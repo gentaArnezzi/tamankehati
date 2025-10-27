@@ -1,0 +1,1034 @@
+
+> Taman Kehati Frontend Development@0.1.0 dev
+> next dev
+
+   ▲ Next.js 15.5.6
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.0.218:3000
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 1580ms
+ ○ Compiling /dashboard/taman ...
+ ✓ Compiled /dashboard/taman in 1745ms (976 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 2048ms
+ GET /dashboard/taman 200 in 79ms
+ ✓ Compiled in 768ms (976 modules)
+ GET /dashboard/taman 200 in 84ms
+ ✓ Compiled in 487ms (976 modules)
+ GET /dashboard/taman 200 in 46ms
+ ✓ Compiled in 351ms (976 modules)
+ GET /dashboard/taman 200 in 73ms
+ ✓ Compiled in 473ms (976 modules)
+ GET /dashboard/taman 200 in 64ms
+ ✓ Compiled in 369ms (976 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard/taman 200 in 100ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 138ms
+ ✓ Compiled in 314ms (976 modules)
+API_BASE_URL: http://localhost:8000
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard/taman 200 in 175ms
+ ✓ Compiled in 249ms (976 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 119ms
+ ✓ Compiled in 175ms (976 modules)
+ GET /dashboard/taman 200 in 34ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 148ms
+ GET /dashboard/taman 200 in 111ms
+ ✓ Compiled in 788ms (976 modules)
+ GET /dashboard/taman 200 in 89ms
+ ✓ Compiled in 574ms (976 modules)
+ GET /dashboard/taman 200 in 60ms
+ ○ Compiling /login ...
+ ✓ Compiled /login in 1129ms (969 modules)
+ GET /login 200 in 1239ms
+ ○ Compiling /dashboard ...
+ ✓ Compiled /dashboard in 625ms (2028 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard 200 in 868ms
+ ○ Compiling /dashboard/users ...
+ ✓ Compiled /dashboard/users in 658ms (2231 modules)
+ GET /dashboard/users 200 in 732ms
+ GET /login 200 in 51ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard 200 in 220ms
+ GET /dashboard/taman 200 in 50ms
+ ✓ Compiled in 1285ms (2245 modules)
+ GET /dashboard/taman 200 in 117ms
+ ✓ Compiled in 908ms (2245 modules)
+ GET /dashboard/taman 200 in 192ms
+ ✓ Compiled in 835ms (2245 modules)
+ GET /dashboard/taman 200 in 239ms
+ ✓ Compiled in 485ms (1080 modules)
+ GET /dashboard/taman 200 in 149ms
+ ✓ Compiled in 166ms (1080 modules)
+ GET /dashboard/taman 200 in 18ms
+ ✓ Compiled in 1433ms (2247 modules)
+ GET /dashboard/taman 200 in 110ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 227ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 807ms (2247 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 410ms
+ ✓ Compiled in 474ms (2247 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 124ms
+ ✓ Compiled in 367ms (2247 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 157ms
+ ✓ Compiled in 593ms (2247 modules)
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 114ms
+ GET /dashboard/taman 200 in 126ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ✓ Compiled in 943ms (2247 modules)
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 663ms
+ ✓ Compiled in 345ms (2247 modules)
+ GET /dashboard/taman 200 in 58ms
+ ✓ Compiled in 257ms (2247 modules)
+ GET /dashboard/taman 200 in 72ms
+ ✓ Compiled in 383ms (2247 modules)
+ GET /dashboard/taman 200 in 44ms
+ ✓ Compiled in 299ms (2247 modules)
+ GET /dashboard/taman 200 in 76ms
+ ✓ Compiled in 335ms (2247 modules)
+ GET /dashboard/taman 200 in 39ms
+ ✓ Compiled in 233ms (2247 modules)
+ GET /dashboard/taman 200 in 42ms
+ ✓ Compiled in 337ms (2247 modules)
+ GET /dashboard/taman 200 in 52ms
+ ✓ Compiled in 437ms (2247 modules)
+ GET /dashboard/taman 200 in 81ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 245ms
+ ✓ Compiled in 1199ms (2245 modules)
+ GET /dashboard/taman 200 in 90ms
+ ✓ Compiled in 264ms (1080 modules)
+ GET /dashboard/taman 200 in 28ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/taman 200 in 144ms
+ ✓ Compiled in 649ms (2245 modules)
+ GET /dashboard/taman 200 in 92ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1190:1]
+ [2m1187[0m |                     )}
+ [2m1188[0m |                   </Button>
+ [2m1189[0m |                 </div>
+ [2m1190[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1191[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1192[0m |           </Card>
+ [2m1193[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1200:1]
+ [2m1197[0m |                     )}
+ [2m1198[0m |                   </Button>
+ [2m1199[0m |                 </div>
+ [2m1200[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1201[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1202[0m |           </Card>
+ [2m1203[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1210:1]
+ [2m1207[0m |                     )}
+ [2m1208[0m |                   </Button>
+ [2m1209[0m |                 </div>
+ [2m1210[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1211[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1212[0m |           </Card>
+ [2m1213[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1219:1]
+ [2m1216[0m |                     )}
+ [2m1217[0m |                   </Button>
+ [2m1218[0m |                 </div>
+ [2m1219[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1220[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1221[0m |           </Card>
+ [2m1222[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1228:1]
+ [2m1225[0m |                     )}
+ [2m1226[0m |                   </Button>
+ [2m1227[0m |                 </div>
+ [2m1228[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1229[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1230[0m |           </Card>
+ [2m1231[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m               )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1162:1]
+ [2m1159[0m |                     </div>
+ [2m1160[0m |                   </div>
+ [2m1161[0m |                     </div>
+ [2m1162[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m                 </div>
+ [2m1163[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m               </CardContent>
+ [2m1164[0m |                 </Card>
+ [2m1165[0m |     
+ [2m1166[0m |                 {/* Submit Buttons */}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m               )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1162:1]
+ [2m1159[0m |                     </div>
+ [2m1160[0m |                   </div>
+ [2m1161[0m |                     </div>
+ [2m1162[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m                 </div>
+ [2m1163[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m               </CardContent>
+ [2m1164[0m |                 </Card>
+ [2m1165[0m |     
+ [2m1166[0m |                 {/* Submit Buttons */}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 619ms (2245 modules)
+ GET /dashboard/taman 200 in 169ms
+ ✓ Compiled in 748ms (2245 modules)
+ GET /dashboard/taman 200 in 66ms
+ ✓ Compiled in 718ms (2245 modules)
+ GET /dashboard/taman 200 in 143ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1294:1]
+ [2m1291[0m |                     </div>
+ [2m1292[0m |                   </CardContent>
+ [2m1293[0m |                 </Card>
+ [2m1294[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1295[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1296[0m |           </Card>
+ [2m1297[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1304:1]
+ [2m1301[0m |                     </div>
+ [2m1302[0m |                   </CardContent>
+ [2m1303[0m |                 </Card>
+ [2m1304[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1305[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1306[0m |           </Card>
+ [2m1307[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1317:1]
+ [2m1314[0m |                     </div>
+ [2m1315[0m |                   </CardContent>
+ [2m1316[0m |                 </Card>
+ [2m1317[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1318[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1319[0m |           </Card>
+ [2m1320[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1330:1]
+ [2m1327[0m |                     </div>
+ [2m1328[0m |                   </CardContent>
+ [2m1329[0m |                 </Card>
+ [2m1330[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1331[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1332[0m |           </Card>
+ [2m1333[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m         )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1343:1]
+ [2m1340[0m |                     </div>
+ [2m1341[0m |                   </CardContent>
+ [2m1342[0m |                 </Card>
+ [2m1343[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m           </form>
+ [2m1344[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m         </CardContent>
+ [2m1345[0m |           </Card>
+ [2m1346[0m |           )}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 1454ms (2247 modules)
+ GET /dashboard/taman 200 in 113ms
+ ✓ Compiled in 418ms (2247 modules)
+ GET /dashboard/taman 200 in 81ms
+ ✓ Compiled in 588ms (2247 modules)
+ GET /dashboard/taman 200 in 72ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got '{'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:912:1]
+ [2m909[0m |             </div>
+ [2m910[0m |               </TabsContent>
+ [2m911[0m | 
+ [2m912[0m |               {/* Tab Content: Lokasi */}
+     : [35;1m              ^[0m
+ [2m913[0m |               <TabsContent value="lokasi" className="space-y-4">
+ [2m914[0m |             {/* Section 2: Lokasi */}
+ [2m915[0m |             <Card className="border-l-4 border-l-red-500">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got '{'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1063:1]
+ [2m1060[0m |             </div>
+ [2m1061[0m |               </TabsContent>
+ [2m1062[0m | 
+ [2m1063[0m |               {/* Tab Content: Karakteristik */}
+      : [35;1m              ^[0m
+ [2m1064[0m |               <TabsContent value="karakteristik" className="space-y-4">
+ [2m1065[0m |             {/* Section 3: Karakteristik Kawasan */}
+ [2m1066[0m |             <Card className="border-l-4 border-l-green-500">
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got '{'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1155:1]
+ [2m1152[0m |             </div>
+ [2m1153[0m |               </TabsContent>
+ [2m1154[0m | 
+ [2m1155[0m |               {/* Tab Content: Deskripsi */}
+      : [35;1m              ^[0m
+ [2m1156[0m |               <TabsContent value="deskripsi" className="space-y-4">
+ [2m1157[0m |                 {/* Section 4: Deskripsi Umum */}
+ [2m1158[0m |             <Card className="border-l-4 border-l-purple-500">
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got '{'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1195:1]
+ [2m1192[0m |             </div>
+ [2m1193[0m |               </TabsContent>
+ [2m1194[0m | 
+ [2m1195[0m |               {/* Tab Content: Visi & Misi */}
+      : [35;1m              ^[0m
+ [2m1196[0m |               <TabsContent value="visi-misi" className="space-y-4">
+ [2m1197[0m |                 {/* Section 5: Visi, Misi & Nilai */}
+ [2m1198[0m |             <Card className="border-l-4 border-l-orange-500">
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expression expected
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1329:1]
+ [2m1326[0m |               </div>
+ [2m1327[0m |             </div>
+ [2m1328[0m |               </TabsContent>
+ [2m1329[0m |             </Tabs>
+      : [35;1m            ^[0m
+ [2m1330[0m | 
+ [2m1331[0m |           </form>
+ [2m1332[0m |         </CardContent>
+      `----
+  [31mx[0m Unterminated regexp literal
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1329:1]
+ [2m1326[0m |               </div>
+ [2m1327[0m |             </div>
+ [2m1328[0m |               </TabsContent>
+ [2m1329[0m |             </Tabs>
+      : [35;1m             ^^^^^^[0m
+ [2m1330[0m | 
+ [2m1331[0m |           </form>
+ [2m1332[0m |         </CardContent>
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 1286ms (2247 modules)
+ GET /dashboard/taman 200 in 188ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:913:1]
+ [2m910[0m |               </Button>
+ [2m911[0m |             </div>
+ [2m912[0m |                   </div>
+ [2m913[0m |                 )}
+     : [35;1m                 ^[0m
+ [2m914[0m | 
+ [2m915[0m |                 {/* Step 2: Lokasi */}
+ [2m916[0m |                 {currentTab === 'lokasi' && (
+     `----
+  [31mx[0m Unterminated regexp literal
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1333:1]
+ [2m1330[0m |                   </div>
+ [2m1331[0m |                 )}
+ [2m1332[0m |               </div>
+ [2m1333[0m |             </div>
+      : [35;1m             ^^^^^[0m
+ [2m1334[0m | 
+ [2m1335[0m |           </form>
+ [2m1336[0m |         </CardContent>
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 404ms (2247 modules)
+ GET /dashboard/taman 200 in 69ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1066:1]
+ [2m1063[0m |               </Button>
+ [2m1064[0m |             </div>
+ [2m1065[0m |                   </div>
+ [2m1066[0m |                 )}
+      : [35;1m                 ^[0m
+ [2m1067[0m | 
+ [2m1068[0m |                 {/* Step 3: Karakteristik */}
+ [2m1069[0m |                 {currentTab === 'karakteristik' && (
+      `----
+  [31mx[0m Unterminated regexp literal
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1335:1]
+ [2m1332[0m |                   </div>
+ [2m1333[0m |                 )}
+ [2m1334[0m |               </div>
+ [2m1335[0m |             </div>
+      : [35;1m             ^^^^^[0m
+ [2m1336[0m | 
+ [2m1337[0m |           </form>
+ [2m1338[0m |         </CardContent>
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 563ms (2247 modules)
+ GET /dashboard/taman 200 in 55ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1160:1]
+ [2m1157[0m |               </Button>
+ [2m1158[0m |             </div>
+ [2m1159[0m |                   </div>
+ [2m1160[0m |                 )}
+      : [35;1m                 ^[0m
+ [2m1161[0m | 
+ [2m1162[0m |                 {/* Step 4: Deskripsi */}
+ [2m1163[0m |                 {currentTab === 'deskripsi' && (
+      `----
+  [31mx[0m Unterminated regexp literal
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1337:1]
+ [2m1334[0m |                   </div>
+ [2m1335[0m |                 )}
+ [2m1336[0m |               </div>
+ [2m1337[0m |             </div>
+      : [35;1m             ^^^^^[0m
+ [2m1338[0m | 
+ [2m1339[0m |           </form>
+ [2m1340[0m |         </CardContent>
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 287ms (2247 modules)
+ GET /dashboard/taman 200 in 64ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1203:1]
+ [2m1200[0m |               </Button>
+ [2m1201[0m |             </div>
+ [2m1202[0m |                   </div>
+ [2m1203[0m |                 )}
+      : [35;1m                 ^[0m
+ [2m1204[0m | 
+ [2m1205[0m |                 {/* Step 5: Visi & Misi */}
+ [2m1206[0m |                 {currentTab === 'visi-misi' && (
+      `----
+  [31mx[0m Unterminated regexp literal
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1340:1]
+ [2m1337[0m |                   </div>
+ [2m1338[0m |                 )}
+ [2m1339[0m |               </div>
+ [2m1340[0m |             </div>
+      : [35;1m             ^^^^^[0m
+ [2m1341[0m | 
+ [2m1342[0m |           </form>
+ [2m1343[0m |         </CardContent>
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 565ms (2247 modules)
+ GET /dashboard/taman 200 in 59ms
+ ⨯ ./src/components/taman/TamanSubmissionPage.tsx
+Error:   [31mx[0m Expected '</', got 'jsx text (
+  [31m|[0m               )'
+      ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/components/taman/TamanSubmissionPage.tsx[0m:1290:1]
+ [2m1287[0m |                       </p>
+ [2m1288[0m |                     </div>
+ [2m1289[0m |                   </div>
+ [2m1290[0m | [35;1m,[0m[35;1m-[0m[35;1m>[0m                 </div>
+ [2m1291[0m | [35;1m`[0m[35;1m-[0m[35;1m>[0m               </CardContent>
+ [2m1292[0m |                 </Card>
+ [2m1293[0m |                 
+ [2m1294[0m |                 {/* Navigation */}
+      `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/components/taman/TamanSubmissionPage.tsx
+./src/app/dashboard/taman/page.tsx
+ ✓ Compiled in 535ms (2247 modules)
+ GET /dashboard/taman 200 in 62ms
+ ✓ Compiled in 738ms (2247 modules)
+ GET /dashboard/taman 200 in 62ms
+ GET /dashboard 200 in 140ms
+ ○ Compiling /dashboard/demo ...
+ ✓ Compiled /dashboard/demo in 3.3s (2374 modules)
+ GET /dashboard/demo 200 in 3491ms
+ GET /dashboard/demo 200 in 58ms
+ GET /dashboard 200 in 95ms
+ GET /dashboard/demo 200 in 88ms
+API_BASE_URL: http://localhost:8000
+ GET /dashboard/demo 200 in 923ms
+ GET /login 200 in 64ms
+ GET /login 200 in 71ms
+ GET /dashboard 200 in 70ms
+ ○ Compiling /dashboard/settings ...
+ ✓ Compiled /dashboard/settings in 2.3s (2395 modules)
+ GET /dashboard/settings 200 in 2475ms
+ ✓ Compiled in 1131ms (2388 modules)
+ GET /dashboard/settings 200 in 97ms
+ ✓ Compiled in 491ms (2388 modules)
+ GET /dashboard/settings 200 in 41ms
+ ✓ Compiled in 338ms (2388 modules)
+ GET /dashboard/settings 200 in 39ms
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           'Authorization': `Bearer ${token}`,
+     : [35;1m                            ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ ○ Compiling /_error ...
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           'Authorization': `Bearer ${token}`,
+     : [35;1m                            ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 2943ms
+ GET /dashboard/settings 500 in 40ms
+ GET /dashboard/settings 500 in 20ms
+ GET /dashboard/settings 500 in 15ms
+ GET /dashboard/settings 500 in 36ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard/settings 500 in 500ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 272ms
+ GET /dashboard/settings 500 in 12ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 256ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 152ms
+ GET /dashboard/settings 500 in 11ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 688ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 272ms
+ GET /dashboard/settings 500 in 13ms
+ GET /dashboard/settings 500 in 52ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 131ms
+ GET /dashboard/settings 500 in 34ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 517ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 167ms
+ GET /dashboard/settings 500 in 10ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 563ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'Bearer'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:242:1]
+ [2m239[0m |       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo', {
+ [2m240[0m |         method: 'POST',
+ [2m241[0m |         headers: {
+ [2m242[0m |           Authorization: `Bearer ${token}`,
+     : [35;1m                          ^^^^^^[0m
+ [2m243[0m |         },
+ [2m244[0m |         body: formDataToUpload,
+ [2m245[0m |       });
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 213ms
+ GET /dashboard/settings 500 in 10ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 375ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'h'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:546:1]
+ [2m543[0m |                         {[...Array(4)].map((_, i) => (
+ [2m544[0m |                           <div
+ [2m545[0m |                             key={i}
+ [2m546[0m |                             className={`h-1 flex-1 rounded-full transition-all ${
+     : [35;1m                                        ^[0m
+ [2m547[0m |                               i < passwordStrength ? getPasswordStrengthColor() : 'bg-gray-200'
+ [2m548[0m |                             }`}
+ [2m549[0m |                           />
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 200 in 344ms
+ GET /dashboard/settings 500 in 145ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 351ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'h'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:546:1]
+ [2m543[0m |                         {[...Array(4)].map((_, i) => (
+ [2m544[0m |                           <div
+ [2m545[0m |                             key={i}
+ [2m546[0m |                             className={`h-1 flex-1 rounded-full transition-all ${
+     : [35;1m                                        ^[0m
+ [2m547[0m |                               i < passwordStrength ? getPasswordStrengthColor() : 'bg-gray-200'
+ [2m548[0m |                             }`}
+ [2m549[0m |                           />
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 200 in 350ms
+ GET /dashboard/settings 500 in 103ms
+ GET /dashboard/settings 500 in 94ms
+ GET /dashboard/settings 500 in 43ms
+ GET /dashboard/settings 500 in 21ms
+ GET /dashboard/settings 500 in 15ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ GET /dashboard/settings 500 in 920ms
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'relative'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:652:1]
+ [2m649[0m |                   <button
+ [2m650[0m |                     type="button"
+ [2m651[0m |                     onClick={() => setNotifications(prev => ({ ...prev, emailNotifications: !prev.emailNotifications }))}
+ [2m652[0m |                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+     : [35;1m                                ^^^^^^^^[0m
+ [2m653[0m |                       notifications.emailNotifications ? 'bg-brand-600' : 'bg-gray-200'
+ [2m654[0m |                     }`}
+ [2m655[0m |                   >
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 200 in 289ms
+ GET /dashboard/settings 500 in 11ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 171ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'relative'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:668:1]
+ [2m665[0m |                   <button
+ [2m666[0m |                     type="button"
+ [2m667[0m |                     onClick={() => setNotifications(prev => ({ ...prev, pushNotifications: !prev.pushNotifications }))}
+ [2m668[0m |                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+     : [35;1m                                ^^^^^^^^[0m
+ [2m669[0m |                       notifications.pushNotifications ? 'bg-brand-600' : 'bg-gray-200'
+ [2m670[0m |                     }`}
+ [2m671[0m |                   >
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 200 in 316ms
+ GET /dashboard/settings 500 in 206ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'relative'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:684:1]
+ [2m681[0m |                   <button
+ [2m682[0m |                     type="button"
+ [2m683[0m |                     onClick={() => setNotifications(prev => ({ ...prev, announcementAlerts: !prev.announcementAlerts }))}
+ [2m684[0m |                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+     : [35;1m                                ^^^^^^^^[0m
+ [2m685[0m |                       notifications.announcementAlerts ? 'bg-brand-600' : 'bg-gray-200'
+ [2m686[0m |                     }`}
+ [2m687[0m |                   >
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 120ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 396ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Expected ',', got 'relative'
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:700:1]
+ [2m697[0m |                   <button
+ [2m698[0m |                     type="button"
+ [2m699[0m |                     onClick={() => setNotifications(prev => ({ ...prev, approvalAlerts: !prev.approvalAlerts }))}
+ [2m700[0m |                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+     : [35;1m                                ^^^^^^^^[0m
+ [2m701[0m |                       notifications.approvalAlerts ? 'bg-brand-600' : 'bg-gray-200'
+ [2m702[0m |                     }`}
+ [2m703[0m |                   >
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 233ms
+ GET /dashboard/settings 500 in 8ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 577ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Unexpected eof
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:724:3]
+ [2m722[0m |     </CollapsibleDashboardLayout>
+ [2m723[0m |   );
+ [2m724[0m | }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 500 in 207ms
+ GET /dashboard/settings 500 in 9ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ GET /dashboard/settings 500 in 287ms
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/dashboard/settings/page.tsx
+Error:   [31mx[0m Unexpected eof
+     ,-[[36;1;4m/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/src/app/dashboard/settings/page.tsx[0m:724:3]
+ [2m722[0m |     </CollapsibleDashboardLayout>
+ [2m723[0m |   );
+ [2m724[0m | }
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/dashboard/settings/page.tsx
+ GET /dashboard/settings 200 in 299ms
+ GET /dashboard/settings 500 in 136ms
+ GET /dashboard/settings 500 in 62ms
+ ✓ Compiled /_error in 653ms (1301 modules)
+ ⨯ [Error: ENOENT: no such file or directory, open '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'
+}
+[Error: ENOENT: no such file or directory, open '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: '/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/frontend/.next/routes-manifest.json'
+}
+ GET /dashboard/settings 500 in 84ms
+ GET /dashboard/settings 500 in 24ms

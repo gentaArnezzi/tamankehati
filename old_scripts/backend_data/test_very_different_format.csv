@@ -1,0 +1,11 @@
+ID,Local_Species_Name,Latin_Binomial,Family_Name,IUCN_Red_List,Is_Endemic_Indonesia,Habitat_Description,Additional_Info
+1,Bunga Bangkai,Amorphophallus titanum,Araceae,EN,Yes,Tropical rainforest,Largest flower in the world
+2,Rafflesia Arnoldii,Rafflesia arnoldii,Rafflesiaceae,EN,Yes,Lowland forest,Parasitic plant
+3,Elang Jawa,Nisaetus bartelsi,Accipitridae,EN,Yes,Mountain forest,National bird of Indonesia
+4,Badak Jawa,Rhinoceros sondaicus,Rhinocerotidae,CR,Yes,Grassland,One-horned rhino
+5,Orangutan Sumatera,Pongo abelii,Hominidae,CR,Yes,Peat swamp forest,Sumatran orangutan
+6,Anoa,Bubalus depressicornis,Bovidae,EN,Yes,Lowland forest,Sulawesi dwarf buffalo
+7,Komodo,Varanus komodoensis,Varanidae,EN,Yes,Island savanna,World's largest lizard
+8,Merak Hijau,Pavo muticus,Phasianidae,EN,Yes,Grassland,Green peafowl
+9,Kakatua Jambul Kuning,Cacatua sulphurea,Cacatuidae,CR,Yes,Forest,Yellow-crested cockatoo
+10,Penyu Hijau,Chelonia mydas,Cheloniidae,EN,No,Marine,Green sea turtle

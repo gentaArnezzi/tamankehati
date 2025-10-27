@@ -1,0 +1,26 @@
+                List of relations
+ Schema |       Name       | Type  |    Owner    
+--------+------------------+-------+-------------
+ public | alembic_version  | table | kehati_user
+ public | articles         | table | kehati_user
+ public | audit_log        | table | kehati_user
+ public | chat_messages    | table | postgres
+ public | chat_sessions    | table | postgres
+ public | fauna            | table | postgres
+ public | flora            | table | postgres
+ public | galleries        | table | kehati_user
+ public | organizations    | table | kehati_user
+ public | park_zones       | table | kehati_user
+ public | parks            | table | kehati_user
+ public | permissions      | table | kehati_user
+ public | policy_rules     | table | kehati_user
+ public | regions          | table | kehati_user
+ public | role_permissions | table | kehati_user
+ public | roles            | table | kehati_user
+ public | spatial_ref_sys  | table | kehati_user
+ public | system_settings  | table | kehati_user
+ public | user_roles       | table | kehati_user
+ public | users            | table | kehati_user
+ public | zones            | table | kehati_user
+(21 rows)
+

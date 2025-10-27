@@ -1,0 +1,49 @@
+# Core FastAPI and async dependencies
+fastapi==0.115.6
+uvicorn[standard]==0.32.1
+
+# Database dependencies
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+psycopg2-binary==2.9.10
+aiosqlite==0.21.0  # SQLite support for development/testing
+alembic==1.14.0
+
+# Data validation and models
+pydantic==2.10.4
+
+# Authentication and security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+
+# File handling
+python-multipart==0.0.17
+aiofiles==24.1.0
+pillow>=10.2.0,<11.0.0
+
+# HTTP client and networking
+httpx==0.28.1
+websockets==14.0
+
+# Server-sent events and streaming
+sse-starlette==2.1.3
+
+# Rate limiting
+slowapi==0.1.9
+
+# Background tasks and caching
+redis==5.2.1
+celery==5.4.0
+
+# Email and templates
+jinja2==3.1.4
+email-validator==2.2.0
+
+# Environment variables
+python-dotenv==1.0.1
+
+# Geospatial libraries
+geoalchemy2==0.15.2
+shapely==2.0.6
+pyproj==3.6.1
+pyshp==2.3.1

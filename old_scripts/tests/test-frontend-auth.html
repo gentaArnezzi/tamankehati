@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Frontend Authentication</title>
+</head>
+<body>
+    <h1>Test Frontend Authentication</h1>
+    <div id="results"></div>
+    
+    <script>
+        const API_BASE_URL = 'http://localhost:8000';
+        
+        async function testFrontendAuth() {
+            const results = document.getElementById('results');
+            
+            try {
+                results.innerHTML += '<p>🔐 Testing frontend authentication...</p>';
+                
+                // Test login
+                const loginResponse = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@kehati.org',
+                        password: 'password'
+                    })
+                });
+                
+                if (!loginResponse.ok) {
+                    throw new Error(`Login failed: ${loginResponse.status}`);
+                }
+                
+                const loginData = await loginResponse.json();
+                results.innerHTML += '<p>✅ Login successful</p>';
+                
+                // Store token in localStorage
+                localStorage.setItem('auth_token', loginData.access_token);
+                localStorage.setItem('auth_user', JSON.stringify({
+                    id: loginData.user_id,
+                    email: loginData.email,
+                    nama: loginData.name,
+                    role: loginData.role,
+                    is_active: true
+                }));
+                
+                const token = loginData.access_token;
+                
+                // Test dashboard API
+                results.innerHTML += '<p>📊 Testing dashboard API...</p>';
+                const dashboardResponse = await fetch(`${API_BASE_URL}/api/v1/dashboard/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!dashboardResponse.ok) {
+                    throw new Error(`Dashboard API failed: ${dashboardResponse.status}`);
+                }
+                
+                const dashboardData = await dashboardResponse.json();
+                results.innerHTML += '<p>✅ Dashboard API successful</p>';
+                
+                // Test users API
+                results.innerHTML += '<p>👥 Testing users API...</p>';
+                const usersResponse = await fetch(`${API_BASE_URL}/api/v1/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!usersResponse.ok) {
+                    throw new Error(`Users API failed: ${usersResponse.status}`);
+                }
+                
+                const usersData = await usersResponse.json();
+                results.innerHTML += '<p>✅ Users API successful: ' + usersData.length + ' users</p>';
+                
+                // Test flora API
+                results.innerHTML += '<p>🌿 Testing flora API...</p>';
+                const floraResponse = await fetch(`${API_BASE_URL}/api/v1/flora/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!floraResponse.ok) {
+                    throw new Error(`Flora API failed: ${floraResponse.status}`);
+                }
+                
+                const floraData = await floraResponse.json();
+                results.innerHTML += '<p>✅ Flora API successful: ' + floraData.items.length + ' flora</p>';
+                
+                // Test fauna API
+                results.innerHTML += '<p>🐦 Testing fauna API...</p>';
+                const faunaResponse = await fetch(`${API_BASE_URL}/api/v1/fauna/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (!faunaResponse.ok) {
+                    throw new Error(`Fauna API failed: ${faunaResponse.status}`);
+                }
+                
+                const faunaData = await faunaResponse.json();
+                results.innerHTML += '<p>✅ Fauna API successful: ' + faunaData.items.length + ' fauna</p>';
+                
+                results.innerHTML += '<p>🎉 All frontend API tests passed!</p>';
+                
+            } catch (error) {
+                results.innerHTML += '<p>❌ Test failed: ' + error.message + '</p>';
+            }
+        }
+        
+        testFrontendAuth();
+    </script>
+</body>
+</html>

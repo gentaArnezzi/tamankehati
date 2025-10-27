@@ -1,0 +1,238 @@
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from typing import List
+from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+from core.database.session import get_session
+from users.models import User
+from api.v1.permissions.rbac import current_user
+from api.v1.permissions.policies import require_roles, UserRole
+import os
+import uuid
+from datetime import datetime
+from pathlib import Path
+import aiofiles
+
+router = APIRouter(prefix="/upload")
+
+# Configuration
+UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"}
+MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+
+# Ensure upload directory exists
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+print(f"UPLOAD_DIR: {UPLOAD_DIR}")
+print(f"UPLOAD_DIR exists: {os.path.exists(UPLOAD_DIR)}")
+
+def is_allowed_file(filename: str) -> bool:
+    """Check if file extension is allowed"""
+    return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
+
+def generate_filename(original_filename: str) -> str:
+    """Generate unique filename"""
+    ext = Path(original_filename).suffix.lower()
+    unique_id = str(uuid.uuid4())
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{timestamp}_{unique_id}{ext}"
+
+@router.post("/gallery-image")
+async def upload_gallery_image(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user)
+):
+    """
+    Upload image file for gallery
+    """
+    # Check user permissions
+    if user.role not in [UserRole.regional_admin, UserRole.super_admin]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to upload files"
+        )
+    
+    # Validate file
+    if not file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No file provided"
+        )
+    
+    if not is_allowed_file(file.filename):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+        )
+    
+    # Check file size
+    file_content = await file.read()
+    if len(file_content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
+        )
+    
+    # Generate unique filename
+    filename = generate_filename(file.filename)
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    
+    print(f"Uploading file to: {file_path}")
+    print(f"UPLOAD_DIR: {UPLOAD_DIR}")
+    print(f"UPLOAD_DIR exists: {os.path.exists(UPLOAD_DIR)}")
+    
+    try:
+        # Save file
+        async with aiofiles.open(file_path, 'wb') as f:
+            await f.write(file_content)
+        
+        print(f"File saved successfully to: {file_path}")
+        print(f"File exists after save: {os.path.exists(file_path)}")
+        
+        # Generate URL (in production, this would be your CDN/storage URL)
+        file_url = f"/uploads/{filename}"
+        
+        return JSONResponse(content={
+            "success": True,
+            "filename": filename,
+            "url": file_url,
+            "size": len(file_content),
+            "message": "File uploaded successfully"
+        })
+        
+    except Exception as e:
+        # Clean up file if upload failed
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to upload file: {str(e)}"
+        )
+
+@router.delete("/gallery-image/{filename}")
+async def delete_gallery_image(
+    filename: str,
+    user: User = Depends(current_user)
+):
+    """
+    Delete uploaded image file
+    """
+    # Check user permissions
+    if user.role not in [UserRole.regional_admin, UserRole.super_admin]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to delete files"
+        )
+    
+    file_path = os.path.join(UPLOAD_DIR, filename)
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="File not found"
+        )
+    
+    try:
+        os.remove(file_path)
+        return JSONResponse(content={
+            "success": True,
+            "message": "File deleted successfully"
+        })
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete file: {str(e)}"
+        )
+
+@router.post("/multiple-gallery-images")
+async def upload_multiple_gallery_images(
+    files: List[UploadFile] = File(...),
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user)
+):
+    """
+    Upload multiple image files for gallery
+    """
+    # Check user permissions
+    if user.role not in [UserRole.regional_admin, UserRole.super_admin]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions to upload files"
+        )
+    
+    # Validate number of files
+    if len(files) > 10:  # Max 10 files at once
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum 10 files allowed per upload"
+        )
+    
+    if len(files) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No files provided"
+        )
+    
+    uploaded_files = []
+    failed_files = []
+    
+    for file in files:
+        try:
+            # Validate file
+            if not file.filename:
+                failed_files.append({
+                    "filename": "unknown",
+                    "error": "No filename provided"
+                })
+                continue
+            
+            if not is_allowed_file(file.filename):
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+                })
+                continue
+            
+            # Check file size
+            file_content = await file.read()
+            if len(file_content) > MAX_FILE_SIZE:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
+                })
+                continue
+            
+            # Generate unique filename
+            filename = generate_filename(file.filename)
+            file_path = os.path.join(UPLOAD_DIR, filename)
+            
+            # Save file
+            async with aiofiles.open(file_path, 'wb') as f:
+                await f.write(file_content)
+            
+            # Generate URL
+            file_url = f"/uploads/{filename}"
+            
+            uploaded_files.append({
+                "filename": filename,
+                "original_name": file.filename,
+                "url": file_url,
+                "size": len(file_content)
+            })
+            
+        except Exception as e:
+            failed_files.append({
+                "filename": file.filename,
+                "error": str(e)
+            })
+            # Clean up file if upload failed
+            if 'file_path' in locals() and os.path.exists(file_path):
+                os.remove(file_path)
+    
+    return JSONResponse(content={
+        "success": len(uploaded_files) > 0,
+        "uploaded_files": uploaded_files,
+        "failed_files": failed_files,
+        "total_uploaded": len(uploaded_files),
+        "total_failed": len(failed_files),
+        "message": f"Uploaded {len(uploaded_files)} files successfully"
+    })

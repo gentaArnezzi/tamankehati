@@ -1,0 +1,6 @@
+Record_ID,Species_Common_Name_Indonesian,Scientific_Binomial_Name,Family_Classification,IUCN_Red_List_Status,Endemic_Status_Indonesia,Natural_Habitat_Type,Physical_Description_Text,Benefits_and_Uses,Feeding_Diet_Type,Behavioral_Characteristics,Conservation_Priority,Threat_Level,Population_Status,Geographic_Distribution
+1,Anggrek Bulan,Phalaenopsis amabilis,Orchidaceae,LC,Yes,Tropical rainforest,White flowers with large petals,Ornamental plant,Photosynthesis,Epiphytic growth,Medium,Low,Stable,Sumatra Kalimantan
+2,Harimau Sumatra,Panthera tigris sumatrae,Felidae,CR,Yes,Lowland forest,Orange with black stripes,Top predator,Carnivorous,Solitary hunter,High,Critical,Decreasing,Sumatra only
+3,Orangutan Kalimantan,Pongo pygmaeus,Hominidae,CR,Yes,Peat swamp forest,Reddish-brown hair,Seed disperser,Frugivorous,Arboreal,High,Critical,Decreasing,Kalimantan only
+4,Cendrawasih,Paradisaea minor,Paradisaeidae,LC,Yes,Primary forest,Colorful plumage,Tourist attraction,Omnivorous,Display behavior,Medium,Low,Stable,Papua only
+5,Komodo Dragon,Varanus komodoensis,Varanidae,EN,Yes,Island savanna,Large lizard with scales,Top predator,Carnivorous,Territorial,High,Endangered,Stable,Komodo Island only

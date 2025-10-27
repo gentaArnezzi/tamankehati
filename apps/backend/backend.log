@@ -1,0 +1,22 @@
+INFO:     Will watch for changes in these directories: ['/Users/irgyaarnezzi/Desktop/tamankehati_23/tamankehati_21/apps/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [81397] using WatchFiles
+INFO:     Started server process [81490]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'check_user_data.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [81490]
+INFO:     Started server process [81909]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/routes/dashboard.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [81909]
+INFO:     Started server process [82212]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

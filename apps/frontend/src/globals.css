@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* Tokens */
+:root{
+  --bg: #ffffff;
+  --fg: #0F1A14;
+  --muted: #6B7280;
+  --muted-foreground-color: #6B7280;
+
+  /* New Brand Color Palette */
+  --brand-900: #233C2B;
+  --brand-800: #294E37;
+  --brand-700: #356447;
+  --brand-600: #4D805F;
+  --brand-500: #6BC179;
+  --brand-400: #8AB494;
+  --brand-300: #A8C7AE;
+  --brand-200: #C7E1C9;
+  --brand-100: #E6F4E8;
+  --brand-50: #F4F0EE;
+
+  --accent-600: #356447;
+  --accent-100: #F4F0EE;
+
+  /* shadcn/ui variables */
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 221.2 83.2% 53.3%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 25%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 221.2 83.2% 53.3%;
+  --radius: 0.75rem;
+}
+
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--fg); font-family: 'Helvetica Now', system-ui, sans-serif; }
+
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  max-width: 80rem;
+}
+
+/* A11y */
+*:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+
+/* Custom utility classes using CSS variables instead of @apply */
+.text-muted-foreground { 
+  color: hsl(var(--muted-foreground)); 
+}
+.bg-brand-100 { background-color: var(--brand-100); }
+.text-brand-700 { color: var(--brand-700); }
+
+/* Ensure text is visible in both light and dark modes */
+.text-foreground {
+  color: hsl(var(--foreground));
+}
+.text-card-foreground {
+  color: hsl(var(--card-foreground));
+}
+.bg-card {
+  background-color: hsl(var(--card));
+}
+.bg-background {
+  background-color: hsl(var(--background));
+}

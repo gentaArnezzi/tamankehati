@@ -1,0 +1,34 @@
+import { z } from 'zod';
+import { FaunaPublicSchema, PaginatedResponseSchema } from './public';
+
+export const FaunaDetailSchema = FaunaPublicSchema.extend({
+  ordo: z.string().optional(),
+  famili: z.string(),
+  genus: z.string().optional(),
+  spesies: z.string().optional(),
+  status_iucn: z.string(),
+  deskripsi: z.string().optional(),
+  habitat: z.string().optional(),
+  sebaran: z.array(z.string()).optional(),
+  koordinat: z
+    .object({
+      lat: z.number(),
+      lng: z.number(),
+    })
+    .optional(),
+  konten_terkait: z
+    .array(
+      z.object({
+        id: z.string(),
+        nama_ilmiah: z.string(),
+        nama_umum: z.string().optional(),
+        gambar_utama: z.string().optional(),
+      })
+    )
+    .optional(),
+});
+
+export const FaunaPaginatedSchema = PaginatedResponseSchema(FaunaPublicSchema);
+
+export type FaunaPaginated = z.infer<typeof FaunaPaginatedSchema>;
+export type FaunaDetail = z.infer<typeof FaunaDetailSchema>;

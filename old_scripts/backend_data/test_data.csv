@@ -1,0 +1,7 @@
+nama_lokal,nama_ilmiah,famili,genus,status_iucn,is_endemic,habitat,deskripsi
+Pohon Jati,Tectona grandis,Lamiaceae,Tectona,LC,False,Hutan tropis,Pohon jati adalah pohon yang sangat berharga untuk kayu
+Anggrek Bulan,Phalaenopsis amabilis,Orchidaceae,Phalaenopsis,VU,True,Hutan hujan,Anggrek bulan adalah anggrek yang sangat indah
+Harimau Sumatera,Panthera tigris sumatrae,Felidae,Panthera,CR,True,Hutan tropis,Harimau sumatera adalah predator puncak di hutan
+Gajah Sumatera,Elephas maximus sumatranus,Elephantidae,Elephas,CR,True,Hutan dan padang rumput,Gajah sumatera adalah mamalia besar yang terancam punah
+Rafflesia Arnoldii,Rafflesia arnoldii,Rafflesiaceae,Rafflesia,VU,True,Hutan hujan,Bunga rafflesia adalah bunga terbesar di dunia
+Orangutan Sumatera,Pongo abelii,Hominidae,Pongo,CR,True,Hutan hujan,Orangutan sumatera adalah primata besar yang terancam punah

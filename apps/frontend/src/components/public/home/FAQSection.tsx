@@ -1,0 +1,100 @@
+'use client';
+
+import { useState } from 'react';
+
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
+const faqData: FAQItem[] = [
+  {
+    question: "Apa itu Taman Kehati?",
+    answer: "Taman Kehati adalah kawasan konservasi yang berfungsi untuk melindungi dan melestarikan keanekaragaman hayati Indonesia. Taman ini menjadi tempat penelitian, edukasi, dan konservasi flora dan fauna endemik."
+  },
+  {
+    question: "Bagaimana cara mengakses data flora dan fauna?",
+    answer: "Anda dapat mengakses data flora dan fauna melalui menu pencarian di halaman utama. Gunakan filter untuk menyaring berdasarkan jenis, wilayah, atau status konservasi untuk menemukan informasi yang Anda butuhkan."
+  },
+  {
+    question: "Apakah data yang tersedia dapat diunduh?",
+    answer: "Ya, sebagian data tersedia untuk diunduh dalam format yang dapat digunakan untuk penelitian dan edukasi. Silakan hubungi tim kami untuk informasi lebih lanjut tentang akses data."
+  },
+  {
+    question: "Bagaimana cara melaporkan temuan flora/fauna baru?",
+    answer: "Anda dapat melaporkan temuan baru melalui formulir kontak yang tersedia di website. Tim ahli kami akan memverifikasi dan menambahkan data tersebut ke dalam sistem setelah konfirmasi."
+  },
+  {
+    question: "Apakah ada program edukasi yang tersedia?",
+    answer: "Ya, kami menyediakan berbagai program edukasi termasuk webinar, workshop, dan materi pembelajaran yang dapat diakses secara online maupun offline."
+  },
+  {
+    question: "Bagaimana cara berkontribusi dalam konservasi?",
+    answer: "Anda dapat berkontribusi dengan melaporkan data, berpartisipasi dalam program edukasi, atau bergabung dengan komunitas konservasi yang terdaftar di platform kami."
+  }
+];
+
+export function FAQSection() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  const toggleFAQ = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  return (
+    <section className="bg-white py-24">
+      <div className="container mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-3xl text-center mb-20">
+          <h2 className="text-5xl font-light text-gray-900 mb-6">
+            Pertanyaan yang Sering Diajukan
+          </h2>
+          <p className="text-lg text-gray-500">
+            Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan platform konservasi kami.
+          </p>
+        </div>
+
+        <div className="max-w-4xl mx-auto">
+          <div className="space-y-6">
+            {faqData.map((faq, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+              >
+                <button
+                  onClick={() => toggleFAQ(index)}
+                  className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="text-lg font-medium text-gray-900 pr-4">
+                    {faq.question}
+                  </h3>
+                  <svg
+                    className={`h-5 w-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${
+                      openIndex === index ? 'rotate-180' : ''
+                    }`}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <path
+                      d="M6 9l6 6 6-6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </button>
+                {openIndex === index && (
+                  <div className="px-8 pb-6">
+                    <p className="text-gray-600 leading-relaxed">
+                      {faq.answer}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

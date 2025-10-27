@@ -1,0 +1,108 @@
+# ### macOS
+# .DS_Store
+# .AppleDouble
+# .LSOverride
+
+# ### IDEs and editors
+# .vscode/
+# .idea/
+# *.swp
+# *.swo
+# *~
+
+# ### Environment files
+# .env
+# .env.*
+
+# ### Logs
+# logs/
+# *.log
+# npm-debug.log*
+# yarn-debug.log*
+# yarn-error.log*
+# pnpm-debug.log*
+
+# ### Runtime data
+# pids/
+# *.pid
+# *.seed
+# *.pid.lock
+
+# ### Coverage
+# coverage/
+# *.lcov
+# .nyc_output/
+# .pytest_cache/
+# .coverage
+
+# ### Python
+# __pycache__/
+# *.py[cod]
+# *$py.class
+# .Python
+# build/
+# develop-eggs/
+# dist/
+# downloads/
+# eggs/
+# .eggs/
+# lib/
+# lib64/
+# parts/
+# sdist/
+# var/
+# wheels/
+# *.egg-info/
+# .installed.cfg
+# *.egg
+# .mypy_cache/
+# .dmypy.json
+# dmypy.json
+# .pyre/
+# venv/
+# env/
+# ENV/
+# env.bak/
+# venv.bak/
+
+# ### Node.js / Next.js
+# node_modules/
+# .next/
+# .turbo/
+# out/
+# build/
+# .cache/
+# .parcel-cache/
+
+# ### Databases
+# *.db
+# *.sqlite
+# *.sqlite3
+# apps/backend/test.db
+
+# ### Temporary folders
+# tmp/
+# temp/
+
+# ### Editor files
+# .vscode/*
+# !.vscode/extensions.json
+# .idea/
+# *.suo
+# *.ntvs*
+# *.njsproj
+# *.sln
+# *.sw?
+
+# ### OS generated files
+# Thumbs.db
+# ehthumbs.db
+# Desktop.ini
+# $RECYCLE.BIN/
+
+# ### Project specific
+# .claude/
+# .vercel/
+# apps/frontend/.env.local
+# apps/frontend/.env.production.local
+# apps/frontend/.env.development.local

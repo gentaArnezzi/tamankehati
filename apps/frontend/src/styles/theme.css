@@ -1,0 +1,44 @@
+/* Custom theme colors for Taman Kehati */
+:root {
+  --primary: #233c2b; /* Forest Green - primary brand color */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #e0f0e9; /* Light green - secondary brand color */
+  --secondary-foreground: #233c2b; /* Forest green text on secondary */
+  --accent: #d1e8da; /* Lighter green - accent color */
+  --accent-foreground: #233c2b;
+  --destructive: #dc2626; /* Red for errors */
+  --destructive-foreground: #ffffff;
+  --muted: #f0f9f6; /* Very light green background */
+  --muted-foreground: #6b7280; /* Gray for muted text */
+  --background: #ffffff; /* White background */
+  --foreground: #1f2937; /* Dark gray text */
+  --border: #d1e8da; /* Light green border */
+  --input: #d1e8da; /* Light green input borders */
+  --ring: #233c2b; /* Forest green focus ring */
+}
+
+.dark {
+  --primary: #a7d1b9; /* Lighter green for dark mode */
+  --primary-foreground: #1f2937; /* Dark gray text on primary in dark mode */
+  --secondary: #2d4d3a; /* Darker green for dark mode */
+  --secondary-foreground: #e5f2ec; /* Light green text on secondary in dark mode */
+  --accent: #2d4d3a; /* Darker green for dark mode */
+  --accent-foreground: #e5f2ec;
+  --muted: #1a2c22; /* Dark green background for dark mode */
+  --muted-foreground: #9ca3af; /* Light gray for muted text in dark mode */
+  --background: #0f172a; /* Dark blue-gray background for dark mode */
+  --foreground: #e5f2ec; /* Light green text for dark mode */
+  --border: #2d4d3a; /* Dark green border for dark mode */
+  --input: #2d4d3a; /* Dark green input borders for dark mode */
+  --ring: #a7d1b9; /* Light green focus ring for dark mode */
+}
+
+/* Additional utility classes for the Taman Kehati theme */
+.bg-primary { background-color: var(--primary); }
+.text-primary { color: var(--primary); }
+.border-primary { border-color: var(--primary); }
+
+/* Specific styles for the brand */
+.brand-gradient {
+  background: linear-gradient(135deg, #233c2b 0%, #3a5f46 100%);
+}

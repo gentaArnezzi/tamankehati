@@ -1,0 +1,435 @@
+# apps/backend/api/v1/routes/fauna.py
+from typing import Optional
+from datetime import datetime, timezone
+
+from fastapi import APIRouter, Depends, Query, HTTPException, status
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+
+from core.database.session import get_session
+from domains.fauna.models import Fauna
+from domains.parks.models import Park
+# from domains.zones.models import Zone  # Temporarily disabled due to schema changes
+from users.models import User, UserRole
+from api.v1.permissions.rbac import current_user
+from api.v1.permissions.policies import require_roles
+from api.v1.serializers.fauna import FaunaIn, FaunaOut, FaunaUpdate, FaunaListResponse
+from api.v1.serializers.common import ErrorResponse
+
+router = APIRouter(prefix="/fauna")
+
+@router.get(
+    "/",
+    response_model=FaunaListResponse,
+    responses={
+        401: {"model": ErrorResponse, "description": "Unauthorized - Missing or invalid token"},
+        403: {"model": ErrorResponse, "description": "Forbidden - Insufficient permissions"},
+        422: {"model": ErrorResponse, "description": "Validation Error - Invalid query parameters"},
+    },
+)
+@router.get(
+    "",
+    response_model=FaunaListResponse,
+    responses={
+        401: {"model": ErrorResponse, "description": "Unauthorized - Missing or invalid token"},
+        403: {"model": ErrorResponse, "description": "Forbidden - Insufficient permissions"},
+        422: {"model": ErrorResponse, "description": "Validation Error - Invalid query parameters"},
+    },
+)
+async def list_fauna(
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user),
+    q: Optional[str] = Query(None, description="Cari berdasarkan nama lokal atau ilmiah", examples=["Orangutan"]),
+    # region_code: Optional[str] = Query(None, description="Filter berdasarkan kode region", examples=["KALTIM"]),  # Removed - using user-based access control
+    status_filter: Optional[str] = Query(None, description="Filter berdasarkan status workflow", examples=["approved"]),
+    submitted_by: Optional[str] = Query(None, description="Filter berdasarkan user yang submit (user ID or 'me')", examples=["me"]),
+    limit: int = Query(50, ge=1, le=1000, description="Jumlah item per halaman"),
+    offset: int = Query(0, ge=0, description="Offset untuk pagination"),
+):
+    # Get real data from database
+    stmt = select(Fauna).where(Fauna.deleted_at == None)
+    
+    # Filter by submitted_by
+    if submitted_by:
+        if submitted_by == "me":
+            # Filter by current user's submitted fauna
+            try:
+                user_id_int = int(user.id)
+                stmt = stmt.where(Fauna.submitted_by == user_id_int)
+                print(f"🔍 Filtering fauna submitted by current user: {user_id_int}")
+            except (ValueError, TypeError) as e:
+                print(f"⚠️ Failed to convert user.id to int: {e}")
+                stmt = stmt.where(Fauna.id == -1)
+        else:
+            # Filter by specific user ID
+            try:
+                submitted_by_int = int(submitted_by)
+                stmt = stmt.where(Fauna.submitted_by == submitted_by_int)
+                print(f"🔍 Filtering fauna submitted by user: {submitted_by_int}")
+            except ValueError:
+                print(f"⚠️ Invalid submitted_by parameter: {submitted_by}")
+                stmt = stmt.where(Fauna.id == -1)
+    # Regional admin scope - using park-based access control
+    elif user.role == UserRole.regional_admin:
+        if user.park_id:
+            # Filter by park_id - only show fauna from their assigned park
+            stmt = stmt.where(Fauna.park_id == user.park_id)
+            print(f"🔍 Filtering fauna for regional admin: park_id == {user.park_id}")
+        else:
+            # If no park_id assigned, filter by their submitted fauna
+            try:
+                user_id_int = int(user.id)
+                stmt = stmt.where(Fauna.submitted_by == user_id_int)
+                print(f"🔍 Filtering fauna for regional admin: submitted_by == {user_id_int}")
+            except (ValueError, TypeError) as e:
+                print(f"⚠️ Failed to convert user.id to int: {e}")
+                stmt = stmt.where(Fauna.id == -1)
+    
+    # Get total count with same filter
+    count_stmt = select(func.count(Fauna.id)).where(Fauna.deleted_at == None)
+    if submitted_by:
+        if submitted_by == "me":
+            try:
+                user_id_int = int(user.id)
+                count_stmt = count_stmt.where(Fauna.submitted_by == user_id_int)
+            except (ValueError, TypeError):
+                count_stmt = count_stmt.where(Fauna.id == -1)
+        else:
+            try:
+                submitted_by_int = int(submitted_by)
+                count_stmt = count_stmt.where(Fauna.submitted_by == submitted_by_int)
+            except ValueError:
+                count_stmt = count_stmt.where(Fauna.id == -1)
+    elif user.role == UserRole.regional_admin:
+        if user.park_id:
+            # Filter by park_id - only count fauna from their assigned park
+            count_stmt = count_stmt.where(Fauna.park_id == user.park_id)
+        else:
+            # If no park_id assigned, filter by their submitted fauna
+            try:
+                user_id_int = int(user.id)
+                count_stmt = count_stmt.where(Fauna.submitted_by == user_id_int)
+            except (ValueError, TypeError):
+                count_stmt = count_stmt.where(Fauna.id == -1)
+    
+    total = (await db.execute(count_stmt)).scalar() or 0
+
+    # Apply pagination
+    stmt = stmt.limit(limit).offset(offset)
+    rows = (await db.execute(stmt)).scalars().all()
+
+    # Get unique park IDs from fauna records
+    park_ids = list(set([fauna.park_id for fauna in rows if fauna.park_id]))
+    
+    # Fetch park data for all unique park IDs
+    parks_data = {}
+    if park_ids:
+        parks_stmt = select(Park).where(Park.id.in_(park_ids))
+        parks_result = (await db.execute(parks_stmt)).scalars().all()
+        parks_data = {park.id: park for park in parks_result}
+
+    # Convert to complete format
+    items = []
+    for fauna in rows:
+        park_data = None
+        if fauna.park_id and fauna.park_id in parks_data:
+            park = parks_data[fauna.park_id]
+            park_data = {
+                "id": park.id,
+                "name": park.name
+            }
+        
+        items.append({
+            "id": fauna.id,
+            "local_name": fauna.local_name,
+            "scientific_name": fauna.scientific_name,
+            "family": fauna.family,
+            "genus": fauna.genus,
+            "species": fauna.species,
+            "ordo": fauna.ordo,
+            "description": fauna.description,
+            "habitat": fauna.habitat,
+            "diet": fauna.diet,
+            "behavior": fauna.behavior,
+            "morphology": fauna.morphology,
+            "local_id": fauna.local_id,
+            "image_url": fauna.image_url,
+            "habitat_sumber_makanan": fauna.habitat_sumber_makanan,
+            "status_hama": fauna.status_hama,
+            "tingkat_hama": fauna.tingkat_hama,
+            "gambar_utama": fauna.gambar_utama,
+            "is_endemic": fauna.is_endemic,
+            "iucn_status": fauna.iucn_status,
+            "park_id": fauna.park_id,
+            "park": park_data,
+            "status": fauna.status,
+            "submitted_by": fauna.submitted_by,
+            "approved_by": fauna.approved_by,
+            "rejected_by": fauna.rejected_by,
+            "submitted_at": fauna.submitted_at.isoformat() if fauna.submitted_at else None,
+            "approved_at": fauna.approved_at.isoformat() if fauna.approved_at else None,
+            "rejected_at": fauna.rejected_at.isoformat() if fauna.rejected_at else None,
+            "rejection_reason": fauna.rejection_reason,
+            "created_at": fauna.created_at.isoformat() if fauna.created_at else None,
+            "updated_at": fauna.updated_at.isoformat() if fauna.updated_at else None,
+            "wilayah": None,
+        })
+
+    return {
+        "items": items,
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "has_next": (offset + limit) < total,
+        "has_prev": offset > 0
+    }
+
+@router.get("/{fauna_id}", response_model=FaunaOut)
+async def get_fauna(
+    fauna_id: int,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user),
+):
+    stmt = select(Fauna).where(Fauna.id == fauna_id, Fauna.deleted_at.is_(None))
+    obj = (await db.execute(stmt)).scalars().first()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Fauna not found")
+
+    # Load park data if park_id exists
+    park_data = None
+    if obj.park_id:
+        park_stmt = select(Park).where(Park.id == obj.park_id)
+        park_obj = (await db.execute(park_stmt)).scalars().first()
+        if park_obj:
+            park_data = {
+                "id": park_obj.id,
+                "name": park_obj.name
+            }
+
+    # Create response data with park information
+    response_data = {
+        "id": obj.id,
+        "local_name": obj.local_name,
+        "scientific_name": obj.scientific_name,
+        "family": obj.family,
+        "genus": obj.genus,
+        "species": obj.species,
+        "ordo": obj.ordo,
+        "description": obj.description,
+        "habitat": obj.habitat,
+        "diet": obj.diet,
+        "behavior": obj.behavior,
+        "morphology": obj.morphology,
+        "local_id": obj.local_id,
+        "image_url": obj.image_url,
+        "habitat_sumber_makanan": obj.habitat_sumber_makanan,
+        "status_hama": obj.status_hama,
+        "tingkat_hama": obj.tingkat_hama,
+        "gambar_utama": obj.gambar_utama,
+        "is_endemic": obj.is_endemic,
+        "iucn_status": obj.iucn_status,
+        "park_id": obj.park_id,
+        "park": park_data,
+        "status": obj.status,
+        "submitted_by": obj.submitted_by,
+        "approved_by": obj.approved_by,
+        "rejected_by": obj.rejected_by,
+        "submitted_at": obj.submitted_at,
+        "approved_at": obj.approved_at,
+        "rejected_at": obj.rejected_at,
+        "rejection_reason": obj.rejection_reason,
+        "created_at": obj.created_at,
+        "updated_at": obj.updated_at,
+    }
+
+    return FaunaOut.model_validate(response_data)
+
+@router.post(
+    "/",
+    response_model=FaunaOut,
+    status_code=201,
+    dependencies=[
+        Depends(require_roles(UserRole.regional_admin, UserRole.super_admin))
+    ],
+    responses={
+        401: {"model": ErrorResponse, "description": "Unauthorized"},
+        403: {"model": ErrorResponse, "description": "Forbidden - Insufficient role or region scope"},
+        400: {"model": ErrorResponse, "description": "Bad Request - Invalid park_id"},
+        422: {"model": ErrorResponse, "description": "Validation Error"},
+    },
+)
+async def create_fauna(
+    payload: FaunaIn,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user),
+):
+    # Validasi park_id: regional_admin hanya bisa create fauna untuk park mereka sendiri
+    if user.role == UserRole.regional_admin:
+        if not user.park_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Regional admin belum di-assign ke park manapun. Silakan buat dan submit park terlebih dahulu, lalu tunggu approval dari super admin."
+            )
+        # Auto-set park_id to user's park (setelah park approved, user sudah punya park_id)
+        payload.park_id = user.park_id
+
+    # Workaround: Use raw SQL due to SQLAlchemy foreign key resolution issue
+    from sqlalchemy import text
+    
+    # Prepare the data
+    iucn_status_value = payload.iucn_status.value if payload.iucn_status else None
+    local_name_value = payload.local_name or payload.scientific_name or "Unknown"
+    
+    # Insert using raw SQL - tambahkan submitted_by
+    result = await db.execute(text("""
+        INSERT INTO fauna (park_id, local_name, scientific_name, ordo, description, habitat_sumber_makanan, status_hama, tingkat_hama, is_endemic, iucn_status, gambar_utama, submitted_by, status, created_at, updated_at)
+        VALUES (:park_id, :local_name, :scientific_name, :ordo, :description, :habitat_sumber_makanan, :status_hama, :tingkat_hama, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, 'draft', now(), now())
+        RETURNING id
+    """), {
+        "park_id": payload.park_id,
+        "local_name": payload.local_name,
+        "scientific_name": payload.scientific_name,
+        "ordo": payload.ordo,
+        "description": payload.description,
+        "habitat_sumber_makanan": payload.habitat_sumber_makanan,
+        "status_hama": payload.status_hama,
+        "tingkat_hama": payload.tingkat_hama,
+        "is_endemic": payload.is_endemic,
+        "iucn_status": iucn_status_value,
+        "gambar_utama": getattr(payload, 'gambar_utama', None),
+        "submitted_by": int(user.id)  # ✅ Set submitted_by (convert to int)
+    })
+    
+    fauna_id = result.scalar()
+    await db.commit()
+    
+    # Fetch the created record
+    created_fauna = await db.execute(select(Fauna).where(Fauna.id == fauna_id))
+    obj = created_fauna.scalars().first()
+    
+    return FaunaOut.model_validate(obj)
+
+@router.put(
+    "/{fauna_id}",
+    response_model=FaunaOut,
+    dependencies=[Depends(require_roles(UserRole.regional_admin, UserRole.super_admin))],
+    responses={
+        401: {"model": ErrorResponse, "description": "Unauthorized"},
+        403: {"model": ErrorResponse, "description": "Forbidden"},
+        404: {"model": ErrorResponse, "description": "Fauna not found"},
+    },
+)
+async def update_fauna(
+    fauna_id: int,
+    payload: FaunaUpdate,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user),
+):
+    obj = (
+        await db.execute(
+            select(Fauna).where(Fauna.id == fauna_id, Fauna.deleted_at.is_(None))
+        )
+    ).scalars().first()
+    if not obj:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Fauna dengan ID tersebut tidak ditemukan",
+        )
+
+    # Validasi: regional_admin hanya bisa update fauna yang SUBMITTED BY mereka sendiri
+    if user.role == UserRole.regional_admin:
+        # Check if fauna submitted by this user (convert user.id to int for comparison)
+        if obj.submitted_by != int(user.id):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Anda hanya bisa mengupdate fauna yang Anda submit sendiri"
+            )
+
+    # Workaround: Use raw SQL for UPDATE due to SQLAlchemy foreign key resolution issue
+    from sqlalchemy import text
+    
+    # Build dynamic UPDATE query
+    update_fields = []
+    update_values = {"fauna_id": fauna_id}
+    
+    update_field_names = ("local_name", "scientific_name", "ordo", "description", "habitat_sumber_makanan", "status_hama", "tingkat_hama", "is_endemic", "iucn_status", "park_id", "gambar_utama")
+    for field in update_field_names:
+        value = getattr(payload, field, None)
+        if value is not None:
+            if field == "iucn_status" and value:
+                update_fields.append(f"{field} = :{field}")
+                update_values[field] = value.value
+            else:
+                update_fields.append(f"{field} = :{field}")
+                update_values[field] = value
+    
+    if update_fields:
+        update_fields.append("updated_at = now()")
+        
+        query = f"UPDATE fauna SET {', '.join(update_fields)} WHERE id = :fauna_id"
+        await db.execute(text(query), update_values)
+        await db.commit()
+    
+    # Fetch the updated record
+    updated_fauna = await db.execute(select(Fauna).where(Fauna.id == fauna_id))
+    obj = updated_fauna.scalars().first()
+    
+    return FaunaOut.model_validate(obj)
+
+@router.delete("/{fauna_id}", dependencies=[Depends(require_roles(
+    UserRole.regional_admin, UserRole.super_admin
+))])
+async def delete_fauna(fauna_id: int, db: AsyncSession = Depends(get_session)):
+    obj = (await db.execute(select(Fauna).where(Fauna.id == fauna_id, Fauna.deleted_at.is_(None)))).scalars().first()
+    if not obj:
+        raise HTTPException(404, "Fauna not found")
+    obj.deleted_at = datetime.now(timezone.utc)
+    await db.commit()
+    return {"ok": True}
+
+# -------------------- WORKFLOW --------------------
+
+@router.post("/{fauna_id}/submit", dependencies=[Depends(require_roles(
+    UserRole.regional_admin, UserRole.super_admin
+))])
+async def submit_fauna(fauna_id: int, db: AsyncSession = Depends(get_session), user: User = Depends(current_user)):
+    obj = (await db.execute(select(Fauna).where(Fauna.id == fauna_id))).scalars().first()
+    if not obj: raise HTTPException(404, "Fauna not found")
+    # if user.role == UserRole.regional_admin and getattr(obj.zone, "region_code", None) != user.region_code:
+    #     raise HTTPException(403, "Region mismatch")
+    obj.status = "in_review"
+    obj.submitted_by = user.id or 0
+    obj.submitted_at = datetime.now(timezone.utc)
+    await db.commit()
+    # emit("fauna.submitted", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None))
+    return {"ok": True}
+
+@router.post("/{fauna_id}/approve", dependencies=[Depends(require_roles(UserRole.super_admin))])
+async def approve_fauna(fauna_id: int, db: AsyncSession = Depends(get_session), user: User = Depends(current_user)):
+    obj = (await db.execute(select(Fauna).where(Fauna.id == fauna_id))).scalars().first()
+    if not obj: raise HTTPException(404, "Fauna not found")
+    # Super Admin bisa approve tanpa batasan region
+    obj.status = "approved"
+    obj.approved_by = user.id or 0
+    obj.approved_at = datetime.now(timezone.utc)
+    await db.commit()
+    # emit("fauna.approved", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None))
+    return {"ok": True}
+
+from pydantic import BaseModel
+class RejectIn(BaseModel):
+    reason: str
+
+@router.post("/{fauna_id}/reject", dependencies=[Depends(require_roles(UserRole.super_admin))])
+async def reject_fauna(fauna_id: int, payload: RejectIn, db: AsyncSession = Depends(get_session), user: User = Depends(current_user)):
+    obj = (await db.execute(select(Fauna).where(Fauna.id == fauna_id))).scalars().first()
+    if not obj: raise HTTPException(404, "Fauna not found")
+    # Super Admin bisa reject tanpa batasan region
+    obj.status = "rejected"
+    obj.rejection_reason = payload.reason
+    obj.approved_by = user.id or 0
+    obj.rejected_at = datetime.now(timezone.utc)
+    await db.commit()
+    # emit("fauna.rejected", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None), reason=payload.reason)
+    return {"ok": True}

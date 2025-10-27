@@ -1,0 +1,189 @@
+'use client';
+
+import { useState } from 'react';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
+import { Alert, AlertDescription } from '../ui/alert';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { Loader2, Edit, X } from 'lucide-react';
+import { toast } from 'sonner';
+
+interface RegionEditFormProps {
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  regionToEdit: {
+    id: number;
+    name: string;
+    code: string;
+    timezone?: string;
+    is_active: boolean;
+  };
+}
+
+interface RegionFormData {
+  name: string;
+  code: string;
+  timezone: string;
+  is_active: boolean;
+}
+
+// Timezone Indonesia
+const INDONESIA_TIMEZONES = [
+  { value: 'Asia/Jakarta', label: 'WIB (Jakarta)' },
+  { value: 'Asia/Makassar', label: 'WITA (Makassar)' },
+  { value: 'Asia/Jayapura', label: 'WIT (Jayapura)' },
+];
+
+export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEditFormProps) {
+  const [formData, setFormData] = useState<RegionFormData>({
+    name: regionToEdit.name,
+    code: regionToEdit.code,
+    timezone: regionToEdit.timezone || 'Asia/Jakarta',
+    is_active: regionToEdit.is_active,
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/crud/regions/${regionToEdit.id}/`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Gagal mengupdate region');
+      }
+
+      const result = await response.json();
+      toast.success(`Region "${result.name}" berhasil diupdate`);
+      
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Gagal mengupdate region';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (field: keyof RegionFormData, value: string | boolean) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  return (
+    <Card className="w-full max-w-md mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Edit className="h-5 w-5" />
+          Edit Region
+        </CardTitle>
+        <CardDescription>
+          Edit region {regionToEdit.name}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="name">Nama Region</Label>
+            <Input
+              id="name"
+              type="text"
+              value={formData.name}
+              onChange={(e) => handleChange('name', e.target.value)}
+              placeholder="Contoh: DKI Jakarta"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="code">Kode Region</Label>
+            <Input
+              id="code"
+              type="text"
+              value={formData.code}
+              onChange={(e) => handleChange('code', e.target.value.toUpperCase())}
+              placeholder="Contoh: JKT"
+              required
+              maxLength={10}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="timezone">Timezone</Label>
+            <Select
+              value={formData.timezone}
+              onValueChange={(value) => handleChange('timezone', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Pilih timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                {INDONESIA_TIMEZONES.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="is_active"
+              checked={formData.is_active}
+              onChange={(e) => handleChange('is_active', e.target.checked)}
+              className="rounded"
+            />
+            <Label htmlFor="is_active">Region Aktif</Label>
+          </div>
+
+          <div className="flex gap-2 pt-4">
+            <Button type="submit" disabled={loading} className="flex-1">
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Mengupdate...
+                </>
+              ) : (
+                <>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Update Region
+                </>
+              )}
+            </Button>
+            {onCancel && (
+              <Button type="button" variant="outline" onClick={onCancel}>
+                <X className="h-4 w-4 mr-2" />
+                Batal
+              </Button>
+            )}
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}

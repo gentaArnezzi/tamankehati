@@ -1,0 +1,48 @@
+services:
+  # Backend API
+  - type: web
+    name: tamankehati-backend
+    runtime: python
+    plan: free  # ✅ Explicitly set to FREE
+    buildCommand: cd apps/backend && pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: cd apps/backend && alembic upgrade head && python init_admin.py && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: tamankehati-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: OLLAMA_BASE_URL
+        value: http://localhost:11434
+      - key: ADMIN_EMAIL
+        value: admin@kehati.org
+      - key: ADMIN_PASSWORD
+        value: admin123
+    autoDeploy: true
+
+  # Frontend (Next.js)
+  - type: web
+    name: tamankehati-frontend
+    runtime: node
+    plan: free  # ✅ Explicitly set to FREE
+    buildCommand: cd apps/frontend && npm install && npm run build
+    startCommand: cd apps/frontend && npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+        value: https://tamankehati-backend-p075.onrender.com
+      - key: NODE_VERSION
+        value: 18.18.0
+    autoDeploy: true
+
+databases:
+  # PostgreSQL Database
+  - name: tamankehati-db
+    databaseName: tamankehati
+    plan: free
+

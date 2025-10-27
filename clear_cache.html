@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clear Cache & Test Profile Photo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .success {
+            background: #16a34a;
+        }
+        .success:hover {
+            background: #15803d;
+        }
+        pre {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+        .step {
+            background: #eff6ff;
+            border-left: 4px solid #2563eb;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Fix Profile Photo Issue</h1>
+    
+    <div class="step">
+        <h3>Step 1: Clear Browser Cache</h3>
+        <button onclick="clearCache()">Clear LocalStorage</button>
+        <p id="cacheStatus"></p>
+    </div>
+
+    <div class="step">
+        <h3>Step 2: Test API Endpoints</h3>
+        <button onclick="testUsersMe()">Test /api/v1/users/me</button>
+        <button onclick="testAuthMe()">Test /api/v1/auth/me</button>
+        <pre id="apiResult"></pre>
+    </div>
+
+    <div class="step">
+        <h3>Step 3: Check Current User Data</h3>
+        <button onclick="checkLocalStorage()">Check LocalStorage</button>
+        <pre id="localStorageData"></pre>
+    </div>
+
+    <div class="step">
+        <h3>Step 4: Go to Login</h3>
+        <button class="success" onclick="goToLogin()">Go to Login Page</button>
+    </div>
+
+    <script>
+        function clearCache() {
+            const before = Object.keys(localStorage).length;
+            localStorage.clear();
+            const after = Object.keys(localStorage).length;
+            document.getElementById('cacheStatus').innerHTML = 
+                `✅ Cleared! Items before: ${before}, after: ${after}<br>` +
+                `<strong>Now you need to login again!</strong>`;
+        }
+
+        async function testUsersMe() {
+            const result = document.getElementById('apiResult');
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                result.textContent = '❌ No token found. Please login first or clear cache.';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/users/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                const data = await response.json();
+                result.textContent = 'GET /api/v1/users/me:\n\n' + JSON.stringify(data, null, 2);
+                
+                if (data.profile_picture_url) {
+                    result.textContent += '\n\n✅ profile_picture_url found: ' + data.profile_picture_url;
+                } else {
+                    result.textContent += '\n\n❌ profile_picture_url is null or missing!';
+                }
+            } catch (error) {
+                result.textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        async function testAuthMe() {
+            const result = document.getElementById('apiResult');
+            const token = localStorage.getItem('auth_token');
+            
+            if (!token) {
+                result.textContent = '❌ No token found. Please login first or clear cache.';
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8000/api/v1/auth/me', {
+                    headers: {
+                        'Authorization': 'Bearer ' + token
+                    }
+                });
+                
+                const data = await response.json();
+                result.textContent = 'GET /api/v1/auth/me:\n\n' + JSON.stringify(data, null, 2);
+                
+                if (data.profile_picture_url) {
+                    result.textContent += '\n\n✅ profile_picture_url found: ' + data.profile_picture_url;
+                } else {
+                    result.textContent += '\n\n❌ profile_picture_url is null or missing!';
+                }
+            } catch (error) {
+                result.textContent = '❌ Error: ' + error.message;
+            }
+        }
+
+        function checkLocalStorage() {
+            const result = document.getElementById('localStorageData');
+            const user = localStorage.getItem('auth_user');
+            const token = localStorage.getItem('auth_token');
+            
+            if (!user && !token) {
+                result.textContent = '❌ No user data in localStorage\n\nYou need to login first!';
+                return;
+            }
+
+            let output = 'LocalStorage Contents:\n\n';
+            
+            if (token) {
+                output += 'auth_token: ' + token.substring(0, 50) + '...\n\n';
+            }
+            
+            if (user) {
+                try {
+                    const userData = JSON.parse(user);
+                    output += 'auth_user:\n' + JSON.stringify(userData, null, 2);
+                    
+                    if (userData.profile_picture_url) {
+                        output += '\n\n✅ profile_picture_url found: ' + userData.profile_picture_url;
+                    } else {
+                        output += '\n\n❌ profile_picture_url is null or missing!';
+                    }
+                } catch (e) {
+                    output += 'Error parsing user data: ' + e.message;
+                }
+            }
+            
+            result.textContent = output;
+        }
+
+        function goToLogin() {
+            window.location.href = 'http://localhost:3000/login';
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>
+
+
