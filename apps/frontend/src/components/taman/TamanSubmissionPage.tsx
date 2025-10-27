@@ -744,8 +744,8 @@ export function TamanSubmissionPage() {
 
       {/* Form Card - Only show if no approved park exists */}
       {!approvedPark && (
-        <Card>
-          <CardHeader>
+        <Card data-tour="taman-form">
+          <CardHeader data-tour="add-taman-button">
             <CardTitle className="flex items-center gap-2">
               {draftPark ? (
                 <>
@@ -863,6 +863,7 @@ export function TamanSubmissionPage() {
                   </Label>
                   <Input
                     id="name"
+                    data-tour="field-nama-taman"
                     placeholder="Contoh: Taman Kehati Cibinong"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
@@ -917,7 +918,7 @@ export function TamanSubmissionPage() {
                 {currentTab === 'lokasi' && (
                   <div className="animate-in fade-in slide-in-from-right-5 duration-300">
                 {/* Section 2: Lokasi */}
-                <div className="space-y-6">
+                <div className="space-y-6" data-tour="section-lokasi">
                   <div className="text-center mb-8">
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
                       <MapPin className="w-8 h-8 text-red-600" />
@@ -1180,6 +1181,7 @@ export function TamanSubmissionPage() {
                 <Label htmlFor="description">Deskripsi Taman</Label>
                 <Textarea
                   id="description"
+                  data-tour="field-deskripsi"
                   placeholder="Deskripsi singkat tentang taman kehati..."
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
@@ -1326,6 +1328,7 @@ export function TamanSubmissionPage() {
                           type="button"
                           disabled={submitting}
                           onClick={() => handleSubmit('in_review')}
+                          data-tour="submit-taman-button"
                           className="gap-2 px-8 bg-green-600 hover:bg-green-700"
                         >
                           {submitting ? (

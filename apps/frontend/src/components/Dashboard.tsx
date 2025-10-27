@@ -3,9 +3,11 @@ import { useAuth } from '../lib/useAuth';
 import { dashboardApi, DashboardStats } from '../lib/api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Skeleton } from './ui/skeleton';
-import { TreePine, Bird, MapPin, Users, AlertCircle, CheckCircle, TrendingUp, Activity, Sparkles, ArrowUpRight } from 'lucide-react';
+import { TreePine, Bird, MapPin, Users, AlertCircle, CheckCircle, TrendingUp, Activity, Sparkles, ArrowUpRight, HelpCircle } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
+import { ProductTour } from './ProductTour';
+import { Button } from './ui/button';
 
 type ActivityItem = {
   id: string;
@@ -21,6 +23,7 @@ export function Dashboard() {
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [runTour, setRunTour] = useState(false);
 
   useEffect(() => {
     loadDashboardData();
@@ -137,20 +140,41 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
+      {/* Product Tour Component */}
+      {user?.role === 'regional_admin' && (
+        <ProductTour run={runTour} onFinish={() => setRunTour(false)} />
+      )}
+
       {/* Welcome Header - Improved Contrast */}
       <div className="relative overflow-hidden rounded-2xl bg-white border-2 border-gray-200 p-8 shadow-lg">
         <div className="relative">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-brand-100 rounded-lg">
-              <Sparkles className="h-6 w-6 text-brand-600" />
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-brand-100 rounded-lg">
+                <Sparkles className="h-6 w-6 text-brand-600" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Selamat Datang, {user?.nama}!
+                </h1>
+                <p className="text-gray-900 text-lg font-medium">
+                  {user?.role === 'super_admin' ? '🎯 Super Admin Dashboard' : '🌳 Regional Admin Dashboard'}
+                </p>
+              </div>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              Selamat Datang, {user?.nama}!
-            </h1>
+            
+            {/* Tour Button - Only for Regional Admin */}
+            {user?.role === 'regional_admin' && (
+              <Button
+                onClick={() => setRunTour(true)}
+                variant="outline"
+                className="flex items-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600"
+              >
+                <HelpCircle className="h-4 w-4" />
+                Panduan
+              </Button>
+            )}
           </div>
-          <p className="text-gray-900 text-lg font-medium">
-            {user?.role === 'super_admin' ? '🎯 Super Admin Dashboard' : '🌳 Regional Admin Dashboard'}
-          </p>
         </div>
       </div>
 
@@ -276,7 +300,7 @@ export function Dashboard() {
               // Regional Admin Dashboard
               <>
                 {/* Card 1 - Taman */}
-                <Card className="relative overflow-hidden border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-green-50 hover:shadow-xl transition-shadow duration-300 group">
+                <Card data-tour="stats-card-taman" className="relative overflow-hidden border-2 border-brand-200 bg-gradient-to-br from-brand-50 to-green-50 hover:shadow-xl transition-shadow duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-bold text-gray-900">
                       Taman Saya
@@ -300,7 +324,7 @@ export function Dashboard() {
                 </Card>
 
                 {/* Card 2 - Flora */}
-                <Card className="relative overflow-hidden border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-shadow duration-300 group">
+                <Card data-tour="stats-card-flora" className="relative overflow-hidden border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-shadow duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-bold text-gray-900">
                       Flora Saya
@@ -324,7 +348,7 @@ export function Dashboard() {
                 </Card>
 
                 {/* Card 3 - Fauna */}
-                <Card className="relative overflow-hidden border-2 border-sky-200 bg-gradient-to-br from-sky-50 to-blue-50 hover:shadow-xl transition-shadow duration-300 group">
+                <Card data-tour="stats-card-fauna" className="relative overflow-hidden border-2 border-sky-200 bg-gradient-to-br from-sky-50 to-blue-50 hover:shadow-xl transition-shadow duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-bold text-gray-900">
                       Fauna Saya
@@ -348,7 +372,7 @@ export function Dashboard() {
                 </Card>
 
                 {/* Card 4 - Activities */}
-                <Card className="relative overflow-hidden border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-xl transition-shadow duration-300 group">
+                <Card data-tour="stats-card-kegiatan" className="relative overflow-hidden border-2 border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 hover:shadow-xl transition-shadow duration-300 group">
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
                     <CardTitle className="text-sm font-bold text-gray-900">
                       Kegiatan Saya

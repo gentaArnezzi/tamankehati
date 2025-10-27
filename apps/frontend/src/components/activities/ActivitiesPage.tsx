@@ -236,7 +236,7 @@ export function ActivitiesPage() {
             Kelola kegiatan konservasi di taman nasional
           </p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} data-tour="add-activity-button">
           <Plus className="h-4 w-4 mr-2" />
           Tambah Kegiatan
         </Button>

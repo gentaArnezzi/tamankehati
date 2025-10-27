@@ -25,6 +25,9 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { NotificationDropdown } from './notifications/NotificationDropdown';
 import { useNotifications } from '../hooks/useNotifications';
 import { useRouter } from 'next/navigation';
+import { ProductTour } from './ProductTour';
+import { InteractiveOnboardingTour } from './InteractiveOnboardingTour';
+import { useNewUserDetection } from '../hooks/useNewUserDetection';
 
 interface CollapsibleDashboardLayoutProps {
   children: ReactNode;
@@ -101,6 +104,10 @@ export function CollapsibleDashboardLayout({
 }: CollapsibleDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [runTour, setRunTour] = useState(false);
+  const [runOnboarding, setRunOnboarding] = useState(false);
+  const onboardingStartedRef = useRef(false); // Track if onboarding has been started
+  const { isNewUser, loading: loadingNewUser, markTourAsCompleted } = useNewUserDetection();
   const navItems = buildNavItems(user?.role);
   const currentPage = resolveCurrentPage(currentPath);
   const avatarInitial = user?.nama?.charAt(0)?.toUpperCase() ?? 'U';
@@ -147,8 +154,38 @@ export function CollapsibleDashboardLayout({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [userMenuOpen]);
 
+  // Auto-trigger onboarding tour for new users (only once)
+  useEffect(() => {
+    if (!loadingNewUser && isNewUser && user?.role === 'regional_admin' && !onboardingStartedRef.current) {
+      // Small delay to ensure UI is fully loaded
+      const timer = setTimeout(() => {
+        setRunOnboarding(true);
+        onboardingStartedRef.current = true; // Mark as started
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [isNewUser, loadingNewUser, user]);
+
+  const handleOnboardingFinish = () => {
+    setRunOnboarding(false);
+    onboardingStartedRef.current = false; // Reset for potential manual re-runs
+    markTourAsCompleted();
+  };
+
   return (
     <div className="flex min-h-screen w-full">
+      {/* Interactive Onboarding Tour - Auto-trigger for new regional admin */}
+      {/* Always render to prevent unmount/remount, logic handled by run prop */}
+      <InteractiveOnboardingTour 
+        run={runOnboarding && user?.role === 'regional_admin'} 
+        onFinish={handleOnboardingFinish} 
+      />
+
+      {/* Product Tour - Manual trigger from Panduan button */}
+      {user?.role === 'regional_admin' && (
+        <ProductTour run={runTour} onFinish={() => setRunTour(false)} />
+      )}
+      
       <div className="flex w-full bg-gray-50 text-gray-900">
         {/* Sidebar */}
         <nav
@@ -231,10 +268,22 @@ export function CollapsibleDashboardLayout({
               const Icon = item.icon;
               const isSelected = currentPage === item.id;
               
+              // Add data-tour attribute for regional admin menu items
+              const getTourDataAttr = (id: string) => {
+                const tourMap: Record<string, string> = {
+                  'taman': 'nav-taman',
+                  'flora': 'nav-flora',
+                  'fauna': 'nav-fauna',
+                  'activities': 'nav-kegiatan',
+                };
+                return tourMap[id] || undefined;
+              };
+              
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.path)}
+                  data-tour={getTourDataAttr(item.id)}
                   className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${
                     isSelected 
                       ? "bg-brand-50 text-brand-700 shadow-sm border-l-2 border-brand-500" 
@@ -266,12 +315,31 @@ export function CollapsibleDashboardLayout({
           </div>
 
           {/* Account Section */}
-          {sidebarOpen && (
-            <div className="border-t border-gray-200 pt-4 space-y-1">
+          <div className="border-t border-gray-200 pt-4 space-y-1">
+            {sidebarOpen && (
               <div className="px-3 py-2 text-xs font-bold text-gray-900 uppercase tracking-wide">
                 Account
               </div>
-              {/* Settings Button */}
+            )}
+            
+            {/* Help/Tour Button - Only for Regional Admin */}
+            {user?.role === 'regional_admin' && (
+              <button
+                onClick={() => setRunTour(true)}
+                title={!sidebarOpen ? "Panduan" : undefined}
+                className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-900 hover:bg-brand-50 hover:text-brand-700"
+              >
+                <div className="grid h-full w-12 place-content-center">
+                  <HelpCircle className="h-4 w-4" />
+                </div>
+                {sidebarOpen && (
+                  <span className="text-sm font-medium">Panduan</span>
+                )}
+              </button>
+            )}
+            
+            {/* Settings Button */}
+            {sidebarOpen && (
               <button
                 onClick={() => onNavigate('/dashboard/settings')}
                 className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${
@@ -285,7 +353,10 @@ export function CollapsibleDashboardLayout({
                 </div>
                 <span className="text-sm font-medium">Pengaturan</span>
               </button>
-              {/* Logout Button */}
+            )}
+            
+            {/* Logout Button */}
+            {sidebarOpen && (
               <button
                 onClick={onLogout}
                 className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-900 hover:bg-gray-50 hover:text-gray-900"
@@ -295,8 +366,8 @@ export function CollapsibleDashboardLayout({
                 </div>
                 <span className="text-sm font-medium">Keluar</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Toggle Button */}
           <button

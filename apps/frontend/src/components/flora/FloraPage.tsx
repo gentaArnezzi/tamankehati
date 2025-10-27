@@ -208,7 +208,7 @@ const handleCreate = () => {
             {/* wilayah field removed from User type */}
           </p>
         </div>
-        <Button onClick={handleCreate} style={{ backgroundColor: '#233c2b' }}>
+        <Button onClick={handleCreate} data-tour="add-flora-button" style={{ backgroundColor: '#233c2b' }}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah Flora
         </Button>
