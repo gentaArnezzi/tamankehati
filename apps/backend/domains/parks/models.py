@@ -52,6 +52,10 @@ class Park(Base):
     # PostGIS disabled - geom = Column(Geometry('MULTIPOLYGON', srid=4326), comment="Geometri Spasial")
     area_ha = Column(Numeric(10, 2), comment="Luas dalam hektar")
     
+    # Koordinat untuk peta interaktif
+    latitude = Column(Numeric(10, 8), comment="Latitude koordinat taman")
+    longitude = Column(Numeric(11, 8), comment="Longitude koordinat taman")
+    
     # Deskripsi
     description = Column(Text, comment="Deskripsi Umum")
     kondisi_fisik = Column(Text, comment="Kondisi Fisik Kawasan")

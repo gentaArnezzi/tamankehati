@@ -658,7 +658,13 @@ export function GroupedApprovalView() {
                                   {/* Type Badge */}
                                   <Badge
                                     variant="outline"
-                                    className="mb-2 bg-blue-50 text-blue-700 border-blue-200 font-medium"
+                                    className={`mb-2 font-medium ${
+                                      item.entityType === 'flora' 
+                                        ? 'bg-green-100 text-green-700 border-green-300'
+                                        : item.entityType === 'fauna'
+                                        ? 'bg-blue-100 text-blue-700 border-blue-300'
+                                        : 'bg-purple-100 text-purple-700 border-purple-300'
+                                    }`}
                                   >
                                     {getEntityLabel(item.entityType)}
                                   </Badge>

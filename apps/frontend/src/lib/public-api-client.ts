@@ -58,6 +58,17 @@ type GaleriPublicResponse = {
   wilayah: string;
 };
 
+type ActivityPublicResponse = {
+  id: string;
+  title: string;
+  description: string;
+  activity_date: string;
+  location: string;
+  park_name: string;
+  created_at: string;
+  updated_at: string;
+};
+
 type PublicListResult<T> = PaginatedResponse<T> & {
   total: number;
 };
@@ -126,6 +137,17 @@ const mapGaleri = (item: GaleriPublicResponse) => ({
   url: item.url,
   jenis: item.jenis,
   wilayah: item.wilayah,
+});
+
+const mapActivity = (item: ActivityPublicResponse) => ({
+  id: item.id,
+  title: item.title,
+  description: item.description,
+  activity_date: item.activity_date,
+  location: item.location,
+  park_name: item.park_name,
+  created_at: item.created_at,
+  updated_at: item.updated_at,
 });
 
 export const publicApi = {
@@ -220,4 +242,40 @@ export const publicApi = {
 
   sendChat: (payload: { message: string; session_id?: string }) =>
     client.post<{ session_id: string; response: string }>('/api/public/chat/', payload),
+
+  getActivities: async (params?: {
+    search?: string;
+    park_id?: number;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await client.get<PublicListResult<ActivityPublicResponse>>(
+      '/api/public/activities/',
+      params,
+    );
+    return {
+      ...withPaginationMeta(response),
+      items: response.items.map(mapActivity),
+    };
+  },
+
+  getActivitiesByPark: async (parkId: number, params?: {
+    search?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
+    const response = await client.get<PublicListResult<ActivityPublicResponse>>(
+      `/api/public/activities/park/${parkId}`,
+      params,
+    );
+    return {
+      ...withPaginationMeta(response),
+      items: response.items.map(mapActivity),
+    };
+  },
+
+  getActivityById: async (id: string) => {
+    const response = await client.get<ActivityPublicResponse>(`/api/public/activities/${id}`);
+    return mapActivity(response);
+  },
 };

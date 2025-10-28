@@ -39,6 +39,7 @@ from api.v1.routes import (
     articles,
     auth,
     dashboard,
+    dashboard_modern,
     fauna,
     flora,
     galleries,
@@ -448,6 +449,7 @@ app.include_router(galleries.router, prefix="/api/v1", tags=["Galleries"])
 app.include_router(upload.router, prefix="/api/v1", tags=["Upload"])
 app.include_router(parks.router, prefix="/api/v1", tags=["Parks"])
 app.include_router(dashboard.router, prefix="/api/v1", tags=["Dashboard"])
+app.include_router(dashboard_modern.router, prefix="/api/v1", tags=["Dashboard Modern"])
 app.include_router(analytics.router, prefix="/api/v1", tags=["Analytics"])
 
 # ✅ FIXED: Duplicate dashboard routers consolidated

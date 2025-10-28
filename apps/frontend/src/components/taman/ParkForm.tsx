@@ -18,6 +18,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Loader2, Plus, X, Info, FileText, MapPin, Target } from 'lucide-react';
 import { toast } from 'sonner';
 import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
+import dynamic from 'next/dynamic';
+
+const InteractiveMap = dynamic(() => import('../ui/interactive-map-client').then(mod => ({ default: mod.InteractiveMap })), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-sm text-gray-600">Memuat peta...</p>
+      </div>
+    </div>
+  )
+});
 
 interface ParkFormProps {
   onSuccess?: () => void;
@@ -43,6 +56,10 @@ interface ParkFormData {
   nilai_penting: string; // Nilai Penting Kawasan
   tipe_ekoregion: string; // Tipe Ekoregion
   status: string;
+  
+  // Koordinat Geografis
+  latitude: number | null; // Latitude koordinat
+  longitude: number | null; // Longitude koordinat
   
   // Dokumen Taman
   description: string; // Deskripsi Umum
@@ -79,6 +96,10 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
     tipe_ekoregion: '',
     status: 'draft',
     
+    // Koordinat Geografis
+    latitude: null,
+    longitude: null,
+    
     // Dokumen Taman
     description: '',
     sejarah: '',
@@ -109,6 +130,14 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
     } finally {
       setLoadingRegions(false);
     }
+  };
+
+  const handleCoordinatesChange = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng
+    }));
   };
 
   const handleSubmit = async (submitStatus: 'draft' | 'in_review') => {
@@ -264,7 +293,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
               </TabsTrigger>
               <TabsTrigger value="location" className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Lokasi & Status
+                Lokasi & Koordinat
               </TabsTrigger>
             </TabsList>
 
@@ -541,6 +570,22 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                   </div>
           </div>
           </div>
+
+                {/* Koordinat Geografis */}
+                <div className="space-y-4">
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">🗺️ Koordinat Geografis</h4>
+                  <p className="text-sm text-gray-600">
+                    Pilih koordinat taman konservasi menggunakan peta interaktif. 
+                    Anda dapat mengklik pada peta, mencari lokasi, atau menggunakan lokasi saat ini.
+                  </p>
+                  
+                  <InteractiveMap
+                    latitude={formData.latitude}
+                    longitude={formData.longitude}
+                    onCoordinatesChange={handleCoordinatesChange}
+                    height="400px"
+                  />
+                </div>
             </TabsContent>
           </Tabs>
 

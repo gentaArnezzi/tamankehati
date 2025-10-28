@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useAuth } from '../../lib/useAuth';
 import { parksApi, Park } from '../../lib/api-client';
 import { Card, CardContent, CardDescription,CardHeader, CardTitle } from '../ui/card';
@@ -51,6 +51,19 @@ import {
   TableRow,
 } from '../ui/table';
 import { ApprovedParkDetails } from './ApprovedParkDetails';
+import dynamic from 'next/dynamic';
+
+const InteractiveMap = dynamic(() => import('../ui/interactive-map-client').then(mod => ({ default: mod.InteractiveMap })), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-sm text-gray-600">Memuat peta...</p>
+      </div>
+    </div>
+  )
+});
 
 interface ParkFormData {
   name: string;
@@ -72,6 +85,8 @@ interface ParkFormData {
   misi: string;
   nilai_dasar: string;
   status: string;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 // Interfaces for Indonesian Region API
@@ -145,6 +160,8 @@ export function TamanSubmissionPage() {
     misi: '',
     nilai_dasar: '',
     status: 'draft',
+    latitude: null,
+    longitude: null,
   });
 
   // Current tab state for multi-step form
@@ -152,9 +169,14 @@ export function TamanSubmissionPage() {
   
   // Tab completion tracking
   const [completedTabs, setCompletedTabs] = useState<string[]>([]);
+  
+  // Guard untuk mencegah double fetch di StrictMode
+  const didFetch = useRef(false);
 
   // Load parks and provinces on mount
   useEffect(() => {
+    if (didFetch.current) return;
+    didFetch.current = true;
     loadParks();
     loadProvinces();
   }, []);
@@ -181,6 +203,8 @@ export function TamanSubmissionPage() {
         misi: (draftPark as any).misi || '',
         nilai_dasar: (draftPark as any).nilai_dasar || '',
         status: 'draft',
+        latitude: (draftPark as any).latitude || null,
+        longitude: (draftPark as any).longitude || null,
       });
     }
   }, [parks]); // Depend on parks, will update when parks load
@@ -322,6 +346,14 @@ export function TamanSubmissionPage() {
   const handleVillageChange = (villageName: string) => {
     // Since SelectItem value is already village.name, we can use it directly
     setFormData(prev => ({ ...prev, desa_kelurahan: villageName }));
+  };
+
+  const handleCoordinatesChange = (lat: number, lng: number) => {
+    setFormData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng
+    }));
   };
 
   const loadParks = async () => {
@@ -797,10 +829,10 @@ export function TamanSubmissionPage() {
                 <div className="flex items-center justify-between max-w-4xl mx-auto">
                   {[
                     { id: 'profil', label: 'Profil', icon: Building2 },
-                    { id: 'lokasi', label: 'Lokasi', icon: MapPin },
+                    { id: 'lokasi', label: 'Lokasi & Koordinat', icon: MapPin },
                     { id: 'karakteristik', label: 'Karakteristik', icon: Leaf },
                     { id: 'deskripsi', label: 'Deskripsi', icon: FileText },
-                    { id: 'visi-misi', label: 'Visi & Misi', icon: Target }
+                    { id: 'visi-misi', label: 'Visi & Misi', icon: BookOpen }
                   ].map((step, index, array) => {
                     const StepIcon = step.icon;
                     const isActive = currentTab === step.id;
@@ -1069,6 +1101,27 @@ export function TamanSubmissionPage() {
                       Selanjutnya: Karakteristik <ChevronRight className="w-5 h-5" />
                     </Button>
                   </div>
+                </div>
+
+                {/* Koordinat Geografis */}
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-xl font-semibold text-gray-800 mb-2">🗺️ Koordinat Geografis</h3>
+                    <p className="text-sm text-gray-600">
+                      Pilih koordinat taman konservasi menggunakan peta interaktif
+                    </p>
+                  </div>
+                  
+                  <Card className="shadow-lg border-t-4 border-t-blue-500">
+                    <CardContent className="pt-6 pb-6">
+                      <InteractiveMap
+                        latitude={formData.latitude}
+                        longitude={formData.longitude}
+                        onCoordinatesChange={handleCoordinatesChange}
+                        height="400px"
+                      />
+                    </CardContent>
+                  </Card>
                 </div>
                   </div>
                 )}
@@ -1355,6 +1408,7 @@ export function TamanSubmissionPage() {
                 </div>
                   </div>
                 )}
+
               </div>
             </div>
 

@@ -201,6 +201,7 @@ async def create_park(
                 provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
                 area_ha, kondisi_fisik, nilai_penting, tipe_ekoregion,
                 description, sejarah, visi, misi, nilai_dasar,
+                latitude, longitude,
                 status, submitted_by, created_at, updated_at
             )
             VALUES (
@@ -208,6 +209,7 @@ async def create_park(
                 :provinsi, :kota_kabupaten, :kecamatan, :desa_kelurahan,
                 :area_ha, :kondisi_fisik, :nilai_penting, :tipe_ekoregion,
                 :description, :sejarah, :visi, :misi, :nilai_dasar,
+                :latitude, :longitude,
                 :status, :submitted_by, NOW(), NOW()
             )
             RETURNING id, name, slug, status, created_at, updated_at
@@ -231,6 +233,8 @@ async def create_park(
             "visi": data.get("visi"),
             "misi": data.get("misi"),
             "nilai_dasar": data.get("nilai_dasar"),
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
             "status": data.get("status", "draft"),  # Use status from request, default to 'draft'
             "submitted_by": int(user.id)
         })
@@ -317,6 +321,8 @@ async def update_park(
                 kota_kabupaten = :kota_kabupaten,
                 kecamatan = :kecamatan,
                 desa_kelurahan = :desa_kelurahan,
+                latitude = :latitude,
+                longitude = :longitude,
                 updated_at = NOW()
             WHERE id = :park_id
             RETURNING id, name, slug, status, created_at, updated_at
@@ -340,6 +346,8 @@ async def update_park(
             "kota_kabupaten": data.get("kota_kabupaten"),
             "kecamatan": data.get("kecamatan"),
             "desa_kelurahan": data.get("desa_kelurahan"),
+            "latitude": data.get("latitude"),
+            "longitude": data.get("longitude"),
         })
         
         row = result.fetchone()

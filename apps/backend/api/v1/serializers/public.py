@@ -1,5 +1,5 @@
 # api/v1/serializers/public.py
-from typing import Optional, List
+from typing import Optional
 from pydantic import BaseModel
 from api.v1.serializers.common import PaginatedResponse
 
@@ -79,6 +79,8 @@ class ParkPublicBase(BaseModel):
     visi: Optional[str]
     misi: Optional[str]
     nilai_dasar: Optional[str]
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
 
 
 class ParkPublicOut(ParkPublicBase):
@@ -140,12 +142,37 @@ class GaleriPublicOut(GaleriPublicBase):
         from_attributes = True
 
 
+class ActivityPublicBase(BaseModel):
+    title: Optional[str]
+    description: Optional[str]
+    activity_date: Optional[str]
+    location: Optional[str]
+    park_name: Optional[str]
+    created_at: Optional[str]
+    updated_at: Optional[str]
+
+
+class ActivityPublicOut(ActivityPublicBase):
+    id: str
+    title: str
+    description: str
+    activity_date: str
+    location: str
+    park_name: str
+    created_at: str
+    updated_at: str
+
+    class Config:
+        from_attributes = True
+
+
 # Response models with pagination
 FloraPublicListResponse = PaginatedResponse[FloraPublicOut]
 FaunaPublicListResponse = PaginatedResponse[FaunaPublicOut]
 ParkPublicListResponse = PaginatedResponse[ParkPublicOut]
 ArtikelPublicListResponse = PaginatedResponse[ArtikelPublicOut]
 GaleriPublicListResponse = PaginatedResponse[GaleriPublicOut]
+ActivityPublicListResponse = PaginatedResponse[ActivityPublicOut]
 
 
 class ChatMessageRequest(BaseModel):

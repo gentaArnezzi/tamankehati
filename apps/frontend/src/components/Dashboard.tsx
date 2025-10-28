@@ -3,7 +3,7 @@ import { useAuth } from '../lib/useAuth';
 import { dashboardApi, DashboardStats } from '../lib/api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Skeleton } from './ui/skeleton';
-import { TreePine, Bird, MapPin, Users, AlertCircle, CheckCircle, TrendingUp, Activity, Sparkles, ArrowUpRight, HelpCircle } from 'lucide-react';
+import { TreePine, Bird, MapPin, Users, AlertCircle, CheckCircle, TrendingUp, Activity, Sparkles, ArrowUpRight, HelpCircle, BarChart3 } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { ProductTour } from './ProductTour';
@@ -163,17 +163,49 @@ export function Dashboard() {
               </div>
             </div>
             
-            {/* Tour Button - Only for Regional Admin */}
-            {user?.role === 'regional_admin' && (
+            <div className="flex items-center gap-2">
+              {/* Modern Dashboard Button */}
               <Button
-                onClick={() => setRunTour(true)}
+                onClick={() => window.location.href = '/dashboard/modern'}
                 variant="outline"
-                className="flex items-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600"
+                className="flex items-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600"
               >
-                <HelpCircle className="h-4 w-4" />
-                Panduan
+                <BarChart3 className="h-4 w-4" />
+                Modern Dashboard
               </Button>
-            )}
+              
+              {/* Data-Driven Dashboard Button */}
+              <Button
+                onClick={() => window.location.href = '/dashboard/data-driven'}
+                variant="outline"
+                className="flex items-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600"
+              >
+                <Activity className="h-4 w-4" />
+                Data Dashboard
+              </Button>
+              
+              {/* Tamankehati Dashboard Button */}
+              <Button
+                onClick={() => window.location.href = '/dashboard/tamankehati'}
+                variant="outline"
+                className="flex items-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600"
+              >
+                <TreePine className="h-4 w-4" />
+                Tamankehati Dashboard
+              </Button>
+              
+              {/* Tour Button - Only for Regional Admin */}
+              {user?.role === 'regional_admin' && (
+                <Button
+                  onClick={() => setRunTour(true)}
+                  variant="outline"
+                  className="flex items-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  Panduan
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

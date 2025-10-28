@@ -7,7 +7,8 @@ from . import (
     galeri,
     stats,
     chatbot as chat,
-    search
+    search,
+    activities
 )
 
 __all__ = [
@@ -18,7 +19,8 @@ __all__ = [
     "galeri",
     "stats",
     "chat",
-    "search"
+    "search",
+    "activities"
 ]
 
 router = APIRouter()
@@ -32,3 +34,4 @@ router.include_router(galeri.router, prefix="/galeri", tags=["Public"])
 router.include_router(stats.router, prefix="/stats", tags=["Public"])
 router.include_router(chat.router, prefix="/chat", tags=["Public"])
 router.include_router(search.router, prefix="/search", tags=["Public"])
+router.include_router(activities.router, prefix="/activities", tags=["Public"])

@@ -12,6 +12,7 @@ import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Spr
 import { formatDate } from '../../../lib/utils';
 import { getParkStats } from '../../../lib/api/client';
 import type { ParkDetail } from '../../../types/parks';
+import { ParkActivities } from '../activities/ParkActivities';
 
 interface ParkDetailViewProps {
   park: ParkDetail;
@@ -158,6 +159,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               </Card>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Activities Section */}
+      <section className="py-16 bg-gradient-to-br from-emerald-50 to-blue-50">
+        <div className="container mx-auto px-4">
+          <ParkActivities parkId={park.id} parkName={park.name} />
         </div>
       </section>
 
