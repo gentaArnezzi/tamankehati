@@ -290,43 +290,66 @@ async def update_park(
         if user.role != UserRole.super_admin and park[1] != user.id:
             raise HTTPException(status_code=403, detail="You can only edit parks you submitted")
         
-        # ✅ REMOVED: Allow editing parks regardless of status
-        # Users can now edit parks even after they're approved
-        # park_status = park[2]  # status is index 2
-        # if user.role == UserRole.regional_admin and park_status != 'draft':
-        #     raise HTTPException(
-        #         status_code=403, 
-        #         detail=f"Anda hanya bisa mengedit taman dengan status 'draft'. Taman ini berstatus '{park_status}'."
-        #     )
+        # Get current park status
+        current_status = park[2]  # status is index 2
         
-        # ✅ FIX: Only update data fields, DON'T change status
-        # Status should only change via explicit actions:
-        # - draft → in_review: via submit_park endpoint
-        # - in_review → approved/rejected: via approve_park/reject_park endpoints
-        update_query = text("""
-            UPDATE parks SET
-                name = :name,
-                sk_penetapan = :sk_penetapan,
-                pengelola = :pengelola,
-                area_ha = :area_ha,
-                kondisi_fisik = :kondisi_fisik,
-                nilai_penting = :nilai_penting,
-                tipe_ekoregion = :tipe_ekoregion,
-                description = :description,
-                sejarah = :sejarah,
-                visi = :visi,
-                misi = :misi,
-                nilai_dasar = :nilai_dasar,
-                provinsi = :provinsi,
-                kota_kabupaten = :kota_kabupaten,
-                kecamatan = :kecamatan,
-                desa_kelurahan = :desa_kelurahan,
-                latitude = :latitude,
-                longitude = :longitude,
-                updated_at = NOW()
-            WHERE id = :park_id
-            RETURNING id, name, slug, status, created_at, updated_at
-        """)
+        # ✅ NEW LOGIC: If editing an approved park, change status to in_review
+        # This requires super admin to re-approve changes
+        if current_status == 'approved':
+            update_query = text("""
+                UPDATE parks SET
+                    name = :name,
+                    sk_penetapan = :sk_penetapan,
+                    pengelola = :pengelola,
+                    area_ha = :area_ha,
+                    kondisi_fisik = :kondisi_fisik,
+                    nilai_penting = :nilai_penting,
+                    tipe_ekoregion = :tipe_ekoregion,
+                    description = :description,
+                    sejarah = :sejarah,
+                    visi = :visi,
+                    misi = :misi,
+                    nilai_dasar = :nilai_dasar,
+                    provinsi = :provinsi,
+                    kota_kabupaten = :kota_kabupaten,
+                    kecamatan = :kecamatan,
+                    desa_kelurahan = :desa_kelurahan,
+                    latitude = :latitude,
+                    longitude = :longitude,
+                    status = 'in_review',
+                    submitted_at = NOW(),
+                    approved_by = NULL,
+                    approved_at = NULL,
+                    updated_at = NOW()
+                WHERE id = :park_id
+                RETURNING id, name, slug, status, created_at, updated_at
+            """)
+        else:
+            # For draft or in_review, just update data without changing status
+            update_query = text("""
+                UPDATE parks SET
+                    name = :name,
+                    sk_penetapan = :sk_penetapan,
+                    pengelola = :pengelola,
+                    area_ha = :area_ha,
+                    kondisi_fisik = :kondisi_fisik,
+                    nilai_penting = :nilai_penting,
+                    tipe_ekoregion = :tipe_ekoregion,
+                    description = :description,
+                    sejarah = :sejarah,
+                    visi = :visi,
+                    misi = :misi,
+                    nilai_dasar = :nilai_dasar,
+                    provinsi = :provinsi,
+                    kota_kabupaten = :kota_kabupaten,
+                    kecamatan = :kecamatan,
+                    desa_kelurahan = :desa_kelurahan,
+                    latitude = :latitude,
+                    longitude = :longitude,
+                    updated_at = NOW()
+                WHERE id = :park_id
+                RETURNING id, name, slug, status, created_at, updated_at
+            """)
         
         result = await db.execute(update_query, {
             "park_id": park_id,
@@ -352,7 +375,10 @@ async def update_park(
         
         row = result.fetchone()
         
-        print(f"✅ Park {park_id} updated by user {user.id}, status: {row[3]}")
+        if current_status == 'approved' and row[3] == 'in_review':
+            print(f"✅ Park {park_id} updated by user {user.id}, status changed: {current_status} → {row[3]} (requires re-approval)")
+        else:
+            print(f"✅ Park {park_id} updated by user {user.id}, status: {row[3]}")
         
         await db.commit()
         

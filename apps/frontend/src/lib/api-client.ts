@@ -1089,6 +1089,8 @@ export interface Park {
   visi: string | null;
   misi: string | null;
   nilai_dasar: string | null;
+  latitude: number | null;
+  longitude: number | null;
   created_at: string;
   updated_at: string;
   submitted_by?: number | null;
@@ -1148,6 +1150,8 @@ export const parksApi = {
     kota_kabupaten?: string;
     kecamatan?: string;
     desa_kelurahan?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     status: string 
   }) => {
     const response = await privateClient.post<Park>('/api/v1/parks/', data);
@@ -1172,6 +1176,8 @@ export const parksApi = {
     kota_kabupaten?: string;
     kecamatan?: string;
     desa_kelurahan?: string;
+    latitude?: number | null;
+    longitude?: number | null;
     status?: string; // Add status field
   }) => {
     const response = await privateClient.put<Park>(`/api/v1/parks/${id}`, data);

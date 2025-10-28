@@ -143,6 +143,8 @@ class ParkDetailResponse(BaseModel):
     kota_kabupaten: Optional[str] = None
     kecamatan: Optional[str] = None
     desa_kelurahan: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     submitted_by: Optional[int] = None
     submitted_at: Optional[str] = None
     approved_by: Optional[int] = None
@@ -167,6 +169,7 @@ async def get_park(
                    sk_penetapan, pengelola, tipe_ekoregion, kondisi_fisik, nilai_penting,
                    sejarah, visi, misi, nilai_dasar,
                    provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
+                   latitude, longitude,
                    submitted_by, submitted_at, approved_by, approved_at, rejected_at
             FROM parks 
             WHERE id = :park_id
@@ -221,11 +224,13 @@ async def get_park(
             kota_kabupaten=row[18],       # kota_kabupaten
             kecamatan=row[19],            # kecamatan
             desa_kelurahan=row[20],       # desa_kelurahan
-            submitted_by=row[21],         # submitted_by
-            submitted_at=row[22].isoformat() if row[22] else None,  # submitted_at
-            approved_by=row[23],          # approved_by
-            approved_at=row[24].isoformat() if row[24] else None,   # approved_at
-            rejected_at=row[25].isoformat() if row[25] else None,   # rejected_at
+            latitude=float(row[21]) if row[21] else None,           # latitude
+            longitude=float(row[22]) if row[22] else None,          # longitude
+            submitted_by=row[23],         # submitted_by
+            submitted_at=row[24].isoformat() if row[24] else None,  # submitted_at
+            approved_by=row[25],          # approved_by
+            approved_at=row[26].isoformat() if row[26] else None,   # approved_at
+            rejected_at=row[27].isoformat() if row[27] else None,   # rejected_at
             created_at=row[6].isoformat() if row[6] else "",
             updated_at=row[7].isoformat() if row[7] else "",
             statistik={

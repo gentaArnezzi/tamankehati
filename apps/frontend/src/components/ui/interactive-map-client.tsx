@@ -71,28 +71,30 @@ export function InteractiveMap({
   const [isSearching, setIsSearching] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isMapMounted, setIsMapMounted] = useState(false);
+  const [mapKey, setMapKey] = useState(''); // Dynamic key to force re-mount
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const containerIdRef = useRef(`map-${Date.now()}-${Math.random()}`); // Unique ID per instance
-  const mapInstanceRef = useRef<boolean>(false); // Track if map is already initialized
 
-  // Initialize client-side rendering
+  // Initialize client-side rendering with unique key
   useEffect(() => {
     setIsClient(true);
+    // Generate unique key for this mount
+    setMapKey(`map-instance-${Date.now()}-${Math.random()}`);
     
     // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
-      if (!mapInstanceRef.current) {
-        setIsMapMounted(true);
-        mapInstanceRef.current = true;
-      }
-    }, 100);
+      setIsMapMounted(true);
+    }, 150);
     
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      setIsMapMounted(false);
+    };
   }, []);
 
-  // Initialize map center with provided coordinates or default to Jakarta (only on first mount)
+  // Initialize map center with provided coordinates
   useEffect(() => {
-    if (latitude && longitude && !mapInstanceRef.current) {
+    if (latitude && longitude) {
       setMapCenter([latitude, longitude]);
     }
   }, [latitude, longitude]);
@@ -101,21 +103,33 @@ export function InteractiveMap({
   useEffect(() => {
     return () => {
       console.log('🧹 Cleaning up map:', containerIdRef.current);
-      // Reset instance tracker
-      mapInstanceRef.current = false;
       
       // Cleanup any existing map instances
       if (mapContainerRef.current) {
         const mapContainer = mapContainerRef.current;
-        // Find and remove any leaflet map instances
+        
+        // Find and destroy Leaflet map instance
         const leafletContainer = mapContainer.querySelector('.leaflet-container');
         if (leafletContainer) {
-          // Remove leaflet specific attributes and classes
+          try {
+            // Remove Leaflet's internal reference
+            delete (leafletContainer as any)._leaflet_id;
+          } catch (e) {
+            console.warn('Error removing leaflet ID:', e);
+          }
           leafletContainer.remove();
         }
+        
         // Clear the entire container
         mapContainer.innerHTML = '';
+        
+        // Remove all Leaflet classes from container
+        if (mapContainer.className) {
+          mapContainer.className = mapContainer.className.replace(/leaflet-\S+/g, '').trim();
+        }
       }
+      
+      // No need to reset tracker - component is unmounting
     };
   }, []);
 
@@ -262,9 +276,9 @@ export function InteractiveMap({
           style={{ height }} 
           className="rounded-lg overflow-hidden border"
         >
-          {isClient && isMapMounted ? (
+          {isClient && isMapMounted && mapKey ? (
             <MapContainer
-              key={containerIdRef.current}
+              key={mapKey}
               center={mapCenter}
               zoom={13}
               style={{ height: '100%', width: '100%' }}

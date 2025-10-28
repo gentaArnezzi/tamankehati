@@ -168,6 +168,9 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         kota_kabupaten: formData.kota_kabupaten,
         kecamatan: formData.kecamatan,
         desa_kelurahan: formData.desa_kelurahan,
+        // Coordinates
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         status: submitStatus, // Set status based on button clicked
       };
 

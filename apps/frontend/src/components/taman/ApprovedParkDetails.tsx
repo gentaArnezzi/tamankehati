@@ -9,6 +9,9 @@ import { Button } from '../ui/button';
 import { Alert, AlertDescription } from '../ui/alert';
 import { Separator } from '../ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
 import {
   MapPin,
   FileText,
@@ -29,6 +32,32 @@ import {
   X,
   Clock,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
+
+const InteractiveMapDisplay = dynamic(() => import('../ui/interactive-map-display').then(mod => ({ default: mod.InteractiveMapDisplay })), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-sm text-gray-600">Memuat peta...</p>
+      </div>
+    </div>
+  )
+});
+
+const InteractiveMapWrapper = dynamic(() => import('../ui/interactive-map-wrapper').then(mod => ({ default: mod.InteractiveMapWrapper })), { 
+  ssr: false,
+  loading: () => (
+    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+        <p className="text-sm text-gray-600">Memuat peta...</p>
+      </div>
+    </div>
+  )
+});
 
 interface ApprovedParkDetailsProps {
   park: Park;
@@ -51,10 +80,18 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     sejarah: park.sejarah || '',
     visi: park.visi || '',
     misi: park.misi || '',
+    nilai_dasar: park.nilai_dasar || '',
+    tipe_ekoregion: park.tipe_ekoregion || '',
+    kondisi_fisik: park.kondisi_fisik || '',
+    nilai_penting: park.nilai_penting || '',
+    latitude: park.latitude || null,
+    longitude: park.longitude || null,
   });
 
   const handleEdit = () => {
     setIsEditing(true);
+    // Scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleCancel = () => {
@@ -72,6 +109,12 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
       sejarah: park.sejarah || '',
       visi: park.visi || '',
       misi: park.misi || '',
+      nilai_dasar: park.nilai_dasar || '',
+      tipe_ekoregion: park.tipe_ekoregion || '',
+      kondisi_fisik: park.kondisi_fisik || '',
+      nilai_penting: park.nilai_penting || '',
+      latitude: park.latitude || null,
+      longitude: park.longitude || null,
     });
   };
 
@@ -80,12 +123,14 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
       const updatedPark = await parksApi.update(park.id, editData);
       
       // Set update status based on park status
-      if (updatedPark.status === 'pending_approval') {
-        setUpdateStatus('pending_approval');
+      if (updatedPark.status === 'in_review') {
+        setUpdateStatus('in_review');
         toast.success('Perubahan taman berhasil disimpan dan menunggu approval dari super admin');
       } else if (updatedPark.status === 'approved') {
         setUpdateStatus('approved');
         toast.success('Perubahan taman berhasil disimpan dan langsung disetujui');
+      } else {
+        toast.success('Perubahan taman berhasil disimpan');
       }
       
       setIsEditing(false);
@@ -96,6 +141,266 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     }
   };
 
+  const handleRegionChange = (region: {
+    provinsi: string;
+    kota_kabupaten: string;
+    kecamatan: string;
+    desa_kelurahan: string;
+  }) => {
+    setEditData(prev => ({
+      ...prev,
+      provinsi: region.provinsi || '',
+      kota_kabupaten: region.kota_kabupaten || '',
+      kecamatan: region.kecamatan || '',
+      desa_kelurahan: region.desa_kelurahan || '',
+    }));
+  };
+
+  const handleCoordinatesChange = (lat: number, lng: number) => {
+    setEditData(prev => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+  };
+
+  // Show edit form
+  if (isEditing) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-2xl">Edit Taman</CardTitle>
+                <CardDescription>
+                  Perubahan akan masuk status review dan memerlukan persetujuan super admin
+                </CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSave} className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  Simpan Perubahan
+                </Button>
+                <Button onClick={handleCancel} variant="outline" className="flex items-center gap-2">
+                  <X className="w-4 h-4" />
+                  Batal
+                </Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="profil" className="w-full">
+              <TabsList className="grid w-full grid-cols-4">
+                <TabsTrigger value="profil">Profil & Informasi</TabsTrigger>
+                <TabsTrigger value="lokasi">Lokasi & Koordinat</TabsTrigger>
+                <TabsTrigger value="karakteristik">Karakteristik</TabsTrigger>
+                <TabsTrigger value="visi-misi">Visi & Misi</TabsTrigger>
+              </TabsList>
+
+              {/* Tab: Profil */}
+              <TabsContent value="profil" className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="name">Nama Resmi Kawasan *</Label>
+                    <Input
+                      id="name"
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      placeholder="Nama resmi kawasan konservasi"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="sk_penetapan">SK Penetapan/Penunjukan</Label>
+                    <Input
+                      id="sk_penetapan"
+                      value={editData.sk_penetapan}
+                      onChange={(e) => setEditData({ ...editData, sk_penetapan: e.target.value })}
+                      placeholder="Nomor SK penetapan"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="pengelola">Instansi Pengelola</Label>
+                    <Input
+                      id="pengelola"
+                      value={editData.pengelola}
+                      onChange={(e) => setEditData({ ...editData, pengelola: e.target.value })}
+                      placeholder="Nama instansi pengelola"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="description">Deskripsi Umum</Label>
+                    <Textarea
+                      id="description"
+                      value={editData.description}
+                      onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                      placeholder="Deskripsi umum tentang taman"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="sejarah">Sejarah Taman</Label>
+                    <Textarea
+                      id="sejarah"
+                      value={editData.sejarah}
+                      onChange={(e) => setEditData({ ...editData, sejarah: e.target.value })}
+                      placeholder="Sejarah pembentukan dan pengembangan taman"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Lokasi */}
+              <TabsContent value="lokasi" className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label>Lokasi Administratif *</Label>
+                    <IndonesiaRegionSelector
+                      initialData={{
+                        provinsi: editData.provinsi,
+                        kota_kabupaten: editData.kota_kabupaten,
+                        kecamatan: editData.kecamatan,
+                        desa_kelurahan: editData.desa_kelurahan,
+                      }}
+                      onChange={handleRegionChange}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="area_ha">Luas Kawasan (ha)</Label>
+                    <Input
+                      id="area_ha"
+                      type="number"
+                      value={editData.area_ha || ''}
+                      onChange={(e) => setEditData({ ...editData, area_ha: e.target.value ? parseFloat(e.target.value) : null })}
+                      placeholder="Luas kawasan dalam hektar"
+                    />
+                  </div>
+
+                  <div>
+                    <Label>Koordinat Geografis</Label>
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label htmlFor="latitude" className="text-sm">Latitude</Label>
+                        <Input
+                          id="latitude"
+                          type="number"
+                          step="0.000001"
+                          value={editData.latitude || ''}
+                          onChange={(e) => setEditData({ ...editData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                          placeholder="-7.376688"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="longitude" className="text-sm">Longitude</Label>
+                        <Input
+                          id="longitude"
+                          type="number"
+                          step="0.000001"
+                          value={editData.longitude || ''}
+                          onChange={(e) => setEditData({ ...editData, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                          placeholder="108.556031"
+                        />
+                      </div>
+                    </div>
+                    <InteractiveMapWrapper
+                      latitude={editData.latitude}
+                      longitude={editData.longitude}
+                      onCoordinatesChange={handleCoordinatesChange}
+                      height="400px"
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Karakteristik */}
+              <TabsContent value="karakteristik" className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="tipe_ekoregion">Tipe Ekoregion</Label>
+                    <Textarea
+                      id="tipe_ekoregion"
+                      value={editData.tipe_ekoregion}
+                      onChange={(e) => setEditData({ ...editData, tipe_ekoregion: e.target.value })}
+                      placeholder="Deskripsi tipe ekoregion kawasan"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="kondisi_fisik">Kondisi Fisik Kawasan</Label>
+                    <Textarea
+                      id="kondisi_fisik"
+                      value={editData.kondisi_fisik}
+                      onChange={(e) => setEditData({ ...editData, kondisi_fisik: e.target.value })}
+                      placeholder="Deskripsi kondisi fisik kawasan"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="nilai_penting">Nilai Penting Kawasan</Label>
+                    <Textarea
+                      id="nilai_penting"
+                      value={editData.nilai_penting}
+                      onChange={(e) => setEditData({ ...editData, nilai_penting: e.target.value })}
+                      placeholder="Deskripsi nilai penting kawasan"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="nilai_dasar">Nilai Dasar</Label>
+                    <Textarea
+                      id="nilai_dasar"
+                      value={editData.nilai_dasar}
+                      onChange={(e) => setEditData({ ...editData, nilai_dasar: e.target.value })}
+                      placeholder="Deskripsi nilai dasar kawasan"
+                      rows={3}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Tab: Visi & Misi */}
+              <TabsContent value="visi-misi" className="space-y-4">
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="visi">Visi</Label>
+                    <Textarea
+                      id="visi"
+                      value={editData.visi}
+                      onChange={(e) => setEditData({ ...editData, visi: e.target.value })}
+                      placeholder="Visi taman"
+                      rows={4}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="misi">Misi</Label>
+                    <Textarea
+                      id="misi"
+                      value={editData.misi}
+                      onChange={(e) => setEditData({ ...editData, misi: e.target.value })}
+                      placeholder="Misi taman"
+                      rows={4}
+                    />
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show detail view
   return (
     <div className="space-y-6">
       {/* Header with Park Name and Status */}
@@ -103,37 +408,15 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <TreePine className="w-8 h-8 text-green-600" />
-            {isEditing ? (
-              <input
-                type="text"
-                value={editData.name}
-                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                className="bg-transparent border-b-2 border-green-600 outline-none"
-              />
-            ) : (
-              park.name
-            )}
+            {park.name}
           </h1>
           <p className="text-muted-foreground mt-2">Detail lengkap taman yang Anda kelola</p>
         </div>
         <div className="flex items-center gap-3">
-          {isEditing ? (
-            <>
-              <Button onClick={handleSave} className="flex items-center gap-2">
-                <Save className="w-4 h-4" />
-                Simpan Perubahan
-              </Button>
-              <Button onClick={handleCancel} variant="outline" className="flex items-center gap-2">
-                <X className="w-4 h-4" />
-                Batal
-              </Button>
-            </>
-          ) : (
-            <Button onClick={handleEdit} className="flex items-center gap-2">
-              <Edit className="w-4 h-4" />
-              Edit Detail
-            </Button>
-          )}
+          <Button onClick={handleEdit} className="flex items-center gap-2">
+            <Edit className="w-4 h-4" />
+            Edit Detail
+          </Button>
           <Badge variant="default" className="flex items-center gap-1 px-4 py-2">
             <CheckCircle className="w-4 h-4" />
             Approved
@@ -143,10 +426,10 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
       {/* Update Status Alert */}
       {updateStatus && (
-        <Alert className={updateStatus === 'pending_approval' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}>
+        <Alert className={updateStatus === 'in_review' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}>
           <div className="flex items-start justify-between">
-            <AlertDescription className={updateStatus === 'pending_approval' ? 'text-yellow-800' : 'text-green-800'}>
-              {updateStatus === 'pending_approval' ? (
+            <AlertDescription className={updateStatus === 'in_review' ? 'text-yellow-800' : 'text-green-800'}>
+              {updateStatus === 'in_review' ? (
                 <>
                   <Clock className="w-4 h-4 inline mr-2" />
                   <strong>Perubahan menunggu approval:</strong> Perubahan yang Anda buat sedang menunggu persetujuan dari super admin. Status akan diperbarui setelah disetujui.
@@ -181,22 +464,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
           <CardContent>
             <div className="flex items-center gap-2">
               <Ruler className="w-5 h-5 text-blue-600" />
-              {isEditing ? (
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={editData.area_ha}
-                    onChange={(e) => setEditData({ ...editData, area_ha: parseFloat(e.target.value) || 0 })}
-                    className="w-24 px-2 py-1 border rounded text-2xl font-bold"
-                    placeholder="0"
-                  />
-                  <span className="text-lg">ha</span>
-                </div>
-              ) : (
-                <span className="text-2xl font-bold">
-                  {park.area_ha ? `${park.area_ha.toLocaleString('id-ID')} ha` : 'N/A'}
-                </span>
-              )}
+              <span className="text-2xl font-bold">
+                {park.area_ha ? `${park.area_ha.toLocaleString('id-ID')} ha` : 'N/A'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -226,19 +496,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
           <CardContent>
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-purple-600" />
-              {isEditing ? (
-                <input
-                  type="text"
-                  value={editData.pengelola}
-                  onChange={(e) => setEditData({ ...editData, pengelola: e.target.value })}
-                  className="flex-1 px-2 py-1 border rounded text-lg font-semibold"
-                  placeholder="Nama pengelola"
-                />
-              ) : (
-                <span className="text-lg font-semibold line-clamp-1">
-                  {park.pengelola || 'N/A'}
-                </span>
-              )}
+              <span className="text-lg font-semibold line-clamp-1">
+                {park.pengelola || 'N/A'}
+              </span>
             </div>
           </CardContent>
         </Card>
@@ -276,17 +536,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   SK Penetapan/Penunjukan
                 </h4>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.sk_penetapan}
-                    onChange={(e) => setEditData({ ...editData, sk_penetapan: e.target.value })}
-                    className="w-full px-3 py-2 border rounded text-base"
-                    placeholder="SK Penetapan/Penunjukan"
-                  />
-                ) : (
-                  <p className="text-base">{park.sk_penetapan || '-'}</p>
-                )}
+                <p className="text-base">{park.sk_penetapan || '-'}</p>
               </div>
 
               <Separator />
@@ -295,17 +545,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Instansi Pengelola
                 </h4>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.pengelola}
-                    onChange={(e) => setEditData({ ...editData, pengelola: e.target.value })}
-                    className="w-full px-3 py-2 border rounded text-base"
-                    placeholder="Instansi Pengelola"
-                  />
-                ) : (
-                  <p className="text-base">{park.pengelola || '-'}</p>
-                )}
+                <p className="text-base">{park.pengelola || '-'}</p>
               </div>
 
               <Separator />
@@ -314,16 +554,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Deskripsi
                 </h4>
-                {isEditing ? (
-                  <textarea
-                    value={editData.description}
-                    onChange={(e) => setEditData({ ...editData, description: e.target.value })}
-                    className="w-full px-3 py-2 border rounded text-base min-h-[100px]"
-                    placeholder="Deskripsi taman"
-                  />
-                ) : (
-                  <p className="text-base whitespace-pre-wrap">{park.description || '-'}</p>
-                )}
+                <p className="text-base whitespace-pre-wrap">{park.description || '-'}</p>
               </div>
 
               <Separator />
@@ -332,16 +563,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   <BookOpen className="w-4 h-4 inline mr-1" />
                   Sejarah
                 </h4>
-                {isEditing ? (
-                  <textarea
-                    value={editData.sejarah}
-                    onChange={(e) => setEditData({ ...editData, sejarah: e.target.value })}
-                    className="w-full px-3 py-2 border rounded text-base min-h-[100px]"
-                    placeholder="Sejarah taman"
-                  />
-                ) : (
-                  <p className="text-base whitespace-pre-wrap">{park.sejarah || '-'}</p>
-                )}
+                <p className="text-base whitespace-pre-wrap">{park.sejarah || '-'}</p>
               </div>
             </CardContent>
           </Card>
@@ -400,6 +622,27 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
               </div>
             </CardContent>
           </Card>
+
+          {/* Peta Lokasi */}
+          {park.latitude && park.longitude && (
+            <InteractiveMapDisplay
+              latitude={park.latitude}
+              longitude={park.longitude}
+              height="450px"
+            />
+          )}
+
+          {!park.latitude && !park.longitude && (
+            <Card>
+              <CardContent className="py-8">
+                <div className="text-center text-muted-foreground">
+                  <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">Koordinat lokasi belum ditambahkan</p>
+                  <p className="text-xs mt-1">Koordinat dapat ditambahkan saat membuat atau mengedit taman</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* Tab: Karakteristik */}
@@ -412,6 +655,15 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-1">
+                  Tipe Ekoregion
+                </h4>
+                <p className="text-base whitespace-pre-wrap">{park.tipe_ekoregion || '-'}</p>
+              </div>
+
+              <Separator />
+
               <div>
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Kondisi Fisik Kawasan
@@ -433,22 +685,10 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
               <div>
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
-                  Tipe Ekoregion
+                  Nilai Dasar
                 </h4>
-                <p className="text-base">{park.tipe_ekoregion || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">{park.nilai_dasar || '-'}</p>
               </div>
-
-              {park.nilai_dasar && (
-                <>
-                  <Separator />
-                  <div>
-                    <h4 className="font-semibold text-sm text-muted-foreground mb-1">
-                      Nilai Dasar
-                    </h4>
-                    <p className="text-base whitespace-pre-wrap">{park.nilai_dasar}</p>
-                  </div>
-                </>
-              )}
             </CardContent>
           </Card>
         </TabsContent>
