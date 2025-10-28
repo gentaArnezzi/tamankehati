@@ -218,6 +218,44 @@ export function ArtikelPage() {
     }
   };
 
+  const handleDelete = async (artikel: Artikel) => {
+    // Confirm delete
+    if (!confirm(`Apakah Anda yakin ingin menghapus artikel "${artikel.judul}"?`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      
+      if (!token) {
+        toast.error('Anda harus login terlebih dahulu');
+        router.push('/login');
+        return;
+      }
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/articles/${artikel.id}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.detail || 'Gagal menghapus artikel');
+      }
+
+      toast.success('Artikel berhasil dihapus!');
+      loadData(); // Reload the list
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      toast.error(error instanceof Error ? error.message : 'Gagal menghapus artikel');
+    }
+  };
+
   const getStatusBadge = (status: string) => {
     return status === 'approved' ? (
       <Badge className="bg-green-100 text-green-800 border-green-200">Dipublikasikan</Badge>
@@ -344,6 +382,15 @@ export function ArtikelPage() {
                       Publikasikan
                     </Button>
                   )}
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleDelete(artikel)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Hapus
+                  </Button>
                 </div>
               </CardContent>
             </Card>

@@ -29,31 +29,35 @@ Data flora dan fauna dengan status `draft`, `rejected`, atau yang sudah `deleted
 - `apps/backend/api/v1/routes/fauna.py` (lines 54-81, 127-142)
 
 ### 3. **Dashboard Statistics (`/api/v1/dashboard`)**
-✅ **DIPERBAIKI** - Hanya count data approved
+✅ **DIPERBAIKI** - Count semua data kecuali deleted (untuk dashboard admin)
 
 **Perubahan:**
-- **Flora & Fauna Count**: Hanya count status `approved`
-  - Regional Admin: Count approved data mereka saja
-  - Super Admin: Count semua approved data
+- **Flora & Fauna Count**: Count semua data kecuali deleted
+  - Regional Admin: Count semua data mereka (draft, in_review, approved, rejected)
+  - Super Admin: Count semua data (untuk admin overview lengkap)
 - **Comprehensive Dashboard Analytics**:
-  - Monthly discoveries: Hanya approved
-  - Regional distribution: Hanya approved
-  - Park distribution: Hanya approved
-  - Endemic count: Hanya dari approved data
+  - Monthly discoveries: Semua data kecuali deleted
+  - Regional distribution: Semua data kecuali deleted
+  - Park distribution: Semua data kecuali deleted
+  - Endemic count: Dari semua data (termasuk draft/in_review)
+
+**Rationale**: Dashboard adalah untuk admin monitoring, jadi perlu lihat semua data mereka, bukan hanya approved. Yang harus approved-only adalah PUBLIC API saja.
 
 **File yang diubah:**
 - `apps/backend/api/v1/routes/dashboard.py` (lines 69-80, 324-500)
 
 ### 4. **Analytics API (`/api/v1/analytics/dashboard`)**
-✅ **DIPERBAIKI** - Hanya count data approved
+✅ **DIPERBAIKI** - Count semua data kecuali deleted (untuk analytics dashboard)
 
 **Perubahan:**
-- Flora stats: Hanya status `approved`
-- Fauna stats: Hanya status `approved`
-- Endemic count: Hanya dari approved data
+- Flora stats: Semua data kecuali deleted, dengan breakdown per status
+- Fauna stats: Semua data kecuali deleted, dengan breakdown per status
+- Endemic count: Dari semua data (termasuk draft/in_review)
+
+**Rationale**: Analytics dashboard untuk admin monitoring, jadi perlu lihat breakdown lengkap termasuk draft dan in_review.
 
 **File yang diubah:**
-- `apps/backend/api/v1/routes/analytics.py` (lines 91-117)
+- `apps/backend/api/v1/routes/analytics.py` (lines 91-119)
 
 ## Status Workflow Flora/Fauna
 
@@ -139,18 +143,22 @@ curl -H "Authorization: Bearer $TOKEN" http://localhost:8000/api/v1/analytics/da
 
 ## Data Integrity Rules
 
-### ✅ Data yang TIDAK PERNAH tampil di public:
-1. Status `draft` (kecuali untuk pembuat)
-2. Status `rejected` (kecuali untuk pembuat dan super admin)
-3. Data dengan `deleted_at IS NOT NULL`
-
-### ✅ Data yang HANYA tampil di Dashboard/Analytics:
-- Hanya status `approved`
-- Exclude draft, rejected, deleted
+### ✅ Data yang TIDAK PERNAH tampil di mana-mana:
+- Data dengan `deleted_at IS NOT NULL` (soft deleted)
 
 ### ✅ Data yang tampil di Public API:
-- Hanya status `approved`
-- Exclude semua status lain
+- **HANYA status `approved`**
+- Exclude draft, rejected, deleted
+
+### ✅ Data yang tampil di Dashboard/Analytics (Admin):
+- **Semua status** (draft, in_review, approved, rejected)
+- Exclude HANYA deleted
+- Regional Admin: semua data mereka
+- Super Admin: semua data
+
+### ✅ Data yang tampil di Authenticated API (List):
+- Super Admin: Semua status kecuali deleted
+- Regional Admin: `approved` + `in_review` (semua user) + `draft` + `rejected` (hanya milik sendiri)
 
 ## Database Query Examples
 
@@ -235,6 +243,31 @@ Jika perlu rollback, cukup revert 6 file berikut:
 **Files Changed**: 
 - `apps/backend/api/v1/public/flora.py`
 - `apps/backend/api/v1/public/fauna.py`
+
+### Issue #2: Dashboard showing no data for Regional Admin ✅ FIXED
+**Problem**: After filtering dashboard to only show approved data, regional admin dashboard showed zero counts.
+**Root Cause**: Dashboard filter was too strict - only counting `approved` status, but regional admin might have data in draft/in_review status.
+**Solution**: Changed dashboard/analytics to count ALL data (except deleted) for admin monitoring purposes. Public API remains approved-only.
+**Rationale**: 
+- Dashboard = Admin monitoring tool → need to see ALL their data (including drafts)
+- Public API = Public facing → only show approved data
+**Files Changed**:
+- `apps/backend/api/v1/routes/dashboard.py`
+- `apps/backend/api/v1/routes/analytics.py`
+
+### Issue #3: Deleted articles still showing in public API ✅ FIXED
+**Problem**: When admin deleted articles from dashboard, they still appeared in public artikel page.
+**Root Cause**: Public artikel API only filtered by status (`published`/`approved`) but didn't check `deleted_at IS NULL`.
+**Solution**: Added `AND deleted_at IS NULL` filter to all artikel public endpoints (list and detail).
+**Files Changed**:
+- `apps/backend/api/v1/public/artikel.py`
+
+### Issue #4: No delete button for articles ✅ FIXED
+**Problem**: Article management page had no delete button, only Edit and Publish.
+**Root Cause**: Delete functionality was not implemented in the frontend component.
+**Solution**: Added `handleDelete` function and delete button with confirmation dialog.
+**Files Changed**:
+- `apps/frontend/src/components/artikel/ArtikelPage.tsx`
 
 ## Version
 - **Date**: 2025-10-28

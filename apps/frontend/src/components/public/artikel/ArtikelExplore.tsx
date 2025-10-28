@@ -181,7 +181,7 @@ export function ArtikelExplore({ initialData, initialParams }: ArtikelExplorePro
               <h2 className="text-2xl font-light text-gray-900 mb-2">
                 Hasil Pencarian
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600" suppressHydrationWarning>
                 {allArticles.length} artikel ditemukan
               </p>
             </div>

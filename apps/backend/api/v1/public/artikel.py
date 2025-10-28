@@ -17,16 +17,17 @@ async def get_artikel(
     db: AsyncSession = Depends(get_session)
 ):
     try:
-        # Get total count - use status = 'published' or 'approved' for public articles
-        count_query = text("SELECT COUNT(*) FROM articles WHERE status IN ('published', 'approved')")
+        # Get total count - use status = 'published' or 'approved' for public articles (exclude deleted)
+        count_query = text("SELECT COUNT(*) FROM articles WHERE status IN ('published', 'approved') AND deleted_at IS NULL")
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
         
-        # Get items with pagination
+        # Get items with pagination (exclude deleted)
         query = text("""
             SELECT id, title, slug, content, summary, category, featured_image, created_at, updated_at
             FROM articles 
-            WHERE status IN ('published', 'approved')
+            WHERE status IN ('published', 'approved') 
+                AND deleted_at IS NULL
             ORDER BY created_at DESC 
             LIMIT :limit OFFSET :offset
         """)
@@ -70,12 +71,13 @@ async def get_artikel_by_slug(
     from fastapi import HTTPException
     
     try:
-        # Query by slug or title fallback
+        # Query by slug or title fallback (exclude deleted)
         query = text("""
             SELECT id, title, slug, content, summary, category, featured_image, created_at, updated_at
             FROM articles 
             WHERE (slug = :slug OR title = :title_fallback) 
-            AND status IN ('published', 'approved')
+                AND status IN ('published', 'approved')
+                AND deleted_at IS NULL
             LIMIT 1
         """)
         
