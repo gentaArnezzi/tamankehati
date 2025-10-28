@@ -48,30 +48,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ✅ Define loadUser before useEffect uses it
   const loadUser = useCallback(async () => {
     try {
-      // Try to get user data from localStorage first
+      // ✅ ALWAYS fetch from API to get latest data (including profile_picture_url)
+      console.log('🔄 Fetching user profile from API...');
+      const fallbackEmail = authStorage.readEmail() ?? undefined;
+      const userData = await resolveUserProfile(fallbackEmail);
+      console.log('✅ User profile loaded from API:', userData);
+      setUser(userData);
+      authStorage.saveUser(userData);
+
+    } catch (error) {
+      console.warn('Failed to load user from API:', error);
+      
+      // ✅ FALLBACK: Try to get user data from localStorage if API fails
       const storedUser = localStorage.getItem('auth_user');
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          console.log('✅ Loaded user from localStorage:', userData);
+          console.log('⚠️ Using cached user from localStorage:', userData);
           setUser(userData);
-          // Add small delay to ensure state is updated before loading=false
-          await new Promise(resolve => setTimeout(resolve, 50));
           setLoading(false);
           return;
         } catch (parseError) {
           console.warn('Failed to parse stored user data:', parseError);
         }
       }
-
-      // If no stored user data, try to get from API
-      const fallbackEmail = authStorage.readEmail() ?? undefined;
-      const userData = await resolveUserProfile(fallbackEmail);
-      setUser(userData);
-      authStorage.saveUser(userData);
-
-    } catch (error) {
-      console.warn('Failed to load user:', error);
+      
       // Token invalid or expired - clear all auth data
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
@@ -131,7 +132,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStorage.saveUser(userProfile);
       setUser(userProfile);
       
-      // HttpClient auto-reads token from localStorage, no manual setToken needed
+      // ✅ Fetch complete user data from API after login
+      // This ensures profile_picture_url and other fields are up-to-date
+      try {
+        console.log('🔄 Fetching complete user profile after login...');
+        const completeProfile = await authApi.getProfile();
+        console.log('✅ Complete profile loaded:', completeProfile);
+        setUser(completeProfile);
+        authStorage.saveUser(completeProfile);
+      } catch (profileError) {
+        console.warn('⚠️ Could not fetch complete profile, using login data:', profileError);
+        // Keep using userProfile from login response if profile fetch fails
+      }
       
       toast.success('Berhasil masuk ke sistem');
     } catch (error) {
