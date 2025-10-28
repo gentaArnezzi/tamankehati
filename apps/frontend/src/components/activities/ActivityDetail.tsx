@@ -73,9 +73,6 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
             </span>
           </div>
         </div>
-        <Button variant="outline" onClick={onClose}>
-          Tutup
-        </Button>
       </div>
 
       {/* Main Info */}

@@ -16,17 +16,41 @@ class FloraPublicBase(BaseModel):
     status: Optional[str]
 
 
+class ParkInfo(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+    area_ha: Optional[float] = None
+    provinsi: Optional[str] = None
+    kota_kabupaten: Optional[str] = None
+    kecamatan: Optional[str] = None
+    desa_kelurahan: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    pengelola: Optional[str] = None
+    tipe_ekoregion: Optional[str] = None
+
 class FloraPublicOut(FloraPublicBase):
     id: str
     nama_ilmiah: str
     nama_umum: str
     famili: str
+    genus: Optional[str] = None
+    spesies: Optional[str] = None
     status_iucn: str
     deskripsi: str
     habitat: str
+    morfologi: Optional[str] = None
+    manfaat: Optional[str] = None
+    kegunaan: Optional[str] = None
     wilayah: str
     gambar_utama: str
     status: str
+    is_endemic: Optional[bool] = False
+    park_info: Optional[ParkInfo] = None
+    local_id: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -49,12 +73,26 @@ class FaunaPublicOut(FaunaPublicBase):
     nama_ilmiah: str
     nama_umum: str
     famili: str
+    genus: Optional[str] = None
+    spesies: Optional[str] = None
+    ordo: Optional[str] = None
     status_iucn: str
     deskripsi: str
     habitat: str
+    morfologi: Optional[str] = None
+    diet: Optional[str] = None
+    behavior: Optional[str] = None
+    habitat_sumber_makanan: Optional[str] = None
+    status_hama: Optional[str] = None
+    tingkat_hama: Optional[str] = None
     wilayah: str
     gambar_utama: str
     status: str
+    is_endemic: Optional[bool] = False
+    park_info: Optional[ParkInfo] = None
+    local_id: Optional[str] = None
+    created_at: Optional[str] = None
+    updated_at: Optional[str] = None
 
     class Config:
         from_attributes = True

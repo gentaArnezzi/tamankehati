@@ -21,6 +21,7 @@ def _build_image_url(image_path: str) -> str:
 async def get_fauna(
     search: Optional[str] = Query(None, description="Search by name"),
     status_iucn: Optional[str] = Query(None, description="Filter by IUCN status"),
+    taman: Optional[int] = Query(None, description="Filter by park ID"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     db: AsyncSession = Depends(get_session)
@@ -43,6 +44,10 @@ async def get_fauna(
         # Add IUCN status filter
         if status_iucn:
             stmt = stmt.filter(Fauna.iucn_status == status_iucn)
+        
+        # Add park filter
+        if taman:
+            stmt = stmt.filter(Fauna.park_id == taman)
         
         # Get total count
         count_stmt = select(func.count()).select_from(stmt.subquery())
@@ -88,8 +93,9 @@ async def get_fauna_by_id(
     id: int,
     db: AsyncSession = Depends(get_session)
 ):
-    """Get single fauna by ID"""
+    """Get single fauna by ID with enhanced data"""
     try:
+        # Enhanced query with park information
         stmt = select(Fauna).where(Fauna.id == id, Fauna.status == "approved")
         result = await db.execute(stmt)
         item = result.scalar_one_or_none()
@@ -97,17 +103,67 @@ async def get_fauna_by_id(
         if not item:
             raise HTTPException(status_code=404, detail="Fauna tidak ditemukan")
         
+        # Get park information if park_id exists
+        park_info = None
+        if item.park_id:
+            from domains.parks.models import Park
+            park_stmt = select(Park).where(Park.id == item.park_id)
+            park_result = await db.execute(park_stmt)
+            park_obj = park_result.scalar_one_or_none()
+            
+            if park_obj:
+                park_info = {
+                    "id": park_obj.id,
+                    "name": park_obj.name,
+                    "description": park_obj.description,
+                    "area_ha": park_obj.area_ha,
+                    "provinsi": park_obj.provinsi,
+                    "kota_kabupaten": park_obj.kota_kabupaten,
+                    "kecamatan": park_obj.kecamatan,
+                    "desa_kelurahan": park_obj.desa_kelurahan,
+                    "latitude": park_obj.latitude,
+                    "longitude": park_obj.longitude,
+                    "pengelola": park_obj.pengelola,
+                    "tipe_ekoregion": park_obj.tipe_ekoregion,
+                }
+        
+        # Build wilayah string from park location info
+        wilayah_parts = []
+        if park_info:
+            if park_info.get("provinsi"):
+                wilayah_parts.append(park_info["provinsi"])
+            if park_info.get("kota_kabupaten"):
+                wilayah_parts.append(park_info["kota_kabupaten"])
+            if park_info.get("kecamatan"):
+                wilayah_parts.append(park_info["kecamatan"])
+        
+        wilayah = ", ".join(wilayah_parts) if wilayah_parts else ""
+        
         return FaunaPublicOut(
             id=str(item.id),
             nama_ilmiah=item.scientific_name or "",
             nama_umum=item.local_name or "",
             famili=item.family or "",
+            genus=item.genus or "",
+            spesies=item.species or "",
+            ordo=item.ordo or "",
             status_iucn=item.iucn_status or "",
             deskripsi=item.description or "",
             habitat=item.habitat or "",
-            wilayah="",  # No region info available
+            morfologi=item.morphology or "",
+            diet=item.diet or "",
+            behavior=item.behavior or "",
+            habitat_sumber_makanan=item.habitat_sumber_makanan or "",
+            status_hama=item.status_hama or "",
+            tingkat_hama=item.tingkat_hama or "",
+            wilayah=wilayah,
             gambar_utama=_build_image_url(item.gambar_utama or ""),
-            status=item.status
+            status=item.status,
+            is_endemic=item.is_endemic or False,
+            park_info=park_info,
+            local_id=item.local_id or "",
+            created_at=item.created_at.isoformat() if item.created_at else None,
+            updated_at=item.updated_at.isoformat() if item.updated_at else None,
         )
         
     except HTTPException:

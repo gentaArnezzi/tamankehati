@@ -222,6 +222,61 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </dl>
             </div>
 
+            {/* Park Information */}
+            {flora.park_info && (
+              <div className="rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-green-100 p-6 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-green-800">Informasi Taman</h2>
+                  <a
+                    href={`/taman/${flora.park_info.id}`}
+                    className="inline-flex items-center gap-1 text-sm font-medium text-green-800 hover:text-green-700 transition-colors"
+                  >
+                    Lihat Detail
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
+                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </a>
+                </div>
+                <div className="mt-4 space-y-3 text-sm text-slate-700">
+                  <div className="flex justify-between gap-4">
+                    <dt className="font-medium text-slate-600">Nama Taman</dt>
+                    <dd className="text-right text-slate-800">
+                      <a
+                        href={`/taman/${flora.park_info.id}`}
+                        className="text-green-800 hover:text-green-700 font-medium transition-colors"
+                      >
+                        {flora.park_info.name}
+                      </a>
+                    </dd>
+                  </div>
+                  {flora.park_info.area_ha && (
+                    <div className="flex justify-between gap-4">
+                      <dt className="font-medium text-slate-600">Luas Area</dt>
+                      <dd className="text-right text-slate-800">{flora.park_info.area_ha} ha</dd>
+                    </div>
+                  )}
+                  {flora.park_info.pengelola && (
+                    <div className="flex justify-between gap-4">
+                      <dt className="font-medium text-slate-600">Pengelola</dt>
+                      <dd className="text-right text-slate-800">{flora.park_info.pengelola}</dd>
+                    </div>
+                  )}
+                  {flora.park_info.tipe_ekoregion && (
+                    <div className="flex justify-between gap-4">
+                      <dt className="font-medium text-slate-600">Tipe Ekoregion</dt>
+                      <dd className="text-right text-slate-800">{flora.park_info.tipe_ekoregion}</dd>
+                    </div>
+                  )}
+                  {flora.park_info.description && (
+                    <div className="mt-3">
+                      <dt className="font-medium text-slate-600 mb-2">Deskripsi Taman</dt>
+                      <dd className="text-sm text-slate-700 leading-relaxed">{flora.park_info.description}</dd>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-slate-900">Status Konservasi</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">

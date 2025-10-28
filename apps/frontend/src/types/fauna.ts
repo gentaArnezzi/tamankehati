@@ -10,7 +10,11 @@ export const FaunaDetailSchema = FaunaPublicSchema.extend({
   deskripsi: z.string().optional(),
   morfologi: z.string().optional(),
   habitat: z.string().optional(),
+  diet: z.string().optional(),
+  behavior: z.string().optional(),
   habitat_sumber_makanan: z.string().optional(),
+  status_hama: z.string().optional(),
+  tingkat_hama: z.string().optional(),
   is_endemic: z.boolean().optional(),
   sebaran: z.array(z.string()).optional(),
   koordinat: z

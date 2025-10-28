@@ -11,6 +11,7 @@ export const FloraDetailSchema = FloraPublicSchema.extend({
   morfologi: z.string().optional(),
   habitat: z.string().optional(),
   manfaat: z.string().optional(),
+  kegunaan: z.string().optional(),
   is_endemic: z.boolean().optional(),
   sebaran: z.array(z.string()).optional(),
   koordinat: z
