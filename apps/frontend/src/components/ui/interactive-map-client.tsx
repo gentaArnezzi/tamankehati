@@ -40,13 +40,21 @@ function MapClickHandler({ onMapClick, initialLat, initialLng }: MapClickHandler
     initialLat && initialLng ? [initialLat, initialLng] : null
   );
 
-  useMapEvents({
+  const map = useMapEvents({
     click: (e) => {
       const { lat, lng } = e.latlng;
       setPosition([lat, lng]);
       onMapClick(lat, lng);
     },
   });
+
+  // Update map center when initialLat/initialLng change
+  useEffect(() => {
+    if (initialLat && initialLng) {
+      setPosition([initialLat, initialLng]);
+      map.setView([initialLat, initialLng], map.getZoom());
+    }
+  }, [initialLat, initialLng, map]);
 
   return position ? <Marker position={position} /> : null;
 }
@@ -62,21 +70,54 @@ export function InteractiveMap({
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [mapKey, setMapKey] = useState(0);
+  const [isMapMounted, setIsMapMounted] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const containerIdRef = useRef(`map-${Date.now()}-${Math.random()}`); // Unique ID per instance
+  const mapInstanceRef = useRef<boolean>(false); // Track if map is already initialized
 
   // Initialize client-side rendering
   useEffect(() => {
     setIsClient(true);
+    
+    // Small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      if (!mapInstanceRef.current) {
+        setIsMapMounted(true);
+        mapInstanceRef.current = true;
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, []);
 
-  // Initialize map center with provided coordinates or default to Jakarta
+  // Initialize map center with provided coordinates or default to Jakarta (only on first mount)
   useEffect(() => {
-    if (latitude && longitude) {
+    if (latitude && longitude && !mapInstanceRef.current) {
       setMapCenter([latitude, longitude]);
-      // Force map re-render when coordinates change
-      setMapKey(prev => prev + 1);
     }
   }, [latitude, longitude]);
+
+  // Cleanup map on unmount
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Cleaning up map:', containerIdRef.current);
+      // Reset instance tracker
+      mapInstanceRef.current = false;
+      
+      // Cleanup any existing map instances
+      if (mapContainerRef.current) {
+        const mapContainer = mapContainerRef.current;
+        // Find and remove any leaflet map instances
+        const leafletContainer = mapContainer.querySelector('.leaflet-container');
+        if (leafletContainer) {
+          // Remove leaflet specific attributes and classes
+          leafletContainer.remove();
+        }
+        // Clear the entire container
+        mapContainer.innerHTML = '';
+      }
+    };
+  }, []);
 
   const handleMapClick = useCallback((lat: number, lng: number) => {
     onCoordinatesChange(lat, lng);
@@ -215,23 +256,38 @@ export function InteractiveMap({
         )}
 
         {/* Map Container */}
-        <div style={{ height }} className="rounded-lg overflow-hidden border">
-          <MapContainer
-            key={`map-${mapKey}-${isClient}`}
-            center={mapCenter}
-            zoom={13}
-            style={{ height: '100%', width: '100%' }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            <MapClickHandler
-              onMapClick={handleMapClick}
-              initialLat={latitude || undefined}
-              initialLng={longitude || undefined}
-            />
-          </MapContainer>
+        <div 
+          ref={mapContainerRef} 
+          id={containerIdRef.current}
+          style={{ height }} 
+          className="rounded-lg overflow-hidden border"
+        >
+          {isClient && isMapMounted ? (
+            <MapContainer
+              key={containerIdRef.current}
+              center={mapCenter}
+              zoom={13}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+              whenReady={() => {
+                console.log('✅ Map initialized:', containerIdRef.current);
+              }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <MapClickHandler
+                onMapClick={handleMapClick}
+                initialLat={latitude || undefined}
+                initialLng={longitude || undefined}
+              />
+            </MapContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full bg-slate-100">
+              <p className="text-slate-500 text-sm">Memuat peta...</p>
+            </div>
+          )}
         </div>
 
         {/* Instructions */}

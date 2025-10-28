@@ -164,6 +164,7 @@ app.add_middleware(
         "Authorization",
         "X-Requested-With",
         "X-Region-Scope",
+        "X-Park-Scope",  # Added for regional_admin
         "Origin",
         "Access-Control-Request-Method",
         "Access-Control-Request-Headers",

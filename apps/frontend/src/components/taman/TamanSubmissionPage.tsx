@@ -53,7 +53,7 @@ import {
 import { ApprovedParkDetails } from './ApprovedParkDetails';
 import dynamic from 'next/dynamic';
 
-const InteractiveMap = dynamic(() => import('../ui/interactive-map-client').then(mod => ({ default: mod.InteractiveMap })), { 
+const InteractiveMapWrapper = dynamic(() => import('../ui/interactive-map-wrapper').then(mod => ({ default: mod.InteractiveMapWrapper })), { 
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-96">
@@ -420,6 +420,8 @@ export function TamanSubmissionPage() {
         kota_kabupaten: formData.kota_kabupaten,
         kecamatan: formData.kecamatan,
         desa_kelurahan: formData.desa_kelurahan,
+        latitude: formData.latitude,    // ✅ Send coordinates to backend
+        longitude: formData.longitude,  // ✅ Send coordinates to backend
         status: submitStatus, // Use status from button clicked
       };
 
@@ -1114,7 +1116,7 @@ export function TamanSubmissionPage() {
                   
                   <Card className="shadow-lg border-t-4 border-t-blue-500">
                     <CardContent className="pt-6 pb-6">
-                      <InteractiveMap
+                      <InteractiveMapWrapper
                         latitude={formData.latitude}
                         longitude={formData.longitude}
                         onCoordinatesChange={handleCoordinatesChange}
