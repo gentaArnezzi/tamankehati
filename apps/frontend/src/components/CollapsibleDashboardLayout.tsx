@@ -18,6 +18,7 @@ import {
   User as UserIcon,
   ChevronDown,
   Settings,
+  CircleHelp,
 } from 'lucide-react';
 import type { User } from '../lib/api-client';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -227,6 +228,16 @@ export function CollapsibleDashboardLayout({
                   >
                     <Settings className="h-4 w-4" />
                     <span>Pengaturan</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      onNavigate('/dashboard/help');
+                    }}
+                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    <CircleHelp className="h-4 w-4" />
+                    <span>Panduan</span>
                   </button>
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
