@@ -11,13 +11,7 @@ import { toast } from 'sonner';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import {
   Tabs,
   TabsContent,
@@ -1166,13 +1160,54 @@ export function TamanSubmissionPage() {
                   <Label htmlFor="tipe_ekoregion">
                     Tipe Ekoregion
                   </Label>
-                  <Input
-                    id="tipe_ekoregion"
-                    placeholder="Contoh: Dataran Rendah"
+                  <Select
                     value={formData.tipe_ekoregion}
-                    onChange={(e) => handleInputChange('tipe_ekoregion', e.target.value)}
-                  />
-                  <p className="text-sm text-muted-foreground">Jenis ekoregion tempat taman berada</p>
+                    onValueChange={(value) => handleInputChange('tipe_ekoregion', value)}
+                  >
+                    <SelectTrigger id="tipe_ekoregion">
+                      <SelectValue placeholder="Pilih tipe ekoregion" />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[400px]">
+                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">DARAT (Terrestrial)</div>
+                      <SelectItem value="Hutan Hujan Dataran Rendah">Hutan Hujan Dataran Rendah</SelectItem>
+                      <SelectItem value="Hutan Hujan Pegunungan">Hutan Hujan Pegunungan</SelectItem>
+                      <SelectItem value="Hutan Gambut">Hutan Gambut</SelectItem>
+                      <SelectItem value="Hutan Mangrove">Hutan Mangrove</SelectItem>
+                      <SelectItem value="Hutan Musim">Hutan Musim</SelectItem>
+                      <SelectItem value="Savana">Savana</SelectItem>
+                      <SelectItem value="Karst">Karst</SelectItem>
+                      
+                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">AIR TAWAR (Freshwater)</div>
+                      <SelectItem value="Sungai Kapuas">Sungai Kapuas</SelectItem>
+                      <SelectItem value="Sungai Mahakam">Sungai Mahakam</SelectItem>
+                      <SelectItem value="Sungai Barito">Sungai Barito</SelectItem>
+                      <SelectItem value="Sungai Musi">Sungai Musi</SelectItem>
+                      <SelectItem value="Sungai Batanghari">Sungai Batanghari</SelectItem>
+                      <SelectItem value="Danau Toba">Danau Toba</SelectItem>
+                      <SelectItem value="Danau Poso">Danau Poso</SelectItem>
+                      <SelectItem value="Danau Sentani">Danau Sentani</SelectItem>
+                      <SelectItem value="Sistem Sungai Sumatera">Sistem Sungai Sumatera</SelectItem>
+                      <SelectItem value="Sistem Sungai Jawa">Sistem Sungai Jawa</SelectItem>
+                      <SelectItem value="Sistem Sungai Kalimantan">Sistem Sungai Kalimantan</SelectItem>
+                      <SelectItem value="Sistem Sungai Sulawesi">Sistem Sungai Sulawesi</SelectItem>
+                      <SelectItem value="Sistem Sungai Papua">Sistem Sungai Papua</SelectItem>
+                      
+                      <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">LAUT (Marine)</div>
+                      <SelectItem value="Papua">Papua</SelectItem>
+                      <SelectItem value="Laut Banda">Laut Banda</SelectItem>
+                      <SelectItem value="Nusa Tenggara">Nusa Tenggara</SelectItem>
+                      <SelectItem value="Laut Sulawesi/Selat Makassar">Laut Sulawesi/Selat Makassar</SelectItem>
+                      <SelectItem value="Halmahera">Halmahera</SelectItem>
+                      <SelectItem value="Palawan/Borneo Utara">Palawan/Borneo Utara</SelectItem>
+                      <SelectItem value="Sumatera Bagian Barat">Sumatera Bagian Barat</SelectItem>
+                      <SelectItem value="Timur Laut Sulawesi/Teluk Tomini">Timur Laut Sulawesi/Teluk Tomini</SelectItem>
+                      <SelectItem value="Dangkalan Sunda/Laut Jawa">Dangkalan Sunda/Laut Jawa</SelectItem>
+                      <SelectItem value="Laut Arafura">Laut Arafura</SelectItem>
+                      <SelectItem value="Jawa Bagian Selatan">Jawa Bagian Selatan</SelectItem>
+                      <SelectItem value="Selat Malaka">Selat Malaka</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">Pilih kategori ekoregion sesuai karakteristik kawasan (darat, air tawar, atau laut)</p>
                 </div>
 
                 {/* Kondisi Fisik Kawasan */}
