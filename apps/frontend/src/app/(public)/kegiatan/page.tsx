@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { ActivitiesPage } from '../../components/public/activities/ActivitiesPage';
+import { ActivitiesPage } from '../../../components/public/activities/ActivitiesPage';
 
 export const metadata: Metadata = {
   title: 'Kegiatan Taman | Taman Kehati',

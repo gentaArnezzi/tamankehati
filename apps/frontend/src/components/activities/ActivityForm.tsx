@@ -35,7 +35,7 @@ const activitySchema = z.object({
   description: z.string().optional(),
   activity_date: z.string().min(1, 'Tanggal kegiatan wajib diisi'),
   location: z.string().optional(),
-  park_id: z.number().min(1, 'Taman wajib dipilih'),
+  park_id: z.number().optional(),
 });
 
 type ActivityFormData = z.infer<typeof activitySchema>;
@@ -43,15 +43,17 @@ type ActivityFormData = z.infer<typeof activitySchema>;
 interface ActivityFormProps {
   activity?: Activity | null;
   parks: Park[];
+  userParkId?: number;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityFormProps) {
+export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel }: ActivityFormProps) {
   const [submitting, setSubmitting] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     activity?.activity_date ? new Date(activity.activity_date) : undefined
   );
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   const form = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
@@ -60,7 +62,7 @@ export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityF
       description: activity?.description ?? '',
       activity_date: activity?.activity_date ?? '',
       location: activity?.location ?? '',
-      park_id: activity?.park_id ?? 1,
+      park_id: activity?.park_id ?? userParkId ?? 1,
     },
   });
 
@@ -70,7 +72,7 @@ export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityF
       description: activity?.description ?? '',
       activity_date: activity?.activity_date ?? '',
       location: activity?.location ?? '',
-      park_id: activity?.park_id ?? 1,
+      park_id: activity?.park_id ?? userParkId ?? 1,
     });
     setDate(activity?.activity_date ? new Date(activity.activity_date) : undefined);
   };
@@ -79,22 +81,29 @@ export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityF
     resetFormValues(activity);
   }, [activity]);
 
+  // Sync date with form field
+  useEffect(() => {
+    if (date) {
+      form.setValue('activity_date', format(date, 'yyyy-MM-dd'));
+    }
+  }, [date, form]);
+
   const handleSubmit = async (data: ActivityFormData) => {
     try {
       setSubmitting(true);
       
+      const submitData = {
+        ...data,
+        activity_date: date ? format(date, 'yyyy-MM-dd') : data.activity_date,
+        park_id: userParkId || data.park_id,
+      };
+      
       if (activity) {
         // Update existing activity
-        await activitiesApi.update(activity.id, {
-          ...data,
-          activity_date: date ? format(date, 'yyyy-MM-dd') : data.activity_date,
-        });
+        await activitiesApi.update(activity.id, submitData);
       } else {
         // Create new activity
-        await activitiesApi.create({
-          ...data,
-          activity_date: date ? format(date, 'yyyy-MM-dd') : data.activity_date,
-        });
+        await activitiesApi.create(submitData);
       }
       
       onSuccess();
@@ -152,15 +161,21 @@ export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityF
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Tanggal Pelaksanaan *</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
+                <div className="relative">
+                  <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                    <PopoverTrigger asChild>
                       <Button
+                        type="button"
                         variant="outline"
                         className={cn(
                           "w-full pl-3 text-left font-normal",
                           !date && "text-muted-foreground"
                         )}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setCalendarOpen(!calendarOpen);
+                        }}
                       >
                         {date ? (
                           format(date, "dd MMMM yyyy", { locale: id })
@@ -169,52 +184,46 @@ export function ActivityForm({ activity, parks, onSuccess, onCancel }: ActivityF
                         )}
                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                       </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={date}
-                      onSelect={(selectedDate) => {
-                        setDate(selectedDate);
-                        if (selectedDate) {
-                          field.onChange(format(selectedDate, 'yyyy-MM-dd'));
-                        }
-                      }}
-                      disabled={(date) => date < new Date()}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={date}
+                        onSelect={(selectedDate) => {
+                          setDate(selectedDate);
+                          if (selectedDate) {
+                            field.onChange(format(selectedDate, 'yyyy-MM-dd'));
+                            setCalendarOpen(false);
+                          }
+                        }}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  {/* Hidden input for form validation */}
+                  <input
+                    type="hidden"
+                    {...field}
+                    value={field.value || ''}
+                  />
+                </div>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="park_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Taman *</FormLabel>
-                <Select onValueChange={(value) => field.onChange(parseInt(value))} value={field.value?.toString()}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih taman" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {parks.map((park) => (
-                      <SelectItem key={park.id} value={park.id.toString()}>
-                        {park.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <FormItem>
+            <FormLabel>Taman</FormLabel>
+            <div className="flex items-center gap-2 px-3 py-2 border border-input bg-input-background rounded-md text-sm">
+              <span className="text-muted-foreground">
+                {parks.find(park => park.id === userParkId)?.name || 'Taman tidak ditemukan'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Taman otomatis mengikuti akun Anda
+            </p>
+          </FormItem>
         </div>
 
         <FormField

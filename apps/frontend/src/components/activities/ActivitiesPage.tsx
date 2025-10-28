@@ -476,6 +476,7 @@ export function ActivitiesPage() {
           <ActivityForm
             activity={selectedActivity}
             parks={parks}
+            userParkId={user?.park_id}
             onSuccess={handleFormSuccess}
             onCancel={() => setFormOpen(false)}
           />
