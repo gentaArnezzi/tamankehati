@@ -1,10 +1,25 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { type FaunaDetail } from '../../../types/fauna';
 import { Badge } from '../../ui/badge';
-import { LeafletMap } from '../map/LeafletMap';
 import { EntityCard } from '../cards/EntityCard';
 import { JsonLd } from '../seo/JsonLd';
+
+// Dynamically import LeafletMap with SSR disabled to avoid "window is not defined" error
+const LeafletMap = dynamic(
+  () => import('../map/LeafletMap').then((mod) => mod.LeafletMap),
+  { 
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[320px] bg-slate-100 rounded-lg animate-pulse flex items-center justify-center">
+        <p className="text-slate-500 text-sm">Memuat peta...</p>
+      </div>
+    )
+  }
+);
 
 type FaunaDetailViewProps = {
   fauna: FaunaDetail;

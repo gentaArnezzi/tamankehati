@@ -448,8 +448,8 @@ async def list_pending_approval_parks(
                 detail="Only super admin can view pending approvals"
             )
         
-        # Get parks with pending_approval status
-        stmt = select(Park).where(Park.status == "pending_approval").order_by(Park.updated_at.desc())
+        # Get parks with in_review status (pending approval)
+        stmt = select(Park).where(Park.status == "in_review").order_by(Park.updated_at.desc())
         result = await db.execute(stmt)
         parks = result.scalars().all()
         
@@ -469,6 +469,7 @@ async def list_pending_approval_parks(
                 "desa_kelurahan": getattr(park, 'desa_kelurahan', ''),
                 "created_at": park.created_at.isoformat() if hasattr(park, 'created_at') and park.created_at else None,
                 "updated_at": park.updated_at.isoformat() if hasattr(park, 'updated_at') and park.updated_at else None,
+                "submitted_at": park.submitted_at.isoformat() if hasattr(park, 'submitted_at') and park.submitted_at else None,
                 "submitted_by": getattr(park, 'submitted_by', None),
             }
             parks_list.append(park_dict)

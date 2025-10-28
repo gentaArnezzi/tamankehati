@@ -79,6 +79,11 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
   const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
   const [uploading, setUploading] = useState(false);
   
+  // Existing gallery images (for edit mode)
+  const [existingGalleries, setExistingGalleries] = useState<Array<{id: number; title: string; image_url: string}>>([]);
+  const [loadingGalleries, setLoadingGalleries] = useState(false);
+  const [galleriesToDelete, setGalleriesToDelete] = useState<Set<number>>(new Set());
+  
   const form = useForm<FloraFormData>({
     resolver: zodResolver(floraSchema),
     defaultValues: {
@@ -122,7 +127,100 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
     
     console.log('FloraForm - formData to reset:', formData);
     form.reset(formData);
+    
+    // Fetch existing galleries in edit mode
+    if (mode === 'edit' && initialData?.id) {
+      fetchExistingGalleries(initialData.id);
+    } else {
+      setExistingGalleries([]);
+    }
   }, [form, initialData, open, mode]);
+
+  const fetchExistingGalleries = async (floraId: string | number) => {
+    setLoadingGalleries(true);
+    try {
+      // ✅ Fix: Use correct endpoint with entity_type and entity_id in path
+      const response = await fetch(`http://localhost:8000/api/v1/galleries/entity/flora/${floraId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        // Backend returns { success: true, data: [...], total: n }
+        const galleries = result.data || result.items || (Array.isArray(result) ? result : []);
+        setExistingGalleries(galleries);
+        console.log('✅ Existing galleries loaded for flora', floraId, ':', galleries.length, 'images');
+      } else {
+        console.error('Failed to fetch galleries:', response.status, response.statusText);
+        setExistingGalleries([]);
+      }
+    } catch (error) {
+      console.error('Error fetching existing galleries:', error);
+      setExistingGalleries([]);
+    } finally {
+      setLoadingGalleries(false);
+    }
+  };
+
+  const markGalleryForDeletion = (galleryId: number) => {
+    if (!confirm('Tandai gambar ini untuk dihapus?\n\nGambar akan dihapus permanent saat Anda klik "Submit untuk Review".')) {
+      return;
+    }
+    
+    // Mark for deletion (will be deleted on form submit)
+    setGalleriesToDelete(prev => new Set([...prev, galleryId]));
+    console.log('Gallery marked for deletion:', galleryId);
+  };
+
+  const unmarkGalleryForDeletion = (galleryId: number) => {
+    // Unmark (restore)
+    setGalleriesToDelete(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(galleryId);
+      return newSet;
+    });
+    console.log('Gallery unmarked:', galleryId);
+  };
+
+  const deleteMarkedGalleries = async () => {
+    // Actually delete galleries that were marked
+    const deletePromises = Array.from(galleriesToDelete).map(async (galleryId) => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/v1/galleries/${galleryId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        });
+        
+        if (response.ok) {
+          console.log('✅ Gallery deleted:', galleryId);
+          return { success: true, id: galleryId };
+        } else {
+          console.error('❌ Failed to delete gallery:', galleryId, response.status);
+          return { success: false, id: galleryId };
+        }
+      } catch (error) {
+        console.error('❌ Error deleting gallery:', galleryId, error);
+        return { success: false, id: galleryId };
+      }
+    });
+
+    const results = await Promise.all(deletePromises);
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.filter(r => !r.success).length;
+
+    if (successCount > 0) {
+      console.log(`✅ Deleted ${successCount} galleries`);
+    }
+    if (failCount > 0) {
+      console.warn(`⚠️ Failed to delete ${failCount} galleries`);
+    }
+
+    return { successCount, failCount };
+  };
 
   // Removed zone loading logic as we now use park_id
 
@@ -212,6 +310,13 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       console.log('Flora form submitting - mode:', mode, 'status:', submitStatus);
       console.log('Flora form data:', data);
       
+      // ✅ Delete marked galleries FIRST before submitting flora data
+      if (galleriesToDelete.size > 0) {
+        console.log(`🗑️ Deleting ${galleriesToDelete.size} marked galleries...`);
+        const deleteResult = await deleteMarkedGalleries();
+        console.log(`✅ Deleted ${deleteResult.successCount} galleries, ${deleteResult.failCount} failed`);
+      }
+      
       let imageUrl = data.gambar_utama;
       let uploadedImageUrls: string[] = [];
       
@@ -253,6 +358,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
         try {
           const { createGalleryForEntity } = await import('../../lib/gallery-integration');
           
+          // Auto-approve galleries if user is super_admin or flora status is approved
+          const galleryStatus = (user?.role === 'super_admin' || floraResult.status === 'approved') ? 'approved' : 'draft';
+          
           // Create gallery record for main image if single file was uploaded
           if (selectedFile && imageUrl) {
             await createGalleryForEntity(imageUrl, {
@@ -261,8 +369,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
               title: `${data.nama_umum || data.nama_ilmiah} - ${data.nama_ilmiah} (Gambar Utama)`,
               description: data.deskripsi || '',
               parkId: Number(data.park_id) || 1,
+              status: galleryStatus,
             });
-            console.log('Gallery record created for main flora image:', floraResult.id);
+            console.log('Gallery record created for main flora image:', floraResult.id, 'status:', galleryStatus);
           }
           
           // Create gallery records for multiple images
@@ -276,8 +385,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
               title: `${data.nama_umum || data.nama_ilmiah} - ${data.nama_ilmiah} ${isMainImage ? '(Gambar Utama)' : `(Gambar ${i + 1})`}`,
               description: data.deskripsi || '',
               parkId: Number(data.park_id) || 1,
+              status: galleryStatus,
             });
-            console.log(`Gallery record created for flora image ${i + 1}:`, floraResult.id);
+            console.log(`Gallery record created for flora image ${i + 1}:`, floraResult.id, 'status:', galleryStatus);
           }
         } catch (galleryError) {
           console.error('Failed to create gallery records:', galleryError);
@@ -288,6 +398,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       form.reset();
       setSelectedFile(null);
       setSelectedFiles([]);
+      setGalleriesToDelete(new Set()); // Clear deletion marks on successful submit
       onOpenChange(false);
     } catch (error) {
       console.error('Flora form submit error:', error);
@@ -299,6 +410,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
 
   const handleClose = () => {
     form.reset();
+    setSelectedFile(null);
+    setSelectedFiles([]);
+    setGalleriesToDelete(new Set()); // Clear deletion marks on cancel
     onOpenChange(false);
   };
 
@@ -532,6 +646,94 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
             )}
 
             <div className="space-y-6">
+              {/* Existing Gallery Images (Edit Mode) */}
+              {mode === 'edit' && existingGalleries.length > 0 && (
+                <div className="p-4 border border-slate-200 rounded-lg bg-slate-50">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-medium text-slate-900">Gambar Gallery Saat Ini</label>
+                    <div className="flex items-center gap-2">
+                      {galleriesToDelete.size > 0 && (
+                        <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                          {galleriesToDelete.size} akan dihapus
+                        </span>
+                      )}
+                      <span className="text-xs text-slate-500">{existingGalleries.length} gambar</span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {existingGalleries.map((gallery) => {
+                      // Safe image URL handling
+                      const imageUrl = gallery.image_url 
+                        ? (gallery.image_url.startsWith('http') ? gallery.image_url : `http://localhost:8000${gallery.image_url}`)
+                        : '/placeholder-image.png'; // Fallback image
+                      
+                      const isMarkedForDeletion = galleriesToDelete.has(gallery.id);
+                      
+                      return (
+                        <div key={gallery.id} className={`relative group ${isMarkedForDeletion ? 'opacity-50' : ''}`}>
+                          <div className={`relative ${isMarkedForDeletion ? 'border-2 border-red-500 rounded' : ''}`}>
+                            <img 
+                              src={imageUrl}
+                              alt={gallery.title || 'Gallery image'}
+                              className={`w-full h-24 object-cover rounded ${isMarkedForDeletion ? 'grayscale' : ''}`}
+                              onError={(e) => {
+                                // Fallback if image fails to load
+                                e.currentTarget.src = '/placeholder-image.png';
+                              }}
+                            />
+                            {isMarkedForDeletion && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-red-500 bg-opacity-70 rounded">
+                                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {!isMarkedForDeletion ? (
+                            <button
+                              type="button"
+                              onClick={() => markGalleryForDeletion(gallery.id)}
+                              className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                              title="Tandai untuk dihapus"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                              </svg>
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => unmarkGalleryForDeletion(gallery.id)}
+                              className="absolute top-1 right-1 bg-green-500 text-white p-1.5 rounded-full opacity-100 hover:bg-green-600 shadow-lg"
+                              title="Batalkan penghapusan"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                              </svg>
+                            </button>
+                          )}
+                          
+                          <p className={`text-xs mt-1 truncate ${isMarkedForDeletion ? 'text-red-600 line-through' : 'text-slate-600'}`} title={gallery.title || 'Gallery image'}>
+                            {isMarkedForDeletion ? '🗑️ Akan dihapus' : (gallery.title || 'Untitled')}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  {loadingGalleries && (
+                    <p className="text-xs text-slate-500 text-center mt-2">Memuat gambar...</p>
+                  )}
+                  {galleriesToDelete.size > 0 && (
+                    <div className="mt-3 p-2 bg-yellow-50 border border-yellow-200 rounded text-xs text-yellow-800">
+                      ⚠️ <strong>{galleriesToDelete.size} gambar</strong> ditandai untuk dihapus. 
+                      Klik <strong>"Submit untuk Review"</strong> untuk menghapus permanent, 
+                      atau klik <strong>"Batal"</strong> untuk membatalkan semua perubahan.
+                    </div>
+                  )}
+                </div>
+              )}
+              
               {/* Single Image Upload */}
               <div>
                 <label className="text-sm font-medium">Upload Gambar Utama Flora</label>
@@ -548,7 +750,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
               <div>
                 <label className="text-sm font-medium">Upload Gambar Tambahan (Opsional)</label>
                 <p className="text-xs text-gray-500 mb-2">
-                  Upload hingga 10 gambar tambahan untuk flora ini
+                  {mode === 'edit' 
+                    ? 'Upload gambar baru yang akan ditambahkan ke gallery'
+                    : 'Upload hingga 10 gambar tambahan untuk flora ini'}
                 </p>
                 <MultipleFileUpload
                   onFilesSelect={handleFilesSelect}

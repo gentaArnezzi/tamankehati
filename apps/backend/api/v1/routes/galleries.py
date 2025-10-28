@@ -289,11 +289,16 @@ async def delete_gallery(gallery_id: int, db: AsyncSession = Depends(get_session
     if not obj:
         raise HTTPException(status_code=404, detail="Gallery not found")
 
-    if obj.author_id != user.id and user.role not in ('regional_admin', 'super_admin'):
-        raise HTTPException(status_code=403, detail="Can only delete your own galleries")
-
-    if user.role == 'regional_admin' and obj.park_id != user.park_id:
-        raise HTTPException(status_code=403, detail="Park scope required")
+    # ✅ Permission check: regional_admin can delete their own galleries or galleries they submitted
+    # Super admin can delete any gallery
+    if user.role == 'regional_admin':
+        if obj.author_id != user.id and obj.submitted_by != user.id:
+            raise HTTPException(status_code=403, detail="You can only delete galleries you created or submitted")
+    
+    # ❌ REMOVED: Gallery model doesn't have park_id field
+    # Gallery uses entity_type + entity_id for polymorphic relationships
+    # if user.role == 'regional_admin' and obj.park_id != user.park_id:
+    #     raise HTTPException(status_code=403, detail="Park scope required")
 
     obj.deleted_at = datetime.now(timezone.utc)
     await db.commit()

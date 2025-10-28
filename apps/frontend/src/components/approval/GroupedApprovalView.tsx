@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { approvalsApi, floraApi, faunaApi, activitiesApi, ParkGroup } from '../../lib/api-client';
+import { approvalsApi, floraApi, faunaApi, activitiesApi, ParkGroup, parksApprovalApi, Park } from '../../lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../ui/card';
 import { Button } from '../ui/button';
 import { Badge } from '../ui/badge';
@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Loader2,
   Eye,
+  MapPin,
 } from 'lucide-react';
 import {
   Collapsible,
@@ -28,9 +29,12 @@ import { Alert, AlertDescription } from '../ui/alert';
 export function GroupedApprovalView() {
   const router = useRouter();
   const [groups, setGroups] = useState<ParkGroup[]>([]);
+  const [pendingParks, setPendingParks] = useState<Park[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
+  const [expandedParkDetails, setExpandedParkDetails] = useState<Set<number>>(new Set());
   const [processingGroups, setProcessingGroups] = useState<Set<number>>(new Set());
+  const [processingParks, setProcessingParks] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     loadGroupedData();
@@ -39,12 +43,17 @@ export function GroupedApprovalView() {
   const loadGroupedData = async () => {
     try {
       setLoading(true);
-      const data = await approvalsApi.listGrouped();
-      setGroups(data.groups);
+      const [groupData, parkData] = await Promise.all([
+        approvalsApi.listGrouped(),
+        parksApprovalApi.listPending().catch(() => []), // Gracefully handle errors
+      ]);
+      
+      setGroups(groupData.groups);
+      setPendingParks(parkData);
       
       // Auto-expand first group if exists
-      if (data.groups.length > 0) {
-        setExpandedGroups(new Set([data.groups[0].parkId]));
+      if (groupData.groups.length > 0) {
+        setExpandedGroups(new Set([groupData.groups[0].parkId]));
       }
     } catch (error) {
       console.error('Failed to load grouped approvals', error);
@@ -62,6 +71,16 @@ export function GroupedApprovalView() {
       newExpanded.add(parkId);
     }
     setExpandedGroups(newExpanded);
+  };
+
+  const toggleParkDetail = (parkId: number) => {
+    const newExpanded = new Set(expandedParkDetails);
+    if (newExpanded.has(parkId)) {
+      newExpanded.delete(parkId);
+    } else {
+      newExpanded.add(parkId);
+    }
+    setExpandedParkDetails(newExpanded);
   };
 
   const handleBulkApprove = async (parkId: number, parkName: string) => {
@@ -122,6 +141,49 @@ export function GroupedApprovalView() {
     }
   };
 
+  const handleApprovePark = async (parkId: number, parkName: string) => {
+    if (!confirm(`Setujui taman "${parkName}"?\n\nTaman akan menjadi aktif dan dapat dikelola oleh regional admin.`)) {
+      return;
+    }
+
+    try {
+      setProcessingParks(new Set([...processingParks, parkId]));
+      await parksApprovalApi.approve(parkId);
+      toast.success(`✅ Taman "${parkName}" berhasil disetujui`);
+      await loadGroupedData();
+    } catch (error) {
+      console.error('Failed to approve park', error);
+      toast.error('Gagal menyetujui taman');
+    } finally {
+      setProcessingParks((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(parkId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleRejectPark = async (parkId: number, parkName: string) => {
+    const reason = prompt(`Alasan menolak taman "${parkName}":`);
+    if (!reason) return;
+
+    try {
+      setProcessingParks(new Set([...processingParks, parkId]));
+      await parksApprovalApi.reject(parkId, reason);
+      toast.success(`❌ Taman "${parkName}" ditolak`);
+      await loadGroupedData();
+    } catch (error) {
+      console.error('Failed to reject park', error);
+      toast.error('Gagal menolak taman');
+    } finally {
+      setProcessingParks((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(parkId);
+        return newSet;
+      });
+    }
+  };
+
   const handleViewParkDetail = (parkId: number) => {
     router.push(`/dashboard/approval/park/${parkId}`);
   };
@@ -164,7 +226,7 @@ export function GroupedApprovalView() {
     );
   }
 
-  if (groups.length === 0) {
+  if (groups.length === 0 && pendingParks.length === 0) {
     return (
       <Card>
         <CardContent className="py-12 text-center">
@@ -180,40 +242,293 @@ export function GroupedApprovalView() {
     );
   }
 
+  // Calculate totals
+  const totalPendingParks = pendingParks.length;
+  const totalPendingFlora = groups.reduce((sum, g) => sum + g.floraCount, 0);
+  const totalPendingFauna = groups.reduce((sum, g) => sum + g.faunaCount, 0);
+
   return (
     <div className="space-y-4">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Total Taman</div>
-            <div className="text-3xl font-bold text-[#356447]">{groups.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Total Item</div>
-            <div className="text-3xl font-bold text-[#356447]">
-              {groups.reduce((sum, g) => sum + g.totalItems, 0)}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Total Taman</div>
+                <div className="text-3xl font-bold text-[#356447]">{totalPendingParks}</div>
+                <div className="text-xs text-muted-foreground mt-1">Menunggu persetujuan</div>
+              </div>
+              <div className="p-3 rounded-lg bg-blue-50">
+                <MapPin className="h-8 w-8 text-blue-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Taman Terbanyak</div>
-            <div className="text-lg font-semibold text-gray-900 truncate">
-              {groups[0]?.parkName || '-'}
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Total Flora</div>
+                <div className="text-3xl font-bold text-[#356447]">{totalPendingFlora}</div>
+                <div className="text-xs text-muted-foreground mt-1">Menunggu persetujuan</div>
+              </div>
+              <div className="p-3 rounded-lg bg-green-50">
+                <Leaf className="h-8 w-8 text-green-600" />
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground">
-              {groups[0]?.totalItems || 0} item
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-sm text-muted-foreground mb-1">Total Fauna</div>
+                <div className="text-3xl font-bold text-[#356447]">{totalPendingFauna}</div>
+                <div className="text-xs text-muted-foreground mt-1">Menunggu persetujuan</div>
+              </div>
+              <div className="p-3 rounded-lg bg-sky-50">
+                <Bird className="h-8 w-8 text-sky-600" />
+              </div>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Grouped Items */}
-      <div className="space-y-3">
-        {groups.map((group) => {
+      {/* Pending Parks - Taman yang menunggu approval */}
+      {pendingParks.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="h-5 w-5 text-[#356447]" />
+            <h3 className="text-lg font-semibold">Taman Menunggu Persetujuan</h3>
+            <Badge variant="secondary">{pendingParks.length}</Badge>
+          </div>
+          
+          {pendingParks.map((park) => {
+            const isProcessing = processingParks.has(park.id);
+            const isExpanded = expandedParkDetails.has(park.id);
+            
+            return (
+              <Card key={park.id} className="overflow-hidden border-2 border-blue-200 bg-blue-50/30">
+                <Collapsible open={isExpanded} onOpenChange={() => toggleParkDetail(park.id)}>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200">
+                          <MapPin className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-xl mb-1">{park.name}</CardTitle>
+                          <CardDescription className="flex items-center gap-3 flex-wrap">
+                            <Badge className="bg-blue-100 text-blue-700 border-blue-300">
+                              Taman Baru
+                            </Badge>
+                            {park.provinsi && (
+                              <span className="text-xs text-gray-600">
+                                📍 {park.provinsi}
+                                {park.kota_kabupaten && `, ${park.kota_kabupaten}`}
+                              </span>
+                            )}
+                            {park.area_ha && (
+                              <span className="text-xs text-gray-600">
+                                📐 {park.area_ha} ha
+                              </span>
+                            )}
+                            {park.submitted_at && (
+                              <span className="text-xs text-gray-500">
+                                📅 {new Date(park.submitted_at).toLocaleDateString('id-ID', {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            )}
+                          </CardDescription>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="border-blue-300 hover:bg-blue-50"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            {isExpanded ? 'Sembunyikan' : 'Lihat Detail'}
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 ml-2" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 ml-2" />
+                            )}
+                          </Button>
+                        </CollapsibleTrigger>
+                        <Button
+                          onClick={() => handleApprovePark(park.id, park.name)}
+                          disabled={isProcessing}
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white"
+                        >
+                          {isProcessing ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle className="h-4 w-4 mr-2" />
+                              Setujui
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={() => handleRejectPark(park.id, park.name)}
+                          disabled={isProcessing}
+                          size="sm"
+                          variant="destructive"
+                        >
+                          Tolak
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  <CollapsibleContent>
+                    <CardContent className="pt-0">
+                      <div className="space-y-4 bg-white rounded-lg p-4 border border-blue-100">
+                        {/* Basic Info */}
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-2">Informasi Dasar</h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            {park.pengelola && (
+                              <div>
+                                <span className="text-gray-500">Pengelola:</span>
+                                <p className="font-medium text-gray-900">{park.pengelola}</p>
+                              </div>
+                            )}
+                            {park.sk_penetapan && (
+                              <div>
+                                <span className="text-gray-500">SK Penetapan:</span>
+                                <p className="font-medium text-gray-900">{park.sk_penetapan}</p>
+                              </div>
+                            )}
+                            {park.tipe_ekoregion && (
+                              <div>
+                                <span className="text-gray-500">Tipe Ekoregion:</span>
+                                <p className="font-medium text-gray-900">{park.tipe_ekoregion}</p>
+                              </div>
+                            )}
+                            {park.kondisi_fisik && (
+                              <div>
+                                <span className="text-gray-500">Kondisi Fisik:</span>
+                                <p className="font-medium text-gray-900">{park.kondisi_fisik}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Location */}
+                        <div>
+                          <h4 className="font-semibold text-sm text-gray-700 mb-2">Lokasi</h4>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            {park.provinsi && (
+                              <div>
+                                <span className="text-gray-500">Provinsi:</span>
+                                <p className="font-medium text-gray-900">{park.provinsi}</p>
+                              </div>
+                            )}
+                            {park.kota_kabupaten && (
+                              <div>
+                                <span className="text-gray-500">Kota/Kabupaten:</span>
+                                <p className="font-medium text-gray-900">{park.kota_kabupaten}</p>
+                              </div>
+                            )}
+                            {park.kecamatan && (
+                              <div>
+                                <span className="text-gray-500">Kecamatan:</span>
+                                <p className="font-medium text-gray-900">{park.kecamatan}</p>
+                              </div>
+                            )}
+                            {park.desa_kelurahan && (
+                              <div>
+                                <span className="text-gray-500">Desa/Kelurahan:</span>
+                                <p className="font-medium text-gray-900">{park.desa_kelurahan}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Description */}
+                        {park.description && (
+                          <div>
+                            <h4 className="font-semibold text-sm text-gray-700 mb-2">Deskripsi</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">{park.description}</p>
+                          </div>
+                        )}
+
+                        {/* Sejarah */}
+                        {park.sejarah && (
+                          <div>
+                            <h4 className="font-semibold text-sm text-gray-700 mb-2">Sejarah</h4>
+                            <p className="text-sm text-gray-600 leading-relaxed">{park.sejarah}</p>
+                          </div>
+                        )}
+
+                        {/* Visi & Misi */}
+                        {(park.visi || park.misi) && (
+                          <div className="grid grid-cols-2 gap-4">
+                            {park.visi && (
+                              <div>
+                                <h4 className="font-semibold text-sm text-gray-700 mb-2">Visi</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">{park.visi}</p>
+                              </div>
+                            )}
+                            {park.misi && (
+                              <div>
+                                <h4 className="font-semibold text-sm text-gray-700 mb-2">Misi</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">{park.misi}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Nilai Penting & Nilai Dasar */}
+                        {(park.nilai_penting || park.nilai_dasar) && (
+                          <div className="grid grid-cols-2 gap-4">
+                            {park.nilai_penting && (
+                              <div>
+                                <h4 className="font-semibold text-sm text-gray-700 mb-2">Nilai Penting</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">{park.nilai_penting}</p>
+                              </div>
+                            )}
+                            {park.nilai_dasar && (
+                              <div>
+                                <h4 className="font-semibold text-sm text-gray-700 mb-2">Nilai Dasar</h4>
+                                <p className="text-sm text-gray-600 leading-relaxed">{park.nilai_dasar}</p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </CollapsibleContent>
+                </Collapsible>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Grouped Items - Konten yang menunggu approval per taman */}
+      {groups.length > 0 && (
+        <>
+          <div className="flex items-center gap-2 mb-2 mt-6">
+            <TreePine className="h-5 w-5 text-[#356447]" />
+            <h3 className="text-lg font-semibold">Konten Menunggu Persetujuan (per Taman)</h3>
+          </div>
+          <div className="space-y-3">
+            {groups.map((group) => {
           const isExpanded = expandedGroups.has(group.parkId);
           const isProcessing = processingGroups.has(group.parkId);
 
@@ -426,14 +741,16 @@ export function GroupedApprovalView() {
             </Card>
           );
         })}
-      </div>
-
-      <Alert className="bg-blue-50 border-blue-200">
-        <AlertDescription className="text-blue-800 text-sm">
-          💡 <strong>Tips:</strong> Klik "Lihat Detail" untuk membuka halaman review lengkap semua data dari taman. 
-          Gunakan "Setujui Semua" untuk approve semua data dari taman sekaligus.
-        </AlertDescription>
-      </Alert>
+          </div>
+          
+          <Alert className="bg-blue-50 border-blue-200">
+            <AlertDescription className="text-blue-800 text-sm">
+              💡 <strong>Tips:</strong> Klik "Lihat Detail" untuk membuka halaman review lengkap semua data dari taman. 
+              Gunakan "Setujui Semua" untuk approve semua data dari taman sekaligus.
+            </AlertDescription>
+          </Alert>
+        </>
+      )}
     </div>
   );
 }

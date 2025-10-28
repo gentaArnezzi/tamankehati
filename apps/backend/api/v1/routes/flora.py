@@ -3,13 +3,14 @@ from typing import List, Optional
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.database.session import get_session
 from domains.flora.models import Flora
 from domains.parks.models import Park
+from domains.galleries.models import Gallery, GalleryStatus
 # Zone import removed - zones functionality removed
 from users.models import User
 from domains.articles.models import UserRole
@@ -351,6 +352,11 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     if update_fields:
         update_fields.append("updated_at = now()")
         
+        # If regional_admin edits approved flora, set status back to in_review
+        if user.role == UserRole.regional_admin and obj.status == "approved":
+            update_fields.append("status = 'in_review'")
+            print(f"⚠️  Flora {flora_id} was approved, now back to in_review after edit by regional_admin")
+        
         query = f"UPDATE flora SET {', '.join(update_fields)} WHERE id = :flora_id"
         await db.execute(text(query), update_values)
         await db.commit()
@@ -434,8 +440,28 @@ async def approve_flora(flora_id: int, db: AsyncSession = Depends(get_session), 
     obj.status = "approved"
     obj.approved_by = user.id or 0
     obj.approved_at = datetime.now(timezone.utc)
+    
+    # Cascade approve: Auto-approve all galleries for this flora
+    await db.execute(
+        update(Gallery)
+        .where(
+            Gallery.entity_type == "flora",
+            Gallery.entity_id == flora_id,
+            Gallery.status.in_([GalleryStatus.draft.value, GalleryStatus.in_review.value])
+        )
+        .values(status=GalleryStatus.approved.value)
+    )
+    
     await db.commit()
     emit("flora.approved", entity="flora", entity_id=flora_id, region_code=None)  # Temporarily disabled due to relationship issues
+    
+    # Log gallery approval
+    gallery_count = (await db.execute(
+        select(func.count(Gallery.id))
+        .where(Gallery.entity_type == "flora", Gallery.entity_id == flora_id, Gallery.status == GalleryStatus.approved.value)
+    )).scalar()
+    print(f"✅ Flora {flora_id} approved. Auto-approved {gallery_count} galleries.")
+    
     return {"ok": True}
 
 @router.post(

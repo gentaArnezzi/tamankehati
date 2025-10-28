@@ -9,6 +9,7 @@ interface GalleryMetadata {
   title: string;
   description: string;
   parkId: number;
+  status?: 'draft' | 'in_review' | 'approved';
 }
 
 /**
@@ -29,6 +30,7 @@ export async function createGalleryForEntity(
       return;
     }
     
+    // Create gallery record
     const response = await fetch(`${API_BASE_URL}/api/v1/galleries/`, {
       method: 'POST',
       headers: {
@@ -54,6 +56,27 @@ export async function createGalleryForEntity(
 
     const result = await response.json();
     console.log('Gallery record created successfully:', result);
+    
+    // Auto-approve if requested (for super_admin or when status is 'approved')
+    if (metadata.status === 'approved' && result.id) {
+      try {
+        const approveResponse = await fetch(`${API_BASE_URL}/api/v1/galleries/${result.id}/approve`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        
+        if (approveResponse.ok) {
+          console.log('Gallery auto-approved successfully:', result.id);
+        } else {
+          console.warn('Failed to auto-approve gallery:', result.id);
+        }
+      } catch (approveError) {
+        console.warn('Error auto-approving gallery:', approveError);
+      }
+    }
   } catch (error) {
     // Log but don't throw - gallery creation failure shouldn't break the main flow
     console.warn('Error creating gallery record:', error);

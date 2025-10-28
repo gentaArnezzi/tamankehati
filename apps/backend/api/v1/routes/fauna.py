@@ -3,13 +3,14 @@ from typing import Optional
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Query, HTTPException, status
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from core.database.session import get_session
 from domains.fauna.models import Fauna
 from domains.parks.models import Park
+from domains.galleries.models import Gallery, GalleryStatus
 # from domains.zones.models import Zone  # Temporarily disabled due to schema changes
 from users.models import User, UserRole
 from api.v1.permissions.rbac import current_user
@@ -367,6 +368,11 @@ async def update_fauna(
     if update_fields:
         update_fields.append("updated_at = now()")
         
+        # If regional_admin edits approved fauna, set status back to in_review
+        if user.role == UserRole.regional_admin and obj.status == "approved":
+            update_fields.append("status = 'in_review'")
+            print(f"⚠️  Fauna {fauna_id} was approved, now back to in_review after edit by regional_admin")
+        
         query = f"UPDATE fauna SET {', '.join(update_fields)} WHERE id = :fauna_id"
         await db.execute(text(query), update_values)
         await db.commit()
@@ -413,8 +419,28 @@ async def approve_fauna(fauna_id: int, db: AsyncSession = Depends(get_session), 
     obj.status = "approved"
     obj.approved_by = user.id or 0
     obj.approved_at = datetime.now(timezone.utc)
+    
+    # Cascade approve: Auto-approve all galleries for this fauna
+    await db.execute(
+        update(Gallery)
+        .where(
+            Gallery.entity_type == "fauna",
+            Gallery.entity_id == fauna_id,
+            Gallery.status.in_([GalleryStatus.draft.value, GalleryStatus.in_review.value])
+        )
+        .values(status=GalleryStatus.approved.value)
+    )
+    
     await db.commit()
     # emit("fauna.approved", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None))
+    
+    # Log gallery approval
+    gallery_count = (await db.execute(
+        select(func.count(Gallery.id))
+        .where(Gallery.entity_type == "fauna", Gallery.entity_id == fauna_id, Gallery.status == GalleryStatus.approved.value)
+    )).scalar()
+    print(f"✅ Fauna {fauna_id} approved. Auto-approved {gallery_count} galleries.")
+    
     return {"ok": True}
 
 from pydantic import BaseModel

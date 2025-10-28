@@ -399,23 +399,29 @@ export function TamanSubmissionPage() {
         const result = await parksApi.update(draftPark.id, parkData);
         console.log('Taman update result:', result);
         
-        toast.success(
-          submitStatus === 'draft' 
-            ? 'Draft taman berhasil diperbarui!'
-            : 'Taman berhasil diperbarui dan diajukan untuk review!'
-        );
-        setSuccess(submitStatus === 'draft' ? 'Draft taman berhasil diperbarui!' : 'Taman berhasil diajukan untuk review!');
+        // If user clicked "Submit untuk Review", call submit endpoint
+        if (submitStatus === 'in_review') {
+          await handleSubmitPark(draftPark.id);
+          toast.success('Taman berhasil diperbarui dan diajukan untuk review!');
+          setSuccess('Taman berhasil diajukan untuk review!');
+        } else {
+          toast.success('Draft taman berhasil diperbarui!');
+          setSuccess('Draft taman berhasil diperbarui!');
+        }
       } else {
-        // CREATE new draft park
-        const result = await parksApi.create(parkData);
+        // CREATE new draft park - always as draft first
+        const result = await parksApi.create({ ...parkData, status: 'draft' });
         console.log('Taman create result:', result);
         
-        toast.success(
-          submitStatus === 'draft' 
-            ? 'Taman berhasil disimpan sebagai draft!'
-            : 'Taman berhasil dibuat dan diajukan untuk review!'
-        );
-        setSuccess(submitStatus === 'draft' ? 'Taman berhasil dibuat! Status: Draft' : 'Taman berhasil diajukan untuk review!');
+        // If user clicked "Submit untuk Review", call submit endpoint
+        if (submitStatus === 'in_review' && result.id) {
+          await handleSubmitPark(parseInt(result.id));
+          toast.success('Taman berhasil dibuat dan diajukan untuk review!');
+          setSuccess('Taman berhasil diajukan untuk review!');
+        } else {
+          toast.success('Taman berhasil disimpan sebagai draft!');
+          setSuccess('Taman berhasil dibuat! Status: Draft');
+        }
       }
 
       // Reload parks list to reflect changes
