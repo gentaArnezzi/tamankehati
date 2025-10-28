@@ -119,6 +119,81 @@ export function CollapsibleDashboardLayout({
     markAllAsRead,
   } = useNotifications();
 
+  // Pending approval count for Super Admin
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
+  
+  // 🧪 TEMPORARY: Force show badge for testing (remove after testing)
+  // Uncomment line below to test badge visually
+  // const testPendingCount = 5; // For testing only
+
+  useEffect(() => {
+    // Only fetch for super_admin
+    if (user?.role !== 'super_admin') {
+      console.log('⚠️ Not super_admin, skipping pending count fetch. Role:', user?.role);
+      return;
+    }
+
+    const fetchPendingCount = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+          console.log('⚠️ No auth token found');
+          return;
+        }
+
+        console.log('🔄 Fetching pending approval counts...');
+
+        // ✅ Use unified approvals endpoint that returns counts for all entities
+        const response = await fetch('http://localhost:8000/api/v1/approvals', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        console.log('📡 API response status:', response.status);
+
+        if (!response.ok) {
+          console.error('❌ API error:', response.status, response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        console.log('📊 Fetched approval data:', data);
+
+        // The API returns { items: [...], total: X, counts: {...} }
+        const counts = data.counts || {};
+        
+        const floraCount = counts.flora || 0;
+        const faunaCount = counts.fauna || 0;
+        const tamanCount = counts.taman || 0;
+        const kegiatanCount = counts.kegiatan || 0;
+        const artikelCount = counts.artikel || 0;
+        const galeriCount = counts.galeri || 0;
+
+        // Total all pending approvals
+        const total = floraCount + faunaCount + tamanCount + kegiatanCount + artikelCount + galeriCount;
+
+        console.log('✅ Pending counts:', {
+          flora: floraCount,
+          fauna: faunaCount,
+          taman: tamanCount,
+          kegiatan: kegiatanCount,
+          artikel: artikelCount,
+          galeri: galeriCount,
+          total: total
+        });
+
+        setPendingApprovalCount(total);
+      } catch (error) {
+        console.error('❌ Failed to fetch pending approval count:', error);
+      }
+    };
+
+    fetchPendingCount();
+    
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchPendingCount, 30000);
+    return () => clearInterval(interval);
+  }, [user?.role]);
+
   const handleNotificationClick = (notification: any) => {
     // Navigate based on notification type
     if (notification.resource === 'announcement' && notification.resource_id) {
@@ -283,8 +358,14 @@ export function CollapsibleDashboardLayout({
                       : "text-gray-900 hover:bg-gray-50 hover:text-gray-900"
                   }`}
                 >
-                  <div className="grid h-full w-12 place-content-center">
+                  <div className="grid h-full w-12 place-content-center relative">
                     <Icon className="h-4 w-4" />
+                    {/* Badge for collapsed sidebar (approval menu) */}
+                    {item.id === 'approval' && pendingApprovalCount > 0 && !sidebarOpen && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold">
+                        {pendingApprovalCount > 9 ? '9+' : pendingApprovalCount}
+                      </span>
+                    )}
                   </div>
                   
                   {sidebarOpen && (
@@ -297,6 +378,17 @@ export function CollapsibleDashboardLayout({
                     </span>
                   )}
 
+                  {/* Badge for approval menu (Super Admin only) */}
+                  {item.id === 'approval' && pendingApprovalCount > 0 && sidebarOpen && (
+                    <>
+                      {console.log('🔴 Rendering badge for approval menu. Count:', pendingApprovalCount)}
+                      <span className="absolute right-3 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-red-500 text-xs text-white font-bold animate-pulse">
+                        {pendingApprovalCount}
+                      </span>
+                    </>
+                  )}
+                  
+                  {/* Generic notification badge */}
                   {item.notifs && item.notifs > 0 && sidebarOpen && (
                     <span className="absolute right-3 flex h-5 w-5 items-center justify-center rounded-full bg-brand-500 text-xs text-white font-medium">
                       {item.notifs}
@@ -394,17 +486,6 @@ export function CollapsibleDashboardLayout({
                   onNotificationClick={handleNotificationClick}
                   loading={notificationsLoading}
                 />
-                <Avatar key={user?.profile_picture_url || 'no-avatar-header'} className="h-9 w-9">
-                  {user?.profile_picture_url && (
-                    <AvatarImage 
-                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${user.profile_picture_url}`}
-                      alt={user?.nama || user?.display_name || 'Profile photo'}
-                    />
-                  )}
-                  <AvatarFallback className="bg-brand-600 text-white font-medium text-sm">
-                    {avatarInitial}
-                  </AvatarFallback>
-                </Avatar>
               </div>
             </div>
           </div>
