@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Loader2,
   Image as ImageIcon,
+  XCircle,
 } from 'lucide-react';
 
 interface CollapsibleApprovalItemProps {
@@ -24,6 +25,7 @@ interface CollapsibleApprovalItemProps {
   isLoadingDetail: boolean;
   onToggle: () => void;
   onApprove: () => void;
+  onReject?: () => void;
 }
 
 // Helper to ensure full URL
@@ -41,6 +43,7 @@ export function CollapsibleApprovalItem({
   isLoadingDetail,
   onToggle,
   onApprove,
+  onReject,
 }: CollapsibleApprovalItemProps) {
   const borderColor = {
     flora: 'border-l-green-500',
@@ -87,14 +90,26 @@ export function CollapsibleApprovalItem({
               </div>
             </CollapsibleTrigger>
             
-            <Button
-              onClick={onApprove}
-              className="bg-[#356447] hover:bg-[#2d5239] flex-shrink-0"
-              size="sm"
-            >
-              <CheckCircle className="h-4 w-4 mr-1" />
-              Setujui
-            </Button>
+            <div className="flex gap-2 flex-shrink-0">
+              <Button
+                onClick={onApprove}
+                className="bg-[#356447] hover:bg-[#2d5239]"
+                size="sm"
+              >
+                <CheckCircle className="h-4 w-4 mr-1" />
+                Setujui
+              </Button>
+              {onReject && (
+                <Button
+                  onClick={onReject}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <XCircle className="h-4 w-4 mr-1" />
+                  Tolak
+                </Button>
+              )}
+            </div>
           </div>
 
           {/* Expanded Detail */}

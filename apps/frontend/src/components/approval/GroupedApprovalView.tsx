@@ -18,6 +18,7 @@ import {
   Loader2,
   Eye,
   MapPin,
+  XCircle,
 } from 'lucide-react';
 import {
   Collapsible,
@@ -138,6 +139,39 @@ export function GroupedApprovalView() {
     } catch (error) {
       console.error('Failed to approve item', error);
       toast.error('Gagal menyetujui item');
+    }
+  };
+
+  const handleSingleReject = async (
+    parkId: number,
+    entityType: string,
+    entityId: number,
+    title: string
+  ) => {
+    const reason = prompt(`Alasan menolak "${title}":`);
+    if (!reason || !reason.trim()) {
+      toast.error('Alasan penolakan harus diisi');
+      return;
+    }
+
+    try {
+      switch (entityType) {
+        case 'flora':
+          await floraApi.reject(entityId, reason);
+          break;
+        case 'fauna':
+          await faunaApi.reject(entityId, reason);
+          break;
+        case 'kegiatan':
+          await activitiesApi.reject(entityId, reason);
+          break;
+      }
+      
+      toast.success(`Berhasil menolak: ${title}`);
+      await loadGroupedData();
+    } catch (error) {
+      console.error('Failed to reject item', error);
+      toast.error('Gagal menolak item');
     }
   };
 
@@ -718,7 +752,7 @@ export function GroupedApprovalView() {
                                 </div>
                               </div>
 
-                              {/* Right: Action Button */}
+                              {/* Right: Action Buttons */}
                               <div className="flex flex-col gap-2">
                                 <Button
                                   onClick={() =>
@@ -734,6 +768,22 @@ export function GroupedApprovalView() {
                                 >
                                   <CheckCircle className="mr-2 h-4 w-4" />
                                   Setujui
+                                </Button>
+                                <Button
+                                  onClick={() =>
+                                    handleSingleReject(
+                                      group.parkId,
+                                      item.entityType,
+                                      item.entityId,
+                                      item.title
+                                    )
+                                  }
+                                  variant="destructive"
+                                  size="sm"
+                                  className="shadow-md hover:shadow-lg transition-all"
+                                >
+                                  <XCircle className="mr-2 h-4 w-4" />
+                                  Tolak
                                 </Button>
                               </div>
                             </div>

@@ -105,6 +105,34 @@ export default function ParkApprovalDetailPage() {
     }
   };
 
+  const handleSingleReject = async (entityType: string, entityId: number, title: string) => {
+    const reason = prompt(`Alasan menolak "${title}":`);
+    if (!reason || !reason.trim()) {
+      toast.error('Alasan penolakan harus diisi');
+      return;
+    }
+
+    try {
+      switch (entityType) {
+        case 'flora':
+          await floraApi.reject(entityId, reason);
+          break;
+        case 'fauna':
+          await faunaApi.reject(entityId, reason);
+          break;
+        case 'kegiatan':
+          await activitiesApi.reject(entityId, reason);
+          break;
+      }
+      
+      toast.success(`Berhasil menolak: ${title}`);
+      await loadParkDetail();
+    } catch (error) {
+      console.error('Failed to reject item', error);
+      toast.error('Gagal menolak item');
+    }
+  };
+
   const toggleItemExpand = async (entityType: string, entityId: number) => {
     const key = `${entityType}-${entityId}`;
     const newExpanded = new Set(expandedItems);
@@ -439,6 +467,7 @@ export default function ParkApprovalDetailPage() {
                       isLoadingDetail={expandedItems.has(key) && !detailsCache[key]}
                       onToggle={() => toggleItemExpand('flora', item.entityId)}
                       onApprove={() => handleSingleApprove('flora', item.entityId, item.title)}
+                      onReject={() => handleSingleReject('flora', item.entityId, item.title)}
                     />
                   );
                 })}
@@ -470,6 +499,7 @@ export default function ParkApprovalDetailPage() {
                       isLoadingDetail={expandedItems.has(key) && !detailsCache[key]}
                       onToggle={() => toggleItemExpand('fauna', item.entityId)}
                       onApprove={() => handleSingleApprove('fauna', item.entityId, item.title)}
+                      onReject={() => handleSingleReject('fauna', item.entityId, item.title)}
                     />
                   );
                 })}
@@ -501,6 +531,7 @@ export default function ParkApprovalDetailPage() {
                       isLoadingDetail={expandedItems.has(key) && !detailsCache[key]}
                       onToggle={() => toggleItemExpand('kegiatan', item.entityId)}
                       onApprove={() => handleSingleApprove('kegiatan', item.entityId, item.title)}
+                      onReject={() => handleSingleReject('kegiatan', item.entityId, item.title)}
                     />
                   );
                 })}
