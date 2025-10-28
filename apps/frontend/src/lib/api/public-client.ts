@@ -71,7 +71,23 @@ export const fetchFaunaPage = (params?: SearchParams) =>
   clientFetch(FaunaPaginatedSchema, '/api/public/fauna/', params);
 
 export const fetchTamanPage = async (params?: SearchParams) => {
-  const url = `${API_BASE_URL}/api/public/parks${toQuery(params)}`;
+  // Map frontend parameters to backend parameters
+  const backendParams: SearchParams = {};
+  
+  if (params) {
+    // Map region to wilayah for backend compatibility
+    if (params.region) {
+      backendParams.wilayah = params.region;
+    }
+    
+    // Pass through other parameters
+    if (params.search) backendParams.search = params.search;
+    if (params.status) backendParams.status = params.status;
+    if (params.limit) backendParams.limit = params.limit;
+    if (params.offset) backendParams.offset = params.offset;
+  }
+
+  const url = `${API_BASE_URL}/api/public/parks${toQuery(backendParams)}`;
   console.log('Fetching taman data from:', url);
   
   const response = await fetch(url, {

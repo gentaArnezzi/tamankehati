@@ -17,15 +17,6 @@ export function GalleryHighlight({ items }: GalleryHighlightProps) {
             <h2 className="text-3xl font-semibold text-slate-900 md:text-4xl">Cuplikan Galeri</h2>
             <p className="mt-2 text-base text-slate-600">Potret konservasi dari lapangan; gunakan tombol panah untuk menelusuri.</p>
           </div>
-          <Link
-            href="/galeri"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition hover:text-emerald-500"
-          >
-            Lihat semua galeri
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-              <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </Link>
         </div>
 
         <div className="mt-10 overflow-x-auto">

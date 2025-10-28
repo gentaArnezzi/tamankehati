@@ -55,21 +55,32 @@ const createFetcher =
   <Schema extends z.ZodTypeAny>(schema: Schema, options?: { revalidate?: number }) =>
   async (path: string, params?: SearchParams) => {
     const url = `${API_BASE_URL}${path}${buildQuery(params)}`;
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      next: {
-        revalidate: options?.revalidate ?? 3600,
-      },
-    });
+    console.log('[SSR] Fetching from:', url);
+    
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        next: {
+          revalidate: options?.revalidate ?? 3600,
+        },
+      });
 
-    if (!response.ok) {
-      throw new Error(`Gagal memuat data dari ${path} (${response.status})`);
+      if (!response.ok) {
+        console.error(`[SSR] Fetch failed: ${response.status} ${response.statusText}`);
+        throw new Error(`Gagal memuat data dari ${path} (${response.status})`);
+      }
+
+      const json = await response.json();
+      console.log('[SSR] Data received:', JSON.stringify(json).substring(0, 200));
+      const parsed = schema.parse(json);
+      console.log('[SSR] Schema parsed successfully');
+      return parsed;
+    } catch (error) {
+      console.error('[SSR] Error in createFetcher:', error);
+      throw error;
     }
-
-    const json = await response.json();
-    return schema.parse(json);
   };
 
 const fetchPaginated = <T extends z.ZodTypeAny>(schema: T, revalidate?: number) =>

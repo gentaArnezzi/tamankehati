@@ -34,7 +34,11 @@ export function FileUpload({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': acceptedTypes
+      'image/*': acceptedTypes.filter(type => type.startsWith('image/')),
+      ...acceptedTypes.filter(type => type.startsWith('.')).reduce((acc, ext) => {
+        acc[ext] = [];
+        return acc;
+      }, {} as Record<string, string[]>)
     },
     maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
     multiple: false,
@@ -123,7 +127,7 @@ export function FileUpload({
               onClick={() => {
                 const input = document.createElement('input');
                 input.type = 'file';
-                input.accept = acceptedTypes.join(',');
+                input.accept = acceptedTypes.filter(type => type.startsWith('image/')).join(',');
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) onFileSelect(file);

@@ -17,15 +17,16 @@ async def get_galeri(
     db: AsyncSession = Depends(get_session)
 ):
     try:
-        # Get total count
-        count_query = text("SELECT COUNT(*) FROM galleries")
+        # Get total count - only approved galleries
+        count_query = text("SELECT COUNT(*) FROM galleries WHERE status = 'approved'")
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
         
-        # Get items with pagination
+        # Get items with pagination - only approved galleries
         query = text("""
             SELECT id, title, image_url, region_code, created_at
             FROM galleries 
+            WHERE status = 'approved'
             ORDER BY created_at DESC 
             LIMIT :limit OFFSET :offset
         """)

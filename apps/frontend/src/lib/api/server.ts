@@ -69,22 +69,32 @@ export async function getTamanPage(params: {
   offset?: number;
 } = {}): Promise<TamanPaginated> {
   try {
-    // Convert offset to skip for backend compatibility
-    const { offset, ...restParams } = params;
-    const backendParams = {
-      ...restParams,
-      skip: offset || 0,
-    };
-
-    const items = await serverFetch<any[]>('/api/public/parks', backendParams);
-    
-    // Wrap the array in paginated format
-    return {
-      items: z.array(TamanPublicSchema).parse(items),
-      total: items.length,
+    // Map frontend parameters to backend parameters
+    const backendParams: Record<string, any> = {
       limit: params.limit || 12,
       offset: params.offset || 0,
     };
+
+    // Map search parameter
+    if (params.search) {
+      backendParams.search = params.search;
+    }
+
+    // Map region parameter (backend uses 'wilayah')
+    if (params.region) {
+      backendParams.wilayah = params.region;
+    }
+
+    // Map tipe_ekoregion parameter
+    if (params.tipe_ekoregion) {
+      backendParams.tipe_ekoregion = params.tipe_ekoregion;
+    }
+
+    // Backend returns paginated format directly
+    const response = await serverFetch<TamanPaginated>('/api/public/parks', backendParams);
+    
+    // Parse and return the response
+    return TamanPaginatedSchema.parse(response);
   } catch (error) {
     console.error('Error fetching taman page:', error);
     return {

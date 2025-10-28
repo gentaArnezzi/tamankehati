@@ -12,12 +12,26 @@ import { Button } from '../../ui/button';
 import { Input } from '../../ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const CATEGORIES = ['Artikel Edukasi', 'Berita Konservasi', 'Riset', 'Opini'];
 
 type ArtikelExploreProps = {
   initialData: ArtikelPaginated;
   initialParams: URLSearchParams;
+};
+
+// Helper function to convert relative image URLs to absolute URLs
+const getImageUrl = (imageUrl: string | undefined) => {
+  if (!imageUrl || !imageUrl.trim()) {
+    return 'https://images.unsplash.com/photo-1493815793585-d94ccbc86df0?w=800&auto=format&fit=crop';
+  }
+  
+  if (imageUrl.startsWith('http')) {
+    return imageUrl;
+  }
+  
+  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${imageUrl}`;
 };
 
 export function ArtikelExplore({ initialData, initialParams }: ArtikelExploreProps) {
@@ -64,10 +78,10 @@ export function ArtikelExplore({ initialData, initialParams }: ArtikelExplorePro
       return undefined;
     },
     initialPageParam: { offset: Number(params.get('offset') ?? 0) },
-    initialData: {
+    initialData: initialData.total > 0 ? {
       pages: [initialData],
       pageParams: [{ offset: Number(params.get('offset') ?? 0) }],
-    },
+    } : undefined,
     refetchOnWindowFocus: false,
   });
 
@@ -202,11 +216,24 @@ export function ArtikelExplore({ initialData, initialParams }: ArtikelExplorePro
           {allArticles.length > 0 && (
             <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {allArticles.map((artikel) => (
-            <Card key={artikel.id} className="flex h-full flex-col overflow-hidden border border-emerald-100">
+            <Card key={artikel.id} className="flex h-full flex-col overflow-hidden border border-emerald-100 hover:shadow-lg transition-shadow">
+              {/* Cover Image */}
+              <div className="relative h-48 w-full overflow-hidden">
+                <Image
+                  src={getImageUrl(artikel.gambar_cover)}
+                  alt={artikel.judul}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                />
+                <div className="absolute top-3 left-3">
+                  <Badge variant="outline" className="border-emerald-200 text-emerald-700 bg-white/90 backdrop-blur-sm">
+                    {artikel.kategori}
+                  </Badge>
+                </div>
+              </div>
+              
               <CardHeader className="space-y-3">
-                <Badge variant="outline" className="self-start border-emerald-200 text-emerald-700">
-                  {artikel.kategori}
-                </Badge>
                 <CardTitle className="text-xl text-slate-900">
                   <Link href={`/artikel/${artikel.slug}`} className="hover:text-emerald-600">
                     {artikel.judul}

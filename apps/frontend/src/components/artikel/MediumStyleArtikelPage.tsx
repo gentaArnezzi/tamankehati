@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { FileUpload } from '../ui/file-upload';
 import { 
   ArrowLeft, 
   Save, 
@@ -39,8 +40,11 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
   const [excerpt, setExcerpt] = useState('');
   const [category, setCategory] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
   const [showToolbar, setShowToolbar] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [previewMode, setPreviewMode] = useState(false);
 
   // Load article data if in edit mode
   useEffect(() => {
@@ -48,6 +52,35 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       loadArticle();
     }
   }, [mode, articleId]);
+
+  const uploadFile = async (file: File): Promise<string> => {
+    console.log('Uploading article image:', file.name, 'Size:', file.size);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: formData,
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Article image upload success:', result);
+      return result.url;
+    } catch (error) {
+      console.error('Article image upload error:', error);
+      throw error;
+    }
+  };
 
   const loadArticle = async () => {
     try {
@@ -114,6 +147,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
 
     try {
       setSubmitting(true);
+      setUploading(true);
       
       const token = localStorage.getItem('auth_token');
       
@@ -121,6 +155,19 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
         toast.error('Anda harus login terlebih dahulu');
         router.push('/login');
         return;
+      }
+
+      // Upload file if selected
+      let finalImageUrl = featuredImage;
+      if (selectedFile) {
+        try {
+          finalImageUrl = await uploadFile(selectedFile);
+          console.log('Image uploaded successfully:', finalImageUrl);
+        } catch (error) {
+          console.error('Image upload failed:', error);
+          toast.error('Gagal mengupload gambar. Silakan coba lagi.');
+          return;
+        }
       }
 
       const url = mode === 'edit' && articleId
@@ -140,7 +187,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
           content,
           summary: excerpt || content.substring(0, 200) + '...',
           category: category || 'Artikel',
-          featured_image: featuredImage || null,
+          featured_image: finalImageUrl || null,
           status,
         }),
       });
@@ -167,11 +214,11 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       toast.error(error instanceof Error ? error.message : 'Gagal menyimpan artikel');
     } finally {
       setSubmitting(false);
+      setUploading(false);
     }
   };
 
   const insertFormatting = (format: string) => {
-    // Simple text formatting helper
     const textarea = document.getElementById('content-editor') as HTMLTextAreaElement;
     if (!textarea) return;
 
@@ -213,6 +260,63 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
     }, 0);
   };
 
+  const insertImage = async () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      try {
+        setUploading(true);
+        const imageUrl = await uploadFile(file);
+        
+        const textarea = document.getElementById('content-editor') as HTMLTextAreaElement;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const imageMarkdown = `\n![${file.name}](${imageUrl})\n`;
+        
+        const newContent = content.substring(0, start) + imageMarkdown + content.substring(end);
+        setContent(newContent);
+        
+        // Set cursor position after inserted image
+        setTimeout(() => {
+          textarea.focus();
+          textarea.setSelectionRange(start + imageMarkdown.length, start + imageMarkdown.length);
+        }, 0);
+        
+        toast.success('Gambar berhasil diupload dan dimasukkan ke artikel');
+      } catch (error) {
+        console.error('Image upload failed:', error);
+        toast.error('Gagal mengupload gambar. Silakan coba lagi.');
+      } finally {
+        setUploading(false);
+      }
+    };
+    input.click();
+  };
+
+  const renderContent = (text: string) => {
+    // Convert markdown to HTML for display
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+      .replace(/^\- (.*$)/gm, '<li>$1</li>')
+      .replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>')
+      .replace(/`(.*?)`/g, '<code>$1</code>')
+      .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
+        // Handle relative URLs by prepending API URL
+        const imageUrl = url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+        return `<img src="${imageUrl}" alt="${alt}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
+      })
+      .replace(/\n/g, '<br>');
+  };
+
   // Show loading state when fetching article data
   if (loading) {
     return (
@@ -248,6 +352,15 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
             <Button
               variant="ghost"
               size="sm"
+              onClick={() => setPreviewMode(!previewMode)}
+              className={previewMode ? 'bg-blue-100 text-blue-700' : ''}
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              {previewMode ? 'Edit' : 'Preview'}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setShowSettings(!showSettings)}
             >
               <MoreHorizontal className="h-4 w-4" />
@@ -256,19 +369,19 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
               variant="outline"
               size="sm"
               onClick={() => handleSave('draft')}
-              disabled={submitting}
+              disabled={submitting || uploading}
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {mode === 'edit' ? 'Update' : 'Simpan'}
+              {(submitting || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {uploading ? 'Uploading...' : (mode === 'edit' ? 'Update' : 'Simpan')}
             </Button>
             <Button
               size="sm"
               onClick={() => handleSave('approved')}
-              disabled={submitting}
+              disabled={submitting || uploading}
               className="bg-green-600 hover:bg-green-700"
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-              {submitting ? 'Publishing...' : 'Publish'}
+              {(submitting || uploading) ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+              {uploading ? 'Uploading...' : (submitting ? 'Publishing...' : 'Publish')}
             </Button>
           </div>
         </div>
@@ -277,48 +390,41 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       {/* Main Editor */}
       <div className="max-w-3xl mx-auto px-8 py-12">
         {/* Cover Image */}
-        {featuredImage ? (
-          <div className="mb-8 relative group">
-            <img 
-              src={featuredImage} 
-              alt="Cover" 
-              className="w-full rounded-lg"
-              style={{ maxHeight: '500px', objectFit: 'cover' }}
-            />
-            <Button
-              variant="destructive"
-              size="sm"
-              className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => setFeaturedImage('')}
-            >
-              Hapus
-            </Button>
-          </div>
-        ) : (
-          <div 
-            className="mb-8 border-2 border-dashed border-gray-200 rounded-lg p-12 text-center hover:border-gray-300 cursor-pointer transition-colors group"
-            onClick={() => {
-              const url = prompt('Masukkan URL gambar cover:');
-              if (url) setFeaturedImage(url);
+        <div className="mb-8">
+          <FileUpload
+            onFileSelect={(file) => {
+              setSelectedFile(file);
+              setFeaturedImage(''); // Clear URL when file is selected
             }}
-          >
-            <ImageIcon className="h-12 w-12 mx-auto text-gray-300 group-hover:text-gray-400 transition-colors" />
-            <p className="mt-2 text-sm text-gray-500 group-hover:text-gray-600">
-              Klik untuk menambahkan cover image
-            </p>
-          </div>
-        )}
+            onFileRemove={() => {
+              setSelectedFile(null);
+              setFeaturedImage('');
+            }}
+            selectedFile={selectedFile}
+            previewUrl={featuredImage?.startsWith('http') ? featuredImage : featuredImage ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${featuredImage}` : undefined}
+            maxSize={10}
+            acceptedTypes={['image/jpeg', 'image/png', 'image/gif', 'image/webp', '.jpg', '.jpeg', '.png', '.gif', '.webp']}
+          />
+        </div>
 
         {/* Title */}
-        <Input
+        <textarea
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Judul"
-          className="border-0 text-5xl font-bold placeholder:text-gray-300 focus-visible:ring-0 px-0 mb-4"
+          className="w-full border-0 text-5xl font-bold placeholder:text-gray-300 focus:outline-none px-0 mb-4 resize-none overflow-hidden"
           style={{ 
             fontSize: '42px',
             lineHeight: '1.2',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            minHeight: '60px',
+            maxHeight: '200px'
+          }}
+          rows={1}
+          onInput={(e) => {
+            const target = e.target as HTMLTextAreaElement;
+            target.style.height = 'auto';
+            target.style.height = Math.min(target.scrollHeight, 200) + 'px';
           }}
         />
 
@@ -385,30 +491,65 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              const url = prompt('Masukkan URL gambar:');
-              if (url) {
-                setContent(content + `\n![Alt text](${url})\n`);
-              }
-            }}
-            title="Insert Image"
+            onClick={insertImage}
+            disabled={uploading}
+            title="Upload Image"
           >
-            <ImageIcon className="h-4 w-4" />
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageIcon className="h-4 w-4" />}
           </Button>
         </div>
 
         {/* Content Editor */}
-        <textarea
-          id="content-editor"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Mulai menulis cerita Anda..."
-          className="w-full min-h-[600px] text-xl leading-relaxed resize-none border-0 focus:outline-none placeholder:text-gray-300"
-          style={{ 
-            fontFamily: 'Georgia, serif',
-            lineHeight: '1.8'
-          }}
-        />
+        <div className="space-y-4">
+          {previewMode ? (
+            /* Preview Mode */
+            <div className="border rounded-lg p-6 bg-white min-h-[600px]">
+              <div className="text-sm text-gray-600 mb-4 font-medium flex items-center gap-2">
+                <Eye className="h-4 w-4" />
+                Preview Mode
+              </div>
+              {content ? (
+                <div 
+                  className="prose prose-lg max-w-none"
+                  dangerouslySetInnerHTML={{ 
+                    __html: renderContent(content)
+                  }}
+                />
+              ) : (
+                <p className="text-gray-400 italic">Tidak ada konten untuk dipreview. Klik "Edit" untuk mulai menulis.</p>
+              )}
+            </div>
+          ) : (
+            /* Edit Mode */
+            <div className="space-y-4">
+              {/* Live Preview */}
+              {content && (
+                <div className="border rounded-lg p-4 bg-gray-50">
+                  <div className="text-sm text-gray-600 mb-2 font-medium">Live Preview:</div>
+                  <div 
+                    className="prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ 
+                      __html: renderContent(content)
+                    }}
+                  />
+                </div>
+              )}
+              
+              {/* Editor */}
+              <textarea
+                id="content-editor"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Mulai menulis cerita Anda... Gunakan **tebal**, *miring*, ## heading, - list, > quote, `code`, atau upload gambar dengan tombol di atas."
+                className="w-full min-h-[600px] text-xl leading-relaxed resize-none border border-gray-200 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-gray-300"
+                style={{ 
+                  fontFamily: 'Georgia, serif',
+                  lineHeight: '1.8'
+                }}
+              />
+            </div>
+          )}
+        </div>
 
         {/* Tips */}
         <div className="mt-12 pt-8 border-t border-gray-200">
@@ -420,7 +561,11 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
                 <li>• Gunakan <code className="bg-gray-100 px-1 rounded">**tebal**</code> untuk teks bold</li>
                 <li>• Gunakan <code className="bg-gray-100 px-1 rounded">*miring*</code> untuk teks italic</li>
                 <li>• Gunakan <code className="bg-gray-100 px-1 rounded">## Judul</code> untuk heading</li>
-                <li>• Gunakan <code className="bg-gray-100 px-1 rounded">![alt](url)</code> untuk gambar</li>
+                <li>• Gunakan <code className="bg-gray-100 px-1 rounded">- item</code> untuk list</li>
+                <li>• Gunakan <code className="bg-gray-100 px-1 rounded">&gt; quote</code> untuk kutipan</li>
+                <li>• Gunakan <code className="bg-gray-100 px-1 rounded">`code`</code> untuk kode</li>
+                <li>• Klik tombol <strong>Upload Image</strong> untuk menambahkan gambar langsung ke artikel</li>
+                <li>• Preview akan muncul di atas editor untuk melihat hasil formatting</li>
               </ul>
             </div>
           </div>
@@ -461,10 +606,16 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">URL Cover Image</label>
+                <label className="block text-sm font-medium mb-2">Cover Image</label>
+                <div className="text-sm text-gray-500 mb-2">
+                  Upload gambar menggunakan area upload di atas editor, atau gunakan URL di bawah ini:
+                </div>
                 <Input
                   value={featuredImage}
-                  onChange={(e) => setFeaturedImage(e.target.value)}
+                  onChange={(e) => {
+                    setFeaturedImage(e.target.value);
+                    setSelectedFile(null); // Clear file when URL is entered
+                  }}
                   placeholder="https://example.com/image.jpg"
                 />
               </div>

@@ -58,7 +58,9 @@ const formatDate = (value: string) =>
 export function ArtikelDetailView({ artikel, related = [] }: ArtikelDetailViewProps) {
   const heroImage =
     artikel.gambar_cover && artikel.gambar_cover.trim()
-      ? artikel.gambar_cover
+      ? artikel.gambar_cover.startsWith('http')
+        ? artikel.gambar_cover
+        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${artikel.gambar_cover}`
       : 'https://images.unsplash.com/photo-1493815793585-d94ccbc86df0?w=1600&auto=format&fit=crop';
 
   const kategori = artikel.kategori;

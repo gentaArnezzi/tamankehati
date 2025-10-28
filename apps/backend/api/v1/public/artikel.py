@@ -17,16 +17,16 @@ async def get_artikel(
     db: AsyncSession = Depends(get_session)
 ):
     try:
-        # Get total count
-        count_query = text("SELECT COUNT(*) FROM articles WHERE is_published = true")
+        # Get total count - use status = 'published' or 'approved' for public articles
+        count_query = text("SELECT COUNT(*) FROM articles WHERE status IN ('published', 'approved')")
         count_result = await db.execute(count_query)
         total = count_result.scalar() or 0
         
         # Get items with pagination
         query = text("""
-            SELECT id, title, content, summary, region_code, created_at
+            SELECT id, title, slug, content, summary, category, featured_image, created_at, updated_at
             FROM articles 
-            WHERE is_published = true
+            WHERE status IN ('published', 'approved')
             ORDER BY created_at DESC 
             LIMIT :limit OFFSET :offset
         """)
@@ -38,11 +38,11 @@ async def get_artikel(
             items=[ArtikelPublicOut(
                 id=str(item.id),
                 judul=item.title or "",
-                slug=item.title.replace(" ", "-").lower() if item.title else "",
+                slug=item.slug or (item.title.replace(" ", "-").lower() if item.title else ""),
                 excerpt=item.summary or (item.content[:100] + "..." if item.content and len(item.content) > 100 else item.content or ""),
-                kategori=item.region_code or "",
+                kategori=item.category or "",
                 tanggal_publish=str(item.created_at) if item.created_at else "",
-                gambar_cover=""
+                gambar_cover=item.featured_image or ""
             ) for item in items],
             total=total,
             limit=limit,
@@ -67,20 +67,38 @@ async def get_artikel_by_slug(
     slug: str,
     db: AsyncSession = Depends(get_session)
 ):
-    # Note: The current Article model doesn't have a slug field, so matching by title
-    # In a real implementation, you'd want to add a slug field to the Article model
     from fastapi import HTTPException
     
-    item = await PublicArtikelService.get_by_slug(db=db, slug=slug)
-    if not item:
-        raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
-    
-    return ArtikelPublicOut(
-        id=str(item.id),
-        judul=item.title or "",
-        slug=slug if slug else str(item.id),  # Use slug parameter or ID as fallback
-        excerpt=item.summary or (item.content[:100] + "..." if item.content and len(item.content) > 100 else item.content or ""),
-        kategori=item.region_code or "",
-        tanggal_publish=str(item.created_at) if item.created_at else "",
-        gambar_cover=""  # No image field in current model
-    )
+    try:
+        # Query by slug or title fallback
+        query = text("""
+            SELECT id, title, slug, content, summary, category, featured_image, created_at, updated_at
+            FROM articles 
+            WHERE (slug = :slug OR title = :title_fallback) 
+            AND status IN ('published', 'approved')
+            LIMIT 1
+        """)
+        
+        # Create title fallback from slug
+        title_fallback = slug.replace("-", " ").replace("_", " ").title()
+        
+        result = await db.execute(query, {"slug": slug, "title_fallback": title_fallback})
+        item = result.fetchone()
+        
+        if not item:
+            raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
+        
+        return ArtikelPublicOut(
+            id=str(item.id),
+            judul=item.title or "",
+            slug=item.slug or slug,
+            excerpt=item.summary or (item.content[:100] + "..." if item.content and len(item.content) > 100 else item.content or ""),
+            kategori=item.category or "",
+            tanggal_publish=str(item.created_at) if item.created_at else "",
+            gambar_cover=item.featured_image or ""
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error getting article by slug: {e}")
+        raise HTTPException(status_code=500, detail="Terjadi kesalahan saat mengambil artikel")

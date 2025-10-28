@@ -64,10 +64,6 @@ export function PublicHeader() {
                   <div className="font-medium text-emerald-700">Taman Konservasi</div>
                   <div className="text-xs text-slate-500 mt-1">Area perlindungan alam</div>
                 </a>
-                <a href="/galeri" className="block px-5 py-4 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors border-b border-slate-100">
-                  <div className="font-medium text-emerald-700">Galeri Foto</div>
-                  <div className="text-xs text-slate-500 mt-1">Koleksi foto keanekaragaman</div>
-                </a>
                 <a href="/artikel" className="block px-5 py-4 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                   <div className="font-medium text-emerald-700">Artikel</div>
                   <div className="text-xs text-slate-500 mt-1">Informasi dan berita</div>
@@ -90,6 +86,10 @@ export function PublicHeader() {
                 <a href="/tentang" className="block px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors border-b border-gray-100">
                   <div className="font-light text-emerald-700">Indeks Kehati</div>
                   <div className="text-xs text-gray-500">Dashboard data publik</div>
+                </a>
+                <a href="/misi" className="block px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors border-b border-gray-100">
+                  <div className="font-light text-emerald-700">Misi Kami</div>
+                  <div className="text-xs text-gray-500">Visi dan tujuan konservasi</div>
                 </a>
                 <a href="/kontak" className="block px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                   <div className="font-light text-emerald-700">Kontak</div>

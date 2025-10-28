@@ -33,7 +33,6 @@ export function NavBar({ children, logo, className = "" }: NavBarProps) {
               { id: 4, title: 'Taman', url: '/taman' },
               { id: 5, title: 'Kegiatan', url: '/kegiatan' },
               { id: 6, title: 'Artikel', url: '/artikel' },
-              { id: 7, title: 'Galeri', url: '/galeri' },
             ]} />
           </div>
 

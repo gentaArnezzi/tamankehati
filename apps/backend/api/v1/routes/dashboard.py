@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from datetime import datetime, timedelta
 from core.database.session import get_session
 from api.v1.permissions.rbac import current_user
 from users.models import User
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/dashboard")
+
 
 @router.get("")
 @router.get("/")
@@ -15,6 +17,10 @@ async def get_dashboard(
     user: User = Depends(current_user)
 ):
     """Get dashboard data for authenticated users"""
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
         # Filter by user for Regional Admin
         user_filter = ""
@@ -126,6 +132,10 @@ async def get_recent_activity(
     user: User = Depends(current_user)
 ):
     """Get recent activity for dashboard"""
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     return {
         "activities": [
             {
@@ -144,6 +154,10 @@ async def get_pending_approvals(
     user: User = Depends(current_user)
 ):
     """Get pending approvals for dashboard"""
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     return {
         "approvals": []
     }
@@ -159,6 +173,10 @@ async def test_dashboard(
     user: User = Depends(current_user)
 ):
     """Test dashboard endpoint - verify database connectivity"""
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
         # Simple test query
         result = await db.execute(text("SELECT COUNT(*) as count FROM parks"))
@@ -183,6 +201,10 @@ async def get_overview_simple(
     user: User = Depends(current_user)
 ):
     """Simple overview dashboard - basic entity counts"""
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
         # Get basic counts
         parks_result = await db.execute(text("SELECT COUNT(*) FROM parks"))
@@ -225,6 +247,10 @@ async def get_comprehensive_simple(
     
     Time ranges: daily, weekly, monthly, quarterly, yearly, five_years
     """
+    # Check if user is authenticated (not anonymous)
+    if not user or user.id == 0:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    
     try:
         # Get time range boundaries
         end_date = datetime.now()

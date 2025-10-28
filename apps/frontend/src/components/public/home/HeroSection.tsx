@@ -5,23 +5,19 @@ export function HeroSection() {
   return (
     <section className="relative isolate overflow-hidden min-h-screen w-full -mt-20 pt-20">
       <Image
-        src="/tamankehati_images/assets_task_01k89f6138ecxv279mjxpvmgjr_1761254618_img_0.webp"
-        alt="Hutan hujan Indonesia"
+        src="/home/hero.jpg"
+        alt="Taman Kehati Indonesia - Keanekaragaman Hayati dengan papan jalan kayu melintasi hutan tropis yang subur dengan bunga-bunga berwarna-warni dan burung macaw"
         fill
+        className="object-cover"
         priority
-        className="object-cover object-center"
-        sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/10" />
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-50/10 via-transparent to-transparent" />
+      
+      {/* White gradient overlay from bottom */}
+      <div className="absolute inset-0 bg-gradient-to-t from-white/50 via-white/20 to-transparent" />
 
       <div className="relative flex min-h-screen w-full items-center">
         <div className="container mx-auto max-w-7xl px-6 py-40 md:py-48">
-          <div className="max-w-4xl space-y-8 text-white">
-            <div className="inline-flex items-center gap-3 rounded-full border border-white/20 bg-white/10 px-6 py-3 text-sm font-medium uppercase tracking-wider backdrop-blur-sm">
-              Portal Nasional Kehati
-            </div>
+          <div className="max-w-4xl space-y-8 text-black">
             <h1 className="text-balance text-5xl font-light leading-tight text-white md:text-7xl lg:text-8xl">
               Portal Keanekaragaman Hayati Indonesia
             </h1>
@@ -53,6 +49,8 @@ export function HeroSection() {
           </div>
         </div>
       </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-white/90 via-white/20 to-transparent" />
     </section>
   );
 }

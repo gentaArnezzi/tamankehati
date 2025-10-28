@@ -65,12 +65,6 @@ const menus = [
     url: '/artikel',
     dropdown: false,
   },
-  {
-    id: 6,
-    title: 'Galeri',
-    url: '/galeri',
-    dropdown: false,
-  },
 ];
 
 export function NavBarDemo() {

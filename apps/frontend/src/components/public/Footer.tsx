@@ -5,7 +5,6 @@ const NAV_LINKS = [
   { label: 'Fauna', href: '/fauna' },
   { label: 'Taman', href: '/taman' },
   { label: 'Artikel', href: '/artikel' },
-  { label: 'Galeri', href: '/galeri' },
 ];
 
 const SUPPORT_LINKS = [

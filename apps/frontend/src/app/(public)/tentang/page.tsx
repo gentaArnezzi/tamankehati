@@ -24,10 +24,19 @@ export default function IndeksKehatiPage() {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/dashboard/`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/public/stats/`);
       if (response.ok) {
         const data = await response.json();
-        setStats(data);
+        // Map public stats to dashboard format
+        setStats({
+          total_taman: data.total_taman,
+          total_flora: data.total_flora,
+          total_fauna: data.total_fauna,
+          total_users: 0, // Not available in public stats
+          published_taman: data.total_taman,
+          published_flora: data.total_flora,
+          published_fauna: data.total_fauna
+        });
       }
     } catch (error) {
       console.error('Failed to fetch stats:', error);
@@ -299,8 +308,14 @@ export default function IndeksKehatiPage() {
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <a 
-                  href="/taman" 
+                  href="/misi" 
                   className="px-8 py-3 bg-white text-green-700 font-semibold rounded-lg hover:bg-green-50 transition-colors"
+                >
+                  Pelajari Misi Kami
+                </a>
+                <a 
+                  href="/taman" 
+                  className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg hover:bg-green-600 transition-colors"
                 >
                   Lihat Taman Kehati
                 </a>

@@ -225,30 +225,12 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Park Information */}
             {fauna.park_info && (
-              <div className="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-blue-100 p-6 shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-blue-800">Informasi Taman</h2>
-                  <a
-                    href={`/taman/${fauna.park_info.id}`}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-blue-800 hover:text-blue-700 transition-colors"
-                  >
-                    Lihat Detail
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
-                      <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </a>
-                </div>
+              <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-semibold text-slate-900">Informasi Taman</h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-700">
                   <div className="flex justify-between gap-4">
                     <dt className="font-medium text-slate-600">Nama Taman</dt>
-                    <dd className="text-right text-slate-800">
-                      <a
-                        href={`/taman/${fauna.park_info.id}`}
-                        className="text-blue-800 hover:text-blue-700 font-medium transition-colors"
-                      >
-                        {fauna.park_info.name}
-                      </a>
-                    </dd>
+                    <dd className="text-right text-slate-800">{fauna.park_info.name}</dd>
                   </div>
                   {fauna.park_info.area_ha && (
                     <div className="flex justify-between gap-4">
