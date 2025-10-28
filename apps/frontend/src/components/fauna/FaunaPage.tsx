@@ -114,6 +114,11 @@ export function FaunaPage() {
   const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
   const [uploading, setUploading] = useState(false);
 
+  // Existing gallery images (for edit mode)
+  const [existingGalleries, setExistingGalleries] = useState<Array<{id: number; title: string; image_url: string}>>([]);
+  const [loadingGalleries, setLoadingGalleries] = useState(false);
+  const [galleriesToDelete, setGalleriesToDelete] = useState<Set<number>>(new Set());
+
   // Removed zone-related state as we now use park_id
 
   // Region filtering removed - using user-based access control
@@ -147,6 +152,90 @@ export function FaunaPage() {
       status: user?.role === 'regional_admin' ? 'draft' : 'approved',
     },
   });
+
+  // Fetch existing galleries when editing
+  useEffect(() => {
+    if (formOpen && formMode === 'edit' && selectedFauna?.id) {
+      fetchExistingGalleries(selectedFauna.id);
+    } else {
+      setExistingGalleries([]);
+      setGalleriesToDelete(new Set());
+    }
+  }, [formOpen, formMode, selectedFauna]);
+
+  const fetchExistingGalleries = async (faunaId: string | number) => {
+    setLoadingGalleries(true);
+    try {
+      const response = await fetch(`http://localhost:8000/api/v1/galleries/entity/fauna/${faunaId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+      });
+      
+      if (response.ok) {
+        const result = await response.json();
+        const galleries = result.data || result.items || (Array.isArray(result) ? result : []);
+        setExistingGalleries(galleries);
+        console.log('✅ Existing galleries loaded for fauna', faunaId, ':', galleries.length, 'images');
+      } else {
+        console.error('Failed to fetch fauna galleries:', response.status, response.statusText);
+        setExistingGalleries([]);
+      }
+    } catch (error) {
+      console.error('Error fetching fauna galleries:', error);
+      setExistingGalleries([]);
+    } finally {
+      setLoadingGalleries(false);
+    }
+  };
+
+  const markGalleryForDeletion = (galleryId: number) => {
+    if (!confirm('Tandai gambar ini untuk dihapus?\n\nGambar akan dihapus permanent saat Anda klik "Submit untuk Review".')) {
+      return;
+    }
+    
+    setGalleriesToDelete(prev => new Set([...prev, galleryId]));
+    console.log('Fauna Gallery marked for deletion:', galleryId);
+  };
+
+  const unmarkGalleryForDeletion = (galleryId: number) => {
+    setGalleriesToDelete(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(galleryId);
+      return newSet;
+    });
+    console.log('Fauna Gallery unmarked:', galleryId);
+  };
+
+  const deleteMarkedGalleries = async () => {
+    const deletePromises = Array.from(galleriesToDelete).map(async (galleryId) => {
+      try {
+        const response = await fetch(`http://localhost:8000/api/v1/galleries/${galleryId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        });
+        
+        if (response.ok) {
+          console.log('✅ Fauna Gallery deleted:', galleryId);
+          return { success: true, id: galleryId };
+        } else {
+          console.error('❌ Failed to delete fauna gallery:', galleryId, response.status);
+          return { success: false, id: galleryId };
+        }
+      } catch (error) {
+        console.error('❌ Error deleting fauna gallery:', galleryId, error);
+        return { success: false, id: galleryId };
+      }
+    });
+    
+    const results = await Promise.all(deletePromises);
+    const successCount = results.filter(r => r.success).length;
+    const failCount = results.length - successCount;
+    
+    return { successCount, failCount };
+  };
 
   // Removed zone loading logic as we now use park_id
 
@@ -334,6 +423,12 @@ export function FaunaPage() {
     try {
       setUploading(true);
       
+      // ✅ Delete marked galleries before submit (edit mode only)
+      if (formMode === 'edit' && galleriesToDelete.size > 0) {
+        const deleteResult = await deleteMarkedGalleries();
+        console.log(`✅ Deleted ${deleteResult.successCount} fauna galleries, ${deleteResult.failCount} failed`);
+      }
+      
       console.log('Fauna form submitting - mode:', formMode, 'status:', submitStatus);
       console.log('Fauna form data:', values);
       
@@ -431,6 +526,7 @@ export function FaunaPage() {
       setFormOpen(false);
       setSelectedFile(null);
       setSelectedFiles([]);
+      setGalleriesToDelete(new Set()); // ✅ Clear gallery deletion marks
       form.reset();
       // Clear cache and reload
       cacheRef.current.clear();
@@ -975,10 +1071,76 @@ export function FaunaPage() {
                 </div>
                 
                 {/* Multiple Images Upload */}
+                {/* Existing Gallery Images (Edit Mode) */}
+                {formMode === 'edit' && (existingGalleries.length > 0 || loadingGalleries) && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Galeri Gambar yang Sudah Ada</label>
+                    <p className="text-xs text-slate-500">
+                      Klik ikon "X" pada gambar untuk menandai penghapusan. Klik ikon "undo" untuk membatalkan.
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {existingGalleries.map((gallery) => {
+                        const isMarkedForDeletion = galleriesToDelete.has(gallery.id);
+                        return (
+                          <div key={gallery.id} className="relative group">
+                            <img
+                              src={gallery.image_url?.startsWith('http') ? gallery.image_url : `http://localhost:8000${gallery.image_url || '/placeholder.png'}`}
+                              alt={gallery.title}
+                              className={`w-full h-24 object-cover rounded border ${isMarkedForDeletion ? 'border-red-500 opacity-50 grayscale' : 'border-slate-200'}`}
+                            />
+                            {!isMarkedForDeletion ? (
+                              <button
+                                type="button"
+                                onClick={() => markGalleryForDeletion(gallery.id)}
+                                className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                                title="Tandai untuk dihapus"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => unmarkGalleryForDeletion(gallery.id)}
+                                className="absolute top-1 right-1 bg-green-500 text-white p-1.5 rounded-full opacity-100 hover:bg-green-600 shadow-lg"
+                                title="Batalkan penghapusan"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                </svg>
+                              </button>
+                            )}
+                            
+                            <p className={`text-xs mt-1 truncate ${isMarkedForDeletion ? 'text-red-600 line-through' : 'text-slate-600'}`} title={gallery.title || 'Gallery image'}>
+                              {isMarkedForDeletion ? '🗑️ Akan dihapus' : (gallery.title || 'Untitled')}
+                            </p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    {loadingGalleries && (
+                      <p className="text-xs text-slate-500 text-center mt-2">Memuat gambar...</p>
+                    )}
+                    {galleriesToDelete.size > 0 && (
+                      <div className="p-3 bg-amber-50 border border-amber-200 rounded-md">
+                        <p className="text-xs text-amber-800">
+                          ⚠️ {galleriesToDelete.size} gambar akan dihapus permanent saat Anda klik "Submit untuk Review"
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <div>
-                  <label className="text-sm font-medium">Upload Gambar Tambahan (Opsional)</label>
+                  <label className="text-sm font-medium">
+                    {formMode === 'edit' ? 'Tambahkan Gambar Baru (Opsional)' : 'Upload Gambar Tambahan (Opsional)'}
+                  </label>
                   <p className="text-xs text-gray-500 mb-2">
-                    Upload hingga 10 gambar tambahan untuk fauna ini
+                    {formMode === 'edit' 
+                      ? 'Upload hingga 10 gambar baru untuk ditambahkan ke galeri fauna ini'
+                      : 'Upload hingga 10 gambar tambahan untuk fauna ini'
+                    }
                   </p>
                   <MultipleFileUpload
                     onFilesSelect={handleFilesSelect}
@@ -1015,27 +1177,23 @@ export function FaunaPage() {
               </div>
 
               <DialogFooter className="flex gap-2">
-                <Button type="button" variant="outline" onClick={() => setFormOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => {
+                  setFormOpen(false);
+                  setGalleriesToDelete(new Set());
+                  setSelectedFile(null);
+                  setSelectedFiles([]);
+                }}>
                   Batal
-                </Button>
-                <Button 
-                  type="button"
-                  variant="secondary"
-                  disabled={uploading}
-                  onClick={form.handleSubmit((data) => handleSubmit(data, 'draft'))}
-                >
-                  {uploading 
-                    ? 'Menyimpan...' 
-                    : 'Simpan sebagai Draft'}
                 </Button>
                 <Button 
                   type="button"
                   disabled={uploading}
                   onClick={form.handleSubmit((data) => handleSubmit(data, 'in_review'))}
+                  style={{ backgroundColor: '#233c2b' }}
                 >
                   {uploading 
-                    ? 'Mengirim...' 
-                    : 'Submit untuk Review'}
+                    ? 'Menyimpan...' 
+                    : 'Simpan Data'}
                 </Button>
               </DialogFooter>
             </form>

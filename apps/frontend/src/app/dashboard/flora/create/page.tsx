@@ -211,7 +211,7 @@ export default function CreateFloraPage() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, submitStatus: 'draft' | 'in_review' = 'in_review') => {
     e.preventDefault();
 
     // Only submit when at review step
@@ -220,7 +220,7 @@ export default function CreateFloraPage() {
       return;
     }
 
-    console.log('Submitting flora data...');
+    console.log('Submitting flora data with status:', submitStatus);
 
     // Validation
     if (!formData.nama_ilmiah.trim()) {
@@ -258,7 +258,7 @@ export default function CreateFloraPage() {
       const floraData = {
         ...formData,
         gambar_utama: imageUrl,
-        status: 'draft' as const,
+        status: submitStatus,  // ✅ Use status from button click
       };
       
       // Submit flora data
@@ -773,23 +773,41 @@ export default function CreateFloraPage() {
                 <ArrowRight className="ml-1.5 h-4 w-4 inline" />
               </button>
             ) : (
-              <button
-                type="submit"
-                disabled={isSubmitting || uploading}
-                className="text-sm px-6 py-2.5 bg-gray-900 text-white hover:bg-gray-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting || uploading ? (
-                  <>
-                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin inline" />
-                    {uploading ? 'Mengunggah...' : 'Menyimpan...'}
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-1.5 h-4 w-4 inline" />
-                    Simpan Data
-                  </>
-                )}
-              </button>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={(e) => handleSubmit(e, 'draft')}
+                  disabled={isSubmitting || uploading}
+                  className="text-sm px-6 py-2.5 bg-gray-200 text-gray-700 hover:bg-gray-300 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting || uploading ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin inline" />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-1.5 h-4 w-4 inline" />
+                      Simpan sebagai Draft
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => handleSubmit(e, 'in_review')}
+                  disabled={isSubmitting || uploading}
+                  className="text-sm px-6 py-2.5 bg-gray-900 text-white hover:bg-gray-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting || uploading ? (
+                    <>
+                      <Loader2 className="mr-1.5 h-4 w-4 animate-spin inline" />
+                      Mengirim...
+                    </>
+                  ) : (
+                    'Submit untuk Review'
+                  )}
+                </button>
+              </div>
             )}
           </div>
         </form>

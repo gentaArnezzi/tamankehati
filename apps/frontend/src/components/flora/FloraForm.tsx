@@ -795,23 +795,13 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
               </Button>
               <Button 
                 type="button"
-                variant="secondary"
-                disabled={form.formState.isSubmitting || uploading}
-                onClick={form.handleSubmit((data) => handleSubmit(data, 'draft'))}
-              >
-                {uploading || form.formState.isSubmitting
-                  ? 'Menyimpan...' 
-                  : 'Simpan sebagai Draft'}
-              </Button>
-              <Button 
-                type="button"
                 disabled={form.formState.isSubmitting || uploading}
                 onClick={form.handleSubmit((data) => handleSubmit(data, 'in_review'))}
                 style={{ backgroundColor: '#233c2b' }}
               >
                 {uploading || form.formState.isSubmitting
-                  ? 'Mengirim...' 
-                  : 'Submit untuk Review'}
+                  ? 'Menyimpan...' 
+                  : 'Simpan Data'}
               </Button>
             </DialogFooter>
           </form>

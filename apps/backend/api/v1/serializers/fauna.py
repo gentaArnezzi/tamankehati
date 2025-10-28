@@ -34,6 +34,7 @@ class FaunaBase(BaseModel):
 
 class FaunaIn(FaunaBase):
     park_id: Optional[int] = Field(None, description="ID taman tempat fauna ditemukan", examples=[1])
+    status: Optional[WorkflowStatus] = Field(WorkflowStatus.draft, description="Status workflow (draft atau in_review)")
 
 class FaunaUpdate(FaunaBase):
     park_id: Optional[int] = Field(None, description="ID taman baru (opsional)")

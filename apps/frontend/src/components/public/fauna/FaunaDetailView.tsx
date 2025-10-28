@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
+import { useState, useEffect } from 'react';
 import { type FaunaDetail } from '../../../types/fauna';
 import { Badge } from '../../ui/badge';
 import { EntityCard } from '../cards/EntityCard';
@@ -25,6 +26,14 @@ type FaunaDetailViewProps = {
   fauna: FaunaDetail;
 };
 
+type GalleryImage = {
+  id: number;
+  title: string;
+  description?: string;
+  image_url: string;
+  created_at?: string;
+};
+
 const taxonomyEntries = (fauna: FaunaDetail) =>
   [
     { label: 'Nama ilmiah', value: fauna.nama_ilmiah },
@@ -39,9 +48,34 @@ const taxonomyEntries = (fauna: FaunaDetail) =>
   ].filter((entry) => entry.value);
 
 export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      try {
+        // Fetch directly from backend API
+        const response = await fetch(`http://localhost:8000/api/public/fauna/${fauna.id}/gallery`);
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fauna Gallery data fetched:', data);
+          setGalleryImages(data.gallery_images || []);
+        } else {
+          console.warn('Fauna Gallery fetch failed:', response.status);
+        }
+      } catch (error) {
+        console.error('Error fetching fauna gallery images:', error);
+      } finally {
+        setLoadingGallery(false);
+      }
+    };
+
+    fetchGalleryImages();
+  }, [fauna.id]);
+
   const heroImage =
     fauna.gambar_utama && fauna.gambar_utama.trim()
-      ? fauna.gambar_utama
+      ? (fauna.gambar_utama.startsWith('http') ? fauna.gambar_utama : `http://localhost:8000${fauna.gambar_utama}`)
       : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&auto=format&fit=crop';
 
   const jsonLd = {
@@ -72,10 +106,19 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
             <div className="flex flex-wrap items-center gap-3">
-              <Badge className="bg-emerald-600 text-white hover:bg-emerald-500">{fauna.status_iucn}</Badge>
-              <Badge variant="outline" className="border-white/40 bg-white/10 text-white">
-                {fauna.wilayah}
-              </Badge>
+              {fauna.status_iucn && (
+                <Badge className="bg-blue-600 text-white hover:bg-blue-500">{fauna.status_iucn}</Badge>
+              )}
+              {fauna.wilayah && (
+                <Badge variant="outline" className="border-white/40 bg-white/10 text-white">
+                  {fauna.wilayah}
+                </Badge>
+              )}
+              {fauna.is_endemic && (
+                <Badge className="bg-amber-600 text-white hover:bg-amber-500">
+                  Endemik Indonesia
+                </Badge>
+              )}
             </div>
             <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">{fauna.nama_ilmiah}</h1>
             {fauna.nama_umum && (
@@ -87,24 +130,51 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
         </div>
 
         <div className="grid gap-8 p-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:p-12">
-          <article className="space-y-6">
+          <article className="space-y-8">
+            {/* Deskripsi */}
             {fauna.deskripsi && (
               <div className="space-y-3">
                 <h2 className="text-2xl font-semibold text-slate-900">Deskripsi</h2>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">{fauna.deskripsi}</p>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+                  {fauna.deskripsi}
+                </p>
               </div>
             )}
 
+            {/* Morfologi */}
+            {fauna.morfologi && (
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold text-slate-900">Morfologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+                  {fauna.morfologi}
+                </p>
+              </div>
+            )}
+
+            {/* Habitat dan Ekologi */}
             {fauna.habitat && (
               <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Habitat</h3>
-                <p className="text-base leading-relaxed text-slate-700">{fauna.habitat}</p>
+                <h3 className="text-xl font-semibold text-slate-900">Habitat dan Ekologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+                  {fauna.habitat}
+                </p>
               </div>
             )}
 
+            {/* Habitat Sumber Makanan */}
+            {fauna.habitat_sumber_makanan && (
+              <div className="space-y-3">
+                <h3 className="text-xl font-semibold text-slate-900">Habitat dan Sumber Makanan</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+                  {fauna.habitat_sumber_makanan}
+                </p>
+              </div>
+            )}
+
+            {/* Sebaran Wilayah */}
             {fauna.sebaran?.length ? (
               <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran</h3>
+                <h3 className="text-xl font-semibold text-slate-900">Sebaran Wilayah</h3>
                 <ul className="flex flex-wrap gap-2 text-sm text-slate-600">
                   {fauna.sebaran.map((wilayah) => (
                     <li key={wilayah} className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
@@ -115,9 +185,10 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
               </div>
             ) : null}
 
+            {/* Peta Geografis */}
             {fauna.koordinat && (
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran Spasial</h3>
+                <h3 className="text-xl font-semibold text-slate-900">Sebaran Geografis</h3>
                 <LeafletMap
                   height="320px"
                   markers={[
@@ -132,7 +203,9 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
                   zoom={7}
                   ariaLabel={`Peta sebaran ${fauna.nama_ilmiah}`}
                 />
-                <p className="text-xs text-slate-500">Koordinat bersifat indikatif untuk visualisasi konservasi.</p>
+                <p className="text-xs text-slate-500">
+                  Koordinat yang ditampilkan bersifat indikatif untuk tujuan visualisasi.
+                </p>
               </div>
             )}
           </article>
@@ -166,6 +239,115 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
           </aside>
         </div>
       </section>
+
+      {/* Gallery Section */}
+      {!loadingGallery && galleryImages.length > 0 && (
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Koleksi {galleryImages.length} foto untuk <span className="italic">{fauna.nama_ilmiah}</span>
+              </p>
+            </div>
+            <Badge variant="outline" className="hidden sm:inline-flex">
+              {galleryImages.length} {galleryImages.length === 1 ? 'Foto' : 'Foto'}
+            </Badge>
+          </div>
+          
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {galleryImages.map((image, index) => (
+              <div 
+                key={image.id} 
+                className="group relative overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm transition-all hover:shadow-lg hover:border-blue-200"
+              >
+                <div className="aspect-square relative overflow-hidden bg-slate-100">
+                  <Image
+                    src={image.image_url.startsWith('http') ? image.image_url : `http://localhost:8000${image.image_url}`}
+                    alt={image.title}
+                    fill
+                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute top-3 right-3">
+                    <Badge className="bg-white/90 text-slate-700 hover:bg-white">
+                      #{index + 1}
+                    </Badge>
+                  </div>
+                </div>
+                <div className="p-4 space-y-1">
+                  <h3 className="font-medium text-slate-900 text-sm line-clamp-1">{image.title}</h3>
+                  {image.description && (
+                    <p className="text-xs text-slate-600 line-clamp-2">{image.description}</p>
+                  )}
+                  {image.created_at && (
+                    <p className="text-xs text-slate-400 pt-1">
+                      {new Date(image.created_at).toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+      
+      {loadingGallery && (
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <p className="mt-1 text-sm text-slate-600">Memuat galeri foto...</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-square bg-slate-200 rounded-xl" />
+                <div className="mt-3 space-y-2">
+                  <div className="h-4 bg-slate-200 rounded w-3/4" />
+                  <div className="h-3 bg-slate-200 rounded w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Empty Gallery State */}
+      {!loadingGallery && galleryImages.length === 0 && (
+        <section className="space-y-6">
+          <div>
+            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <p className="mt-1 text-sm text-slate-600">
+              Koleksi foto untuk <span className="italic">{fauna.nama_ilmiah}</span>
+            </p>
+          </div>
+          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+            <svg
+              className="mx-auto h-12 w-12 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <h3 className="mt-4 text-sm font-medium text-slate-900">Belum ada foto galeri</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Galeri foto untuk spesies ini belum tersedia atau masih dalam proses persetujuan.
+            </p>
+          </div>
+        </section>
+      )}
 
       {fauna.konten_terkait?.length ? (
         <section className="space-y-6">

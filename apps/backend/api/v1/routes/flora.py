@@ -276,10 +276,13 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
     iucn_status_value = payload.iucn_status.value if payload.iucn_status else None
     local_name_value = payload.local_name or payload.scientific_name or "Unknown"
     
-    # Insert using raw SQL - tambahkan submitted_by
+    # Insert using raw SQL - tambahkan submitted_by dan status
+    # ✅ Use status from payload (frontend sends 'draft' or 'in_review')
+    status_value = payload.status.value if payload.status else 'draft'  # Get enum value
+    
     result = await db.execute(text("""
         INSERT INTO flora (park_id, local_name, scientific_name, family, genus, description, morphology, benefits, is_endemic, iucn_status, gambar_utama, submitted_by, status, created_at, updated_at)
-        VALUES (:park_id, :local_name, :scientific_name, :family, :genus, :description, :morphology, :benefits, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, 'draft', now(), now())
+        VALUES (:park_id, :local_name, :scientific_name, :family, :genus, :description, :morphology, :benefits, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, :status, now(), now())
         RETURNING id
     """), {
         "park_id": payload.park_id,
@@ -293,7 +296,8 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
         "is_endemic": payload.is_endemic,
         "iucn_status": iucn_status_value,
         "gambar_utama": getattr(payload, 'gambar_utama', None),
-        "submitted_by": int(user.id)  # ✅ Set submitted_by (convert to int)
+        "submitted_by": int(user.id),  # ✅ Set submitted_by (convert to int)
+        "status": status_value  # ✅ Use status from frontend
     })
     
     flora_id = result.scalar()

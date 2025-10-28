@@ -31,6 +31,7 @@ class FloraBase(BaseModel):
 
 class FloraIn(FloraBase):
     park_id: Optional[int] = Field(None, description="ID taman tempat flora ditemukan", examples=[1])
+    status: Optional[WorkflowStatus] = Field(WorkflowStatus.draft, description="Status workflow (draft atau in_review)")
 
 class FloraUpdate(FloraBase):
     park_id: Optional[int] = Field(None, description="ID taman baru (opsional)")
