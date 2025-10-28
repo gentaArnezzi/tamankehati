@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
+import '../styles/onboarding-tour.css';
 
 interface InteractiveOnboardingTourProps {
   run: boolean;
@@ -111,26 +112,22 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: 'body',
           popover: {
-            title: '🎉 Selamat Datang di Taman Kehati!',
+            title: 'Selamat Datang di Taman Kehati',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Terima kasih telah bergabung sebagai <strong>Regional Admin</strong>! 
+              <p>Terima kasih telah bergabung sebagai <strong>Regional Admin</strong>. Kami akan memandu Anda mengenal sistem manajemen konservasi ini.</p>
+              
+              <p>Yang akan Anda pelajari:</p>
+              <ul>
+                <li>Membuat taman (lokasi konservasi)</li>
+                <li>Menambahkan data flora</li>
+                <li>Menambahkan data fauna</li>
+                <li>Mencatat kegiatan lapangan</li>
+              </ul>
+              
+              <div style="background-color: #dbeafe;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  <strong>Panduan Interaktif</strong> · Klik "Selanjutnya" untuk memulai perjalanan Anda
                 </p>
-                <p style="margin-bottom: 12px;">
-                  Kami akan memandu Anda untuk mengenal sistem ini:
-                </p>
-                <ul style="list-style: none; padding-left: 0; margin: 12px 0;">
-                  <li style="margin-bottom: 8px;">✅ Membuat taman (lokasi konservasi)</li>
-                  <li style="margin-bottom: 8px;">✅ Menambahkan data flora</li>
-                  <li style="margin-bottom: 8px;">✅ Menambahkan data fauna</li>
-                  <li style="margin-bottom: 8px;">✅ Mencatat kegiatan lapangan</li>
-                </ul>
-                <div style="background-color: #dbeafe; border-left: 4px solid #3b82f6; padding: 12px; margin-top: 16px; border-radius: 4px;">
-                  <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                    💡 <strong>Panduan interaktif</strong> - Klik "Selanjutnya" untuk memulai!
-                  </p>
-                </div>
               </div>
             `,
             side: 'center',
@@ -142,18 +139,14 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="nav-taman"]',
           popover: {
-            title: '🌳 Langkah 1: Menu Taman',
+            title: 'Langkah 1 · Menu Taman',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Hal pertama yang perlu Anda lakukan adalah <strong>membuat taman</strong>. 
-                  Taman adalah lokasi/kawasan konservasi tempat data flora, fauna, dan kegiatan Anda berada.
+              <p>Hal pertama yang perlu Anda lakukan adalah <strong>membuat taman</strong>. Taman adalah lokasi/kawasan konservasi tempat data flora, fauna, dan kegiatan Anda berada.</p>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik "Selanjutnya" untuk melihat form pembuatan taman
                 </p>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a; margin-top: 12px;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    ✅ Klik "Selanjutnya" untuk melihat form pembuatan taman
-                  </p>
-                </div>
               </div>
             `,
             side: 'right',
@@ -179,29 +172,28 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="taman-form"]',
           popover: {
-            title: '📝 Formulir Pembuatan Taman',
+            title: 'Formulir Pembuatan Taman',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Ini adalah <strong>form untuk membuat taman baru</strong>. Anda perlu mengisi:
-                </p>
-                <ul style="list-style: disc; margin-left: 20px; margin-bottom: 12px;">
-                  <li><strong>Nama Taman</strong> - Nama resmi taman (wajib)</li>
-                  <li><strong>Deskripsi</strong> - Penjelasan singkat</li>
-                  <li><strong>Lokasi</strong> - Provinsi, Kabupaten, dll</li>
-                  <li><strong>Detail lainnya</strong> - SK Penetapan, Pengelola, dll</li>
-                </ul>
-                <div style="background-color: #fef3c7; padding: 12px; border-radius: 6px; border-left: 4px solid #f59e0b; margin-top: 12px;">
-                  <p style="margin: 0; color: #92400e; font-size: 14px;">
-                    💡 Minimal isi <strong>Nama Taman</strong>, lalu scroll ke bawah dan klik tombol hijau <strong>"Submit untuk Review"</strong>
-                  </p>
-                </div>
-                <p style="margin-top: 12px; font-size: 13px; color: #6b7280; font-style: italic;">
-                  Setelah submit taman, klik "Selanjutnya" untuk lanjut ke Flora...
+              <p>Ini adalah <strong>form untuk membuat taman baru</strong>. Field yang perlu diisi:</p>
+              
+              <ul>
+                <li><strong>Nama Taman</strong> — Nama resmi taman (wajib)</li>
+                <li><strong>Deskripsi</strong> — Penjelasan singkat</li>
+                <li><strong>Lokasi</strong> — Provinsi, Kabupaten, dll</li>
+                <li><strong>Detail lainnya</strong> — SK Penetapan, Pengelola, dll</li>
+              </ul>
+              
+              <div style="background-color: #fef3c7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  <strong>Tips:</strong> Minimal isi Nama Taman, lalu scroll ke bawah dan klik tombol "Submit untuk Review"
                 </p>
               </div>
+              
+              <p style="font-size: 13px; color: #6b7280; font-style: italic; margin-top: 12px;">
+                Setelah submit taman, klik "Selanjutnya" untuk lanjut ke Flora
+              </p>
             `,
-            side: 'left',
+            side: 'right',
             align: 'start',
           },
           onHighlightStarted: async () => {
@@ -214,17 +206,14 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="nav-flora"]',
           popover: {
-            title: '🌿 Langkah 2: Menu Flora',
+            title: 'Langkah 2 · Menu Flora',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Sekarang mari kita lihat cara menambahkan data <strong>Flora</strong> (tumbuhan).
+              <p>Sekarang mari kita lihat cara menambahkan data <strong>Flora</strong> (tumbuhan).</p>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik "Selanjutnya" untuk membuka halaman Flora
                 </p>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    ✅ Klik "Selanjutnya" untuk membuka halaman Flora
-                  </p>
-                </div>
               </div>
             `,
             side: 'right',
@@ -249,27 +238,25 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="add-flora-button"]',
           popover: {
-            title: '🌱 Mengelola Data Flora',
+            title: 'Mengelola Data Flora',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Di halaman ini Anda dapat mengelola data flora:
+              <p>Di halaman ini Anda dapat mengelola data flora:</p>
+              
+              <ul>
+                <li>Melihat semua data flora</li>
+                <li>Menambah spesies flora baru</li>
+                <li>Upload foto flora</li>
+                <li>Mencatat status konservasi</li>
+              </ul>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik tombol <strong>"Tambah Flora"</strong> di atas untuk menambah data flora
                 </p>
-                <ul style="list-style: disc; margin-left: 20px; margin-bottom: 12px;">
-                  <li>Melihat semua data flora</li>
-                  <li>Menambah spesies flora baru</li>
-                  <li>Upload foto flora</li>
-                  <li>Mencatat status konservasi</li>
-                </ul>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a; margin-top: 12px;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    💡 Klik tombol <strong>"Tambah Flora"</strong> di atas, lalu isi form untuk menambah data flora
-                  </p>
-                </div>
               </div>
             `,
-            side: 'bottom',
-            align: 'start',
+            side: 'left',
+            align: 'center',
           },
           onHighlightStarted: async () => {
             await waitForElement('[data-tour="add-flora-button"]', 3000);
@@ -280,17 +267,14 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="nav-fauna"]',
           popover: {
-            title: '🦜 Langkah 3: Menu Fauna',
+            title: 'Langkah 3 · Menu Fauna',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Selanjutnya, mari kita lihat halaman <strong>Fauna</strong> (hewan).
+              <p>Selanjutnya, mari kita lihat halaman <strong>Fauna</strong> (hewan).</p>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik "Selanjutnya" untuk membuka halaman Fauna
                 </p>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    ✅ Klik "Selanjutnya" untuk membuka halaman Fauna
-                  </p>
-                </div>
               </div>
             `,
             side: 'right',
@@ -315,27 +299,25 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="add-fauna-button"]',
           popover: {
-            title: '🐾 Mengelola Data Fauna',
+            title: 'Mengelola Data Fauna',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Halaman Fauna berfungsi sama seperti Flora:
+              <p>Halaman Fauna berfungsi sama seperti Flora:</p>
+              
+              <ul>
+                <li>Dokumentasikan spesies hewan</li>
+                <li>Upload foto fauna</li>
+                <li>Catat status konservasi</li>
+                <li>Kelola informasi habitat & populasi</li>
+              </ul>
+              
+              <div style="background-color: #dbeafe;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik <strong>"Tambah Fauna"</strong> untuk menambah data fauna
                 </p>
-                <ul style="list-style: disc; margin-left: 20px; margin-bottom: 12px;">
-                  <li>Dokumentasikan spesies hewan</li>
-                  <li>Upload foto fauna</li>
-                  <li>Catat status konservasi</li>
-                  <li>Kelola informasi habitat & populasi</li>
-                </ul>
-                <div style="background-color: #dbeafe; padding: 12px; border-radius: 6px; border-left: 4px solid #3b82f6; margin-top: 12px;">
-                  <p style="margin: 0; color: #1e40af; font-size: 14px;">
-                    💡 Klik <strong>"Tambah Fauna"</strong> untuk menambah data fauna
-                  </p>
-                </div>
               </div>
             `,
-            side: 'bottom',
-            align: 'start',
+            side: 'left',
+            align: 'center',
           },
           onHighlightStarted: async () => {
             await waitForElement('[data-tour="add-fauna-button"]', 3000);
@@ -346,17 +328,14 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="nav-kegiatan"]',
           popover: {
-            title: '📅 Langkah 4: Menu Kegiatan',
+            title: 'Langkah 4 · Menu Kegiatan',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Terakhir, mari lihat halaman <strong>Kegiatan</strong>.
+              <p>Terakhir, mari lihat halaman <strong>Kegiatan</strong>.</p>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik "Selanjutnya" untuk membuka halaman Kegiatan
                 </p>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    ✅ Klik "Selanjutnya" untuk membuka halaman Kegiatan
-                  </p>
-                </div>
               </div>
             `,
             side: 'right',
@@ -381,27 +360,25 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: '[data-tour="add-activity-button"]',
           popover: {
-            title: '🗓️ Mengelola Kegiatan',
+            title: 'Mengelola Kegiatan',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 12px;">
-                  Di halaman Kegiatan, Anda dapat mencatat aktivitas lapangan:
+              <p>Di halaman Kegiatan, Anda dapat mencatat aktivitas lapangan:</p>
+              
+              <ul>
+                <li>Survei keanekaragaman hayati</li>
+                <li>Monitoring flora/fauna</li>
+                <li>Kegiatan konservasi</li>
+                <li>Penelitian lapangan</li>
+              </ul>
+              
+              <div style="background-color: #dcfce7;">
+                <p style="margin: 0; color: #1a1a1a;">
+                  Klik <strong>"Tambah Kegiatan"</strong> untuk mencatat kegiatan baru
                 </p>
-                <ul style="list-style: disc; margin-left: 20px; margin-bottom: 12px;">
-                  <li>Survei keanekaragaman hayati</li>
-                  <li>Monitoring flora/fauna</li>
-                  <li>Kegiatan konservasi</li>
-                  <li>Penelitian lapangan</li>
-                </ul>
-                <div style="background-color: #dcfce7; padding: 12px; border-radius: 6px; border-left: 4px solid #16a34a; margin-top: 12px;">
-                  <p style="margin: 0; color: #166534; font-size: 14px;">
-                    💡 Klik <strong>"Tambah Kegiatan"</strong> untuk mencatat kegiatan baru
-                  </p>
-                </div>
               </div>
             `,
-            side: 'bottom',
-            align: 'start',
+            side: 'left',
+            align: 'center',
           },
           onHighlightStarted: async () => {
             await waitForElement('[data-tour="add-activity-button"]', 3000);
@@ -412,43 +389,33 @@ export function InteractiveOnboardingTour({ run, onFinish }: InteractiveOnboardi
         {
           element: 'body',
           popover: {
-            title: '🎉 Panduan Selesai!',
+            title: 'Panduan Selesai',
             description: `
-              <div style="font-size: 15px; line-height: 1.8;">
-                <p style="margin-bottom: 16px; font-size: 17px; font-weight: 600; color: #16a34a;">
-                  Selamat! Anda sudah menyelesaikan panduan onboarding!
+              <p style="font-size: 17px; font-weight: 600; color: #16a34a; margin-bottom: 16px;">
+                Selamat! Anda sudah menyelesaikan panduan onboarding.
+              </p>
+              
+              <p>Anda sekarang siap untuk:</p>
+              
+              <ul>
+                <li>Membuat dan mengelola taman</li>
+                <li>Menambahkan data flora</li>
+                <li>Menambahkan data fauna</li>
+                <li>Mencatat kegiatan lapangan</li>
+              </ul>
+              
+              <div style="background-color: #dbeafe;">
+                <p style="margin: 0 0 8px 0; color: #1a1a1a; font-weight: 600;">
+                  Catatan Penting
                 </p>
-                <p style="margin-bottom: 16px;">
-                  Anda sekarang tahu cara:
-                </p>
-                <div style="display: grid; gap: 8px; margin: 12px 0;">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #16a34a; font-size: 20px;">✅</span>
-                    <span>Membuat dan mengelola taman</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #16a34a; font-size: 20px;">✅</span>
-                    <span>Menambahkan data flora</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #16a34a; font-size: 20px;">✅</span>
-                    <span>Menambahkan data fauna</span>
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span style="color: #16a34a; font-size: 20px;">✅</span>
-                    <span>Mencatat kegiatan lapangan</span>
-                  </div>
-                </div>
-                <div style="background-color: #dbeafe; padding: 16px; border-radius: 8px; border-left: 4px solid #3b82f6; margin-top: 20px;">
-                  <p style="margin: 0 0 8px 0; color: #1e40af; font-weight: 600;">📝 Catatan Penting:</p>
-                  <p style="margin: 0; color: #1e40af; font-size: 14px; line-height: 1.6;">
-                    Semua data yang Anda submit akan berstatus <strong>"Draft"</strong> dan perlu disetujui oleh Super Admin sebelum dipublikasikan.
-                  </p>
-                </div>
-                <p style="margin-top: 20px; text-align: center; font-size: 16px;">
-                  <strong>Selamat bekerja! 🚀</strong>
+                <p style="margin: 0; color: #4b5563; font-size: 14px; line-height: 1.6;">
+                  Semua data yang Anda submit akan berstatus <strong>"Draft"</strong> dan perlu disetujui oleh Super Admin sebelum dipublikasikan.
                 </p>
               </div>
+              
+              <p style="margin-top: 20px; text-align: center; font-size: 16px; font-weight: 600;">
+                Selamat bekerja!
+              </p>
             `,
             side: 'center',
             align: 'center',

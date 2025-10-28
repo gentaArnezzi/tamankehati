@@ -18,14 +18,12 @@ import {
   User as UserIcon,
   ChevronDown,
   Settings,
-  HelpCircle,
 } from 'lucide-react';
 import type { User } from '../lib/api-client';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { NotificationDropdown } from './notifications/NotificationDropdown';
 import { useNotifications } from '../hooks/useNotifications';
 import { useRouter } from 'next/navigation';
-import { ProductTour } from './ProductTour';
 import { InteractiveOnboardingTour } from './InteractiveOnboardingTour';
 import { useNewUserDetection } from '../hooks/useNewUserDetection';
 
@@ -104,7 +102,6 @@ export function CollapsibleDashboardLayout({
 }: CollapsibleDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [runTour, setRunTour] = useState(false);
   const [runOnboarding, setRunOnboarding] = useState(false);
   const onboardingStartedRef = useRef(false); // Track if onboarding has been started
   const { isNewUser, loading: loadingNewUser, markTourAsCompleted } = useNewUserDetection();
@@ -157,11 +154,11 @@ export function CollapsibleDashboardLayout({
   // Auto-trigger onboarding tour for new users (only once)
   useEffect(() => {
     if (!loadingNewUser && isNewUser && user?.role === 'regional_admin' && !onboardingStartedRef.current) {
-      // Small delay to ensure UI is fully loaded
+      // Delay to let user see the dashboard first before tour starts
       const timer = setTimeout(() => {
         setRunOnboarding(true);
         onboardingStartedRef.current = true; // Mark as started
-      }, 1000);
+      }, 3500); // 3.5 seconds delay to let user explore first
       return () => clearTimeout(timer);
     }
   }, [isNewUser, loadingNewUser, user]);
@@ -180,11 +177,6 @@ export function CollapsibleDashboardLayout({
         run={runOnboarding && user?.role === 'regional_admin'} 
         onFinish={handleOnboardingFinish} 
       />
-
-      {/* Product Tour - Manual trigger from Panduan button */}
-      {user?.role === 'regional_admin' && (
-        <ProductTour run={runTour} onFinish={() => setRunTour(false)} />
-      )}
       
       <div className="flex w-full bg-gray-50 text-gray-900">
         {/* Sidebar */}
@@ -235,16 +227,6 @@ export function CollapsibleDashboardLayout({
                   >
                     <Settings className="h-4 w-4" />
                     <span>Pengaturan</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setUserMenuOpen(false);
-                      onNavigate('/dashboard/help');
-                    }}
-                    className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <HelpCircle className="h-4 w-4" />
-                    <span>Bantuan</span>
                   </button>
                   <div className="border-t border-gray-200 my-1"></div>
                   <button
@@ -320,22 +302,6 @@ export function CollapsibleDashboardLayout({
               <div className="px-3 py-2 text-xs font-bold text-gray-900 uppercase tracking-wide">
                 Account
               </div>
-            )}
-            
-            {/* Help/Tour Button - Only for Regional Admin */}
-            {user?.role === 'regional_admin' && (
-              <button
-                onClick={() => setRunTour(true)}
-                title={!sidebarOpen ? "Panduan" : undefined}
-                className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-900 hover:bg-brand-50 hover:text-brand-700"
-              >
-                <div className="grid h-full w-12 place-content-center">
-                  <HelpCircle className="h-4 w-4" />
-                </div>
-                {sidebarOpen && (
-                  <span className="text-sm font-medium">Panduan</span>
-                )}
-              </button>
             )}
             
             {/* Settings Button */}
