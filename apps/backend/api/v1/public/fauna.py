@@ -28,8 +28,11 @@ async def get_fauna(
 ):
     """Get approved fauna for public display"""
     try:
-        # Build query for approved fauna only
-        stmt = select(Fauna).where(Fauna.status == "approved")
+        # Build query for approved fauna only (exclude deleted)
+        stmt = select(Fauna).where(
+            Fauna.status == "approved",
+            Fauna.deleted_at == None
+        )
         
         # Add search filter
         if search:
@@ -95,8 +98,12 @@ async def get_fauna_by_id(
 ):
     """Get single fauna by ID with enhanced data"""
     try:
-        # Enhanced query with park information
-        stmt = select(Fauna).where(Fauna.id == id, Fauna.status == "approved")
+        # Enhanced query with park information (exclude deleted)
+        stmt = select(Fauna).where(
+            Fauna.id == id, 
+            Fauna.status == "approved",
+            Fauna.deleted_at == None
+        )
         result = await db.execute(stmt)
         item = result.scalar_one_or_none()
         

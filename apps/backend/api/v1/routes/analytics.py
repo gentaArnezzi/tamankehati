@@ -88,30 +88,32 @@ async def get_dashboard(db: AsyncSession = Depends(get_session), user=Depends(cu
             park_filter = "AND p.id = :park_id"
             params["park_id"] = user.park_id
 
-        # Flora stats (updated: flora now links directly to parks)
+        # ✅ Flora stats - ONLY APPROVED untuk analytics publik!
+        # ✅ EXCLUDE draft, rejected, deleted data
         flora_sql = f"""
             SELECT
                 COUNT(*) as total,
-                COALESCE(SUM(CASE WHEN f.status = 'approved' THEN 1 ELSE 0 END), 0) as approved,
-                COALESCE(SUM(CASE WHEN f.status = 'in_review' THEN 1 ELSE 0 END), 0) as in_review,
+                COUNT(*) as approved,
+                0 as in_review,
                 COALESCE(SUM(CASE WHEN f.is_endemic = true THEN 1 ELSE 0 END), 0) as endemic
             FROM flora f
             JOIN parks p ON f.park_id = p.id
-            WHERE 1=1 {park_filter}
+            WHERE f.status = 'approved' AND f.deleted_at IS NULL {park_filter}
         """
         flora_result = await db.execute(text(flora_sql), params)
         flora_stats = flora_result.first() or (0, 0, 0, 0)
 
-        # Fauna stats (updated: fauna now links directly to parks)
+        # ✅ Fauna stats - ONLY APPROVED untuk analytics publik!
+        # ✅ EXCLUDE draft, rejected, deleted data
         fauna_sql = f"""
             SELECT
                 COUNT(*) as total,
-                COALESCE(SUM(CASE WHEN f.status = 'approved' THEN 1 ELSE 0 END), 0) as approved,
-                COALESCE(SUM(CASE WHEN f.status = 'in_review' THEN 1 ELSE 0 END), 0) as in_review,
+                COUNT(*) as approved,
+                0 as in_review,
                 COALESCE(SUM(CASE WHEN f.is_endemic = true THEN 1 ELSE 0 END), 0) as endemic
             FROM fauna f
             JOIN parks p ON f.park_id = p.id
-            WHERE 1=1 {park_filter}
+            WHERE f.status = 'approved' AND f.deleted_at IS NULL {park_filter}
         """
         fauna_result = await db.execute(text(fauna_sql), params)
         fauna_stats = fauna_result.first() or (0, 0, 0, 0)

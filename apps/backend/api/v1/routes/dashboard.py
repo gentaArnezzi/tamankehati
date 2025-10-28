@@ -30,16 +30,17 @@ async def get_dashboard(
             filter_params = {"user_id": user.id}
         
         # Get real statistics from database
-        # Count pending approvals (status != 'approved' AND status != 'rejected')
-        # This includes 'in_review', 'draft', and any other pending status
+        # ✅ Count pending approvals = 'in_review' ONLY (NOT draft!)
+        # ✅ EXCLUDE deleted data (deleted_at IS NULL)
+        # Draft tidak dihitung sebagai pending approval
         # Regional Admin: only their submitted data
         # Super Admin: all data
         pending_sql = f"""
             SELECT 
-                (SELECT COUNT(*) FROM flora WHERE status NOT IN ('approved', 'rejected') {user_filter}) +
-                (SELECT COUNT(*) FROM fauna WHERE status NOT IN ('approved', 'rejected') {user_filter}) +
-                (SELECT COUNT(*) FROM parks WHERE status NOT IN ('approved', 'rejected') {user_filter}) +
-                (SELECT COUNT(*) FROM activities WHERE status NOT IN ('approved', 'rejected') {user_filter}) as total_pending
+                (SELECT COUNT(*) FROM flora WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
+                (SELECT COUNT(*) FROM fauna WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
+                (SELECT COUNT(*) FROM parks WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
+                (SELECT COUNT(*) FROM activities WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) as total_pending
         """
         pending_result = await db.execute(text(pending_sql), filter_params)
         pending_approvals = pending_result.scalar() or 0
@@ -52,8 +53,8 @@ async def get_dashboard(
         else:
             total_users = 0
         
-        # Count articles (approved flora)
-        articles_sql = f"SELECT COUNT(*) FROM flora WHERE status = 'approved' {user_filter}"
+        # Count articles (approved flora) - exclude deleted
+        articles_sql = f"SELECT COUNT(*) FROM flora WHERE status = 'approved' AND deleted_at IS NULL {user_filter}"
         articles_result = await db.execute(text(articles_sql), filter_params)
         total_articles = articles_result.scalar() or 0
         
@@ -65,17 +66,30 @@ async def get_dashboard(
         else:
             total_announcements = 0
         
-        # Count flora and fauna
-        flora_sql = f"SELECT COUNT(*) FROM flora {('WHERE ' + user_filter.replace('AND ', '')) if user_filter else ''}"
+        # ✅ Count flora and fauna (ONLY APPROVED - untuk statistik publik!)
+        # ✅ EXCLUDE draft, rejected, deleted data
+        # Regional admin: count their approved data
+        # Super admin: count all approved data
+        if user.role == "regional_admin":
+            # Regional admin sees count of their approved data only
+            flora_sql = f"SELECT COUNT(*) FROM flora WHERE submitted_by = :user_id AND status = 'approved' AND deleted_at IS NULL"
+            fauna_sql = f"SELECT COUNT(*) FROM fauna WHERE submitted_by = :user_id AND status = 'approved' AND deleted_at IS NULL"
+        else:
+            # Super admin: count only approved data for statistics
+            flora_sql = "SELECT COUNT(*) FROM flora WHERE status = 'approved' AND deleted_at IS NULL"
+            fauna_sql = "SELECT COUNT(*) FROM fauna WHERE status = 'approved' AND deleted_at IS NULL"
+        
         flora_result = await db.execute(text(flora_sql), filter_params)
         total_flora = flora_result.scalar() or 0
         
-        fauna_sql = f"SELECT COUNT(*) FROM fauna {('WHERE ' + user_filter.replace('AND ', '')) if user_filter else ''}"
         fauna_result = await db.execute(text(fauna_sql), filter_params)
         total_fauna = fauna_result.scalar() or 0
         
-        # Count parks
-        parks_sql = f"SELECT COUNT(*) FROM parks {('WHERE ' + user_filter.replace('AND ', '')) if user_filter else ''}"
+        # Count parks (exclude deleted)
+        if user.role == "regional_admin":
+            parks_sql = f"SELECT COUNT(*) FROM parks WHERE submitted_by = :user_id AND deleted_at IS NULL"
+        else:
+            parks_sql = "SELECT COUNT(*) FROM parks WHERE deleted_at IS NULL"
         parks_result = await db.execute(text(parks_sql), filter_params)
         total_parks = parks_result.scalar() or 0
         
@@ -293,7 +307,9 @@ async def get_comprehensive_simple(
                 COALESCE(SUM(p.area_ha), 0) as total_area_ha,
                 COALESCE(AVG(p.area_ha), 0) as avg_area_ha
             FROM parks p
-            WHERE p.created_at >= :start_date AND p.created_at <= :end_date {parks_filter}
+            WHERE p.created_at >= :start_date AND p.created_at <= :end_date 
+                AND p.deleted_at IS NULL
+                {parks_filter}
         """
         
         parks_params = {"start_date": start_date, "end_date": end_date}
@@ -305,27 +321,31 @@ async def get_comprehensive_simple(
         total_area_ha = parks_data[1] or 0
         avg_area_ha = parks_data[2] or 0
         
-        # Flora counts - filter by submitted_by for Regional Admin
+        # ✅ Flora counts - ONLY APPROVED untuk dashboard analytics publik!
+        # ✅ EXCLUDE draft, rejected, deleted data
         flora_sql = f"""
             SELECT 
                 COUNT(*) as total,
                 COUNT(CASE WHEN f.is_endemic = true THEN 1 END) as endemic,
-                COUNT(CASE WHEN f.status = 'approved' THEN 1 END) as approved
+                COUNT(*) as approved
             FROM flora f
-            WHERE f.created_at >= :start_date AND f.created_at <= :end_date {user_filter}
+            WHERE f.created_at >= :start_date AND f.created_at <= :end_date 
+                AND f.status = 'approved' AND f.deleted_at IS NULL {user_filter}
         """
         
         flora_result = await db.execute(text(flora_sql), {**filter_params, "start_date": start_date, "end_date": end_date})
         flora_data = flora_result.first()
         
-        # Fauna counts - filter by submitted_by for Regional Admin
+        # ✅ Fauna counts - ONLY APPROVED untuk dashboard analytics publik!
+        # ✅ EXCLUDE draft, rejected, deleted data
         fauna_sql = f"""
             SELECT 
                 COUNT(*) as total,
                 COUNT(CASE WHEN f.is_endemic = true THEN 1 END) as endemic,
-                COUNT(CASE WHEN f.status = 'approved' THEN 1 END) as approved
+                COUNT(*) as approved
             FROM fauna f
-            WHERE f.created_at >= :start_date AND f.created_at <= :end_date {user_filter}
+            WHERE f.created_at >= :start_date AND f.created_at <= :end_date 
+                AND f.status = 'approved' AND f.deleted_at IS NULL {user_filter}
         """
         
         fauna_result = await db.execute(text(fauna_sql), {**filter_params, "start_date": start_date, "end_date": end_date})
@@ -339,7 +359,9 @@ async def get_comprehensive_simple(
         activities_sql = f"""
             SELECT COUNT(*) as total_activities
             FROM activities a
-            WHERE a.created_at >= :start_date AND a.created_at <= :end_date {activities_filter}
+            WHERE a.created_at >= :start_date AND a.created_at <= :end_date 
+                AND a.deleted_at IS NULL
+                {activities_filter}
         """
         
         activities_params = {"start_date": start_date, "end_date": end_date}
@@ -352,15 +374,24 @@ async def get_comprehensive_simple(
         # For regional admin, replace "f.submitted_by" with "submitted_by" in subquery
         monthly_user_filter = user_filter.replace('f.submitted_by', 'submitted_by') if user_filter else ''
         
+        # ✅ Monthly discoveries - only approved data
         monthly_sql = f"""
             SELECT 
                 TO_CHAR(created_at, 'Mon') as month,
                 EXTRACT(MONTH FROM created_at) as month_num,
                 COUNT(*) as discoveries
             FROM (
-                SELECT created_at FROM flora WHERE created_at >= :start_date AND created_at <= :end_date {monthly_user_filter}
+                SELECT created_at FROM flora 
+                WHERE created_at >= :start_date AND created_at <= :end_date 
+                    AND deleted_at IS NULL 
+                    AND status = 'approved'
+                    {monthly_user_filter}
                 UNION ALL
-                SELECT created_at FROM fauna WHERE created_at >= :start_date AND created_at <= :end_date {monthly_user_filter}
+                SELECT created_at FROM fauna 
+                WHERE created_at >= :start_date AND created_at <= :end_date 
+                    AND deleted_at IS NULL 
+                    AND status = 'approved'
+                    {monthly_user_filter}
             ) combined
             GROUP BY TO_CHAR(created_at, 'Mon'), EXTRACT(MONTH FROM created_at)
             ORDER BY month_num
@@ -375,7 +406,7 @@ async def get_comprehensive_simple(
             for row in monthly_result.fetchall()
         ]
         
-        # Get regional/park distribution (for regional admins, show their parks only)
+        # ✅ Get regional/park distribution - only approved data
         if user.role == "super_admin":
             # Super admin sees distribution by province
             # Only count parks with provinsi (skip NULL values)
@@ -386,19 +417,28 @@ async def get_comprehensive_simple(
                     COUNT(DISTINCT f.id) as flora,
                     COUNT(DISTINCT fa.id) as fauna
                 FROM parks p
-                LEFT JOIN flora f ON f.park_id = p.id AND f.created_at >= :start_date AND f.created_at <= :end_date
-                LEFT JOIN fauna fa ON fa.park_id = p.id AND fa.created_at >= :start_date AND fa.created_at <= :end_date
+                LEFT JOIN flora f ON f.park_id = p.id 
+                    AND f.created_at >= :start_date 
+                    AND f.created_at <= :end_date
+                    AND f.deleted_at IS NULL
+                    AND f.status = 'approved'
+                LEFT JOIN fauna fa ON fa.park_id = p.id 
+                    AND fa.created_at >= :start_date 
+                    AND fa.created_at <= :end_date
+                    AND fa.deleted_at IS NULL
+                    AND fa.status = 'approved'
                 WHERE p.provinsi IS NOT NULL 
                     AND p.provinsi != ''
                     AND p.created_at >= :start_date 
                     AND p.created_at <= :end_date
+                    AND p.deleted_at IS NULL
                 GROUP BY p.provinsi
                 ORDER BY (COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id)) DESC, parks DESC
                 LIMIT 10
             """
             regional_result = await db.execute(text(regional_sql), {"start_date": start_date, "end_date": end_date})
         else:
-            # Regional admin sees parks they submitted with their flora/fauna
+            # Regional admin sees parks they submitted with their approved flora/fauna
             regional_sql = f"""
                 SELECT 
                     p.name as region,
@@ -406,11 +446,18 @@ async def get_comprehensive_simple(
                     COUNT(DISTINCT f.id) as flora,
                     COUNT(DISTINCT fa.id) as fauna
                 FROM parks p
-                LEFT JOIN flora f ON f.park_id = p.id AND f.submitted_by = :user_id
-                LEFT JOIN fauna fa ON fa.park_id = p.id AND fa.submitted_by = :user_id
+                LEFT JOIN flora f ON f.park_id = p.id 
+                    AND f.submitted_by = :user_id
+                    AND f.deleted_at IS NULL
+                    AND f.status = 'approved'
+                LEFT JOIN fauna fa ON fa.park_id = p.id 
+                    AND fa.submitted_by = :user_id
+                    AND fa.deleted_at IS NULL
+                    AND fa.status = 'approved'
                 WHERE p.submitted_by = :user_id 
                     AND p.created_at >= :start_date 
                     AND p.created_at <= :end_date
+                    AND p.deleted_at IS NULL
                 GROUP BY p.name
                 ORDER BY (COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id)) DESC
                 LIMIT 10
@@ -428,16 +475,25 @@ async def get_comprehensive_simple(
         ]
         
         # Get park details with species count
-        # For regional admin, show only flora/fauna they submitted
+        # For regional admin, show only approved flora/fauna they submitted
+        # ✅ Park distribution - only approved data
         park_distribution_sql = f"""
             SELECT 
                 p.name,
                 COALESCE(p.area_ha, 0) as area,
                 COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id) as species
             FROM parks p
-            LEFT JOIN flora f ON f.park_id = p.id {'AND f.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
-            LEFT JOIN fauna fa ON fa.park_id = p.id {'AND fa.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
-            WHERE p.created_at >= :start_date AND p.created_at <= :end_date {parks_filter}
+            LEFT JOIN flora f ON f.park_id = p.id 
+                AND f.deleted_at IS NULL 
+                AND f.status = 'approved'
+                {'AND f.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
+            LEFT JOIN fauna fa ON fa.park_id = p.id 
+                AND fa.deleted_at IS NULL 
+                AND fa.status = 'approved'
+                {'AND fa.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
+            WHERE p.created_at >= :start_date AND p.created_at <= :end_date 
+                AND p.deleted_at IS NULL
+                {parks_filter}
             GROUP BY p.name, p.area_ha
             ORDER BY species DESC
             LIMIT 8

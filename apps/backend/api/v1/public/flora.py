@@ -29,8 +29,11 @@ async def get_flora(
 ):
     """Get approved flora for public display"""
     try:
-        # Build query for approved flora only
-        stmt = select(Flora).where(Flora.status == "approved")
+        # Build query for approved flora only (exclude deleted)
+        stmt = select(Flora).where(
+            Flora.status == "approved",
+            Flora.deleted_at == None
+        )
         
         # Add search filter
         if search:
@@ -96,8 +99,12 @@ async def get_flora_by_id(
 ):
     """Get single flora by ID with enhanced data"""
     try:
-        # Enhanced query with park information
-        stmt = select(Flora).where(Flora.id == id, Flora.status == "approved")
+        # Enhanced query with park information (exclude deleted)
+        stmt = select(Flora).where(
+            Flora.id == id, 
+            Flora.status == "approved",
+            Flora.deleted_at == None
+        )
         result = await db.execute(stmt)
         item = result.scalar_one_or_none()
         
@@ -176,8 +183,12 @@ async def get_flora_gallery(
 ):
     """Get gallery images for a specific flora"""
     try:
-        # First check if flora exists and is approved
-        flora_stmt = select(Flora).where(Flora.id == id, Flora.status == "approved")
+        # First check if flora exists and is approved (exclude deleted)
+        flora_stmt = select(Flora).where(
+            Flora.id == id, 
+            Flora.status == "approved",
+            Flora.deleted_at == None
+        )
         flora_result = await db.execute(flora_stmt)
         flora = flora_result.scalar_one_or_none()
         

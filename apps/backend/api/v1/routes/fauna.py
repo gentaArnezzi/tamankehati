@@ -51,6 +51,40 @@ async def list_fauna(
     # Get real data from database
     stmt = select(Fauna).where(Fauna.deleted_at == None)
     
+    # ✅ IMPORTANT: Filter berdasarkan status dan permission
+    # - Draft: hanya pembuat yang bisa lihat
+    # - Rejected: hanya pembuat dan super admin yang bisa lihat
+    # - Deleted: tidak bisa diakses siapapun (sudah di-filter di atas)
+    # - Approved & In_review: semua authenticated user bisa lihat
+    try:
+        user_id_int = int(user.id)
+        from sqlalchemy import or_, and_
+        
+        if user.role == UserRole.super_admin:
+            # Super admin bisa lihat semua status kecuali deleted
+            pass
+        else:
+            # Regional admin dan user lain:
+            # - Bisa lihat approved dan in_review
+            # - Bisa lihat draft dan rejected milik mereka sendiri
+            stmt = stmt.where(
+                or_(
+                    Fauna.status.in_(['approved', 'in_review']),  # Public statuses
+                    and_(
+                        Fauna.status.in_(['draft', 'rejected']),  # Private statuses
+                        Fauna.submitted_by == user_id_int  # Only their own
+                    )
+                )
+            )
+        print(f"🔒 [FAUNA] Filtering by status and user permissions (user_id: {user_id_int}, role: {user.role})")
+    except (ValueError, TypeError) as e:
+        print(f"⚠️ Failed to apply status filter: {e}")
+    
+    # Filter by status
+    if status_filter:
+        stmt = stmt.where(Fauna.status == status_filter)
+        print(f"🔍 [FAUNA] Filtering by status: {status_filter}")
+    
     # Filter by submitted_by
     if submitted_by:
         if submitted_by == "me":
@@ -89,6 +123,29 @@ async def list_fauna(
     
     # Get total count with same filter
     count_stmt = select(func.count(Fauna.id)).where(Fauna.deleted_at == None)
+    
+    # ✅ Apply same status filter to count
+    try:
+        user_id_int = int(user.id)
+        from sqlalchemy import or_, and_
+        
+        if user.role != UserRole.super_admin:
+            count_stmt = count_stmt.where(
+                or_(
+                    Fauna.status.in_(['approved', 'in_review']),
+                    and_(
+                        Fauna.status.in_(['draft', 'rejected']),
+                        Fauna.submitted_by == user_id_int
+                    )
+                )
+            )
+    except (ValueError, TypeError):
+        pass
+    
+    # Apply status filter to count if provided
+    if status_filter:
+        count_stmt = count_stmt.where(Fauna.status == status_filter)
+    
     if submitted_by:
         if submitted_by == "me":
             try:
