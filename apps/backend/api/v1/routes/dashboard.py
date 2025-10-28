@@ -16,7 +16,7 @@ async def get_dashboard(
     db: AsyncSession = Depends(get_session),
     user: User = Depends(current_user)
 ):
-    """Get dashboard data for authenticated users"""
+    """Get dashboard data - showing ONLY APPROVED data for statistics"""
     # Check if user is authenticated (not anonymous)
     if not user or user.id == 0:
         raise HTTPException(status_code=401, detail="Authentication required")
@@ -66,18 +66,17 @@ async def get_dashboard(
         else:
             total_announcements = 0
         
-        # ✅ Count flora and fauna untuk dashboard
-        # ✅ EXCLUDE deleted data (deleted_at IS NULL)
-        # Regional admin: count ALL their data (termasuk draft, in_review, approved, rejected)
-        # Super admin: count ALL data (untuk admin dashboard overview)
+        # ✅ Count flora and fauna untuk dashboard - ONLY APPROVED
+        # ✅ EXCLUDE draft, rejected, deleted data
+        # Dashboard ini untuk statistik publik/approved saja
         if user.role == "regional_admin":
-            # Regional admin sees ALL their data count
-            flora_sql = f"SELECT COUNT(*) FROM flora WHERE submitted_by = :user_id AND deleted_at IS NULL"
-            fauna_sql = f"SELECT COUNT(*) FROM fauna WHERE submitted_by = :user_id AND deleted_at IS NULL"
+            # Regional admin sees count of their approved data
+            flora_sql = f"SELECT COUNT(*) FROM flora WHERE submitted_by = :user_id AND status = 'approved' AND deleted_at IS NULL"
+            fauna_sql = f"SELECT COUNT(*) FROM fauna WHERE submitted_by = :user_id AND status = 'approved' AND deleted_at IS NULL"
         else:
-            # Super admin: count all non-deleted data
-            flora_sql = "SELECT COUNT(*) FROM flora WHERE deleted_at IS NULL"
-            fauna_sql = "SELECT COUNT(*) FROM fauna WHERE deleted_at IS NULL"
+            # Super admin: count only approved data
+            flora_sql = "SELECT COUNT(*) FROM flora WHERE status = 'approved' AND deleted_at IS NULL"
+            fauna_sql = "SELECT COUNT(*) FROM fauna WHERE status = 'approved' AND deleted_at IS NULL"
         
         flora_result = await db.execute(text(flora_sql), filter_params)
         total_flora = flora_result.scalar() or 0
@@ -321,41 +320,38 @@ async def get_comprehensive_simple(
         total_area_ha = parks_data[1] or 0
         avg_area_ha = parks_data[2] or 0
         
-        # ✅ Flora counts - untuk analytics dashboard
-        # ✅ EXCLUDE deleted data
-        # Regional Admin: semua data mereka (termasuk draft/in_review)
-        # Super Admin: semua data (untuk overview lengkap)
+        # ✅ Flora counts - ONLY APPROVED untuk dashboard statistics
+        # ✅ EXCLUDE draft, rejected, deleted data
         flora_sql = f"""
             SELECT 
                 COUNT(*) as total,
                 COUNT(CASE WHEN f.is_endemic = true THEN 1 END) as endemic,
-                COUNT(CASE WHEN f.status = 'approved' THEN 1 END) as approved
+                COUNT(*) as approved
             FROM flora f
             WHERE f.created_at >= :start_date AND f.created_at <= :end_date 
-                AND f.deleted_at IS NULL {user_filter}
+                AND f.status = 'approved' AND f.deleted_at IS NULL {user_filter}
         """
         
         flora_result = await db.execute(text(flora_sql), {**filter_params, "start_date": start_date, "end_date": end_date})
         flora_data = flora_result.first()
         
-        # ✅ Fauna counts - untuk analytics dashboard
-        # ✅ EXCLUDE deleted data
-        # Regional Admin: semua data mereka (termasuk draft/in_review)
-        # Super Admin: semua data (untuk overview lengkap)
+        # ✅ Fauna counts - ONLY APPROVED untuk dashboard statistics
+        # ✅ EXCLUDE draft, rejected, deleted data
         fauna_sql = f"""
             SELECT 
                 COUNT(*) as total,
                 COUNT(CASE WHEN f.is_endemic = true THEN 1 END) as endemic,
-                COUNT(CASE WHEN f.status = 'approved' THEN 1 END) as approved
+                COUNT(*) as approved
             FROM fauna f
             WHERE f.created_at >= :start_date AND f.created_at <= :end_date 
-                AND f.deleted_at IS NULL {user_filter}
+                AND f.status = 'approved' AND f.deleted_at IS NULL {user_filter}
         """
         
         fauna_result = await db.execute(text(fauna_sql), {**filter_params, "start_date": start_date, "end_date": end_date})
         fauna_data = fauna_result.first()
         
         # Activities count - filter by submitted_by for Regional Admin
+        # Note: activities table doesn't have deleted_at column
         activities_filter = ""
         if user.role == "regional_admin":
             activities_filter = "AND a.submitted_by = :user_id"
@@ -363,8 +359,7 @@ async def get_comprehensive_simple(
         activities_sql = f"""
             SELECT COUNT(*) as total_activities
             FROM activities a
-            WHERE a.created_at >= :start_date AND a.created_at <= :end_date 
-                AND a.deleted_at IS NULL
+            WHERE a.created_at >= :start_date AND a.created_at <= :end_date
                 {activities_filter}
         """
         
@@ -378,9 +373,7 @@ async def get_comprehensive_simple(
         # For regional admin, replace "f.submitted_by" with "submitted_by" in subquery
         monthly_user_filter = user_filter.replace('f.submitted_by', 'submitted_by') if user_filter else ''
         
-        # ✅ Monthly discoveries - exclude deleted only
-        # Regional Admin: all their data (termasuk draft/in_review)
-        # Super Admin: all data (untuk analytics lengkap)
+        # ✅ Monthly discoveries - ONLY APPROVED
         monthly_sql = f"""
             SELECT 
                 TO_CHAR(created_at, 'Mon') as month,
@@ -389,12 +382,12 @@ async def get_comprehensive_simple(
             FROM (
                 SELECT created_at FROM flora 
                 WHERE created_at >= :start_date AND created_at <= :end_date 
-                    AND deleted_at IS NULL
+                    AND status = 'approved' AND deleted_at IS NULL
                     {monthly_user_filter}
                 UNION ALL
                 SELECT created_at FROM fauna 
                 WHERE created_at >= :start_date AND created_at <= :end_date 
-                    AND deleted_at IS NULL
+                    AND status = 'approved' AND deleted_at IS NULL
                     {monthly_user_filter}
             ) combined
             GROUP BY TO_CHAR(created_at, 'Mon'), EXTRACT(MONTH FROM created_at)
@@ -410,9 +403,9 @@ async def get_comprehensive_simple(
             for row in monthly_result.fetchall()
         ]
         
-        # ✅ Get regional/park distribution - exclude deleted
+        # ✅ Get regional/park distribution - ONLY APPROVED
         if user.role == "super_admin":
-            # Super admin sees distribution by province (all data)
+            # Super admin sees distribution by province (approved data only)
             # Only count parks with provinsi (skip NULL values)
             regional_sql = """
                 SELECT 
@@ -424,11 +417,11 @@ async def get_comprehensive_simple(
                 LEFT JOIN flora f ON f.park_id = p.id 
                     AND f.created_at >= :start_date 
                     AND f.created_at <= :end_date
-                    AND f.deleted_at IS NULL
+                    AND f.status = 'approved' AND f.deleted_at IS NULL
                 LEFT JOIN fauna fa ON fa.park_id = p.id 
                     AND fa.created_at >= :start_date 
                     AND fa.created_at <= :end_date
-                    AND fa.deleted_at IS NULL
+                    AND fa.status = 'approved' AND fa.deleted_at IS NULL
                 WHERE p.provinsi IS NOT NULL 
                     AND p.provinsi != ''
                     AND p.created_at >= :start_date 
@@ -440,7 +433,7 @@ async def get_comprehensive_simple(
             """
             regional_result = await db.execute(text(regional_sql), {"start_date": start_date, "end_date": end_date})
         else:
-            # Regional admin sees parks they submitted with all their flora/fauna
+            # Regional admin sees parks they submitted with approved flora/fauna only
             regional_sql = f"""
                 SELECT 
                     p.name as region,
@@ -450,10 +443,10 @@ async def get_comprehensive_simple(
                 FROM parks p
                 LEFT JOIN flora f ON f.park_id = p.id 
                     AND f.submitted_by = :user_id
-                    AND f.deleted_at IS NULL
+                    AND f.status = 'approved' AND f.deleted_at IS NULL
                 LEFT JOIN fauna fa ON fa.park_id = p.id 
                     AND fa.submitted_by = :user_id
-                    AND fa.deleted_at IS NULL
+                    AND fa.status = 'approved' AND fa.deleted_at IS NULL
                 WHERE p.submitted_by = :user_id 
                     AND p.created_at >= :start_date 
                     AND p.created_at <= :end_date
@@ -475,8 +468,8 @@ async def get_comprehensive_simple(
         ]
         
         # Get park details with species count
-        # For regional admin, show all flora/fauna they submitted
-        # ✅ Park distribution - exclude deleted only
+        # For regional admin, show approved flora/fauna they submitted
+        # ✅ Park distribution - ONLY APPROVED
         park_distribution_sql = f"""
             SELECT 
                 p.name,
@@ -484,10 +477,10 @@ async def get_comprehensive_simple(
                 COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id) as species
             FROM parks p
             LEFT JOIN flora f ON f.park_id = p.id 
-                AND f.deleted_at IS NULL
+                AND f.status = 'approved' AND f.deleted_at IS NULL
                 {'AND f.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
             LEFT JOIN fauna fa ON fa.park_id = p.id 
-                AND fa.deleted_at IS NULL
+                AND fa.status = 'approved' AND fa.deleted_at IS NULL
                 {'AND fa.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
             WHERE p.created_at >= :start_date AND p.created_at <= :end_date 
                 AND p.deleted_at IS NULL
