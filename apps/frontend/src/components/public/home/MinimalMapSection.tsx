@@ -106,7 +106,7 @@ export function MinimalMapSection() {
             initial={{ opacity: 0, x: 30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative"
+            className="relative z-0"
           >
             {!loading && parks.length > 0 && (
               <>
@@ -134,7 +134,7 @@ export function MinimalMapSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: 0.8 }}
-                  className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md rounded-xl p-6 border border-emerald-100 shadow-lg"
+                  className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md rounded-xl p-6 border border-emerald-100 shadow-lg z-20"
                 >
                   <div className="grid grid-cols-3 gap-6 text-center">
                     <div>

@@ -8,7 +8,16 @@ import { type FloraDetail } from '../../../types/flora';
 import { Badge } from '../../ui/badge';
 import { EntityCard } from '../cards/EntityCard';
 import { JsonLd } from '../seo/JsonLd';
-import { MapPin, ArrowRight } from 'lucide-react';
+import { MapPin, ArrowRight, ArrowLeft, Home } from 'lucide-react';
+import { 
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '../../ui/breadcrumb';
+import { ImageWithFallback } from '../../ui/image-with-fallback';
 
 // Dynamically import LeafletMap with SSR disabled to avoid "window is not defined" error
 const LeafletMap = dynamic(
@@ -73,10 +82,6 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
     fetchGalleryImages();
   }, [flora.id]);
-  const heroImage =
-    flora.gambar_utama && flora.gambar_utama.trim()
-      ? (flora.gambar_utama.startsWith('http') ? flora.gambar_utama : `http://localhost:8000${flora.gambar_utama}`)
-      : 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=1600&auto=format&fit=crop';
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -91,20 +96,68 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
   };
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-0 pb-12 bg-white">
       <JsonLd data={jsonLd} />
-      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="relative h-[320px] w-full md:h-[420px]">
-          <Image
-            src={heroImage}
+
+      {/* Hero Section - Full Width with Breadcrumb Overlay */}
+      <section className="relative -mx-6 md:-mx-8 lg:-mx-12">
+        <div className="relative h-[400px] w-full md:h-[500px] lg:h-[600px]">
+          <ImageWithFallback
+            src={flora.gambar_utama}
             alt={flora.nama_ilmiah}
+            title={flora.nama_umum || flora.nama_ilmiah}
             fill
             priority
             className="object-cover"
             sizes="(max-width: 768px) 100vw, 960px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
+          
+          {/* Breadcrumb & Back Button Overlay - Top */}
+          <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/70 to-transparent pt-8 pb-16 z-20">
+            <div className="container mx-auto max-w-7xl px-6 md:px-8 lg:px-12">
+              <div className="flex items-center justify-between gap-4">
+                {/* Back Button */}
+                <Link
+                  href="/flora"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-colors backdrop-blur-sm bg-black/20 hover:bg-black/30 px-3 py-2 rounded-lg"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span className="hidden sm:inline">Kembali</span>
+                </Link>
+
+                {/* Breadcrumb */}
+                <Breadcrumb>
+                  <BreadcrumbList className="text-white/80">
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link href="/" className="flex items-center gap-1 hover:text-white transition-colors">
+                          <Home className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">Beranda</span>
+                        </Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="text-white/50" />
+                    <BreadcrumbItem>
+                      <BreadcrumbLink asChild>
+                        <Link href="/flora" className="hover:text-white transition-colors">Flora</Link>
+                      </BreadcrumbLink>
+                    </BreadcrumbItem>
+                    <BreadcrumbSeparator className="text-white/50" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage className="max-w-[200px] sm:max-w-none truncate text-white">
+                        {flora.nama_umum || flora.nama_ilmiah}
+                      </BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </BreadcrumbList>
+                </Breadcrumb>
+              </div>
+            </div>
+          </div>
+
+          {/* Title & Badges - Bottom */}
+          <div className="absolute bottom-0 left-0 right-0">
+            <div className="container mx-auto max-w-7xl px-6 md:px-8 lg:px-12 py-8 md:py-12">
             <div className="flex flex-wrap items-center gap-3">
               {flora.status_iucn && (
                 <Badge className="bg-slate-900 text-white hover:bg-slate-800">{flora.status_iucn}</Badge>
@@ -126,10 +179,16 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                 {flora.nama_umum}
               </p>
             )}
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid gap-8 p-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:p-12">
+      {/* Content Section */}
+      <div className="px-6 md:px-8 lg:px-12">
+        <section className="bg-white mt-12">
+          <div className="container mx-auto max-w-7xl py-12">
+          <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
           <article className="space-y-8">
             {/* Deskripsi */}
             {flora.deskripsi && (
@@ -211,7 +270,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
           </article>
 
           <aside className="space-y-6">
-            <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-medium text-slate-900">Taksonomi</h2>
               <dl className="mt-4 space-y-3 text-sm text-slate-700">
                 {taxonomyEntries(flora).map((entry) => (
@@ -291,12 +350,13 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </Link>
             </div>
           </aside>
-        </div>
-      </section>
+          </div>
+          </div>
+        </section>
 
-      {/* Gallery Section */}
-      {!loadingGallery && galleryImages.length > 0 && (
-        <section className="space-y-6">
+        {/* Gallery Section */}
+        {!loadingGallery && galleryImages.length > 0 && (
+          <section className="space-y-6 mt-12">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
@@ -348,11 +408,11 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </div>
             ))}
           </div>
-        </section>
-      )}
+          </section>
+        )}
       
-      {loadingGallery && (
-        <section className="space-y-6">
+        {loadingGallery && (
+          <section className="space-y-6 mt-12">
           <div>
             <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">Memuat galeri foto...</p>
@@ -368,19 +428,19 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </div>
             ))}
           </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {/* Empty Gallery State */}
-      {!loadingGallery && galleryImages.length === 0 && (
-        <section className="space-y-6">
+        {/* Empty Gallery State */}
+        {!loadingGallery && galleryImages.length === 0 && (
+          <section className="space-y-6 mt-12">
           <div>
             <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">
               Koleksi foto untuk <span className="italic">{flora.nama_ilmiah}</span>
             </p>
           </div>
-          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
+          <div className="rounded-xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
             <svg
               className="mx-auto h-12 w-12 text-slate-400"
               fill="none"
@@ -400,11 +460,11 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               Galeri foto untuk spesies ini belum tersedia atau masih dalam proses persetujuan.
             </p>
           </div>
-        </section>
-      )}
+          </section>
+        )}
 
-      {flora.konten_terkait?.length ? (
-        <section className="space-y-6">
+        {flora.konten_terkait?.length ? (
+          <section className="space-y-6 mt-12">
           <div>
             <h2 className="text-2xl font-light text-slate-900">Spesies Terkait</h2>
             <p className="text-sm text-slate-600">
@@ -422,8 +482,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               />
             ))}
           </div>
-        </section>
-      ) : null}
+          </section>
+        ) : null}
+      </div>
     </div>
   );
 }

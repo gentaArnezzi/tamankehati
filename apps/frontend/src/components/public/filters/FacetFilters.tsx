@@ -100,40 +100,33 @@ export function FacetFilters({ defaultValues, options, targetPath, title = 'Filt
 
   return (
     <div className="w-full">
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleReset}
-              className="text-gray-600 hover:text-gray-900"
-            >
-              Reset
-            </Button>
-          </div>
-
-          {/* Filter Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="search" className="text-sm font-medium text-gray-700">
+      <div className="bg-slate-50 rounded-xl p-6">
+        <form onSubmit={handleSubmit}>
+          {/* Single Row Filter */}
+          <div className="flex flex-col lg:flex-row items-start lg:items-end gap-4">
+            {/* Search - Takes more space */}
+            <div className="flex-1 w-full space-y-2">
+              <label htmlFor="search" className="text-sm font-light text-slate-700">
                 {labels.search}
               </label>
-              <Input id="search" placeholder="Cari nama ilmiah atau lokal" {...form.register('search')} />
+              <Input 
+                id="search" 
+                placeholder="Cari nama ilmiah atau lokal" 
+                {...form.register('search')} 
+                className="h-11 bg-white border-slate-200 focus:border-slate-900 focus:ring-slate-900"
+              />
             </div>
 
+            {/* Famili */}
             {options.famili && options.famili.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">{labels.famili}</label>
+              <div className="w-full lg:w-56 space-y-2">
+                <label className="text-sm font-light text-slate-700">{labels.famili}</label>
                 <Select onValueChange={(value) => form.setValue('famili', value)} value={form.watch('famili')}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-11 bg-white border-slate-200">
                     <SelectValue placeholder={`Semua ${labels.famili?.toLowerCase() ?? 'famili'}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__all__">Semua pilihan</SelectItem>
+                    <SelectItem value="__all__">Semua famili</SelectItem>
                     {options.famili.map((familia) => (
                       <SelectItem key={familia} value={familia}>
                         {familia}
@@ -144,14 +137,15 @@ export function FacetFilters({ defaultValues, options, targetPath, title = 'Filt
               </div>
             )}
 
+            {/* Status IUCN */}
             {options.status_iucn && options.status_iucn.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">{labels.status_iucn}</label>
+              <div className="w-full lg:w-48 space-y-2">
+                <label className="text-sm font-light text-slate-700">{labels.status_iucn}</label>
                 <Select
                   onValueChange={(value) => form.setValue('status_iucn', value)}
                   value={form.watch('status_iucn')}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-11 bg-white border-slate-200">
                     <SelectValue placeholder="Semua status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -166,15 +160,16 @@ export function FacetFilters({ defaultValues, options, targetPath, title = 'Filt
               </div>
             )}
 
+            {/* Wilayah */}
             {options.wilayah && options.wilayah.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">{labels.wilayah}</label>
+              <div className="w-full lg:w-56 space-y-2">
+                <label className="text-sm font-light text-slate-700">{labels.wilayah}</label>
                 <Select onValueChange={(value) => form.setValue('wilayah', value)} value={form.watch('wilayah')}>
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full h-11 bg-white border-slate-200">
                     <SelectValue placeholder={`Semua ${labels.wilayah?.toLowerCase() ?? 'provinsi'}`} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__all__">Semua pilihan</SelectItem>
+                    <SelectItem value="__all__">Semua provinsi</SelectItem>
                     {options.wilayah.map((wilayah) => (
                       <SelectItem key={wilayah} value={wilayah}>
                         {wilayah}
@@ -184,12 +179,25 @@ export function FacetFilters({ defaultValues, options, targetPath, title = 'Filt
                 </Select>
               </div>
             )}
-          </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white px-6" disabled={isPending}>
-              {isPending ? 'Menerapkan...' : 'Terapkan Filter'}
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex gap-2 w-full lg:w-auto">
+              <Button 
+                type="submit" 
+                className="flex-1 lg:flex-none bg-slate-900 hover:bg-slate-800 text-white h-11 px-6" 
+                disabled={isPending}
+              >
+                {isPending ? 'Menerapkan...' : 'Filter'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleReset}
+                className="h-11 px-4 text-slate-600 hover:text-slate-900 border-slate-200"
+              >
+                Reset
+              </Button>
+            </div>
           </div>
         </form>
       </div>

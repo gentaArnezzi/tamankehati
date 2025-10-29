@@ -1,7 +1,7 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '../../ui/badge';
 import { MapPin, Leaf, Calendar } from 'lucide-react';
+import { ImageWithFallback } from '../../ui/image-with-fallback';
 
 type EntityCardProps = {
   href: string;
@@ -23,12 +23,10 @@ export function EntityCard({ href, title, subtitle, image, tags = [], status, va
       <article className="flex overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-500">
         {/* Image Section */}
         <Link href={href} className="relative block h-40 w-56 flex-shrink-0 overflow-hidden">
-          <Image
-            src={
-              image ||
-              'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&auto=format&fit=crop&q=80'
-            }
-            alt={title || 'Gambar taman konservasi'}
+          <ImageWithFallback
+            src={image}
+            alt={title || 'Gambar entitas'}
+            title={title}
             fill
             className="object-cover transition duration-500 hover:scale-105"
             sizes="224px"
@@ -107,12 +105,10 @@ export function EntityCard({ href, title, subtitle, image, tags = [], status, va
     <article className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-500">
       {/* Image Section */}
       <Link href={href} className="relative block h-48 w-full overflow-hidden">
-        <Image
-          src={
-            image ||
-            'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&auto=format&fit=crop&q=80'
-          }
-          alt={title || 'Gambar taman konservasi'}
+        <ImageWithFallback
+          src={image}
+          alt={title || 'Gambar entitas'}
+          title={title}
           fill
           className="object-cover transition duration-500 hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 360px"

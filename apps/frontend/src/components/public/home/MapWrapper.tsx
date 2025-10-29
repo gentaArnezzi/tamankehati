@@ -63,11 +63,19 @@ export function MapWrapper({ center, zoom, markers, scrollWheelZoom = true, heig
           className: 'map-tiles-dark',
         }).addTo(map);
 
-        // Add CSS for dark overlay on tiles
+        // Add CSS for dark overlay on tiles and z-index fix
         const style = document.createElement('style');
         style.textContent = `
           .map-tiles-dark {
             filter: brightness(0.6) contrast(1.1) saturate(0.8);
+          }
+          .leaflet-container,
+          .leaflet-control-container,
+          .leaflet-control-zoom {
+            z-index: 10 !important;
+          }
+          .leaflet-pane {
+            z-index: 10 !important;
           }
         `;
         document.head.appendChild(style);
@@ -259,7 +267,7 @@ export function MapWrapper({ center, zoom, markers, scrollWheelZoom = true, heig
       <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
       <div 
         ref={mapRef} 
-        style={{ height, width: '100%' }}
+        style={{ height, width: '100%', position: 'relative', zIndex: 1 }}
         className="rounded-2xl overflow-hidden border border-emerald-100"
       />
     </>

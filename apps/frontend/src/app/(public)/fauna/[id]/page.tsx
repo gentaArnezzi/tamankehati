@@ -65,12 +65,10 @@ export default async function FaunaDetailPage({ params }: FaunaDetailPageProps) 
     };
 
     return (
-      <section className="bg-[var(--bg,#f8f7f5)] py-20">
-        <div className="container mx-auto max-w-5xl px-4">
-          <JsonLd data={jsonLd} />
-          <FaunaDetailView fauna={enrichedFauna} />
-        </div>
-      </section>
+      <div className="pt-16 px-6 md:px-8 lg:px-12 bg-white min-h-screen">
+        <JsonLd data={jsonLd} />
+        <FaunaDetailView fauna={enrichedFauna} />
+      </div>
     );
   } catch (error) {
     console.error('Fauna detail not found', error);

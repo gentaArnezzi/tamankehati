@@ -27,7 +27,7 @@ export function AboutSection() {
     
 
   return (
-    <section ref={ref} className="relative min-h-[100vh] py-24 bg-white overflow-hidden">
+    <section ref={ref} className="relative min-h-[100vh] py-24 bg-white overflow-hidden z-0">
       {/* Arc Gallery Background */}
       <div className="absolute inset-0 z-0 -top-40">
         <ArcGalleryHero 

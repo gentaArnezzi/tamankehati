@@ -102,10 +102,10 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
   const totalPages = Math.ceil((data?.total ?? 0) / ITEMS_PER_PAGE);
 
   return (
-    <div className="bg-slate-50">
-      <div className="container mx-auto max-w-7xl px-6 py-20">
+    <div className="bg-white">
+      <div className="container mx-auto max-w-7xl px-6 py-16">
         {/* Filters Section */}
-        <div className="mb-16">
+        <div className="mb-12">
           <FacetFilters
             defaultValues={{
               search: params.get('search') ?? '',
@@ -183,7 +183,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
           {items.length > 0 && (
             <div className={
               viewMode === 'grid' 
-                ? 'grid gap-8 md:grid-cols-2 xl:grid-cols-3' 
+                ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                 : 'space-y-6'
             }>
               {items.map((taman, index) => {

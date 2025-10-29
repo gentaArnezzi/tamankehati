@@ -8,7 +8,6 @@ import { AboutTamanSection } from '../../components/public/home/AboutTamanSectio
 import { MinimalStatsSection } from '../../components/public/home/MinimalStatsSection';
 import { MinimalFeaturedSection } from '../../components/public/home/MinimalFeaturedSection';
 import { MinimalMapSection } from '../../components/public/home/MinimalMapSection';
-import { MinimalTestimonialsSection } from '../../components/public/home/MinimalTestimonialsSection';
 import { MinimalNewsletterSection } from '../../components/public/home/MinimalNewsletterSection';
 import { FAQSection } from '../../components/public/home/FAQSection';
 import { getPublicStats, getLatestArticles, getGalleryHighlights } from '../../lib/api/public-client';
@@ -134,9 +133,6 @@ export default function HomePageClient() {
       {/* Map Section */}
       <MinimalMapSection />
 
-      {/* Testimonials */}
-      <MinimalTestimonialsSection />
-
       {/* Newsletter */}
       <MinimalNewsletterSection />
 
@@ -180,7 +176,7 @@ function ScrollToTopButton() {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.8 }}
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-all"
+          className="fixed bottom-8 right-8 z-40 w-12 h-12 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-all"
           whileHover={{ y: -4 }}
           whileTap={{ scale: 0.95 }}
         >

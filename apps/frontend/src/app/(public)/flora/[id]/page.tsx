@@ -65,12 +65,10 @@ export default async function FloraDetailPage({ params }: FloraDetailPageProps) 
     };
 
     return (
-      <section className="bg-[var(--bg,#f8f7f5)] py-20">
-        <div className="container mx-auto max-w-5xl px-4">
-          <JsonLd data={jsonLd} />
-          <FloraDetailView flora={enrichedFlora} />
-        </div>
-      </section>
+      <div className="pt-16 px-6 md:px-8 lg:px-12 bg-white min-h-screen">
+        <JsonLd data={jsonLd} />
+        <FloraDetailView flora={enrichedFlora} />
+      </div>
     );
   } catch (error) {
     console.error('Flora detail not found', error);

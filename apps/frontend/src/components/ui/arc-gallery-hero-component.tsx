@@ -124,7 +124,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
                 }}
               >
                 <div 
-                  className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-50 cursor-pointer group"
+                  className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-[15] cursor-pointer group"
                   style={{ 
                     transform: `rotate(${angle / 6}deg)`,
                     width: '100%',
