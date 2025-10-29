@@ -41,11 +41,17 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
   };
 
+  // Only scroll when assistant responds, not when user sends message
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+      // Add a small delay to ensure the message is rendered before scrolling
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
   }, [messages]);
 
   useEffect(() => {
@@ -85,21 +91,37 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
       }
 
       const data = await response.json();
+      console.log('API Response:', data); // Debug log
+      
+      // Handle different possible response structures
+      const aiResponse = data.reply || data.message || data.response || data.content || data.answer || JSON.stringify(data);
+      
+      // Check if we got a valid response
+      if (!aiResponse || aiResponse.trim() === '') {
+        throw new Error('Empty response from AI');
+      }
       
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: data.reply,
+        content: aiResponse,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Error sending message:', error);
+      
+      // Check if it's a network error or service unavailable
+      const isNetworkError = error instanceof TypeError && error.message.includes('fetch');
+      const isServiceUnavailable = error instanceof Error && error.message.includes('Failed to send message');
+      
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi.',
+        content: isNetworkError || isServiceUnavailable 
+          ? '🤖 AI Tanya Kehati sedang tidak aktif saat ini. Silakan coba lagi nanti atau hubungi administrator untuk informasi lebih lanjut.'
+          : 'Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi.',
         timestamp: new Date()
       };
       setMessages(prev => [...prev, errorMessage]);

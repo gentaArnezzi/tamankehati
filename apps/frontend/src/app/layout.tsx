@@ -9,6 +9,11 @@ export const metadata: Metadata = {
   title: 'Taman Kehati',
   description: 'Taman Kehati - Sistem Manajemen Taman Keanekaragaman Hayati',
   metadataBase: new URL('http://localhost:3000'),
+  icons: {
+    icon: '/logo/logo_klh.ico',
+    shortcut: '/logo/logo_klh.ico',
+    apple: '/logo/logo_klh.png',
+  },
 };
 
 export const viewport: Viewport = {
