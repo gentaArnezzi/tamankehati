@@ -21,6 +21,8 @@ def _build_image_url(image_path: str) -> str:
 async def get_fauna(
     search: Optional[str] = Query(None, description="Search by name"),
     status_iucn: Optional[str] = Query(None, description="Filter by IUCN status"),
+    provinsi: Optional[str] = Query(None, description="Filter by park province"),
+    wilayah: Optional[str] = Query(None, description="Filter by park province (alias for provinsi)"),
     taman: Optional[int] = Query(None, description="Filter by park ID"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
@@ -28,10 +30,17 @@ async def get_fauna(
 ):
     """Get approved fauna for public display"""
     try:
+        from domains.parks.models import Park
+        
+        # Support both 'provinsi' and 'wilayah' parameters (wilayah is alias)
+        province_filter = provinsi or wilayah
+        
         # Build query for approved fauna only (exclude deleted)
-        stmt = select(Fauna).where(
+        # Always join with parks table to get province for display
+        stmt = select(Fauna, Park.provinsi).join(Park, Fauna.park_id == Park.id).where(
             Fauna.status == "approved",
-            Fauna.deleted_at == None
+            Fauna.deleted_at == None,
+            Park.deleted_at == None
         )
         
         # Add search filter
@@ -48,6 +57,10 @@ async def get_fauna(
         if status_iucn:
             stmt = stmt.filter(Fauna.iucn_status == status_iucn)
         
+        # Add province filter (from park)
+        if province_filter:
+            stmt = stmt.filter(Park.provinsi == province_filter)
+        
         # Add park filter
         if taman:
             stmt = stmt.filter(Fauna.park_id == taman)
@@ -60,23 +73,23 @@ async def get_fauna(
         # Apply pagination
         stmt = stmt.offset(offset).limit(limit)
         result = await db.execute(stmt)
-        items = result.scalars().all()
+        rows = result.all()
         
-        # Build response
-        fauna_items = [
-            FaunaPublicOut(
-                id=str(item.id),
-                nama_ilmiah=item.scientific_name or "",
-                nama_umum=item.local_name or "",
-                famili=item.family or "",
-                status_iucn=item.iucn_status or "",
-                deskripsi=item.description or "",
-                habitat=item.habitat or "",
-                wilayah="",  # No region info available
-                gambar_utama=_build_image_url(item.gambar_utama or ""),
-                status=item.status
-            ) for item in items
-        ]
+        # Build response with park province information
+        fauna_items = []
+        for fauna_item, park_provinsi in rows:
+            fauna_items.append(FaunaPublicOut(
+                id=str(fauna_item.id),
+                nama_ilmiah=fauna_item.scientific_name or "",
+                nama_umum=fauna_item.local_name or "",
+                famili=fauna_item.family or "",
+                status_iucn=fauna_item.iucn_status or "",
+                deskripsi=fauna_item.description or "",
+                habitat=fauna_item.habitat or "",
+                wilayah=park_provinsi or "",
+                gambar_utama=_build_image_url(fauna_item.gambar_utama or ""),
+                status=fauna_item.status
+            ))
         
         return FaunaPublicListResponse(
             items=fauna_items,

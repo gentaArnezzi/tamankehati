@@ -16,6 +16,7 @@ class ParkResponse(BaseModel):
     region_id: Optional[int] = None
     area_ha: Optional[float] = None
     description: Optional[str] = None
+    gambar_utama: Optional[str] = None
     created_at: str
     updated_at: str
 
@@ -31,7 +32,8 @@ class ParkListResponse(BaseModel):
 @router.get("/", response_model=ParkListResponse)
 async def list_parks(
     search: Optional[str] = Query(None, description="Search by park name"),
-    wilayah: Optional[str] = Query(None, description="Filter by region name"),
+    provinsi: Optional[str] = Query(None, description="Filter by province"),
+    wilayah: Optional[str] = Query(None, description="Filter by region name (deprecated, use provinsi)"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
     db: AsyncSession = Depends(get_session)
@@ -42,7 +44,7 @@ async def list_parks(
     # Base query without regions join (regions table doesn't exist, region_id removed)
     # Only show approved and non-deleted parks
     base_query = """
-        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at
+        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at, p.gambar_utama
         FROM parks p
         WHERE p.status = 'approved' AND p.deleted_at IS NULL
     """
@@ -61,8 +63,16 @@ async def list_parks(
         count_query += " AND p.name ILIKE :search"
         params["search"] = f"%{search}%"
     
-    # Note: wilayah filter removed since regions table doesn't exist
-    # Parks now use park-based scoping instead of region-based
+    # Add provinsi filter
+    if provinsi:
+        base_query += " AND p.provinsi = :provinsi"
+        count_query += " AND p.provinsi = :provinsi"
+        params["provinsi"] = provinsi
+    # Support deprecated wilayah parameter for backward compatibility
+    elif wilayah:
+        base_query += " AND p.provinsi = :provinsi"
+        count_query += " AND p.provinsi = :provinsi"
+        params["provinsi"] = wilayah
     
     # Get total count
     count_result = await db.execute(text(count_query), params)
@@ -102,6 +112,7 @@ async def list_parks(
                     region_id=None,  # region_id removed from database
                     area_ha=float(row[4]) if row[4] else None,
                     description=row[5] if row[5] else None,
+                    gambar_utama=row[8] if row[8] else None,
                     created_at=created_at_str,
                     updated_at=updated_at_str
                 ))
@@ -146,6 +157,7 @@ class ParkDetailResponse(BaseModel):
     desa_kelurahan: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    gambar_utama: Optional[str] = None
     submitted_by: Optional[int] = None
     submitted_at: Optional[str] = None
     approved_by: Optional[int] = None
@@ -172,6 +184,7 @@ async def get_park(
                    sejarah, visi, misi, nilai_dasar,
                    provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
                    latitude, longitude,
+                   gambar_utama,
                    submitted_by, submitted_at, approved_by, approved_at, rejected_at
             FROM parks 
             WHERE id = :park_id AND status = 'approved' AND deleted_at IS NULL
@@ -192,7 +205,17 @@ async def get_park(
             flora_query = text("SELECT COUNT(*) FROM flora WHERE park_id = :park_id AND status = 'approved' AND deleted_at IS NULL")
             flora_result = await db.execute(flora_query, {"park_id": park_id})
             flora_count = flora_result.scalar() or 0
-        except:
+            print(f"🌿 Flora count for park {park_id}: {flora_count}")
+            
+            # Debug: check all flora for this park regardless of status
+            debug_query = text("SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = :park_id LIMIT 5")
+            debug_result = await db.execute(debug_query, {"park_id": park_id})
+            debug_rows = debug_result.fetchall()
+            print(f"🔍 Debug - All flora for park {park_id}:")
+            for row in debug_rows:
+                print(f"   ID: {row[0]}, Nama: {row[1]}, Status: {row[2]}, Deleted: {row[3]}")
+        except Exception as e:
+            print(f"❌ Error getting flora count for park {park_id}: {e}")
             flora_count = 0
         
         # Get fauna count for this park (approved and not deleted)
@@ -201,7 +224,9 @@ async def get_park(
             fauna_query = text("SELECT COUNT(*) FROM fauna WHERE park_id = :park_id AND status = 'approved' AND deleted_at IS NULL")
             fauna_result = await db.execute(fauna_query, {"park_id": park_id})
             fauna_count = fauna_result.scalar() or 0
-        except:
+            print(f"🐾 Fauna count for park {park_id}: {fauna_count}")
+        except Exception as e:
+            print(f"❌ Error getting fauna count for park {park_id}: {e}")
             fauna_count = 0
         
         return ParkDetailResponse(
@@ -228,11 +253,12 @@ async def get_park(
             desa_kelurahan=row[20],       # desa_kelurahan
             latitude=float(row[21]) if row[21] else None,           # latitude
             longitude=float(row[22]) if row[22] else None,          # longitude
-            submitted_by=row[23],         # submitted_by
-            submitted_at=row[24].isoformat() if row[24] else None,  # submitted_at
-            approved_by=row[25],          # approved_by
-            approved_at=row[26].isoformat() if row[26] else None,   # approved_at
-            rejected_at=row[27].isoformat() if row[27] else None,   # rejected_at
+            gambar_utama=row[23],         # gambar_utama (NEW)
+            submitted_by=row[24],         # submitted_by
+            submitted_at=row[25].isoformat() if row[25] else None,  # submitted_at
+            approved_by=row[26],          # approved_by
+            approved_at=row[27].isoformat() if row[27] else None,   # approved_at
+            rejected_at=row[28].isoformat() if row[28] else None,   # rejected_at
             created_at=row[6].isoformat() if row[6] else "",
             updated_at=row[7].isoformat() if row[7] else "",
             statistik={

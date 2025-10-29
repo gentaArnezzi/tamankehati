@@ -18,8 +18,7 @@ from domains.galleries.models import Gallery, GalleryStatus
 from domains.activities.models import Activity
 # Zone import removed - zones functionality removed
 from domains.parks.models import Park
-from users.models import User
-from domains.articles.models import UserRole
+from users.models import User, UserRole
 
 router = APIRouter(prefix="/approvals")
 
@@ -93,7 +92,7 @@ async def list_pending_approvals(
     want_fauna = entity_type in (None, "fauna")
     want_zona = entity_type in (None, "zona")
     want_artikel = entity_type in (None, "artikel")
-    want_galeri = entity_type in (None, "galeri")
+    want_galeri = False  # Gallery is NOT a separate approval item - part of park
     want_kegiatan = entity_type in (None, "kegiatan")
     want_taman = entity_type in (None, "taman")
 
@@ -181,33 +180,12 @@ async def list_pending_approvals(
                 )
             )
 
+    # Gallery is NOT a separate approval item - it's part of the park
+    # Galleries are auto-approved when their park is approved
     if want_galeri:
-        stmt = select(Gallery).where(
-            Gallery.status == GalleryStatus.in_review.value,
-            Gallery.deleted_at.is_(None),
-        )
-        if user.role == UserRole.regional_admin:
-            # Regional admin only sees their own submitted galleries
-            stmt = stmt.where(Gallery.submitted_by == int(user.id))
-        gallery_rows = (await db.execute(stmt)).scalars().all()
-        counts["galeri"] = len(gallery_rows)
-        for gallery in gallery_rows:
-            records.append(
-                ApprovalItem(
-                    entity_type="galeri",
-                    entity_id=gallery.id,
-                    title=gallery.title or f"Galeri #{gallery.id}",
-                    status=gallery.status,
-                    submitted_at=gallery.submitted_at,
-                    updated_at=gallery.updated_at,
-                    metadata=ApprovalMeta(
-                        region_code=gallery.region_code,
-                        submitted_by=gallery.submitted_by,
-                        approved_by=gallery.approved_by,
-                    ),
-                    thumbnail_url=gallery.image_url,
-                )
-            )
+        # This block is disabled - galleries should not appear in approval queue
+        # stmt = select(Gallery).where(...)
+        counts["galeri"] = 0
 
     if want_kegiatan:
         stmt = select(Activity).where(
@@ -227,7 +205,7 @@ async def list_pending_approvals(
                     updated_at=activity.updated_at,
                     metadata=ApprovalMeta(
                         region_code=None,
-                        submitted_by=activity.created_by,
+                        submitted_by=activity.submitted_by,
                         approved_by=activity.approved_by,
                     ),
                     thumbnail_url=None,
@@ -283,7 +261,7 @@ async def list_pending_approvals(
 # ==================== GROUPED APPROVALS BY PARK ====================
 
 class ParkGroupItem(BaseModel):
-    entity_type: Literal["flora", "fauna", "artikel", "galeri", "kegiatan"]
+    entity_type: Literal["flora", "fauna", "artikel", "kegiatan"]  # Gallery removed - part of park
     entity_id: int
     title: str
     status: str
@@ -437,6 +415,9 @@ async def get_grouped_approvals(
         )
         groups[activity.park_id].kegiatan_count += 1
         groups[activity.park_id].total_items += 1
+    
+    # Note: Galleries are NOT separate approval items
+    # They are part of the park and auto-approved when park is approved
     
     # Sort groups by total items (descending)
     sorted_groups = sorted(groups.values(), key=lambda g: g.total_items, reverse=True)

@@ -410,6 +410,36 @@ async def update_fauna(
 
     # Workaround: Use raw SQL for UPDATE due to SQLAlchemy foreign key resolution issue
     from sqlalchemy import text
+    import json
+    
+    # ✅ BACKUP DATA: If editing approved fauna, backup original data
+    backup_json = None
+    if obj.status == "approved":
+        backup_query = text("""
+            SELECT local_name, scientific_name, ordo, description, habitat_sumber_makanan,
+                   status_hama, tingkat_hama, is_endemic, iucn_status, park_id, gambar_utama
+            FROM fauna WHERE id = :fauna_id
+        """)
+        backup_result = await db.execute(backup_query, {"fauna_id": fauna_id})
+        backup_row = backup_result.fetchone()
+        
+        if backup_row:
+            backup_data = {
+                "local_name": backup_row[0],
+                "scientific_name": backup_row[1],
+                "ordo": backup_row[2],
+                "description": backup_row[3],
+                "habitat_sumber_makanan": backup_row[4],
+                "status_hama": backup_row[5],
+                "tingkat_hama": backup_row[6],
+                "is_endemic": backup_row[7],
+                "iucn_status": backup_row[8],
+                "park_id": backup_row[9],
+                "gambar_utama": backup_row[10],
+                "_backup": True  # Mark as backup
+            }
+            backup_json = json.dumps(backup_data)
+            print(f"💾 Backing up fauna {fauna_id} data before edit")
     
     # Build dynamic UPDATE query
     update_fields = []
@@ -429,9 +459,15 @@ async def update_fauna(
     if update_fields:
         update_fields.append("updated_at = now()")
         
-        # If regional_admin edits approved fauna, set status back to in_review
+        # If regional_admin edits approved fauna, set status back to in_review and store backup
         if user.role == UserRole.regional_admin and obj.status == "approved":
             update_fields.append("status = 'in_review'")
+            update_fields.append("submitted_at = now()")
+            update_fields.append("approved_by = NULL")
+            update_fields.append("approved_at = NULL")
+            if backup_json:
+                update_fields.append("rejection_reason = :backup_data")
+                update_values["backup_data"] = backup_json
             print(f"⚠️  Fauna {fauna_id} was approved, now back to in_review after edit by regional_admin")
         
         query = f"UPDATE fauna SET {', '.join(update_fields)} WHERE id = :fauna_id"
@@ -481,6 +517,11 @@ async def approve_fauna(fauna_id: int, db: AsyncSession = Depends(get_session), 
     obj.approved_by = user.id or 0
     obj.approved_at = datetime.now(timezone.utc)
     
+    # ✅ Clear backup data if exists (changes are now approved)
+    if obj.rejection_reason and obj.rejection_reason.startswith('{') and '"_backup"' in obj.rejection_reason:
+        obj.rejection_reason = None
+        print(f"🗑️ Cleared backup data for fauna {fauna_id} (changes approved)")
+    
     # Cascade approve: Auto-approve all galleries for this fauna
     await db.execute(
         update(Gallery)
@@ -512,11 +553,52 @@ class RejectIn(BaseModel):
 async def reject_fauna(fauna_id: int, payload: RejectIn, db: AsyncSession = Depends(get_session), user: User = Depends(current_user)):
     obj = (await db.execute(select(Fauna).where(Fauna.id == fauna_id))).scalars().first()
     if not obj: raise HTTPException(404, "Fauna not found")
-    # Super Admin bisa reject tanpa batasan region
-    obj.status = "rejected"
-    obj.rejection_reason = payload.reason
-    obj.approved_by = user.id or 0
-    obj.rejected_at = datetime.now(timezone.utc)
+    
+    # ✅ CHECK IF THIS IS A REJECTED EDIT (has backup data)
+    import json
+    has_backup = False
+    backup_data = None
+    rejection_reason = payload.reason
+    
+    if obj.rejection_reason and obj.rejection_reason.startswith('{') and '"_backup"' in obj.rejection_reason:
+        try:
+            backup_data = json.loads(obj.rejection_reason)
+            if backup_data.get("_backup"):
+                has_backup = True
+                print(f"🔄 Found backup data for fauna {fauna_id}, will restore to approved state")
+        except:
+            pass
+    
+    if has_backup and backup_data:
+        # ✅ RESTORE DATA: This was an edit of approved fauna, restore to original state
+        obj.local_name = backup_data.get("local_name")
+        obj.scientific_name = backup_data.get("scientific_name")
+        obj.ordo = backup_data.get("ordo")
+        obj.description = backup_data.get("description")
+        obj.habitat_sumber_makanan = backup_data.get("habitat_sumber_makanan")
+        obj.status_hama = backup_data.get("status_hama")
+        obj.tingkat_hama = backup_data.get("tingkat_hama")
+        obj.is_endemic = backup_data.get("is_endemic")
+        obj.iucn_status = backup_data.get("iucn_status")
+        obj.park_id = backup_data.get("park_id")
+        obj.gambar_utama = backup_data.get("gambar_utama")
+        
+        # Restore status to approved
+        obj.status = "approved"
+        obj.approved_at = datetime.now(timezone.utc)
+        obj.approved_by = user.id or 0
+        obj.rejection_reason = f"Edit rejected: {rejection_reason}"  # Keep rejection reason for history
+        
+        print(f"✅ Fauna {fauna_id} restored to approved state with original data")
+    else:
+        # ✅ NEW FAUNA REJECTION: This is a new fauna submission, reject normally
+        obj.status = "rejected"
+        obj.rejection_reason = rejection_reason
+        obj.approved_by = user.id or 0
+        obj.rejected_at = datetime.now(timezone.utc)
+        
+        print(f"❌ Fauna {fauna_id} rejected (new submission)")
+    
     await db.commit()
-    # emit("fauna.rejected", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None), reason=payload.reason)
+    # emit("fauna.rejected", entity="fauna", entity_id=fauna_id, region_code=getattr(obj.zone, "region_code", None), reason=rejection_reason)
     return {"ok": True}

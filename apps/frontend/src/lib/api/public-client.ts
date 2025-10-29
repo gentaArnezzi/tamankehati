@@ -80,6 +80,16 @@ export const fetchTamanPage = async (params?: SearchParams) => {
       backendParams.wilayah = params.region;
     }
     
+    // Also support wilayah directly (from FacetFilters)
+    if (params.wilayah) {
+      backendParams.wilayah = params.wilayah;
+    }
+    
+    // Also support provinsi parameter
+    if (params.provinsi) {
+      backendParams.provinsi = params.provinsi;
+    }
+    
     // Pass through other parameters
     if (params.search) backendParams.search = params.search;
     if (params.status) backendParams.status = params.status;

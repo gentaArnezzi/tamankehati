@@ -65,6 +65,9 @@ class Park(Base):
     misi = Column(Text, comment="Misi Taman")
     nilai_dasar = Column(Text, comment="Nilai-nilai Dasar")
     
+    # Gambar
+    gambar_utama = Column(String(500), nullable=True, comment="URL gambar utama taman")
+    
     # Status
     status = Column(String(20), default="draft", nullable=False)
     
@@ -79,7 +82,7 @@ class Park(Base):
     approved_at = Column(DateTime, nullable=True)
     rejected_by = Column(Integer, ForeignKey('users.id', ondelete="SET NULL"), nullable=True)
     rejected_at = Column(DateTime, nullable=True)
-    rejection_reason = Column(String(500), nullable=True)
+    rejection_reason = Column(Text, nullable=True, comment="Rejection reason or backup data for approved park edits")
     deleted_at = Column(DateTime, nullable=True)
     
     # region = relationship("Region", back_populates="parks")

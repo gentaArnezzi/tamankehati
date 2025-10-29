@@ -201,7 +201,7 @@ async def create_park(
                 provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
                 area_ha, kondisi_fisik, nilai_penting, tipe_ekoregion,
                 description, sejarah, visi, misi, nilai_dasar,
-                latitude, longitude,
+                latitude, longitude, gambar_utama,
                 status, submitted_by, created_at, updated_at
             )
             VALUES (
@@ -209,7 +209,7 @@ async def create_park(
                 :provinsi, :kota_kabupaten, :kecamatan, :desa_kelurahan,
                 :area_ha, :kondisi_fisik, :nilai_penting, :tipe_ekoregion,
                 :description, :sejarah, :visi, :misi, :nilai_dasar,
-                :latitude, :longitude,
+                :latitude, :longitude, :gambar_utama,
                 :status, :submitted_by, NOW(), NOW()
             )
             RETURNING id, name, slug, status, created_at, updated_at
@@ -235,6 +235,7 @@ async def create_park(
             "nilai_dasar": data.get("nilai_dasar"),
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
+            "gambar_utama": data.get("gambar_utama"),
             "status": data.get("status", "draft"),  # Use status from request, default to 'draft'
             "submitted_by": int(user.id)
         })
@@ -290,8 +291,48 @@ async def update_park(
         if user.role != UserRole.super_admin and park[1] != user.id:
             raise HTTPException(status_code=403, detail="You can only edit parks you submitted")
         
-        # Get current park status
+        # Get current park status and data
         current_status = park[2]  # status is index 2
+        
+        # ✅ Store original data as JSON in rejection_reason field temporarily
+        # This allows us to restore data if changes are rejected
+        if current_status == 'approved':
+            # Get full current park data for backup
+            backup_query = text("""
+                SELECT name, sk_penetapan, pengelola, area_ha, kondisi_fisik, nilai_penting,
+                       tipe_ekoregion, description, sejarah, visi, misi, nilai_dasar,
+                       provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
+                       latitude, longitude, gambar_utama
+                FROM parks WHERE id = :park_id
+            """)
+            backup_result = await db.execute(backup_query, {"park_id": park_id})
+            backup_row = backup_result.fetchone()
+            
+            if backup_row:
+                import json
+                backup_data = {
+                    "name": backup_row[0],
+                    "sk_penetapan": backup_row[1],
+                    "pengelola": backup_row[2],
+                    "area_ha": float(backup_row[3]) if backup_row[3] else None,
+                    "kondisi_fisik": backup_row[4],
+                    "nilai_penting": backup_row[5],
+                    "tipe_ekoregion": backup_row[6],
+                    "description": backup_row[7],
+                    "sejarah": backup_row[8],
+                    "visi": backup_row[9],
+                    "misi": backup_row[10],
+                    "nilai_dasar": backup_row[11],
+                    "provinsi": backup_row[12],
+                    "kota_kabupaten": backup_row[13],
+                    "kecamatan": backup_row[14],
+                    "desa_kelurahan": backup_row[15],
+                    "latitude": float(backup_row[16]) if backup_row[16] else None,
+                    "longitude": float(backup_row[17]) if backup_row[17] else None,
+                    "gambar_utama": backup_row[18],
+                    "_backup": True  # Mark as backup
+                }
+                backup_json = json.dumps(backup_data)
         
         # ✅ NEW LOGIC: If editing an approved park, change status to in_review
         # This requires super admin to re-approve changes
@@ -316,10 +357,12 @@ async def update_park(
                     desa_kelurahan = :desa_kelurahan,
                     latitude = :latitude,
                     longitude = :longitude,
+                    gambar_utama = :gambar_utama,
                     status = 'in_review',
                     submitted_at = NOW(),
                     approved_by = NULL,
                     approved_at = NULL,
+                    rejection_reason = :backup_data,
                     updated_at = NOW()
                 WHERE id = :park_id
                 RETURNING id, name, slug, status, created_at, updated_at
@@ -346,12 +389,13 @@ async def update_park(
                     desa_kelurahan = :desa_kelurahan,
                     latitude = :latitude,
                     longitude = :longitude,
+                    gambar_utama = :gambar_utama,
                     updated_at = NOW()
                 WHERE id = :park_id
                 RETURNING id, name, slug, status, created_at, updated_at
             """)
         
-        result = await db.execute(update_query, {
+        params = {
             "park_id": park_id,
             "name": data.get("name", ""),
             "sk_penetapan": data.get("sk_penetapan"),
@@ -371,7 +415,14 @@ async def update_park(
             "desa_kelurahan": data.get("desa_kelurahan"),
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
-        })
+            "gambar_utama": data.get("gambar_utama"),
+        }
+        
+        # Add backup data if editing approved park
+        if current_status == 'approved':
+            params["backup_data"] = backup_json
+        
+        result = await db.execute(update_query, params)
         
         row = result.fetchone()
         
@@ -501,6 +552,7 @@ async def list_pending_approval_parks(
                 "kota_kabupaten": getattr(park, 'kota_kabupaten', ''),
                 "kecamatan": getattr(park, 'kecamatan', ''),
                 "desa_kelurahan": getattr(park, 'desa_kelurahan', ''),
+                "gambar_utama": getattr(park, 'gambar_utama', None),  # Park image for preview
                 "created_at": park.created_at.isoformat() if hasattr(park, 'created_at') and park.created_at else None,
                 "updated_at": park.updated_at.isoformat() if hasattr(park, 'updated_at') and park.updated_at else None,
                 "submitted_at": park.submitted_at.isoformat() if hasattr(park, 'submitted_at') and park.submitted_at else None,
@@ -550,6 +602,30 @@ async def approve_park(
         park.status = "approved"
         park.approved_at = datetime.utcnow()
         park.approved_by = int(user.id)
+        
+        # ✅ Clear backup data if exists (changes are now approved)
+        if park.rejection_reason and park.rejection_reason.startswith('{') and '"_backup"' in park.rejection_reason:
+            park.rejection_reason = None
+            print(f"🗑️ Cleared backup data for park {park_id} (changes approved)")
+        
+        # Auto-approve all galleries for this park
+        from domains.galleries.models import Gallery, GalleryStatus
+        gallery_stmt = select(Gallery).where(
+            Gallery.entity_type == 'park',
+            Gallery.entity_id == park_id,
+            Gallery.status.in_([GalleryStatus.draft.value, GalleryStatus.in_review.value]),
+            Gallery.deleted_at == None
+        )
+        gallery_result = await db.execute(gallery_stmt)
+        galleries = gallery_result.scalars().all()
+        
+        for gallery in galleries:
+            gallery.status = GalleryStatus.approved.value
+            gallery.approved_by = int(user.id)
+            gallery.approved_at = datetime.utcnow()
+        
+        if len(galleries) > 0:
+            print(f"✅ Auto-approved {len(galleries)} galleries for park {park_id}")
         
         # Assign park_id to the park submitter (if they don't have one yet)
         assign_to_user_id = park.submitted_by
@@ -651,13 +727,58 @@ async def reject_park(
     if not park:
         raise HTTPException(status_code=404, detail="Park not found")
     
-    # Update status to rejected
-    park.status = "rejected"
-    park.approved_at = datetime.utcnow()
-    park.rejection_reason = rejection_reason
+    # Check if this is a rejected edit of an approved park (has backup data)
+    has_backup = False
+    backup_data = None
+    if park.rejection_reason and park.rejection_reason.startswith('{') and '"_backup"' in park.rejection_reason:
+        try:
+            import json
+            backup_data = json.loads(park.rejection_reason)
+            if backup_data.get("_backup"):
+                has_backup = True
+                print(f"🔄 Found backup data for park {park_id}, will restore to approved state")
+        except:
+            pass
     
-    # ✅ IMPORTANT: Clear park_id from user so they can create a new park
-    if park.submitted_by:
+    if has_backup and backup_data:
+        # ✅ RESTORE DATA: This was an edit of approved park, restore to original state
+        park.name = backup_data.get("name")
+        park.sk_penetapan = backup_data.get("sk_penetapan")
+        park.pengelola = backup_data.get("pengelola")
+        park.area_ha = backup_data.get("area_ha")
+        park.kondisi_fisik = backup_data.get("kondisi_fisik")
+        park.nilai_penting = backup_data.get("nilai_penting")
+        park.tipe_ekoregion = backup_data.get("tipe_ekoregion")
+        park.description = backup_data.get("description")
+        park.sejarah = backup_data.get("sejarah")
+        park.visi = backup_data.get("visi")
+        park.misi = backup_data.get("misi")
+        park.nilai_dasar = backup_data.get("nilai_dasar")
+        park.provinsi = backup_data.get("provinsi")
+        park.kota_kabupaten = backup_data.get("kota_kabupaten")
+        park.kecamatan = backup_data.get("kecamatan")
+        park.desa_kelurahan = backup_data.get("desa_kelurahan")
+        park.latitude = backup_data.get("latitude")
+        park.longitude = backup_data.get("longitude")
+        park.gambar_utama = backup_data.get("gambar_utama")
+        
+        # Restore status to approved
+        park.status = "approved"
+        park.approved_at = datetime.utcnow()  # Keep approval timestamp
+        park.approved_by = user.id  # Super admin who rejected becomes the approver of restored version
+        park.rejection_reason = f"Edit rejected: {rejection_reason}"  # Keep rejection reason for history
+        
+        print(f"✅ Park {park_id} restored to approved state with original data")
+    else:
+        # ✅ NEW PARK REJECTION: This is a new park submission, reject normally
+        park.status = "rejected"
+        park.approved_at = datetime.utcnow()
+        park.rejection_reason = rejection_reason
+        
+        print(f"❌ Park {park_id} rejected (new submission)")
+    
+    # ✅ IMPORTANT: Clear park_id from user ONLY if this is a new park rejection (not a restored one)
+    if not has_backup and park.submitted_by:
         submitter_stmt = select(User).where(User.id == park.submitted_by)
         submitter_result = await db.execute(submitter_stmt)
         submitter = submitter_result.scalar_one_or_none()

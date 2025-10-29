@@ -22,6 +22,8 @@ def _build_image_url(image_path: str) -> str:
 async def get_flora(
     search: Optional[str] = Query(None, description="Search by name"),
     status_iucn: Optional[str] = Query(None, description="Filter by IUCN status"),
+    provinsi: Optional[str] = Query(None, description="Filter by park province"),
+    wilayah: Optional[str] = Query(None, description="Filter by park province (alias for provinsi)"),
     taman: Optional[int] = Query(None, description="Filter by park ID"),
     limit: int = Query(10, ge=1, le=100, description="Items per page"),
     offset: int = Query(0, ge=0, description="Pagination offset"),
@@ -29,10 +31,17 @@ async def get_flora(
 ):
     """Get approved flora for public display"""
     try:
+        from domains.parks.models import Park
+        
+        # Support both 'provinsi' and 'wilayah' parameters (wilayah is alias)
+        province_filter = provinsi or wilayah
+        
         # Build query for approved flora only (exclude deleted)
-        stmt = select(Flora).where(
+        # Always join with parks table to get province for display
+        stmt = select(Flora, Park.provinsi).join(Park, Flora.park_id == Park.id).where(
             Flora.status == "approved",
-            Flora.deleted_at == None
+            Flora.deleted_at == None,
+            Park.deleted_at == None
         )
         
         # Add search filter
@@ -49,6 +58,10 @@ async def get_flora(
         if status_iucn:
             stmt = stmt.filter(Flora.iucn_status == status_iucn)
         
+        # Add province filter (from park)
+        if province_filter:
+            stmt = stmt.filter(Park.provinsi == province_filter)
+        
         # Add park filter
         if taman:
             stmt = stmt.filter(Flora.park_id == taman)
@@ -61,23 +74,23 @@ async def get_flora(
         # Apply pagination
         stmt = stmt.offset(offset).limit(limit)
         result = await db.execute(stmt)
-        items = result.scalars().all()
+        rows = result.all()
         
-        # Build response
-        flora_items = [
-            FloraPublicOut(
-                id=str(item.id),
-                nama_ilmiah=item.scientific_name or "",
-                nama_umum=item.local_name or "",
-                famili=item.family or "",
-                status_iucn=item.iucn_status or "",
-                deskripsi=item.description or "",
-                habitat=item.habitat or "",
-                wilayah="",  # No region info available
-                gambar_utama=_build_image_url(item.gambar_utama or ""),
-                status=item.status
-            ) for item in items
-        ]
+        # Build response with park province information
+        flora_items = []
+        for flora_item, park_provinsi in rows:
+            flora_items.append(FloraPublicOut(
+                id=str(flora_item.id),
+                nama_ilmiah=flora_item.scientific_name or "",
+                nama_umum=flora_item.local_name or "",
+                famili=flora_item.family or "",
+                status_iucn=flora_item.iucn_status or "",
+                deskripsi=flora_item.description or "",
+                habitat=flora_item.habitat or "",
+                wilayah=park_provinsi or "",
+                gambar_utama=_build_image_url(flora_item.gambar_utama or ""),
+                status=flora_item.status
+            ))
         
         return FloraPublicListResponse(
             items=flora_items,

@@ -6,8 +6,15 @@ import { parksApi } from '../../../../lib/api-client';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
 import { Badge } from '../../../../components/ui/badge';
 import { Button } from '../../../../components/ui/button';
-import { ArrowLeft, TreePine } from 'lucide-react';
+import { ArrowLeft, TreePine, Camera } from 'lucide-react';
 import { toast } from 'sonner';
+
+interface Gallery {
+  id: number;
+  title: string;
+  image_url: string;
+  description?: string;
+}
 
 export default function TamanDetailPage() {
   const params = useParams();
@@ -15,10 +22,13 @@ export default function TamanDetailPage() {
   const id = params.id as string;
   
   const [taman, setTaman] = useState<any>(null);
+  const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingGallery, setLoadingGallery] = useState(false);
 
   useEffect(() => {
     loadTamanDetail();
+    loadGalleries();
   }, [id]);
 
   const loadTamanDetail = async () => {
@@ -32,6 +42,38 @@ export default function TamanDetailPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadGalleries = async () => {
+    try {
+      setLoadingGallery(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/entity/park/${id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Gallery response:', result);
+        setGalleries(result.data || result.items || []);
+      } else {
+        console.error('Gallery load failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to load galleries:', error);
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  const getImageUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
   };
 
   const getStatusBadge = (status?: string) => {
@@ -112,6 +154,53 @@ export default function TamanDetailPage() {
         </CardHeader>
 
         <CardContent className="space-y-6">
+          {/* Main Image */}
+          {taman.gambar_utama && (
+            <div>
+              <h3 className="font-semibold mb-3 text-lg flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Foto Utama Taman
+              </h3>
+              <img
+                src={getImageUrl(taman.gambar_utama)}
+                alt={taman.name}
+                className="w-full h-96 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                onError={(e) => {
+                  console.error('Failed to load main image:', taman.gambar_utama);
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+          )}
+
+          {/* Gallery */}
+          {galleries.length > 0 && (
+            <div>
+              <h3 className="font-semibold mb-3 text-lg flex items-center gap-2">
+                <Camera className="h-5 w-5" />
+                Galeri Foto ({galleries.length})
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {galleries.map((gallery) => (
+                  <div key={gallery.id} className="group relative">
+                    <img
+                      src={getImageUrl(gallery.image_url)}
+                      alt={gallery.title}
+                      className="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                      onError={(e) => {
+                        console.error('Failed to load gallery image:', gallery.image_url);
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                    {gallery.title && (
+                      <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Information Grid */}
           <div className="grid md:grid-cols-2 gap-6">
             <div>

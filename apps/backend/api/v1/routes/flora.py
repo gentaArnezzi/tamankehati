@@ -395,6 +395,36 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
 
     # Workaround: Use raw SQL for UPDATE due to SQLAlchemy foreign key resolution issue
     from sqlalchemy import text
+    import json
+    
+    # ✅ BACKUP DATA: If editing approved flora, backup original data
+    backup_json = None
+    if obj.status == "approved":
+        backup_query = text("""
+            SELECT local_name, scientific_name, family, genus, description, morphology,
+                   benefits, is_endemic, iucn_status, park_id, gambar_utama
+            FROM flora WHERE id = :flora_id
+        """)
+        backup_result = await db.execute(backup_query, {"flora_id": flora_id})
+        backup_row = backup_result.fetchone()
+        
+        if backup_row:
+            backup_data = {
+                "local_name": backup_row[0],
+                "scientific_name": backup_row[1],
+                "family": backup_row[2],
+                "genus": backup_row[3],
+                "description": backup_row[4],
+                "morphology": backup_row[5],
+                "benefits": backup_row[6],
+                "is_endemic": backup_row[7],
+                "iucn_status": backup_row[8],
+                "park_id": backup_row[9],
+                "gambar_utama": backup_row[10],
+                "_backup": True  # Mark as backup
+            }
+            backup_json = json.dumps(backup_data)
+            print(f"💾 Backing up flora {flora_id} data before edit")
     
     # Build dynamic UPDATE query
     update_fields = []
@@ -413,9 +443,15 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     if update_fields:
         update_fields.append("updated_at = now()")
         
-        # If regional_admin edits approved flora, set status back to in_review
+        # If regional_admin edits approved flora, set status back to in_review and store backup
         if user.role == UserRole.regional_admin and obj.status == "approved":
             update_fields.append("status = 'in_review'")
+            update_fields.append("submitted_at = now()")
+            update_fields.append("approved_by = NULL")
+            update_fields.append("approved_at = NULL")
+            if backup_json:
+                update_fields.append("rejection_reason = :backup_data")
+                update_values["backup_data"] = backup_json
             print(f"⚠️  Flora {flora_id} was approved, now back to in_review after edit by regional_admin")
         
         query = f"UPDATE flora SET {', '.join(update_fields)} WHERE id = :flora_id"
@@ -502,6 +538,11 @@ async def approve_flora(flora_id: int, db: AsyncSession = Depends(get_session), 
     obj.approved_by = user.id or 0
     obj.approved_at = datetime.now(timezone.utc)
     
+    # ✅ Clear backup data if exists (changes are now approved)
+    if obj.rejection_reason and obj.rejection_reason.startswith('{') and '"_backup"' in obj.rejection_reason:
+        obj.rejection_reason = None
+        print(f"🗑️ Cleared backup data for flora {flora_id} (changes approved)")
+    
     # Cascade approve: Auto-approve all galleries for this flora
     await db.execute(
         update(Gallery)
@@ -541,13 +582,54 @@ async def reject_flora(flora_id: int, payload: dict, db: AsyncSession = Depends(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Flora dengan ID tersebut tidak ditemukan"
         )
-    # Super Admin bisa reject tanpa batasan region
-    obj.status = "rejected"
-    obj.rejection_reason = payload.get("reason", "")
-    obj.approved_by = user.id or 0
-    obj.rejected_at = datetime.now(timezone.utc)
+    
+    # ✅ CHECK IF THIS IS A REJECTED EDIT (has backup data)
+    import json
+    has_backup = False
+    backup_data = None
+    rejection_reason = payload.get("reason", "")
+    
+    if obj.rejection_reason and obj.rejection_reason.startswith('{') and '"_backup"' in obj.rejection_reason:
+        try:
+            backup_data = json.loads(obj.rejection_reason)
+            if backup_data.get("_backup"):
+                has_backup = True
+                print(f"🔄 Found backup data for flora {flora_id}, will restore to approved state")
+        except:
+            pass
+    
+    if has_backup and backup_data:
+        # ✅ RESTORE DATA: This was an edit of approved flora, restore to original state
+        obj.local_name = backup_data.get("local_name")
+        obj.scientific_name = backup_data.get("scientific_name")
+        obj.family = backup_data.get("family")
+        obj.genus = backup_data.get("genus")
+        obj.description = backup_data.get("description")
+        obj.morphology = backup_data.get("morphology")
+        obj.benefits = backup_data.get("benefits")
+        obj.is_endemic = backup_data.get("is_endemic")
+        obj.iucn_status = backup_data.get("iucn_status")
+        obj.park_id = backup_data.get("park_id")
+        obj.gambar_utama = backup_data.get("gambar_utama")
+        
+        # Restore status to approved
+        obj.status = "approved"
+        obj.approved_at = datetime.now(timezone.utc)
+        obj.approved_by = user.id or 0
+        obj.rejection_reason = f"Edit rejected: {rejection_reason}"  # Keep rejection reason for history
+        
+        print(f"✅ Flora {flora_id} restored to approved state with original data")
+    else:
+        # ✅ NEW FLORA REJECTION: This is a new flora submission, reject normally
+        obj.status = "rejected"
+        obj.rejection_reason = rejection_reason
+        obj.approved_by = user.id or 0
+        obj.rejected_at = datetime.now(timezone.utc)
+        
+        print(f"❌ Flora {flora_id} rejected (new submission)")
+    
     await db.commit()
-    emit("flora.rejected", entity="flora", entity_id=flora_id, region_code=None, reason=payload.get("reason"))  # Temporarily disabled due to relationship issues
+    emit("flora.rejected", entity="flora", entity_id=flora_id, region_code=None, reason=rejection_reason)  # Temporarily disabled due to relationship issues
     return {"ok": True}
 
 # -------------------- REVIEW & BULK OPERATIONS --------------------
