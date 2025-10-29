@@ -130,10 +130,10 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
           {/* Header with View Controls */}
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-2xl font-light text-gray-900 mb-2">
+              <h2 className="text-2xl font-semibold text-emerald-700 mb-2">
                 Hasil Pencarian
               </h2>
-              <p className="text-gray-600" suppressHydrationWarning>
+              <p className="text-zinc-600 font-semibold" suppressHydrationWarning>
                 {data?.total ?? 0} taman ditemukan
               </p>
             </div>
@@ -142,20 +142,20 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-emerald-700'
                 }`}
               >
                 Card
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-semibold transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-emerald-700 text-white shadow-sm'
+                    : 'text-gray-600 hover:text-emerald-700'
                 }`}
               >
                 Row
@@ -187,9 +187,6 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
                 : 'space-y-4'
             }>
               {items.map((taman) => {
-                // Region-based addressing removed - using user-based access control
-                const regionName = 'Indonesia';
-                
                 return (
                   <EntityCard
                     key={taman.id}
@@ -197,7 +194,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
                     title={taman.name}
                     subtitle={taman.description || undefined}
                     image={getImageUrl(taman.gambar_utama)}
-                    region={regionName}
+                    region={taman.provinsi || 'Indonesia'}
                     area={taman.area_ha || undefined}
                     created_at={taman.created_at}
                     tags={[]} // No tags for now
