@@ -138,7 +138,7 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
       'Content-Type': 'application/json',
     },
     next: {
-      revalidate: 600,
+      revalidate: 0, // Disable cache to get fresh data with gambar_utama
     },
   });
 

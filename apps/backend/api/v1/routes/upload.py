@@ -3,9 +3,9 @@ from typing import List
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database.session import get_session
-from users.models import User
+from users.models import User, UserRole
 from api.v1.permissions.rbac import current_user
-from api.v1.permissions.policies import require_roles, UserRole
+from api.v1.permissions.policies import require_roles
 import os
 import uuid
 from datetime import datetime
@@ -45,10 +45,11 @@ async def upload_gallery_image(
     Upload image file for gallery
     """
     # Check user permissions
-    if user.role not in [UserRole.regional_admin, UserRole.super_admin]:
+    allowed_roles = ["regional_admin", "super_admin"]
+    if user.role not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to upload files"
+            detail=f"Insufficient permissions to upload files. Your role: {user.role}"
         )
     
     # Validate file
@@ -90,9 +91,7 @@ async def upload_gallery_image(
         
         # Generate full URL for frontend to access
         # In production, this would be your CDN/storage URL
-        from core.config import get_settings
-        settings = get_settings()
-        base_url = settings.BASE_URL or "http://localhost:8000"
+        base_url = os.getenv("BASE_URL", "http://localhost:8000")
         file_url = f"{base_url}/uploads/{filename}"
         
         return JSONResponse(content={
@@ -157,10 +156,11 @@ async def upload_multiple_gallery_images(
     Upload multiple image files for gallery
     """
     # Check user permissions
-    if user.role not in [UserRole.regional_admin, UserRole.super_admin]:
+    allowed_roles = ["regional_admin", "super_admin"]
+    if user.role not in allowed_roles:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Insufficient permissions to upload files"
+            detail=f"Insufficient permissions to upload files. Your role: {user.role}"
         )
     
     # Validate number of files

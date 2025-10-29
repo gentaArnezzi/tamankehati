@@ -205,7 +205,7 @@ async def list_pending_approvals(
                     updated_at=activity.updated_at,
                     metadata=ApprovalMeta(
                         region_code=None,
-                        submitted_by=activity.created_by,
+                        submitted_by=activity.submitted_by,
                         approved_by=activity.approved_by,
                     ),
                     thumbnail_url=None,

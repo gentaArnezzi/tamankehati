@@ -10,6 +10,13 @@ import { FacetFilters } from '../filters/FacetFilters';
 import { Pagination } from '../../ui/pagination';
 
 const ITEMS_PER_PAGE = 12;
+
+// Helper to get full image URL
+const getImageUrl = (url?: string | null) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+};
 const PROVINSI_OPTIONS = [
   'Aceh',
   'Sumatera Utara',
@@ -189,7 +196,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
                     href={`/taman/${taman.id}`}
                     title={taman.name}
                     subtitle={taman.description || undefined}
-                    image={null} // Parks don't have images in current schema
+                    image={getImageUrl(taman.gambar_utama)}
                     region={regionName}
                     area={taman.area_ha || undefined}
                     created_at={taman.created_at}

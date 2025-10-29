@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Separator } from '../../ui/separator';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Button } from '../../ui/button';
-import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Sprout, PawPrint, BookOpen, ArrowRight, ExternalLink, Activity } from 'lucide-react';
+import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Sprout, PawPrint, BookOpen, ArrowRight, ExternalLink, Activity, Camera } from 'lucide-react';
 import { formatDate } from '../../../lib/utils';
 import { getParkStats } from '../../../lib/api/client';
 import type { ParkDetail } from '../../../types/parks';
@@ -20,14 +20,54 @@ interface ParkDetailViewProps {
   park: ParkDetail;
 }
 
+interface Gallery {
+  id: number;
+  title: string;
+  image_url: string;
+  status: string;
+}
+
 export function ParkDetailView({ park }: ParkDetailViewProps) {
   const [scrollY, setScrollY] = useState(0);
+  const [galleries, setGalleries] = useState<Gallery[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    loadGalleries();
+  }, [park.id]);
+
+  const loadGalleries = async () => {
+    try {
+      setLoadingGallery(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/entity/park/${park.id}`
+      );
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Gallery response:', result);
+        setGalleries(result.data || result.items || []);
+      } else {
+        console.error('Gallery load failed:', response.status, response.statusText);
+      }
+    } catch (error) {
+      console.error('Failed to load galleries:', error);
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  const getImageUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+  };
 
   // Use stats from park data directly
   const stats = park.statistik || {
@@ -43,10 +83,10 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
       <section className="relative h-[60vh] min-h-[500px] overflow-hidden">
         {/* Background Image */}
         <div className="absolute inset-0 w-full h-full">
-          {park.galeri && park.galeri.length > 0 ? (
+          {park.gambar_utama ? (
             <Image
-              src={park.galeri[0].url || '/placeholder.svg'}
-              alt={park.galeri[0].judul || park.name}
+              src={getImageUrl(park.gambar_utama)}
+              alt={park.name}
               fill
               className="object-cover"
               priority
@@ -414,24 +454,41 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
       </section>
 
       {/* Gallery Section */}
-      {park.galeri && park.galeri.length > 0 && (
-        <section className="py-16 bg-slate-50">
+      {galleries.length > 0 && (
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
-                <p className="mt-1 text-sm text-slate-600">Koleksi foto taman konservasi</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
+                    <Camera className="h-6 w-6 text-purple-600" />
+                    Galeri Foto
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {galleries.length} foto dari taman konservasi ini
+                  </p>
+                </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {park.galeri.slice(0, 6).map((image, index) => (
-                  <div key={index} className="aspect-square relative rounded-xl overflow-hidden bg-slate-200 group">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {galleries.map((gallery) => (
+                  <div 
+                    key={gallery.id} 
+                    className="aspect-square relative rounded-xl overflow-hidden bg-slate-200 group cursor-pointer shadow-md hover:shadow-xl transition-shadow"
+                  >
                     <Image
-                      src={image.url || '/placeholder.svg'}
-                      alt={image.judul || `Gambar ${index + 1}`}
+                      src={getImageUrl(gallery.image_url)}
+                      alt={gallery.title || 'Foto taman'}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="object-cover group-hover:scale-110 transition-transform duration-500"
                       loading="lazy"
                     />
+                    {gallery.title && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3 transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                        <p className="text-white text-sm font-medium truncate">
+                          {gallery.title}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

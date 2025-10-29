@@ -1,14 +1,158 @@
 INFO:     Will watch for changes in these directories: ['/Users/irgyaarnezzi/Desktop/tamankehati_new/apps/backend']
 INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
-INFO:     Started reloader process [23205] using WatchFiles
-INFO:     Started server process [23208]
+INFO:     Started reloader process [72505] using WatchFiles
+INFO:     Started server process [72522]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-WARNING:  WatchFiles detected changes in 'api/v1/routes/dashboard.py'. Reloading...
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
 INFO:     Shutting down
 INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
-INFO:     Finished server process [23208]
-INFO:     Started server process [24313]
+INFO:     Finished server process [72522]
+INFO:     Started server process [72990]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+UPLOAD_DIR: ./uploads
+UPLOAD_DIR exists: True
+Uploads directory: /Users/irgyaarnezzi/Desktop/tamankehati_new/apps/backend/uploads
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 list_parks: user=t@kehati.org, role=regional_admin
+🔍 Filtering parks for regional admin: park_id == 41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+✅ list_parks: returning 1 parks
+🌿 Flora count for park 41: 0
+❌ Error getting flora count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "nama_ilmiah" does not exist
+[SQL: SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = $1 LIMIT 5]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+❌ Error getting fauna count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: SELECT COUNT(*) FROM fauna WHERE park_id = $1 AND status = 'approved' AND deleted_at IS NULL]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 list_parks: user=t@kehati.org, role=regional_admin
+🔍 Filtering parks for regional admin: park_id == 41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+✅ list_parks: returning 1 parks
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🌿 Flora count for park 41: 0
+❌ Error getting flora count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "nama_ilmiah" does not exist
+[SQL: SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = $1 LIMIT 5]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+❌ Error getting fauna count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: SELECT COUNT(*) FROM fauna WHERE park_id = $1 AND status = 'approved' AND deleted_at IS NULL]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🚀 User loaded from cache: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🌿 Flora count for park 16: 0
+❌ Error getting flora count for park 16: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "nama_ilmiah" does not exist
+[SQL: SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = $1 LIMIT 5]
+[parameters: (16,)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+❌ Error getting fauna count for park 16: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: SELECT COUNT(*) FROM fauna WHERE park_id = $1 AND status = 'approved' AND deleted_at IS NULL]
+[parameters: (16,)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+🌿 Flora count for park 41: 0
+❌ Error getting flora count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.ProgrammingError) <class 'asyncpg.exceptions.UndefinedColumnError'>: column "nama_ilmiah" does not exist
+[SQL: SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = $1 LIMIT 5]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+❌ Error getting fauna count for park 41: (sqlalchemy.dialects.postgresql.asyncpg.Error) <class 'asyncpg.exceptions.InFailedSQLTransactionError'>: current transaction is aborted, commands ignored until end of transaction block
+[SQL: SELECT COUNT(*) FROM fauna WHERE park_id = $1 AND status = 'approved' AND deleted_at IS NULL]
+[parameters: (41,)]
+(Background on this error at: https://sqlalche.me/e/20/dbapi)
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🔍 Attempting to load user from database: user_id=64
+🔍 Database user loaded: id=64, email=t@kehati.org, role=regional_admin, park_id=41
+🌿 Flora count for park 39: 1
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [72990]
+INFO:     Started server process [90644]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [90644]
+INFO:     Started server process [90759]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [90759]
+INFO:     Started server process [91365]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [91365]
+INFO:     Started server process [91510]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/public/parks_simple.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [91510]
+INFO:     Started server process [92093]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.

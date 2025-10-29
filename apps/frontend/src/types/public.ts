@@ -97,6 +97,7 @@ export const TamanPublicSchema = z.object({
   desa_kelurahan: z.string().nullable().optional(),
   latitude: z.number().nullable().optional(),
   longitude: z.number().nullable().optional(),
+  gambar_utama: z.string().nullable().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
   statistik: z.object({

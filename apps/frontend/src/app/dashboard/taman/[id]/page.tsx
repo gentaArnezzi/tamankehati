@@ -57,8 +57,11 @@ export default function TamanDetailPage() {
       );
       
       if (response.ok) {
-        const data = await response.json();
-        setGalleries(data.items || []);
+        const result = await response.json();
+        console.log('Gallery response:', result);
+        setGalleries(result.data || result.items || []);
+      } else {
+        console.error('Gallery load failed:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load galleries:', error);

@@ -36,6 +36,8 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
+import { FileUpload } from '../ui/file-upload';
+import { MultipleFileUpload } from '../ui/multiple-file-upload';
 
 const InteractiveMapDisplay = dynamic(() => import('../ui/interactive-map-display').then(mod => ({ default: mod.InteractiveMapDisplay })), { 
   ssr: false,
@@ -68,6 +70,12 @@ interface Gallery {
   description?: string;
 }
 
+interface FileWithPreview {
+  file: File;
+  preview: string;
+  id: string;
+}
+
 interface ApprovedParkDetailsProps {
   park: Park;
   onParkUpdate?: (updatedPark: Park) => void;
@@ -78,6 +86,17 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(false);
+  
+  // Main image upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [mainImageUrl, setMainImageUrl] = useState<string>(park.gambar_utama || '');
+  const [mainImageRemoved, setMainImageRemoved] = useState(false);
+  
+  // Gallery upload states
+  const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  
   const [editData, setEditData] = useState({
     name: park.name,
     area_ha: park.area_ha || 0,
@@ -102,7 +121,8 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
   // Load galleries when component mounts or park changes
   useEffect(() => {
     loadGalleries();
-  }, [park.id]);
+    setMainImageUrl(park.gambar_utama || '');
+  }, [park.id, park.gambar_utama]);
 
   const loadGalleries = async () => {
     if (!park.id) return;
@@ -119,8 +139,11 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
       );
       
       if (response.ok) {
-        const data = await response.json();
-        setGalleries(data.items || []);
+        const result = await response.json();
+        console.log('Gallery response:', result);
+        setGalleries(result.data || result.items || []);
+      } else {
+        console.error('Gallery load failed:', response.status, response.statusText);
       }
     } catch (error) {
       console.error('Failed to load galleries:', error);
@@ -135,6 +158,289 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
   };
 
+  // Main image upload handlers
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    setMainImageRemoved(false); // Reset removed flag when new file selected
+    await uploadFile(file);
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setMainImageUrl('');
+    setMainImageRemoved(true); // Mark as explicitly removed
+  };
+
+  const uploadFile = async (file: File) => {
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      console.log('Uploading file:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        url: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`
+      });
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+          body: formData,
+        }
+      );
+
+      console.log('Upload response:', {
+        ok: response.ok,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
+      if (!response.ok) {
+        const responseText = await response.text();
+        console.error('Upload error response text:', responseText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(responseText);
+        } catch {
+          errorData = { detail: responseText || response.statusText };
+        }
+        
+        const errorMessage = errorData?.detail || `Upload failed: ${response.status} ${response.statusText}`;
+        console.error('Upload error data:', errorData);
+        throw new Error(errorMessage);
+      }
+
+      const result = await response.json();
+      console.log('Upload success:', result);
+      setMainImageUrl(result.url);
+      toast.success('Foto utama berhasil diupload');
+    } catch (error) {
+      console.error('Upload error:', error);
+      const message = error instanceof Error ? error.message : 'Gagal upload foto';
+      toast.error(message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Gallery upload handlers
+  const handleGalleryFilesSelect = (files: File[]) => {
+    const newFiles: FileWithPreview[] = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      id: `${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`
+    }));
+    setSelectedFiles(prev => [...prev, ...newFiles]);
+  };
+
+  const handleGalleryFileRemove = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const fileToRemove = prev.find(f => f.id === fileId);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return prev.filter(f => f.id !== fileId);
+    });
+  };
+
+  // Cleanup all previews when component unmounts
+  useEffect(() => {
+    const currentFiles = selectedFiles;
+    return () => {
+      currentFiles.forEach(fileWithPreview => {
+        URL.revokeObjectURL(fileWithPreview.preview);
+      });
+    };
+  }, [selectedFiles]);
+
+  const uploadMultipleFiles = async (files: File[]) => {
+    const uploadedUrls: string[] = [];
+    
+    for (const file of files) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        console.log(`Uploading gallery file ${file.name}:`, {
+          name: file.name,
+          size: file.size,
+          type: file.type
+        });
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            },
+            body: formData,
+          }
+        );
+
+        console.log(`Upload response for ${file.name}:`, {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText
+        });
+
+        if (!response.ok) {
+          const responseText = await response.text();
+          console.error(`Upload error response text for ${file.name}:`, responseText);
+          
+          let errorData;
+          try {
+            errorData = JSON.parse(responseText);
+          } catch {
+            errorData = { detail: responseText || response.statusText };
+          }
+          
+          const errorMessage = errorData?.detail || `Failed to upload ${file.name}: ${response.status} ${response.statusText}`;
+          console.error(`Upload error data for ${file.name}:`, errorData);
+          throw new Error(errorMessage);
+        }
+
+        const result = await response.json();
+        console.log(`Upload success for ${file.name}:`, result);
+        uploadedUrls.push(result.url);
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error);
+        const message = error instanceof Error ? error.message : `Gagal upload ${file.name}`;
+        toast.error(message);
+        // Continue with other files even if one fails
+      }
+    }
+
+    return uploadedUrls;
+  };
+
+  const submitGalleryImages = async () => {
+    if (selectedFiles.length === 0) return;
+
+    try {
+      setUploadingGallery(true);
+      
+      // Extract File objects from FileWithPreview
+      const files = selectedFiles.map(f => f.file);
+      const uploadedUrls = await uploadMultipleFiles(files);
+
+      // Create gallery entries for each uploaded image
+      for (const imageUrl of uploadedUrls) {
+        const galleryData = {
+          entity_type: 'park',
+          entity_id: park.id,
+          title: `${park.name} - Gallery`,
+          image_url: imageUrl,
+          description: '',
+          status: 'approved', // Auto-approve for regional admin edits
+        };
+
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(galleryData),
+          }
+        );
+
+        if (!response.ok) {
+          console.error('Failed to create gallery entry');
+        }
+      }
+
+      toast.success(`${uploadedUrls.length} foto berhasil ditambahkan ke galeri`);
+      
+      // Cleanup previews
+      selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+      setSelectedFiles([]);
+      
+      await loadGalleries(); // Reload galleries
+    } catch (error) {
+      console.error('Error submitting gallery:', error);
+      toast.error('Gagal menyimpan galeri');
+    } finally {
+      setUploadingGallery(false);
+    }
+  };
+
+  const handleDeleteGallery = async (galleryId: number) => {
+    if (!confirm('Apakah Anda yakin ingin menghapus foto ini dari galeri?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/${galleryId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete gallery: ${response.status}`);
+      }
+
+      toast.success('Foto berhasil dihapus dari galeri');
+      await loadGalleries(); // Reload galleries
+    } catch (error) {
+      console.error('Failed to delete gallery:', error);
+      toast.error('Gagal menghapus foto dari galeri');
+    }
+  };
+
+  // Test upload endpoint
+  const testUploadEndpoint = async () => {
+    try {
+      const testBlob = new Blob(['test'], { type: 'image/jpeg' });
+      const testFile = new File([testBlob], 'test.jpg', { type: 'image/jpeg' });
+      
+      const formData = new FormData();
+      formData.append('file', testFile);
+      
+      console.log('Testing upload endpoint...');
+      console.log('Auth token:', localStorage.getItem('auth_token'));
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+          body: formData,
+        }
+      );
+      
+      const responseText = await response.text();
+      console.log('Test upload response status:', response.status);
+      console.log('Test upload response text:', responseText);
+      
+      if (response.ok) {
+        toast.success('Upload endpoint test: SUCCESS');
+      } else {
+        toast.error(`Upload endpoint test: FAILED (${response.status})`);
+      }
+    } catch (error) {
+      console.error('Test upload error:', error);
+      toast.error('Upload endpoint test: ERROR');
+    }
+  };
+
   const handleEdit = () => {
     setIsEditing(true);
     // Scroll to top for better UX
@@ -143,6 +449,16 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
   const handleCancel = () => {
     setIsEditing(false);
+    
+    // Reset image states
+    setSelectedFile(null);
+    setMainImageUrl(park.gambar_utama || '');
+    setMainImageRemoved(false);
+    
+    // Cleanup gallery previews
+    selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    setSelectedFiles([]);
+    
     setEditData({
       name: park.name,
       area_ha: park.area_ha || 0,
@@ -163,11 +479,31 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
       latitude: park.latitude || null,
       longitude: park.longitude || null,
     });
+    
+    // Reset image states
+    setSelectedFile(null);
+    
+    // Cleanup gallery previews
+    selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    setSelectedFiles([]);
+    
+    setMainImageUrl(park.gambar_utama || '');
   };
 
   const handleSave = async () => {
     try {
-      const updatedPark = await parksApi.update(park.id, editData);
+      // Include main image URL in the update
+      const dataToSave = {
+        ...editData,
+        gambar_utama: mainImageUrl,
+      };
+      
+      const updatedPark = await parksApi.update(park.id, dataToSave);
+      
+      // Upload gallery images if any
+      if (selectedFiles.length > 0) {
+        await submitGalleryImages();
+      }
       
       // Set update status based on park status
       if (updatedPark.status === 'in_review') {
@@ -298,6 +634,65 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                       placeholder="Sejarah pembentukan dan pengembangan taman"
                       rows={4}
                     />
+                  </div>
+
+                  {/* Main Image Upload */}
+                  <div>
+                    <Label>Foto Utama Taman</Label>
+                    <FileUpload
+                      onFileSelect={handleFileSelect}
+                      onFileRemove={handleFileRemove}
+                      selectedFile={selectedFile}
+                      previewUrl={mainImageRemoved ? undefined : (mainImageUrl || (park.gambar_utama ? getImageUrl(park.gambar_utama) : undefined))}
+                      maxSize={5}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Upload foto utama taman (maksimal 5MB)
+                    </p>
+                  </div>
+
+                  {/* Existing Gallery Photos */}
+                  {galleries.length > 0 && (
+                    <div>
+                      <Label>Galeri Foto Saat Ini ({galleries.length})</Label>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-2 p-4 border rounded-lg bg-gray-50">
+                        {galleries.map((gallery) => (
+                          <div key={gallery.id} className="relative group">
+                            <img
+                              src={getImageUrl(gallery.image_url)}
+                              alt={gallery.title || 'Gallery'}
+                              className="w-full h-32 object-cover rounded-lg border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteGallery(gallery.id)}
+                              className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                              title="Hapus foto"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            {gallery.title && (
+                              <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gallery Upload */}
+                  <div>
+                    <Label>Tambah Foto Baru ke Galeri</Label>
+                    <MultipleFileUpload
+                      onFilesSelect={handleGalleryFilesSelect}
+                      onFileRemove={handleGalleryFileRemove}
+                      selectedFiles={selectedFiles}
+                      maxFiles={10}
+                      maxSize={5}
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Upload hingga 10 foto untuk galeri (maksimal 5MB per foto)
+                    </p>
                   </div>
                 </div>
               </TabsContent>

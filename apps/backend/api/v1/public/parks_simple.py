@@ -16,6 +16,7 @@ class ParkResponse(BaseModel):
     region_id: Optional[int] = None
     area_ha: Optional[float] = None
     description: Optional[str] = None
+    gambar_utama: Optional[str] = None
     created_at: str
     updated_at: str
 
@@ -43,7 +44,7 @@ async def list_parks(
     # Base query without regions join (regions table doesn't exist, region_id removed)
     # Only show approved and non-deleted parks
     base_query = """
-        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at
+        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at, p.gambar_utama
         FROM parks p
         WHERE p.status = 'approved' AND p.deleted_at IS NULL
     """
@@ -111,6 +112,7 @@ async def list_parks(
                     region_id=None,  # region_id removed from database
                     area_ha=float(row[4]) if row[4] else None,
                     description=row[5] if row[5] else None,
+                    gambar_utama=row[8] if row[8] else None,
                     created_at=created_at_str,
                     updated_at=updated_at_str
                 ))
@@ -155,6 +157,7 @@ class ParkDetailResponse(BaseModel):
     desa_kelurahan: Optional[str] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    gambar_utama: Optional[str] = None
     submitted_by: Optional[int] = None
     submitted_at: Optional[str] = None
     approved_by: Optional[int] = None
@@ -181,6 +184,7 @@ async def get_park(
                    sejarah, visi, misi, nilai_dasar,
                    provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
                    latitude, longitude,
+                   gambar_utama,
                    submitted_by, submitted_at, approved_by, approved_at, rejected_at
             FROM parks 
             WHERE id = :park_id AND status = 'approved' AND deleted_at IS NULL
@@ -249,11 +253,12 @@ async def get_park(
             desa_kelurahan=row[20],       # desa_kelurahan
             latitude=float(row[21]) if row[21] else None,           # latitude
             longitude=float(row[22]) if row[22] else None,          # longitude
-            submitted_by=row[23],         # submitted_by
-            submitted_at=row[24].isoformat() if row[24] else None,  # submitted_at
-            approved_by=row[25],          # approved_by
-            approved_at=row[26].isoformat() if row[26] else None,   # approved_at
-            rejected_at=row[27].isoformat() if row[27] else None,   # rejected_at
+            gambar_utama=row[23],         # gambar_utama (NEW)
+            submitted_by=row[24],         # submitted_by
+            submitted_at=row[25].isoformat() if row[25] else None,  # submitted_at
+            approved_by=row[26],          # approved_by
+            approved_at=row[27].isoformat() if row[27] else None,   # approved_at
+            rejected_at=row[28].isoformat() if row[28] else None,   # rejected_at
             created_at=row[6].isoformat() if row[6] else "",
             updated_at=row[7].isoformat() if row[7] else "",
             statistik={
