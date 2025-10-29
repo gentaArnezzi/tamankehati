@@ -963,29 +963,29 @@ hingga 2001, kini diakui sebagai spesies terpisah) ...
 ║  WORKFLOW: draft → in_review → approved/rejected             ║
 ║                                                              ║
 ║  ROLES:                                                      ║
-║  • Super Admin: Kelola semua, approve semua                 ║
-║  • Regional Admin: Kelola 1 taman, submit untuk approval    ║
+║  • Super Admin: Kelola semua, approve semua                  ║
+║  • Regional Admin: Kelola 1 taman, submit untuk approval     ║
 ║                                                              ║
 ║  DATA WAJIB:                                                 ║
-║  ✓ Taman: name, slug                                        ║
-║  ✓ Flora/Fauna: park_id, local_name, scientific_name        ║
-║  ✓ Aktivitas: park_id, title, activity_date                 ║
-║  ✓ Galeri: title, image_url                                 ║
+║  ✓ Taman: name, slug                                         ║
+║  ✓ Flora/Fauna: park_id, local_name, scientific_name         ║
+║  ✓ Aktivitas: park_id, title, activity_date                  ║
+║  ✓ Galeri: title, image_url                                  ║
 ║                                                              ║
-║  IUCN STATUS: EX > EW > CR > EN > VU > NT > LC | DD | NE    ║
+║  IUCN STATUS: EX > EW > CR > EN > VU > NT > LC | DD | NE     ║
 ║               (Punah → Kritis → Aman)                        ║
 ║                                                              ║
 ║  FOTO:                                                       ║
-║  • Min: 1280x720px (HD)                                     ║
+║  • Min: 1280x720px (HD)                                      ║
 ║  • Format: JPG/PNG                                           ║
-║  • Max: 5MB (thumbnail), 10MB (galeri)                      ║
+║  • Max: 5MB (thumbnail), 10MB (galeri)                       ║
 ║                                                              ║
 ║  REFERENSI:                                                  ║
-║  • IUCN Red List: iucnredlist.org                           ║
-║  • Catalogue of Life: catalogueoflife.org                   ║
-║  • GBIF: gbif.org                                           ║
+║  • IUCN Red List: iucnredlist.org                            ║
+║  • Catalogue of Life: catalogueoflife.org                    ║
+║  • GBIF: gbif.org                                            ║
 ║                                                              ║
-║  SUPPORT: support@tamankehati.id                            ║
+║  SUPPORT: support@tamankehati.id                             ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
 

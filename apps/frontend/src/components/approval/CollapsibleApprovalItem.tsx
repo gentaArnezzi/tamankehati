@@ -175,19 +175,116 @@ export function CollapsibleApprovalItem({
                           </div>
                         </div>
                       )}
+
+                      {/* Gambar Detail Flora */}
+                      {(detail.gambar_daun || detail.gambar_batang || detail.gambar_bunga || detail.gambar_buah) && (
+                        <div>
+                          <h4 className="text-sm font-medium text-gray-900 mb-3">
+                            Dokumentasi Detail Flora
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {detail.gambar_daun && (
+                              <div className="space-y-2">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                  <img
+                                    src={getFullImageUrl(detail.gambar_daun)}
+                                    alt="Pertelaan Daun"
+                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      console.error('Failed to load leaf image:', detail.gambar_daun);
+                                      target.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs font-medium text-gray-900">Pertelaan Daun</p>
+                                  <p className="text-[10px] text-gray-500">Detail struktur daun</p>
+                                </div>
+                              </div>
+                            )}
+                            {detail.gambar_batang && (
+                              <div className="space-y-2">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                  <img
+                                    src={getFullImageUrl(detail.gambar_batang)}
+                                    alt="Batang/Percabangan"
+                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      console.error('Failed to load stem image:', detail.gambar_batang);
+                                      target.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs font-medium text-gray-900">Batang</p>
+                                  <p className="text-[10px] text-gray-500">Batang & percabangan</p>
+                                </div>
+                              </div>
+                            )}
+                            {detail.gambar_bunga && (
+                              <div className="space-y-2">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                  <img
+                                    src={getFullImageUrl(detail.gambar_bunga)}
+                                    alt="Bunga"
+                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      console.error('Failed to load flower image:', detail.gambar_bunga);
+                                      target.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs font-medium text-gray-900">Bunga</p>
+                                  <p className="text-[10px] text-gray-500">Detail struktur bunga</p>
+                                </div>
+                              </div>
+                            )}
+                            {detail.gambar_buah && (
+                              <div className="space-y-2">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                  <img
+                                    src={getFullImageUrl(detail.gambar_buah)}
+                                    alt="Buah"
+                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      console.error('Failed to load fruit image:', detail.gambar_buah);
+                                      target.style.display = 'none';
+                                    }}
+                                  />
+                                </div>
+                                <div className="text-center">
+                                  <p className="text-xs font-medium text-gray-900">Buah</p>
+                                  <p className="text-[10px] text-gray-500">Detail struktur buah</p>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="grid md:grid-cols-2 gap-4">
                         <DetailField label="Nama Ilmiah" value={detail.nama_ilmiah} italic />
                         <DetailField label="Nama Umum" value={detail.nama_umum} />
                         <DetailField label="Famili" value={detail.famili} />
                         <DetailField label="Genus" value={detail.genus} />
+                        <DetailField label="Sinonim" value={detail.sinonim} italic />
+                        <DetailField label="Waktu Berbunga" value={detail.waktu_berbunga} />
                         <DetailField label="Status IUCN" value={detail.status_iucn} />
                         <DetailField label="Endemik" value={detail.is_endemic ? 'Ya' : 'Tidak'} />
                       </div>
                       
                       <DetailField label="Deskripsi Umum" value={detail.deskripsi} fullWidth multiline />
                       <DetailField label="Morfologi" value={detail.morfologi} fullWidth multiline />
+                      <DetailField label="Habitat" value={detail.habitat} fullWidth multiline />
                       <DetailField label="Manfaat" value={detail.manfaat} fullWidth multiline />
+                      <DetailField label="Penyebaran" value={detail.penyebaran} fullWidth multiline />
+                      <DetailField label="Metode Perbanyakan" value={detail.metode_perbanyakan} fullWidth multiline />
+                      <DetailField label="Referensi" value={detail.referensi} fullWidth multiline />
                     </>
                   )}
 
