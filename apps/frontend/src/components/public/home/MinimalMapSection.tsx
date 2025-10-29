@@ -94,12 +94,25 @@ export function MinimalMapSection() {
         if (statsResponse.ok) {
           const statsData = await statsResponse.json();
           console.log('Stats data received:', statsData);
+          console.log('Setting stats with:', statsData);
           setStats(statsData);
         } else {
           console.error('Stats API error:', statsResponse.status, statsResponse.statusText);
+          // Set fallback data
+          setStats({
+            total_flora: 0,
+            total_fauna: 0,
+            total_taman: 0
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        // Set fallback data on error
+        setStats({
+          total_flora: 0,
+          total_fauna: 0,
+          total_taman: 0
+        });
       } finally {
         setLoading(false);
       }
@@ -207,13 +220,21 @@ export function MinimalMapSection() {
                     </div>
                     <div>
                       <div className="text-3xl font-light text-slate-900">
-                        {stats ? `${(stats.total_flora + stats.total_fauna).toLocaleString()}+` : '500+'}
+                        {(() => {
+                          if (stats) {
+                            const total = stats.total_flora + stats.total_fauna;
+                            console.log('Calculating species total:', { flora: stats.total_flora, fauna: stats.total_fauna, total });
+                            return `${total.toLocaleString()}+`;
+                          }
+                          console.log('No stats data, using fallback');
+                          return '500+';
+                        })()}
                       </div>
                       <div className="text-sm text-slate-600 mt-1">Spesies</div>
                       {/* Debug info - remove in production */}
                       {process.env.NODE_ENV === 'development' && (
                         <div className="text-xs text-gray-400 mt-1">
-                          Debug: flora={stats?.total_flora || 0}, fauna={stats?.total_fauna || 0}
+                          Debug: flora={stats?.total_flora || 0}, fauna={stats?.total_fauna || 0}, stats={stats ? 'loaded' : 'null'}
                         </div>
                       )}
                     </div>

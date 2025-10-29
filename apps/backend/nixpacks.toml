@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["python310", "postgresql"]
+nixPkgs = ["python310", "postgresql", "redis"]
 
 [phases.install]
 cmds = [
@@ -8,8 +8,7 @@ cmds = [
 ]
 
 [phases.build]
-cmds = ["echo 'Build phase complete'"]
+cmds = ["echo 'Backend build complete'"]
 
 [start]
 cmd = "uvicorn main:app --host 0.0.0.0 --port $PORT"
-
