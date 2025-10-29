@@ -385,8 +385,12 @@ export default function TanyaKehatiPage() {
         {/* Minimal Header */}
         <div className="flex items-center justify-between py-6 px-6 border-b border-slate-100">
           <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center">
-              <Bot className="w-5 h-5 text-white" />
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden">
+              <img 
+                src="/logo/logo_tanyakehati.png" 
+                alt="Tanya Kehati" 
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <h1 className="text-lg font-light text-slate-900">Tanya Kehati</h1>
