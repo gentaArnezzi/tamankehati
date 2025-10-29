@@ -12,28 +12,44 @@ import { Pagination } from '../../ui/pagination';
 const ITEMS_PER_PAGE = 12;
 const FAMILI_OPTIONS = ['Felidae', 'Cervidae', 'Psittacidae', 'Varanidae', 'Testudinidae'];
 const STATUS_IUCN_OPTIONS = ['CR', 'EN', 'VU', 'NT', 'LC'];
-const WILAYAH_OPTIONS = [
+const PROVINSI_OPTIONS = [
   'Aceh',
   'Sumatera Utara',
   'Sumatera Barat',
   'Riau',
+  'Kepulauan Riau',
   'Jambi',
   'Sumatera Selatan',
   'Bengkulu',
   'Lampung',
+  'Kepulauan Bangka Belitung',
   'Kalimantan Barat',
   'Kalimantan Tengah',
   'Kalimantan Selatan',
   'Kalimantan Timur',
   'Kalimantan Utara',
+  'Banten',
+  'Jawa Barat',
+  'Jawa Tengah',
+  'DI Yogyakarta',
+  'Jawa Timur',
+  'Bali',
+  'Nusa Tenggara Barat',
+  'Nusa Tenggara Timur',
   'Sulawesi Utara',
   'Sulawesi Tengah',
   'Sulawesi Selatan',
   'Sulawesi Tenggara',
   'Gorontalo',
   'Sulawesi Barat',
+  'Maluku',
+  'Maluku Utara',
   'Papua',
   'Papua Barat',
+  'Papua Tengah',
+  'Papua Pegunungan',
+  'Papua Selatan',
+  'Papua Barat Daya',
 ];
 
 type FaunaExploreProps = {
@@ -90,12 +106,12 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
               search: params.get('search') ?? '',
               famili: params.get('famili') ?? '',
               status_iucn: params.get('status_iucn') ?? '',
-              wilayah: params.get('wilayah') ?? '',
+              wilayah: params.get('provinsi') ?? params.get('wilayah') ?? '',
             }}
             options={{
               famili: FAMILI_OPTIONS,
               status_iucn: STATUS_IUCN_OPTIONS,
-              wilayah: WILAYAH_OPTIONS,
+              wilayah: PROVINSI_OPTIONS,
             }}
             targetPath="/fauna"
             title="Filter Fauna"
@@ -103,7 +119,7 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
               famili: 'Famili / Ordo',
               search: 'Kata kunci',
               status_iucn: 'Status IUCN',
-              wilayah: 'Provinsi',
+              wilayah: 'Provinsi (Lokasi Taman)',
             }}
           />
         </div>
@@ -125,23 +141,23 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
             <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'grid'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                Grid
+                Card
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list'
                     ? 'bg-white text-gray-900 shadow-sm'
                     : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                List
+                Row
               </button>
             </div>
           </div>
