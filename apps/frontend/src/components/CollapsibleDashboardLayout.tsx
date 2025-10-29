@@ -52,11 +52,12 @@ const resolveCurrentPage = (path: string) => {
   if (path.startsWith('/dashboard/announcements')) return 'announcements';
   if (path.startsWith('/dashboard/settings')) return 'settings';
   if (path.startsWith('/dashboard/announcement')) return 'announcements';
+  if (path.startsWith('/dashboard/activities')) return 'activities';
   if (path.startsWith('/dashboard/taman/berita')) return 'berita';
   if (path.startsWith('/dashboard/taman/flora')) return 'flora';
   if (path.startsWith('/dashboard/taman/fauna')) return 'fauna';
-  if (path.startsWith('/dashboard/taman')) return 'taman';
   if (path.startsWith('/dashboard/taman/activities')) return 'activities';
+  if (path.startsWith('/dashboard/taman')) return 'taman';
   if (path.startsWith('/dashboard/ai-demo')) return 'ai-demo';
   if (path.startsWith('/dashboard/demo')) return 'demo';
   return 'dashboard';
@@ -85,7 +86,7 @@ const buildNavItems = (role?: User['role'] | null): NavItem[] => {
       { id: 'taman', label: 'Taman', icon: TreePine, path: '/dashboard/taman' },
       { id: 'flora', label: 'Flora', icon: TreePine, path: '/dashboard/taman/flora' },
       { id: 'fauna', label: 'Fauna', icon: Bird, path: '/dashboard/taman/fauna' },
-      { id: 'activities', label: 'Kegiatan', icon: Calendar, path: '/dashboard/taman/activities' },
+      { id: 'activities', label: 'Kegiatan', icon: Calendar, path: '/dashboard/activities' },
       { id: 'demo', label: 'Dashboard Demo', icon: BarChart3, path: '/dashboard/demo' },
       { id: 'ai-demo', label: 'AI Demo', icon: Sparkles, path: '/dashboard/ai-demo' },
     ];

@@ -72,17 +72,19 @@ async def get_park_stats(
         fauna_result = await db.execute(fauna_query, {"park_id": park_id})
         total_fauna = fauna_result.scalar() or 0
 
+        # Get activities count for this park
+        activities_query = text("SELECT COUNT(*) FROM activities WHERE park_id = :park_id AND status = 'approved'")
+        activities_result = await db.execute(activities_query, {"park_id": park_id})
+        total_activities = activities_result.scalar() or 0
+
         # Get artikel count - since articles don't have park_id, return 0 for now
         total_artikel = 0
-
-        # Get gallery count - since galleries don't have park_id, return 0 for now
-        total_galeri = 0
 
         return StatsResponse(
             total_flora=total_flora,
             total_fauna=total_fauna,
             total_taman=0,  # This is for the park itself, not relevant here
-            total_artikel=total_artikel
+            total_artikel=total_activities  # Use activities count instead of articles
         )
     except Exception as e:
         print(f"Error getting park stats: {e}")

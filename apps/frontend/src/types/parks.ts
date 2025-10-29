@@ -26,6 +26,7 @@ export const ParkDetailSchema = ParkPublicSchema.extend({
       flora: z.number().default(0),
       fauna: z.number().default(0),
       artikel: z.number().default(0),
+      kegiatan: z.number().default(0),
       galeri: z.number().default(0),
     })
     .optional(),

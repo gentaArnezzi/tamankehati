@@ -45,7 +45,7 @@ export default async function TamanDetailPage({ params }: TamanDetailPageProps) 
       statistik: {
         flora: parkStats?.total_flora ?? taman.statistik?.flora ?? 0,
         fauna: parkStats?.total_fauna ?? taman.statistik?.fauna ?? 0,
-        artikel: parkStats?.total_artikel ?? 0,
+        kegiatan: parkStats?.total_artikel ?? 0,  // Using total_artikel field for activities count
         galeri: 0,  // Gallery stats not available in current API
       },
     };
