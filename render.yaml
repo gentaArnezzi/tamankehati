@@ -8,7 +8,7 @@ services:
     branch: main
     rootDir: apps/backend
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
-    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
@@ -21,7 +21,7 @@ services:
         # Set this to your Railway database URL (postgresql://...)
       - key: SECRET_KEY
         generateValue: true
-        sync: false
+        # Auto-generated secure secret key
       - key: ALGORITHM
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
@@ -34,7 +34,7 @@ services:
         sync: false
         # Set this to your Vercel frontend URL
       - key: UPLOAD_DIRECTORY
-        value: /opt/render/project/src/uploads
+        value: /tmp/uploads
       - key: MAX_FILE_SIZE
         value: 10485760
       - key: LOG_LEVEL
@@ -42,11 +42,10 @@ services:
       - key: LOG_FORMAT
         value: json
     autoDeploy: true
-    disk:
-      name: uploads
-      mountPath: /opt/render/project/src/uploads
-      sizeGB: 1
 
 # NOTE: Frontend deployed to Vercel, Database deployed to Railway
-# This file only contains backend service configuration
+# Free tier limitations:
+# - No disk storage (uploads stored in /tmp - ephemeral)
+# - 1 worker only
+# For persistent storage, upgrade to paid plan or use cloud storage (S3, Cloudinary)
 
