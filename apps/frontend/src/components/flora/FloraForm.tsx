@@ -39,14 +39,23 @@ const floraSchema = z.object({
   nama_umum: z.string().optional(),
   famili: z.string().optional(),
   genus: z.string().optional(),
+  sinonim: z.string().optional(),
   status_iucn: z.string().optional(),
   deskripsi: z.string().optional(),
   habitat: z.string().optional(),
   morfologi: z.string().optional(),
+  waktu_berbunga: z.string().optional(),
+  penyebaran: z.string().optional(),
+  metode_perbanyakan: z.string().optional(),
   manfaat: z.string().optional(),
+  referensi: z.string().optional(),
   is_endemic: z.boolean().optional(),
   park_id: z.number().optional(),
   gambar_utama: z.string().optional(),
+  gambar_daun: z.string().optional(),
+  gambar_batang: z.string().optional(),
+  gambar_bunga: z.string().optional(),
+  gambar_buah: z.string().optional(),
   status: z.enum(['draft', 'in_review', 'approved', 'rejected']).optional(),
 });
 
@@ -77,6 +86,10 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
   // File upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
+  const [selectedLeafImage, setSelectedLeafImage] = useState<File | null>(null);
+  const [selectedStemImage, setSelectedStemImage] = useState<File | null>(null);
+  const [selectedFlowerImage, setSelectedFlowerImage] = useState<File | null>(null);
+  const [selectedFruitImage, setSelectedFruitImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   
   // Existing gallery images (for edit mode)
@@ -91,15 +104,24 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       nama_umum: initialData?.nama_umum ?? '',
       famili: initialData?.famili ?? '',
       genus: initialData?.genus ?? '',
+      sinonim: initialData?.sinonim ?? '',
       status_iucn: initialData?.status_iucn ?? '',
       deskripsi: initialData?.deskripsi ?? '',
       habitat: initialData?.habitat ?? '',
       morfologi: initialData?.morfologi ?? '',
+      waktu_berbunga: initialData?.waktu_berbunga ?? '',
+      penyebaran: initialData?.penyebaran ?? '',
+      metode_perbanyakan: initialData?.metode_perbanyakan ?? '',
       manfaat: initialData?.manfaat ?? '',
+      referensi: initialData?.referensi ?? '',
       status: initialData?.status ?? (user?.role === 'regional_admin' ? 'draft' : 'approved'),
       is_endemic: initialData?.is_endemic ?? false,
       park_id: initialData?.park_id ?? 1,
       gambar_utama: initialData?.gambar_utama ?? '',
+      gambar_daun: initialData?.gambar_daun ?? '',
+      gambar_batang: initialData?.gambar_batang ?? '',
+      gambar_bunga: initialData?.gambar_bunga ?? '',
+      gambar_buah: initialData?.gambar_buah ?? '',
     },
   });
 
@@ -115,14 +137,23 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       nama_umum: initialData?.nama_umum ?? '',
       famili: initialData?.famili ?? '',
       genus: initialData?.genus ?? '',
+      sinonim: initialData?.sinonim ?? '',
       status_iucn: initialData?.status_iucn ?? '',
       deskripsi: initialData?.deskripsi ?? '',
       habitat: initialData?.habitat ?? '',
       morfologi: initialData?.morfologi ?? '',
+      waktu_berbunga: initialData?.waktu_berbunga ?? '',
+      penyebaran: initialData?.penyebaran ?? '',
+      metode_perbanyakan: initialData?.metode_perbanyakan ?? '',
       manfaat: initialData?.manfaat ?? '',
+      referensi: initialData?.referensi ?? '',
       is_endemic: initialData?.is_endemic ?? false,
       park_id: initialData?.park_id ?? 1,
       gambar_utama: initialData?.gambar_utama ?? '',
+      gambar_daun: initialData?.gambar_daun ?? '',
+      gambar_batang: initialData?.gambar_batang ?? '',
+      gambar_bunga: initialData?.gambar_bunga ?? '',
+      gambar_buah: initialData?.gambar_buah ?? '',
     };
     
     console.log('FloraForm - formData to reset:', formData);
@@ -319,12 +350,41 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       
       let imageUrl = data.gambar_utama;
       let uploadedImageUrls: string[] = [];
+      let leafImageUrl = data.gambar_daun;
+      let stemImageUrl = data.gambar_batang;
+      let flowerImageUrl = data.gambar_bunga;
+      let fruitImageUrl = data.gambar_buah;
       
       // If single file is selected, upload it first
       if (selectedFile) {
         console.log('Uploading flora image file:', selectedFile.name);
         imageUrl = await uploadFile(selectedFile);
         console.log('Flora image uploaded successfully, URL:', imageUrl);
+      }
+      
+      // Upload detail images
+      if (selectedLeafImage) {
+        console.log('Uploading leaf image:', selectedLeafImage.name);
+        leafImageUrl = await uploadFile(selectedLeafImage);
+        console.log('Leaf image uploaded successfully, URL:', leafImageUrl);
+      }
+      
+      if (selectedStemImage) {
+        console.log('Uploading stem image:', selectedStemImage.name);
+        stemImageUrl = await uploadFile(selectedStemImage);
+        console.log('Stem image uploaded successfully, URL:', stemImageUrl);
+      }
+      
+      if (selectedFlowerImage) {
+        console.log('Uploading flower image:', selectedFlowerImage.name);
+        flowerImageUrl = await uploadFile(selectedFlowerImage);
+        console.log('Flower image uploaded successfully, URL:', flowerImageUrl);
+      }
+      
+      if (selectedFruitImage) {
+        console.log('Uploading fruit image:', selectedFruitImage.name);
+        fruitImageUrl = await uploadFile(selectedFruitImage);
+        console.log('Fruit image uploaded successfully, URL:', fruitImageUrl);
       }
       
       // If multiple files are selected, upload them
@@ -343,6 +403,10 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       const floraData = {
         ...data,
         gambar_utama: imageUrl,
+        gambar_daun: leafImageUrl,
+        gambar_batang: stemImageUrl,
+        gambar_bunga: flowerImageUrl,
+        gambar_buah: fruitImageUrl,
         status: submitStatus, // Use the status from button click
       };
       
@@ -494,6 +558,39 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
 
             <FormField
               control={form.control}
+              name="sinonim"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Sinonim</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Nama-nama sinonim atau nama lain dari flora ini"
+                      className="resize-none"
+                      rows={2}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="waktu_berbunga"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Waktu Berbunga</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Contoh: Januari - Maret, atau sepanjang tahun" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
               name="status_iucn"
               render={({ field }) => (
                 <FormItem>
@@ -608,6 +705,63 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
                   <FormControl>
                     <Textarea
                       placeholder="Contoh: Dimanfaatkan sebagai tanaman obat tradisional untuk meredakan demam"
+                      className="resize-none"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="penyebaran"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Penyebaran</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Daerah penyebaran flora ini, misalnya: Sumatra, Kalimantan, Papua"
+                      className="resize-none"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="metode_perbanyakan"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Metode Perbanyakan</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Cara perbanyakan flora ini, misalnya: biji, stek, cangkok, kultur jaringan"
+                      className="resize-none"
+                      rows={3}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="referensi"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Referensi</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Sumber referensi, jurnal, buku, atau literatur lainnya"
                       className="resize-none"
                       rows={3}
                       {...field}
@@ -786,6 +940,161 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
                   </FormItem>
                 )}
               />
+              
+              {/* Gambar Detail Flora */}
+              <div className="space-y-4 mt-6 pt-6 border-t border-gray-200">
+                <h3 className="text-sm font-medium text-gray-900">Gambar Detail Flora (Opsional)</h3>
+                
+                <div className="grid gap-6 md:grid-cols-2">
+                  {/* Gambar Daun */}
+                  <div className="space-y-3">
+                    <FormLabel className="text-sm font-medium">Gambar Pertelaan Daun</FormLabel>
+                    <FileUpload
+                      onFileSelect={setSelectedLeafImage}
+                      onFileRemove={() => setSelectedLeafImage(null)}
+                      selectedFile={selectedLeafImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="gambar_daun"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/daun.jpg" 
+                              type="url"
+                              {...field}
+                              className="h-9 text-xs"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Gambar Batang */}
+                  <div className="space-y-3">
+                    <FormLabel className="text-sm font-medium">Gambar Batang/Percabangan</FormLabel>
+                    <FileUpload
+                      onFileSelect={setSelectedStemImage}
+                      onFileRemove={() => setSelectedStemImage(null)}
+                      selectedFile={selectedStemImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="gambar_batang"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/batang.jpg" 
+                              type="url"
+                              {...field}
+                              className="h-9 text-xs"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Gambar Bunga */}
+                  <div className="space-y-3">
+                    <FormLabel className="text-sm font-medium">Gambar Bunga</FormLabel>
+                    <FileUpload
+                      onFileSelect={setSelectedFlowerImage}
+                      onFileRemove={() => setSelectedFlowerImage(null)}
+                      selectedFile={selectedFlowerImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="gambar_bunga"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/bunga.jpg" 
+                              type="url"
+                              {...field}
+                              className="h-9 text-xs"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Gambar Buah */}
+                  <div className="space-y-3">
+                    <FormLabel className="text-sm font-medium">Gambar Buah</FormLabel>
+                    <FileUpload
+                      onFileSelect={setSelectedFruitImage}
+                      onFileRemove={() => setSelectedFruitImage(null)}
+                      selectedFile={selectedFruitImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="gambar_buah"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input 
+                              placeholder="https://example.com/buah.jpg" 
+                              type="url"
+                              {...field}
+                              className="h-9 text-xs"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
 
 

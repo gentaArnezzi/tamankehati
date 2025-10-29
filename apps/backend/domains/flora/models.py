@@ -20,17 +20,28 @@ class Flora(Base):
 
     local_name = Column(String)
     scientific_name = Column(String)
-    family = Column(String)
-    genus = Column(String)
-    species = Column(String)  # Add missing column
+    family = Column(String)  # Famili
+    genus = Column(String)  # Genus
+    species = Column(String)
+    synonym = Column(Text, nullable=True)  # Sinonim
     description = Column(Text)
-    habitat = Column(Text)  # Add missing column
-    morphology = Column(Text)
-    benefits = Column(Text)
-    uses = Column(Text)  # Add missing column
-    local_id = Column(String)  # Add missing column
-    image_url = Column(String)  # Add missing column
-    gambar_utama = Column(String(500), nullable=True)  # URL to main image
+    habitat = Column(Text)  # Data alami habitat
+    morphology = Column(Text)  # Morfologi
+    flowering_time = Column(String(100), nullable=True)  # Waktu berbunga
+    distribution = Column(Text, nullable=True)  # Penyebaran
+    propagation_method = Column(Text, nullable=True)  # Metode perbanyakan
+    benefits = Column(Text)  # Manfaat
+    uses = Column(Text)
+    reference = Column(Text, nullable=True)  # Referensi
+    local_id = Column(String)
+    
+    # Gambar - Main & Detail Images
+    image_url = Column(String)
+    gambar_utama = Column(String(500), nullable=True)  # URL gambar utama
+    leaf_image_url = Column(String(500), nullable=True)  # Gambar pertelaan daun
+    stem_image_url = Column(String(500), nullable=True)  # Gambar batang percabangan
+    flower_image_url = Column(String(500), nullable=True)  # Gambar bunga
+    fruit_image_url = Column(String(500), nullable=True)  # Gambar buah
 
     is_endemic = Column(Boolean, nullable=False, default=False)
     iucn_status = Column(String(8), nullable=True)

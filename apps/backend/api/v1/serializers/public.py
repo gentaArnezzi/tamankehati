@@ -37,14 +37,23 @@ class FloraPublicOut(FloraPublicBase):
     famili: str
     genus: Optional[str] = None
     spesies: Optional[str] = None
+    sinonim: Optional[str] = None
     status_iucn: str
     deskripsi: str
     habitat: str
     morfologi: Optional[str] = None
     manfaat: Optional[str] = None
     kegunaan: Optional[str] = None
+    waktu_berbunga: Optional[str] = None
+    penyebaran: Optional[str] = None
+    metode_perbanyakan: Optional[str] = None
+    referensi: Optional[str] = None
     wilayah: str
     gambar_utama: str
+    gambar_daun: Optional[str] = None
+    gambar_batang: Optional[str] = None
+    gambar_bunga: Optional[str] = None
+    gambar_buah: Optional[str] = None
     status: str
     is_endemic: Optional[bool] = False
     park_info: Optional[ParkInfo] = None

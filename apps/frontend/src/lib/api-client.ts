@@ -106,17 +106,21 @@ type FloraAdminResponse = {
   local_name?: string | null;
   family?: string | null;
   genus?: string | null;
+  synonym?: string | null;
   description?: string | null;
-  habitat?: string | null;  // Added habitat field
+  habitat?: string | null;
+  morphology?: string | null;
+  flowering_time?: string | null;
+  distribution?: string | null;
+  propagation_method?: string | null;
+  benefits?: string | null;
+  reference?: string | null;
   is_endemic?: boolean;
   iucn_status?: string | null;
-  morphology?: string | null;
-  benefits?: string | null;
   park_id: number;
   park?: {
     id: number;
     name: string;
-    // region_id: number;  // Removed - using user-based access control
   } | null;
   status: WorkflowStatus;
   submitted_by?: number | null;
@@ -129,7 +133,10 @@ type FloraAdminResponse = {
   updated_at?: string | null;
   wilayah?: string | null;
   gambar_utama?: string | null;
-  // region_code?: string | null;  // Removed - using user-based access control
+  leaf_image_url?: string | null;
+  stem_image_url?: string | null;
+  flower_image_url?: string | null;
+  fruit_image_url?: string | null;
 };
 
 type FaunaAdminResponse = {
@@ -346,10 +353,16 @@ export interface Flora {
   nama_umum?: string;       // Frontend Indonesian, maps to local_name in backend
   famili?: string;          // Frontend Indonesian, maps to family in backend
   genus?: string;
+  sinonim?: string;         // Frontend Indonesian, maps to synonym in backend
   status_iucn?: string;     // Frontend Indonesian, maps to iucn_status in backend
   deskripsi?: string;       // Frontend Indonesian, maps to description in backend
+  habitat?: string;
   morfologi?: string;       // Frontend Indonesian, maps to morphology in backend
+  waktu_berbunga?: string;  // Frontend Indonesian, maps to flowering_time in backend
+  penyebaran?: string;      // Frontend Indonesian, maps to distribution in backend
+  metode_perbanyakan?: string;  // Frontend Indonesian, maps to propagation_method in backend
   manfaat?: string;         // Frontend Indonesian, maps to benefits in backend
+  referensi?: string;       // Frontend Indonesian, maps to reference in backend
   is_endemic?: boolean;
   park_id?: number;
   park?: {
@@ -357,7 +370,6 @@ export interface Flora {
     name: string;
     region_id: number;
   };
-  habitat?: string;
   wilayah?: string;
   region_code?: string;
   status: WorkflowStatus;
@@ -370,6 +382,10 @@ export interface Flora {
   updated_at?: string;
   rejection_reason?: string | null;
   gambar_utama?: string;
+  gambar_daun?: string;     // Frontend Indonesian, maps to leaf_image_url in backend
+  gambar_batang?: string;   // Frontend Indonesian, maps to stem_image_url in backend
+  gambar_bunga?: string;    // Frontend Indonesian, maps to flower_image_url in backend
+  gambar_buah?: string;     // Frontend Indonesian, maps to fruit_image_url in backend
 }
 
 export interface Fauna {
@@ -595,20 +611,24 @@ const mapFlora = (flora: FloraAdminResponse): Flora => ({
   nama_umum: flora.local_name ?? undefined,
   famili: flora.family ?? undefined,
   genus: flora.genus ?? undefined,
+  sinonim: flora.synonym ?? undefined,
   status_iucn: flora.iucn_status ?? undefined,
   deskripsi: flora.description ?? undefined,
+  habitat: flora.habitat ?? undefined,
   morfologi: flora.morphology ?? undefined,
+  waktu_berbunga: flora.flowering_time ?? undefined,
+  penyebaran: flora.distribution ?? undefined,
+  metode_perbanyakan: flora.propagation_method ?? undefined,
   manfaat: flora.benefits ?? undefined,
+  referensi: flora.reference ?? undefined,
   is_endemic: flora.is_endemic ?? false,
-  habitat: flora.habitat ?? undefined,  // Added habitat mapping
   wilayah: flora.wilayah ?? undefined,
-  park_id: flora.park_id,  // Added park_id mapping
-  park: flora.park ? {  // Added park mapping
+  park_id: flora.park_id,
+  park: flora.park ? {
     id: flora.park.id,
     name: flora.park.name,
     region_id: 0  // Legacy field, not used anymore
   } : undefined,
-    // region_code: flora.region_code ?? undefined,  // Removed - using user-based access control
   status: flora.status,
   submitted_by: flora.submitted_by ?? undefined,
   approved_by: flora.approved_by ?? undefined,
@@ -616,6 +636,10 @@ const mapFlora = (flora: FloraAdminResponse): Flora => ({
   updated_at: flora.updated_at ?? flora.approved_at ?? flora.submitted_at ?? undefined,
   rejection_reason: flora.rejection_reason ?? undefined,
   gambar_utama: flora.gambar_utama ?? undefined,
+  gambar_daun: flora.leaf_image_url ?? undefined,
+  gambar_batang: flora.stem_image_url ?? undefined,
+  gambar_bunga: flora.flower_image_url ?? undefined,
+  gambar_buah: flora.fruit_image_url ?? undefined,
 });
 
 const mapFauna = (fauna: FaunaAdminResponse): Fauna => ({
@@ -838,13 +862,22 @@ export const floraApi = {
       local_name: payload.nama_umum,
       family: payload.famili,
       genus: payload.genus,
+      synonym: payload.sinonim,
       description: payload.deskripsi,
-      habitat: payload.habitat,  // Added habitat field
+      habitat: payload.habitat,
       morphology: payload.morfologi,
       benefits: payload.manfaat,
+      flowering_time: payload.waktu_berbunga,
+      distribution: payload.penyebaran,
+      propagation_method: payload.metode_perbanyakan,
+      reference: payload.referensi,
       is_endemic: payload.is_endemic || false,
       iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
       gambar_utama: payload.gambar_utama,
+      leaf_image_url: payload.gambar_daun,
+      stem_image_url: payload.gambar_batang,
+      flower_image_url: payload.gambar_bunga,
+      fruit_image_url: payload.gambar_buah,
       status: payload.status, // Add status field
     });
     return mapFlora(response);
@@ -857,13 +890,22 @@ export const floraApi = {
       local_name: payload.nama_umum,
       family: payload.famili,
       genus: payload.genus,
+      synonym: payload.sinonim,
       description: payload.deskripsi,
-      habitat: payload.habitat,  // Added habitat field
+      habitat: payload.habitat,
       morphology: payload.morfologi,
       benefits: payload.manfaat,
+      flowering_time: payload.waktu_berbunga,
+      distribution: payload.penyebaran,
+      propagation_method: payload.metode_perbanyakan,
+      reference: payload.referensi,
       is_endemic: payload.is_endemic,
       iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
       gambar_utama: payload.gambar_utama,
+      leaf_image_url: payload.gambar_daun,
+      stem_image_url: payload.gambar_batang,
+      flower_image_url: payload.gambar_bunga,
+      fruit_image_url: payload.gambar_buah,
       status: payload.status, // Add status field
     });
     return mapFlora(response);

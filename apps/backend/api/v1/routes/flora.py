@@ -338,8 +338,22 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
     status_value = payload.status.value if payload.status else 'draft'  # Get enum value
     
     result = await db.execute(text("""
-        INSERT INTO flora (park_id, local_name, scientific_name, family, genus, description, morphology, benefits, is_endemic, iucn_status, gambar_utama, submitted_by, status, created_at, updated_at)
-        VALUES (:park_id, :local_name, :scientific_name, :family, :genus, :description, :morphology, :benefits, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, :status, now(), now())
+        INSERT INTO flora (
+            park_id, local_name, scientific_name, family, genus, species, synonym,
+            description, habitat, morphology, benefits, uses,
+            flowering_time, distribution, propagation_method, reference,
+            is_endemic, iucn_status, 
+            gambar_utama, leaf_image_url, stem_image_url, flower_image_url, fruit_image_url,
+            submitted_by, status, created_at, updated_at
+        )
+        VALUES (
+            :park_id, :local_name, :scientific_name, :family, :genus, :species, :synonym,
+            :description, :habitat, :morphology, :benefits, :uses,
+            :flowering_time, :distribution, :propagation_method, :reference,
+            :is_endemic, :iucn_status,
+            :gambar_utama, :leaf_image_url, :stem_image_url, :flower_image_url, :fruit_image_url,
+            :submitted_by, :status, now(), now()
+        )
         RETURNING id
     """), {
         "park_id": payload.park_id,
@@ -347,12 +361,24 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
         "scientific_name": payload.scientific_name,
         "family": payload.family,
         "genus": payload.genus,
+        "species": payload.species,
+        "synonym": payload.synonym,
         "description": payload.description,
+        "habitat": payload.habitat,
         "morphology": payload.morphology,
         "benefits": payload.benefits,
+        "uses": payload.uses,
+        "flowering_time": payload.flowering_time,
+        "distribution": payload.distribution,
+        "propagation_method": payload.propagation_method,
+        "reference": payload.reference,
         "is_endemic": payload.is_endemic,
         "iucn_status": iucn_status_value,
         "gambar_utama": getattr(payload, 'gambar_utama', None),
+        "leaf_image_url": getattr(payload, 'leaf_image_url', None),
+        "stem_image_url": getattr(payload, 'stem_image_url', None),
+        "flower_image_url": getattr(payload, 'flower_image_url', None),
+        "fruit_image_url": getattr(payload, 'fruit_image_url', None),
         "submitted_by": int(user.id),  # ✅ Set submitted_by (convert to int)
         "status": status_value  # ✅ Use status from frontend
     })
@@ -401,8 +427,11 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     backup_json = None
     if obj.status == "approved":
         backup_query = text("""
-            SELECT local_name, scientific_name, family, genus, description, morphology,
-                   benefits, is_endemic, iucn_status, park_id, gambar_utama
+            SELECT local_name, scientific_name, family, genus, species, synonym,
+                   description, habitat, morphology, benefits, uses,
+                   flowering_time, distribution, propagation_method, reference,
+                   is_endemic, iucn_status, park_id, 
+                   gambar_utama, leaf_image_url, stem_image_url, flower_image_url, fruit_image_url
             FROM flora WHERE id = :flora_id
         """)
         backup_result = await db.execute(backup_query, {"flora_id": flora_id})
@@ -414,13 +443,25 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
                 "scientific_name": backup_row[1],
                 "family": backup_row[2],
                 "genus": backup_row[3],
-                "description": backup_row[4],
-                "morphology": backup_row[5],
-                "benefits": backup_row[6],
-                "is_endemic": backup_row[7],
-                "iucn_status": backup_row[8],
-                "park_id": backup_row[9],
-                "gambar_utama": backup_row[10],
+                "species": backup_row[4],
+                "synonym": backup_row[5],
+                "description": backup_row[6],
+                "habitat": backup_row[7],
+                "morphology": backup_row[8],
+                "benefits": backup_row[9],
+                "uses": backup_row[10],
+                "flowering_time": backup_row[11],
+                "distribution": backup_row[12],
+                "propagation_method": backup_row[13],
+                "reference": backup_row[14],
+                "is_endemic": backup_row[15],
+                "iucn_status": backup_row[16],
+                "park_id": backup_row[17],
+                "gambar_utama": backup_row[18],
+                "leaf_image_url": backup_row[19],
+                "stem_image_url": backup_row[20],
+                "flower_image_url": backup_row[21],
+                "fruit_image_url": backup_row[22],
                 "_backup": True  # Mark as backup
             }
             backup_json = json.dumps(backup_data)
@@ -430,7 +471,11 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     update_fields = []
     update_values = {"flora_id": flora_id}
     
-    for f in ("local_name","scientific_name","family","genus","description","morphology","benefits","is_endemic","iucn_status","park_id","gambar_utama"):
+    for f in ("local_name","scientific_name","family","genus","species","synonym",
+              "description","habitat","morphology","benefits","uses",
+              "flowering_time","distribution","propagation_method","reference",
+              "is_endemic","iucn_status","park_id",
+              "gambar_utama","leaf_image_url","stem_image_url","flower_image_url","fruit_image_url"):
         v = getattr(payload, f, None)
         if v is not None:
             if f == "iucn_status" and v:
@@ -604,13 +649,25 @@ async def reject_flora(flora_id: int, payload: dict, db: AsyncSession = Depends(
         obj.scientific_name = backup_data.get("scientific_name")
         obj.family = backup_data.get("family")
         obj.genus = backup_data.get("genus")
+        obj.species = backup_data.get("species")
+        obj.synonym = backup_data.get("synonym")
         obj.description = backup_data.get("description")
+        obj.habitat = backup_data.get("habitat")
         obj.morphology = backup_data.get("morphology")
         obj.benefits = backup_data.get("benefits")
+        obj.uses = backup_data.get("uses")
+        obj.flowering_time = backup_data.get("flowering_time")
+        obj.distribution = backup_data.get("distribution")
+        obj.propagation_method = backup_data.get("propagation_method")
+        obj.reference = backup_data.get("reference")
         obj.is_endemic = backup_data.get("is_endemic")
         obj.iucn_status = backup_data.get("iucn_status")
         obj.park_id = backup_data.get("park_id")
         obj.gambar_utama = backup_data.get("gambar_utama")
+        obj.leaf_image_url = backup_data.get("leaf_image_url")
+        obj.stem_image_url = backup_data.get("stem_image_url")
+        obj.flower_image_url = backup_data.get("flower_image_url")
+        obj.fruit_image_url = backup_data.get("fruit_image_url")
         
         # Restore status to approved
         obj.status = "approved"

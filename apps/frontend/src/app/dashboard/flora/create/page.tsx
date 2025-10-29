@@ -44,6 +44,10 @@ export default function CreateFloraPage() {
   // File upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
+  const [selectedLeafImage, setSelectedLeafImage] = useState<File | null>(null);
+  const [selectedStemImage, setSelectedStemImage] = useState<File | null>(null);
+  const [selectedFlowerImage, setSelectedFlowerImage] = useState<File | null>(null);
+  const [selectedFruitImage, setSelectedFruitImage] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   
   const [formData, setFormData] = useState({
@@ -51,12 +55,21 @@ export default function CreateFloraPage() {
     nama_umum: '',
     famili: '',
     genus: '',
+    sinonim: '',
     deskripsi: '',
     morfologi: '',
+    waktu_berbunga: '',
+    penyebaran: '',
+    metode_perbanyakan: '',
     manfaat: '',
+    referensi: '',
     status_iucn: '',
     is_endemic: false,
     gambar_utama: '',
+    gambar_daun: '',
+    gambar_batang: '',
+    gambar_bunga: '',
+    gambar_buah: '',
   });
 
   const handleChange = (field: string, value: any) => {
@@ -260,12 +273,41 @@ export default function CreateFloraPage() {
       
       let imageUrl = formData.gambar_utama;
       let uploadedImageUrls: string[] = [];
+      let leafImageUrl = formData.gambar_daun;
+      let stemImageUrl = formData.gambar_batang;
+      let flowerImageUrl = formData.gambar_bunga;
+      let fruitImageUrl = formData.gambar_buah;
       
       // If single file is selected, upload it first
       if (selectedFile) {
         console.log('Uploading flora image file:', selectedFile.name);
         imageUrl = await uploadFile(selectedFile);
         console.log('Flora image uploaded successfully, URL:', imageUrl);
+      }
+      
+      // Upload detail images
+      if (selectedLeafImage) {
+        console.log('Uploading leaf image:', selectedLeafImage.name);
+        leafImageUrl = await uploadFile(selectedLeafImage);
+        console.log('Leaf image uploaded successfully, URL:', leafImageUrl);
+      }
+      
+      if (selectedStemImage) {
+        console.log('Uploading stem image:', selectedStemImage.name);
+        stemImageUrl = await uploadFile(selectedStemImage);
+        console.log('Stem image uploaded successfully, URL:', stemImageUrl);
+      }
+      
+      if (selectedFlowerImage) {
+        console.log('Uploading flower image:', selectedFlowerImage.name);
+        flowerImageUrl = await uploadFile(selectedFlowerImage);
+        console.log('Flower image uploaded successfully, URL:', flowerImageUrl);
+      }
+      
+      if (selectedFruitImage) {
+        console.log('Uploading fruit image:', selectedFruitImage.name);
+        fruitImageUrl = await uploadFile(selectedFruitImage);
+        console.log('Fruit image uploaded successfully, URL:', fruitImageUrl);
       }
       
       // If multiple files are selected, upload them
@@ -284,6 +326,10 @@ export default function CreateFloraPage() {
       const floraData = {
         ...formData,
         gambar_utama: imageUrl,
+        gambar_daun: leafImageUrl,
+        gambar_batang: stemImageUrl,
+        gambar_bunga: flowerImageUrl,
+        gambar_buah: fruitImageUrl,
         status: submitStatus,  // ✅ Use status from button click
       };
       
@@ -500,6 +546,29 @@ export default function CreateFloraPage() {
                   />
                 </div>
               </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="sinonim" className="text-sm font-medium text-gray-700">Sinonim</Label>
+                <Textarea
+                  id="sinonim"
+                  placeholder="Nama-nama sinonim atau nama lain dari flora ini"
+                  value={formData.sinonim}
+                  onChange={(e) => handleChange('sinonim', e.target.value)}
+                  rows={2}
+                  className="border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="waktu_berbunga" className="text-sm font-medium text-gray-700">Waktu Berbunga</Label>
+                <Input
+                  id="waktu_berbunga"
+                  placeholder="Contoh: Januari - Maret, atau sepanjang tahun"
+                  value={formData.waktu_berbunga}
+                  onChange={(e) => handleChange('waktu_berbunga', e.target.value)}
+                  className="h-11 border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors"
+                />
+              </div>
             </div>
           </div>
           )}
@@ -567,6 +636,42 @@ export default function CreateFloraPage() {
                   value={formData.manfaat}
                   onChange={(e) => handleChange('manfaat', e.target.value)}
                   rows={5}
+                  className="border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="penyebaran" className="text-sm font-medium text-gray-700">Penyebaran</Label>
+                <Textarea
+                  id="penyebaran"
+                  placeholder="Daerah penyebaran flora ini, misalnya: Sumatra, Kalimantan, Papua"
+                  value={formData.penyebaran}
+                  onChange={(e) => handleChange('penyebaran', e.target.value)}
+                  rows={3}
+                  className="border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="metode_perbanyakan" className="text-sm font-medium text-gray-700">Metode Perbanyakan</Label>
+                <Textarea
+                  id="metode_perbanyakan"
+                  placeholder="Cara perbanyakan flora ini, misalnya: biji, stek, cangkok, kultur jaringan"
+                  value={formData.metode_perbanyakan}
+                  onChange={(e) => handleChange('metode_perbanyakan', e.target.value)}
+                  rows={3}
+                  className="border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors resize-none"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="referensi" className="text-sm font-medium text-gray-700">Referensi</Label>
+                <Textarea
+                  id="referensi"
+                  placeholder="Sumber referensi, jurnal, buku, atau literatur lainnya"
+                  value={formData.referensi}
+                  onChange={(e) => handleChange('referensi', e.target.value)}
+                  rows={3}
                   className="border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors resize-none"
                 />
               </div>
@@ -697,6 +802,123 @@ export default function CreateFloraPage() {
                   </div>
                 )}
               </div>
+
+              <div className="space-y-6 pt-6 border-t border-gray-200">
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-1">Gambar Detail Flora (Opsional)</h3>
+                  <p className="text-xs text-gray-500">Tambahkan gambar detail untuk dokumentasi lengkap</p>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Gambar Daun */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700">Gambar Pertelaan Daun</Label>
+                    <FileUpload
+                      onFileSelect={setSelectedLeafImage}
+                      onFileRemove={() => setSelectedLeafImage(null)}
+                      selectedFile={selectedLeafImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/daun.jpg"
+                      value={formData.gambar_daun}
+                      onChange={(e) => handleChange('gambar_daun', e.target.value)}
+                      className="h-9 text-xs border-gray-300 focus:border-gray-900 focus:ring-0"
+                    />
+                  </div>
+
+                  {/* Gambar Batang */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700">Gambar Batang/Percabangan</Label>
+                    <FileUpload
+                      onFileSelect={setSelectedStemImage}
+                      onFileRemove={() => setSelectedStemImage(null)}
+                      selectedFile={selectedStemImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/batang.jpg"
+                      value={formData.gambar_batang}
+                      onChange={(e) => handleChange('gambar_batang', e.target.value)}
+                      className="h-9 text-xs border-gray-300 focus:border-gray-900 focus:ring-0"
+                    />
+                  </div>
+
+                  {/* Gambar Bunga */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700">Gambar Bunga</Label>
+                    <FileUpload
+                      onFileSelect={setSelectedFlowerImage}
+                      onFileRemove={() => setSelectedFlowerImage(null)}
+                      selectedFile={selectedFlowerImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/bunga.jpg"
+                      value={formData.gambar_bunga}
+                      onChange={(e) => handleChange('gambar_bunga', e.target.value)}
+                      className="h-9 text-xs border-gray-300 focus:border-gray-900 focus:ring-0"
+                    />
+                  </div>
+
+                  {/* Gambar Buah */}
+                  <div className="space-y-2">
+                    <Label className="text-xs font-medium text-gray-700">Gambar Buah</Label>
+                    <FileUpload
+                      onFileSelect={setSelectedFruitImage}
+                      onFileRemove={() => setSelectedFruitImage(null)}
+                      selectedFile={selectedFruitImage}
+                      maxSize={10}
+                      className="border-dashed"
+                    />
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-200" />
+                      </div>
+                      <div className="relative flex justify-center">
+                        <span className="px-2 bg-white text-[10px] text-gray-400">atau URL</span>
+                      </div>
+                    </div>
+                    <Input
+                      type="url"
+                      placeholder="https://example.com/buah.jpg"
+                      value={formData.gambar_buah}
+                      onChange={(e) => handleChange('gambar_buah', e.target.value)}
+                      className="h-9 text-xs border-gray-300 focus:border-gray-900 focus:ring-0"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           )}
@@ -729,6 +951,18 @@ export default function CreateFloraPage() {
                       <span className="text-gray-500">Genus</span>
                       <span className="text-gray-900 font-medium">{formData.genus || '-'}</span>
                     </div>
+                    {formData.sinonim && (
+                      <div>
+                        <span className="text-gray-500 block mb-1">Sinonim</span>
+                        <p className="text-gray-900">{formData.sinonim}</p>
+                      </div>
+                    )}
+                    {formData.waktu_berbunga && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-500">Waktu Berbunga</span>
+                        <span className="text-gray-900 font-medium">{formData.waktu_berbunga}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -747,6 +981,24 @@ export default function CreateFloraPage() {
                       <span className="text-gray-500 block mb-1">Manfaat</span>
                       <p className="text-gray-900 line-clamp-3">{formData.manfaat || '-'}</p>
                     </div>
+                    {formData.penyebaran && (
+                      <div>
+                        <span className="text-gray-500 block mb-1">Penyebaran</span>
+                        <p className="text-gray-900 line-clamp-2">{formData.penyebaran}</p>
+                      </div>
+                    )}
+                    {formData.metode_perbanyakan && (
+                      <div>
+                        <span className="text-gray-500 block mb-1">Metode Perbanyakan</span>
+                        <p className="text-gray-900 line-clamp-2">{formData.metode_perbanyakan}</p>
+                      </div>
+                    )}
+                    {formData.referensi && (
+                      <div>
+                        <span className="text-gray-500 block mb-1">Referensi</span>
+                        <p className="text-gray-900 line-clamp-2">{formData.referensi}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -766,11 +1018,79 @@ export default function CreateFloraPage() {
 
                 <div className="border border-gray-200 rounded-lg p-5">
                   <h3 className="text-sm font-medium text-gray-900 mb-4">Galeri Foto</h3>
-                  <div className="text-sm">
+                  <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Total Gambar</span>
                       <span className="text-gray-900 font-medium">{(selectedFile ? 1 : 0) + selectedFiles.length} gambar</span>
                     </div>
+                    {(formData.gambar_daun || selectedLeafImage) && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500">Gambar Daun</span>
+                          <span className="text-green-600 text-xs">✓ Tersedia</span>
+                        </div>
+                        {selectedLeafImage && (
+                          <div className="mt-2 relative w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                            <img 
+                              src={URL.createObjectURL(selectedLeafImage)} 
+                              alt="Preview Daun" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(formData.gambar_batang || selectedStemImage) && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500">Gambar Batang</span>
+                          <span className="text-green-600 text-xs">✓ Tersedia</span>
+                        </div>
+                        {selectedStemImage && (
+                          <div className="mt-2 relative w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                            <img 
+                              src={URL.createObjectURL(selectedStemImage)} 
+                              alt="Preview Batang" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(formData.gambar_bunga || selectedFlowerImage) && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500">Gambar Bunga</span>
+                          <span className="text-green-600 text-xs">✓ Tersedia</span>
+                        </div>
+                        {selectedFlowerImage && (
+                          <div className="mt-2 relative w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                            <img 
+                              src={URL.createObjectURL(selectedFlowerImage)} 
+                              alt="Preview Bunga" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {(formData.gambar_buah || selectedFruitImage) && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500">Gambar Buah</span>
+                          <span className="text-green-600 text-xs">✓ Tersedia</span>
+                        </div>
+                        {selectedFruitImage && (
+                          <div className="mt-2 relative w-24 h-24 rounded border border-gray-200 overflow-hidden">
+                            <img 
+                              src={URL.createObjectURL(selectedFruitImage)} 
+                              alt="Preview Buah" 
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
