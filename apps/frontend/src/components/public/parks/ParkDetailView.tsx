@@ -8,14 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../..
 import { Separator } from '../../ui/separator';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Button } from '../../ui/button';
-import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Sprout, PawPrint, BookOpen, ArrowRight, ExternalLink } from 'lucide-react';
+import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Sprout, PawPrint, BookOpen, ArrowRight, ExternalLink, Activity } from 'lucide-react';
 import { formatDate } from '../../../lib/utils';
 import { getParkStats } from '../../../lib/api/client';
 import type { ParkDetail } from '../../../types/parks';
-import { ParkActivities } from '../activities/ParkActivities';
 import { ParkFlora } from './ParkFlora';
 import { ParkFauna } from './ParkFauna';
-import { ParkArticles } from './ParkArticles';
+import { ParkActivities } from '../activities/ParkActivities';
 
 interface ParkDetailViewProps {
   park: ParkDetail;
@@ -34,7 +33,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
   const stats = park.statistik || {
     flora: 0,
     fauna: 0,
-    artikel: 0,
+    kegiatan: 0,
     galeri: 0,
   };
 
@@ -140,19 +139,19 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               </div>
             </Link>
 
-            {/* Articles Count */}
-            <Link href={`/artikel?taman=${park.id}`} className="group">
-              <div className="text-gray-900 flex flex-col gap-6 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-0 bg-gradient-to-br from-green-50 to-blue-50">
+            {/* Activities Count */}
+            <Link href={`/kegiatan?taman=${park.id}`} className="group">
+              <div className="text-gray-900 flex flex-col gap-6 rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer border-0 bg-gradient-to-br from-emerald-50 to-emerald-100">
                 <div className="p-8 text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-green-800 to-blue-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                    <BookOpen className="w-8 h-8 text-white" />
+                  <div className="w-16 h-16 bg-emerald-800 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <Activity className="w-8 h-8 text-white" />
                   </div>
-                  <div className="text-3xl font-bold bg-gradient-to-r from-green-800 to-blue-800 bg-clip-text text-transparent mb-2">
-                    {stats.artikel}
+                  <div className="text-3xl font-bold text-emerald-800 mb-2">
+                    {stats.kegiatan || 0}
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Artikel</h3>
-                  <p className="text-sm text-gray-600 mb-4">Tentang taman ini</p>
-                  <div className="flex items-center justify-center text-green-800 group-hover:text-blue-800">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Kegiatan</h3>
+                  <p className="text-sm text-gray-600 mb-4">Aktivitas di taman ini</p>
+                  <div className="flex items-center justify-center text-emerald-800 group-hover:text-emerald-700">
                     <span className="text-sm font-medium">Lihat Detail</span>
                     <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                   </div>
@@ -256,7 +255,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                           : 'bg-yellow-100 text-yellow-800'
                         }
                       >
-                        {park.status === 'approved' ? 'Disetujui' : 'Draft'}
+                        {park.status === 'approved' ? 'Published' : 'Draft'}
                       </Badge>
                     </dd>
                   </div>
@@ -286,13 +285,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                   <div>
                     <dt className="font-medium text-slate-600">Dibuat</dt>
                     <dd className="text-sm font-semibold text-slate-800">
-                      {formatDate(park.created_at)}
+                      {park.created_at ? formatDate(park.created_at) : 'Tidak tersedia'}
                     </dd>
                   </div>
                   <div>
                     <dt className="font-medium text-slate-600">Diperbarui</dt>
                     <dd className="text-sm font-semibold text-slate-800">
-                      {formatDate(park.updated_at)}
+                      {park.updated_at ? formatDate(park.updated_at) : 'Tidak tersedia'}
                     </dd>
                   </div>
                 </dl>
@@ -304,20 +303,42 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                   Lokasi
                 </h2>
                 <div className="mt-4">
-                  <div className="aspect-video bg-gradient-to-br from-green-200 to-blue-200 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <Map className="w-12 h-12 text-green-600 mx-auto mb-2" />
-                      <p className="text-sm text-green-800 font-medium">Peta Interaktif</p>
-                      <p className="text-xs text-blue-600">Akan segera tersedia</p>
+                  {park.latitude && park.longitude ? (
+                    <div className="space-y-4">
+                      <div className="aspect-video bg-gradient-to-br from-green-200 to-blue-200 rounded-lg overflow-hidden">
+                        <iframe
+                          src={`https://www.openstreetmap.org/export/embed.html?bbox=${park.longitude - 0.01},${park.latitude - 0.01},${park.longitude + 0.01},${park.latitude + 0.01}&layer=mapnik&marker=${park.latitude},${park.longitude}`}
+                          width="100%"
+                          height="100%"
+                          style={{ border: 0 }}
+                          allowFullScreen
+                          loading="lazy"
+                          referrerPolicy="no-referrer-when-downgrade"
+                          title={`Peta ${park.name}`}
+                        />
+                      </div>
+                      <div className="text-sm text-slate-600">
+                        <p><span className="font-medium">Koordinat:</span> {park.latitude}, {park.longitude}</p>
+                        <p><span className="font-medium">Alamat:</span> {park.desa_kelurahan}, {park.kecamatan}, {park.kota_kabupaten}, {park.provinsi}</p>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full border-green-800 text-green-800 hover:bg-green-800 hover:text-white"
+                        onClick={() => window.open(`https://www.openstreetmap.org/?mlat=${park.latitude}&mlon=${park.longitude}&zoom=15`, '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Buka di Peta
+                      </Button>
                     </div>
-                  </div>
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-4 border-green-800 text-green-800 hover:bg-green-800 hover:text-white"
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Lihat di Peta
-                  </Button>
+                  ) : (
+                    <div className="aspect-video bg-gradient-to-br from-green-200 to-blue-200 rounded-lg flex items-center justify-center">
+                      <div className="text-center">
+                        <Map className="w-12 h-12 text-green-600 mx-auto mb-2" />
+                        <p className="text-sm text-green-800 font-medium">Peta Interaktif</p>
+                        <p className="text-xs text-blue-600">Koordinat tidak tersedia</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </aside>
@@ -325,12 +346,6 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
         </div>
       </section>
 
-      {/* Activities Section */}
-      <section className="py-16 bg-gradient-to-br from-emerald-50 to-blue-50">
-        <div className="container mx-auto px-4">
-          <ParkActivities parkId={park.id} parkName={park.name} />
-        </div>
-      </section>
 
       {/* Flora Section */}
       <section className="py-16 bg-white">
@@ -376,24 +391,24 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
         </div>
       </section>
 
-      {/* Articles Section */}
-      <section className="py-16 bg-white">
+      {/* Activities Section */}
+      <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-semibold text-slate-900">Artikel Terkait</h2>
-                <p className="mt-1 text-sm text-slate-600">Artikel dan berita tentang taman ini</p>
+                <h2 className="text-2xl font-semibold text-slate-900">Kegiatan Taman</h2>
+                <p className="mt-1 text-sm text-slate-600">Aktivitas dan kegiatan yang dilakukan di taman ini</p>
               </div>
               <Link
-                href={`/artikel?taman=${park.id}`}
-                className="inline-flex items-center gap-2 text-sm font-medium bg-gradient-to-r from-green-800 to-blue-800 bg-clip-text text-transparent hover:from-green-700 hover:to-blue-700 transition-colors"
+                href={`/kegiatan?taman=${park.id}`}
+                className="inline-flex items-center gap-2 text-sm font-medium text-emerald-800 hover:text-emerald-700 transition-colors"
               >
                 Lihat Semua
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-            <ParkArticles parkId={park.id} />
+            <ParkActivities parkId={park.id} parkName={park.name} />
           </div>
         </div>
       </section>

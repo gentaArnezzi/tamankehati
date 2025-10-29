@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../lib/useAuth';
 import { activitiesApi, Activity, parksApi, Park } from '../../lib/api-client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -71,6 +72,7 @@ const renderStatusBadge = (status: string) => {
 };
 
 export function ActivitiesPage() {
+  const router = useRouter();
   const { user } = useAuth();
   const [data, setData] = useState<Activity[]>([]);
   const [parks, setParks] = useState<Park[]>([]);
@@ -83,10 +85,10 @@ export function ActivitiesPage() {
   const [parkFilter, setParkFilter] = useState('all');
   const itemsPerPage = 10;
 
-  const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [formOpen, setFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState<'edit'>('edit');
 
   const loadData = useCallback(async () => {
     try {
@@ -143,9 +145,7 @@ export function ActivitiesPage() {
   }, [loadParks]);
 
   const handleCreate = () => {
-    setSelectedActivity(null);
-    setFormMode('create');
-    setFormOpen(true);
+    router.push('/dashboard/activities/create');
   };
 
   const handleEdit = (activity: Activity) => {
@@ -459,18 +459,13 @@ export function ActivitiesPage() {
         </div>
       )}
 
-      {/* Forms */}
+      {/* Edit Form Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
-              {formMode === 'create' ? 'Tambah Kegiatan Baru' : 'Edit Kegiatan'}
-            </DialogTitle>
+            <DialogTitle>Edit Kegiatan</DialogTitle>
             <DialogDescription>
-              {formMode === 'create' 
-                ? 'Buat kegiatan konservasi baru untuk taman nasional'
-                : 'Edit informasi kegiatan konservasi'
-              }
+              Edit informasi kegiatan konservasi
             </DialogDescription>
           </DialogHeader>
           <ActivityForm
