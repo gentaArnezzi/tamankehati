@@ -9,7 +9,7 @@ const NAV_LINKS = [
 ];
 
 const SUPPORT_LINKS = [
-  { label: 'Tentang', href: '/tentang' },
+  { label: 'Indeks Kehati', href: '/indeks' },
   { label: 'Kontak', href: '/kontak' },
 ];
 

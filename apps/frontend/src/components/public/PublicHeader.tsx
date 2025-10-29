@@ -109,7 +109,7 @@ export function PublicHeader() {
               </button>
               <div className="absolute top-full left-0 mt-3 w-64 bg-white/98 backdrop-blur-xl rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-200 z-[110]">
                 <div className="py-4">
-                  <a href="/tentang" className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100">
+                  <a href="/indeks" className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100">
                     <div className="font-medium text-slate-900">Indeks Kehati</div>
                     <div className="text-xs text-slate-500 mt-1">Dashboard data publik</div>
                   </a>

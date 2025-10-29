@@ -8,7 +8,8 @@ from . import (
     stats,
     chatbot as chat,
     search,
-    activities
+    activities,
+    dashboard_insights
 )
 
 __all__ = [
@@ -20,7 +21,8 @@ __all__ = [
     "stats",
     "chat",
     "search",
-    "activities"
+    "activities",
+    "dashboard_insights"
 ]
 
 router = APIRouter()
@@ -35,3 +37,4 @@ router.include_router(stats.router, prefix="/stats", tags=["Public"])
 router.include_router(chat.router, prefix="/chat", tags=["Public"])
 router.include_router(search.router, prefix="/search", tags=["Public"])
 router.include_router(activities.router, prefix="/activities", tags=["Public"])
+router.include_router(dashboard_insights.router, prefix="/dashboard", tags=["Public"])
