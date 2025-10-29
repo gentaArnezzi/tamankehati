@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { Bird, MapPin, PawPrint } from 'lucide-react';
 
 export function FaunaHero() {
   const [scrollY, setScrollY] = useState(0);
@@ -13,12 +14,12 @@ export function FaunaHero() {
   }, []);
 
   return (
-    <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
+    <section className="relative h-[80vh] min-h-[600px] overflow-hidden">
       {/* Parallax Background */}
       <div 
         className="absolute inset-0 w-full h-[120%]"
         style={{
-          transform: `translateY(${scrollY * 0.5}px)`,
+          transform: `translateY(${scrollY * 0.3}px)`,
         }}
       >
         <Image
@@ -30,43 +31,61 @@ export function FaunaHero() {
         />
       </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
+      {/* Subtle bottom overlay with standard dark brown */}
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
+
+      {/* Floating elements with brown theme */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 left-20 w-2 h-2 bg-amber-400 rounded-full animate-float"></div>
+        <div className="absolute top-40 right-32 w-1 h-1 bg-amber-500 rounded-full animate-float delay-1000"></div>
+        <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-amber-300 rounded-full animate-float delay-500"></div>
+      </div>
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center">
         <div className="container mx-auto max-w-7xl px-6">
-          <div className="max-w-4xl">
+          <div className="max-w-4xl mx-auto text-center">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-6 py-3 text-sm font-medium uppercase tracking-widest backdrop-blur mb-8 text-black">
-              Atlas Fauna Indonesia
+            <div className="inline-block mb-8 animate-fade-in">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-950/40 backdrop-blur-sm border border-amber-800/30 rounded-full text-amber-50 text-sm font-medium">
+                <Bird className="w-4 h-4" />
+                Atlas Fauna Indonesia
+              </div>
             </div>
 
             {/* Title */}
-            <h1 className="text-5xl font-light leading-tight text-white mb-6 md:text-7xl">
-              Fauna Kehati
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight animate-slide-up">
+              <span className="block">Fauna</span>
+              <span className="block font-normal text-amber-50">Kehati</span>
             </h1>
 
             {/* Description */}
-            <p className="text-xl leading-relaxed text-white/90 mb-8 max-w-2xl">
+            <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
               Temukan keanekaragaman fauna Indonesia yang menakjubkan. Dari burung endemik hingga mamalia langka, 
               jelajahi kekayaan satwa liar yang menjadi kebanggaan Nusantara.
             </p>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8 text-white/80">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
-                <span className="text-sm font-medium">300+ Spesies Terdata</span>
+            <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                  300+
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">Spesies Terdata</div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                <span className="text-sm font-medium">50+ Famili Hewan</span>
+              
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                  50+
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">Famili Hewan</div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span className="text-sm font-medium">Seluruh Nusantara</span>
+              
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                  <MapPin className="w-8 h-8 mx-auto" />
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">Seluruh Nusantara</div>
               </div>
             </div>
           </div>
@@ -74,11 +93,11 @@ export function FaunaHero() {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-amber-100">
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs uppercase tracking-widest">Scroll</span>
-          <div className="w-6 h-10 border border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-bounce"></div>
+          <div className="w-6 h-10 border border-amber-200/30 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-amber-200/60 rounded-full mt-2 animate-bounce"></div>
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ export function MisiCTA() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Main CTA */}
         <div className="text-center mb-20">
@@ -57,8 +57,8 @@ export function MisiCTA() {
         {/* Ways to Contribute */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
           {waysToContribute.map((way, index) => (
-            <div key={index} className="text-center p-8 border border-gray-200 hover:border-gray-900 transition-colors">
-              <h3 className="text-lg font-light text-gray-900 mb-4">
+            <div key={index} className="text-center p-8 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 bg-white rounded-xl animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
                 {way.title}
               </h3>
               <p className="text-gray-600 mb-6 text-sm leading-relaxed">
@@ -72,9 +72,9 @@ export function MisiCTA() {
         </div>
 
         {/* Contact Information */}
-        <div className="bg-gray-50 rounded-lg p-12">
+        <div className="bg-white rounded-xl p-12 border border-gray-200">
           <div className="text-center mb-12">
-            <h3 className="text-xl font-light text-gray-900 mb-4">
+            <h3 className="text-2xl font-light text-gray-900 mb-4">
               Hubungi Kami
             </h3>
             <p className="text-gray-600">
@@ -84,7 +84,7 @@ export function MisiCTA() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {contactInfo.map((contact, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                 <h4 className="text-sm font-medium text-gray-900 mb-2">
                   {contact.title}
                 </h4>

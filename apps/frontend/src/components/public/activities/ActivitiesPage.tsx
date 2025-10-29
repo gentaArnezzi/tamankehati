@@ -8,10 +8,16 @@ import { Alert, AlertDescription } from '../../ui/alert';
 import { Input } from '../../ui/input';
 import { 
   Search,
-  ChevronRight
+  ChevronRight,
+  Calendar,
+  MapPin,
+  Filter,
+  Grid3X3,
+  List
 } from 'lucide-react';
 import { publicApi } from '../../../lib/public-api-client';
 import Link from 'next/link';
+import Image from 'next/image';
 import styles from './ActivitiesPage.module.css';
 
 interface Activity {
@@ -257,101 +263,87 @@ export function ActivitiesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Enhanced Hero Section */}
-      <section 
-        className="py-24 md:py-32 lg:py-40 xl:py-48 bg-cover bg-center bg-no-repeat border-b border-gray-200 relative min-h-[70vh] lg:min-h-[80vh] overflow-hidden"
-        style={{
-          backgroundImage: "url('/home/hero.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          backgroundAttachment: 'fixed'
-        }}
-      >
-        {/* Gradient overlays for depth */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-black/10 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-        
-        {/* Subtle animated background elements */}
+    <div className="min-h-screen bg-slate-50">
+      {/* Hero Section with Background Image */}
+      <section className="relative h-[80vh] min-h-[600px] overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/home/hero.jpg"
+            alt="Kegiatan Konservasi Taman Kehati Indonesia"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {/* Subtle bottom overlay with standard dark brown */}
+        <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
+
+        {/* Floating elements with brown theme */}
         <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/3 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-gray-400/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-slate-400/3 rounded-full blur-2xl animate-pulse delay-500"></div>
+          <div className="absolute top-20 left-20 w-2 h-2 bg-amber-400 rounded-full animate-float"></div>
+          <div className="absolute top-40 right-32 w-1 h-1 bg-amber-500 rounded-full animate-float delay-1000"></div>
+          <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-amber-300 rounded-full animate-float delay-500"></div>
         </div>
         
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className="max-w-4xl">
-            {/* Animated badge */}
-            <div className="inline-block mb-6">
-              <div className="text-sm md:text-base lg:text-lg text-white tracking-wide uppercase font-semibold drop-shadow-lg bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20 animate-fade-in">
-              Kegiatan Konservasi
+        {/* Content */}
+        <div className="relative z-10 flex h-full items-center">
+          <div className="container mx-auto max-w-7xl px-6">
+            <div className="max-w-4xl mx-auto text-center">
+              {/* Badge */}
+              <div className="inline-block mb-8 animate-fade-in">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-950/40 backdrop-blur-sm border border-amber-800/30 rounded-full text-amber-50 text-sm font-medium">
+                  <Calendar className="w-4 h-4" />
+                  Kegiatan Konservasi
+                </div>
               </div>
-            </div>
-            
-            {/* Main heading with animation */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-bold text-white mb-8 leading-tight drop-shadow-2xl animate-slide-up">
-              <span className="block bg-gradient-to-r from-white via-gray-100 to-gray-200 bg-clip-text text-transparent">
-              Kegiatan
-              </span>
-              <span className="block bg-gradient-to-r from-gray-200 via-white to-slate-200 bg-clip-text text-transparent">
-                Konservasi
-              </span>
-            </h1>
-            
-            {/* Description with animation */}
-            <p className="text-lg md:text-xl lg:text-2xl text-white mb-10 leading-relaxed drop-shadow-lg font-medium max-w-3xl animate-fade-in-up delay-300">
-              Jelajahi berbagai kegiatan konservasi yang dilaksanakan di taman-taman keanekaragaman hayati Indonesia
-            </p>
-            
-            {/* Search with animation */}
-            <div className="max-w-md lg:max-w-lg xl:max-w-xl animate-fade-in-up delay-500">
-              <div className="relative group">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600 h-4 w-4 lg:h-5 lg:w-5 z-20 group-focus-within:text-gray-800 transition-colors duration-300" />
-                <Input
-                  placeholder="Cari kegiatan atau taman..."
-                  value={searchQuery}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10 lg:pl-12 pr-4 py-3 lg:py-4 border-white/30 focus:border-gray-400 focus:ring-gray-400/20 rounded-xl bg-white/95 backdrop-blur-md text-sm lg:text-base shadow-2xl text-gray-900 placeholder-gray-500 hover:bg-white transition-all duration-300 focus:scale-105"
-                />
+              
+              {/* Main heading */}
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight animate-slide-up">
+                <span className="block">Kegiatan</span>
+                <span className="block font-normal text-amber-50">Konservasi</span>
+              </h1>
+              
+              {/* Description */}
+              <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
+                Jelajahi berbagai kegiatan konservasi yang dilaksanakan di taman-taman keanekaragaman hayati Indonesia
+              </p>
+              
+              {/* Search */}
+              <div className="max-w-md mx-auto animate-fade-in delay-500">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-200 w-5 h-5" />
+                  <Input
+                    placeholder="Cari kegiatan atau taman..."
+                    value={searchQuery}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 bg-amber-950/20 backdrop-blur-sm border border-amber-800/30 rounded-xl text-white placeholder-amber-200 focus:bg-amber-950/30 focus:border-amber-700 transition-all duration-300"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Stats with staggered animation */}
-            <div className="mt-12 lg:mt-16 flex flex-wrap items-center gap-4 lg:gap-6 animate-fade-in-up delay-700">
-              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl border border-white/30 hover:bg-white/30 hover:scale-105 transition-all duration-300 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-gray-400 rounded-full animate-pulse group-hover:animate-bounce"></div>
-              <div>
-                    <span className="text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">
-                      {statsLoading ? '...' : totalItems}
-                    </span>
-                    <span className="ml-2 text-white font-semibold text-sm lg:text-base">Kegiatan</span>
+              {/* Stats */}
+              <div className="mt-16 flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                    {statsLoading ? '...' : totalItems.toLocaleString()}
                   </div>
+                  <div className="text-sm text-amber-100 uppercase tracking-wide">Kegiatan</div>
                 </div>
-              </div>
-              
-              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl border border-white/30 hover:bg-white/30 hover:scale-105 transition-all duration-300 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-slate-400 rounded-full animate-pulse group-hover:animate-bounce delay-100"></div>
-              <div>
-                    <span className="text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">
-                      {statsLoading ? '...' : stats?.total_taman || 0}
-                    </span>
-                    <span className="ml-2 text-white font-semibold text-sm lg:text-base">Taman</span>
+                
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                    {statsLoading ? '...' : (stats?.total_taman || 0).toLocaleString()}
                   </div>
+                  <div className="text-sm text-amber-100 uppercase tracking-wide">Taman</div>
                 </div>
-              </div>
-              
-              <div className="bg-white/20 backdrop-blur-md px-6 py-4 rounded-2xl shadow-2xl border border-white/30 hover:bg-white/30 hover:scale-105 transition-all duration-300 group">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-gray-500 rounded-full animate-pulse group-hover:animate-bounce delay-200"></div>
-              <div>
-                    <span className="text-3xl lg:text-4xl font-bold text-white drop-shadow-lg">
-                      {statsLoading ? '...' : ((stats?.total_flora || 0) + (stats?.total_fauna || 0))}
-                    </span>
-                    <span className="ml-2 text-white font-semibold text-sm lg:text-base">Spesies</span>
+                
+                <div className="text-center">
+                  <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                    {statsLoading ? '...' : ((stats?.total_flora || 0) + (stats?.total_fauna || 0)).toLocaleString()}
                   </div>
+                  <div className="text-sm text-amber-100 uppercase tracking-wide">Spesies</div>
                 </div>
               </div>
             </div>
@@ -360,17 +352,22 @@ export function ActivitiesPage() {
       </section>
 
       {/* Filter Section */}
-      <section className="py-12 bg-gray-50 border-b border-gray-200">
+      <section className="py-16 bg-white border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
             {/* Filter Controls */}
             <div className="flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 text-slate-600 text-sm font-medium">
+                <Filter className="w-4 h-4" />
+                Filter:
+              </div>
+              
               <div className="relative">
                 <select 
                   value={selectedPark}
                   onChange={(e) => setSelectedPark(e.target.value)}
                   disabled={parksLoading}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="appearance-none bg-white border border-slate-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 hover:border-slate-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">
                     {parksLoading ? 'Memuat taman...' : 'Semua Taman'}
@@ -383,9 +380,9 @@ export function ActivitiesPage() {
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                   {parksLoading ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-slate-400"></div>
                   ) : (
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   )}
@@ -396,7 +393,7 @@ export function ActivitiesPage() {
                 <select 
                   value={selectedTime}
                   onChange={(e) => setSelectedTime(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="appearance-none bg-white border border-slate-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 hover:border-slate-400"
                 >
                   <option value="">Semua Waktu</option>
                   <option value="hari-ini">Hari Ini</option>
@@ -405,7 +402,7 @@ export function ActivitiesPage() {
                   <option value="tahun-ini">Tahun Ini</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
@@ -418,7 +415,7 @@ export function ActivitiesPage() {
                 <select 
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-transparent transition-all duration-200 hover:border-gray-400"
+                  className="appearance-none bg-white border border-slate-300 rounded-lg px-4 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:border-slate-500 transition-all duration-200 hover:border-slate-400"
                 >
                   <option value="terbaru">Terbaru</option>
                   <option value="terlama">Terlama</option>
@@ -426,36 +423,32 @@ export function ActivitiesPage() {
                   <option value="a-z">A-Z</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </div>
               </div>
               
-              <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+              <div className="flex items-center border border-slate-300 rounded-lg overflow-hidden">
                 <button 
                   onClick={() => setViewMode('list')}
                   className={`p-2 transition-colors duration-200 ${
                     viewMode === 'list' 
-                      ? 'bg-gray-100 text-gray-800' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                      ? 'bg-slate-100 text-slate-800' 
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                  </svg>
+                  <List className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={() => setViewMode('grid')}
                   className={`p-2 transition-colors duration-200 ${
                     viewMode === 'grid' 
-                      ? 'bg-gray-100 text-gray-800' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50'
+                      ? 'bg-slate-100 text-slate-800' 
+                      : 'bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                  </svg>
+                  <Grid3X3 className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -464,20 +457,20 @@ export function ActivitiesPage() {
       </section>
 
       {/* Activities Section */}
-      <section className="py-16">
+      <section className="py-20 bg-slate-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
           <div className="mb-16">
-            <h2 className="text-3xl font-light text-gray-900 mb-4">Semua Kegiatan</h2>
-            <p className="text-gray-600 mb-6">Koleksi kegiatan konservasi dan edukasi</p>
+            <h2 className="text-4xl font-light text-slate-900 mb-4">Semua Kegiatan</h2>
+            <p className="text-slate-600 mb-8 text-lg">Koleksi kegiatan konservasi dan edukasi</p>
             
             {/* Results Count and Filter Reset */}
             <div className="flex items-center justify-between">
               {filteredActivities.length > 0 && (
-              <div className="text-sm text-gray-500">
+                <div className="text-sm text-slate-500">
                   {filteredActivities.length} dari {totalItems} kegiatan ditemukan
-              </div>
-            )}
+                </div>
+              )}
               
               {(selectedPark || selectedTime || sortBy !== 'terbaru') && (
                 <button
@@ -486,7 +479,7 @@ export function ActivitiesPage() {
                     setSelectedTime('');
                     setSortBy('terbaru');
                   }}
-                  className="text-sm text-gray-600 hover:text-gray-800 underline transition-colors duration-200"
+                  className="text-sm text-slate-600 hover:text-slate-800 underline transition-colors duration-200"
                 >
                   Reset Filter
                 </button>

@@ -64,11 +64,11 @@ export function MisiTheoryOfChange() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-gray-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl font-light text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl font-light text-gray-900 mb-6">
             Theory of Change
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
@@ -77,9 +77,9 @@ export function MisiTheoryOfChange() {
           </p>
         </div>
 
-        {/* Video Section */}
+        {/* Video Section - PRESERVED */}
         <div className="mb-20" id="video">
-          <div className="relative h-96 rounded-lg overflow-hidden bg-gray-100">
+          <div className="relative h-96 rounded-xl overflow-hidden bg-gray-100 shadow-lg">
             <video
               autoPlay
               loop
@@ -91,7 +91,7 @@ export function MisiTheoryOfChange() {
               <source src="https://cdn.prod.website-files.com/66ce39f987d962826a1a9abb/66ce39f987d962826a1a9b71_Locals%20For%20Website%20(1)-transcode.mp4" type="video/mp4" />
               <source src="https://cdn.prod.website-files.com/66ce39f987d962826a1a9abb/66ce39f987d962826a1a9b71_Locals%20For%20Website%20(1)-transcode.webm" type="video/webm" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-8 left-8 text-white">
               <h3 className="text-xl font-light mb-2">Community Engagement</h3>
               <p className="text-white/90">Membangun komunitas yang peduli konservasi</p>
@@ -103,8 +103,8 @@ export function MisiTheoryOfChange() {
         <div className="mb-20">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             {pillars.map((pillar, index) => (
-              <div key={index}>
-                <h3 className="text-xl font-light text-gray-900 mb-4">
+              <div key={index} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <h3 className="text-xl font-medium text-gray-900 mb-4">
                   {pillar.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-6">
@@ -124,9 +124,9 @@ export function MisiTheoryOfChange() {
         </div>
 
         {/* Impact Areas */}
-        <div className="bg-gray-50 rounded-lg p-12">
+        <div className="bg-white rounded-xl p-12 border border-gray-200">
           <div className="text-center mb-12">
-            <h3 className="text-2xl font-light text-gray-900 mb-4">
+            <h3 className="text-3xl font-light text-gray-900 mb-4">
               Dampak yang Kami Ciptakan
             </h3>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -137,8 +137,8 @@ export function MisiTheoryOfChange() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {impactAreas.map((area, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl font-light text-gray-900 mb-2">
+              <div key={index} className="text-center animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <div className="text-4xl font-light text-gray-900 mb-2">
                   {area.value}
                 </div>
                 <h4 className="text-sm font-medium text-gray-900 mb-1">

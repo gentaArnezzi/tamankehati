@@ -93,7 +93,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
   return (
     <div className="space-y-12">
       <JsonLd data={jsonLd} />
-      <section className="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="relative h-[320px] w-full md:h-[420px]">
           <Image
             src={heroImage}
@@ -107,7 +107,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
             <div className="flex flex-wrap items-center gap-3">
               {flora.status_iucn && (
-                <Badge className="bg-emerald-600 text-white hover:bg-emerald-500">{flora.status_iucn}</Badge>
+                <Badge className="bg-slate-900 text-white hover:bg-slate-800">{flora.status_iucn}</Badge>
               )}
               {flora.wilayah && (
                 <Badge variant="outline" className="border-white/40 bg-white/10 text-white">
@@ -115,12 +115,12 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                 </Badge>
               )}
               {flora.is_endemic && (
-                <Badge className="bg-amber-600 text-white hover:bg-amber-500">
+                <Badge className="bg-slate-700 text-white hover:bg-slate-600">
                   Endemik Indonesia
                 </Badge>
               )}
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">{flora.nama_ilmiah}</h1>
+            <h1 className="mt-4 text-3xl font-light text-white md:text-4xl lg:text-5xl">{flora.nama_ilmiah}</h1>
             {flora.nama_umum && (
               <p className="text-lg text-white/80 md:text-xl">
                 {flora.nama_umum}
@@ -133,9 +133,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
           <article className="space-y-8">
             {/* Deskripsi */}
             {flora.deskripsi && (
-              <div className="space-y-3">
-                <h2 className="text-2xl font-semibold text-slate-900">Deskripsi</h2>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-light text-slate-900">Deskripsi</h2>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {flora.deskripsi}
                 </p>
               </div>
@@ -143,9 +143,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
             {/* Morfologi */}
             {flora.morfologi && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Morfologi</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Morfologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {flora.morfologi}
                 </p>
               </div>
@@ -153,9 +153,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
             {/* Habitat */}
             {flora.habitat && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Habitat dan Ekologi</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Habitat dan Ekologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {flora.habitat}
                 </p>
               </div>
@@ -163,9 +163,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
             {/* Manfaat */}
             {flora.manfaat && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Manfaat dan Kegunaan</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Manfaat dan Kegunaan</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {flora.manfaat}
                 </p>
               </div>
@@ -173,11 +173,11 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
             {/* Sebaran Wilayah */}
             {flora.sebaran?.length ? (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran Wilayah</h3>
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Sebaran Wilayah</h3>
                 <ul className="flex flex-wrap gap-2 text-sm text-slate-600">
                   {flora.sebaran.map((wilayah) => (
-                    <li key={wilayah} className="rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                    <li key={wilayah} className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                       {wilayah}
                     </li>
                   ))}
@@ -188,7 +188,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
             {/* Peta Geografis */}
             {flora.koordinat && (
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran Geografis</h3>
+                <h3 className="text-xl font-medium text-slate-900">Sebaran Geografis</h3>
                 <LeafletMap
                   height="320px"
                   markers={[
@@ -211,8 +211,8 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
           </article>
 
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6">
-              <h2 className="text-lg font-semibold text-emerald-800">Taksonomi</h2>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+              <h2 className="text-lg font-medium text-slate-900">Taksonomi</h2>
               <dl className="mt-4 space-y-3 text-sm text-slate-700">
                 {taxonomyEntries(flora).map((entry) => (
                   <div key={entry.label} className="flex justify-between gap-4">
@@ -225,15 +225,15 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
             {/* Park Information */}
             {flora.park_info && (
-              <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">Informasi Taman</h2>
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-medium text-slate-900">Informasi Taman</h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-700">
                   <div className="flex justify-between gap-4">
                     <dt className="font-medium text-slate-600">Nama Taman</dt>
                     <dd className="text-right text-slate-800">
                       <Link 
                         href={`/taman/${flora.park_info.id}`}
-                        className="text-emerald-600 hover:text-emerald-800 hover:underline transition-colors font-medium"
+                        className="text-slate-900 hover:text-slate-600 hover:underline transition-colors font-medium"
                       >
                         {flora.park_info.name}
                       </Link>
@@ -264,10 +264,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     </div>
                   )}
                 </div>
-                <div className="mt-4 pt-4 border-t border-emerald-100">
+                <div className="mt-4 pt-4 border-t border-slate-200">
                   <Link 
                     href={`/taman/${flora.park_info.id}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-800 hover:underline transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-slate-600 hover:underline transition-colors"
                   >
                     <MapPin className="w-4 h-4" />
                     Lihat Detail Taman
@@ -277,15 +277,15 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </div>
             )}
 
-            <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Status Konservasi</h2>
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-medium text-slate-900">Status Konservasi</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 Status IUCN menggambarkan tingkat keterancaman spesies. Gunakan informasi ini untuk menentukan prioritas
                 tindakan konservasi serta kebutuhan monitoring populasi di lapangan.
               </p>
               <Link
                 href="https://www.iucnredlist.org/"
-                className="mt-4 inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-500"
+                className="mt-4 inline-flex text-sm font-medium text-slate-900 hover:text-slate-600"
               >
                 Pelajari panduan IUCN
               </Link>
@@ -299,12 +299,12 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+              <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
               <p className="mt-1 text-sm text-slate-600">
                 Koleksi {galleryImages.length} foto untuk <span className="italic">{flora.nama_ilmiah}</span>
               </p>
             </div>
-            <Badge variant="outline" className="hidden sm:inline-flex">
+            <Badge variant="outline" className="hidden sm:inline-flex border-slate-200 text-slate-700">
               {galleryImages.length} {galleryImages.length === 1 ? 'Foto' : 'Foto'}
             </Badge>
           </div>
@@ -313,7 +313,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
             {galleryImages.map((image, index) => (
               <div 
                 key={image.id} 
-                className="group relative overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-sm transition-all hover:shadow-lg hover:border-emerald-200"
+                className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-lg hover:border-slate-300"
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
@@ -325,7 +325,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-white/90 text-slate-700 hover:bg-white">
+                    <Badge className="bg-white/90 text-slate-700 hover:bg-white border-slate-200">
                       #{index + 1}
                     </Badge>
                   </div>
@@ -354,7 +354,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
       {loadingGallery && (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">Memuat galeri foto...</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -375,7 +375,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
       {!loadingGallery && galleryImages.length === 0 && (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">
               Koleksi foto untuk <span className="italic">{flora.nama_ilmiah}</span>
             </p>
@@ -406,7 +406,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
       {flora.konten_terkait?.length ? (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Spesies Terkait</h2>
+            <h2 className="text-2xl font-light text-slate-900">Spesies Terkait</h2>
             <p className="text-sm text-slate-600">
               Temukan spesies dengan karakteristik serupa untuk memperluas konteks taksonomi dan konservasi.
             </p>

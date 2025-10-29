@@ -6,7 +6,7 @@ import { MisiCTA } from './MisiCTA';
 
 export function MisiPage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gray-50">
       <MisiHero />
       <MisiTheoryOfChange />
       <MisiCTA />

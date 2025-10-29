@@ -30,16 +30,15 @@ export function GalleryHero() {
         />
       </div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/20" />
-      <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-black/20" />
+      {/* Subtle bottom overlay with standard dark brown */}
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center">
         <div className="container mx-auto max-w-7xl px-6">
           <div className="max-w-4xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-6 py-3 text-sm font-medium uppercase tracking-widest backdrop-blur mb-8 text-black">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-950/40 px-6 py-3 text-sm font-medium uppercase tracking-widest backdrop-blur mb-8 text-amber-50">
               Galeri Kehati Indonesia
             </div>
 
@@ -49,23 +48,23 @@ export function GalleryHero() {
             </h1>
 
             {/* Description */}
-            <p className="text-xl leading-relaxed text-white/90 mb-8 max-w-2xl">
+            <p className="text-xl leading-relaxed text-amber-50 mb-8 max-w-2xl">
               Jelajahi koleksi foto keanekaragaman hayati Indonesia yang menakjubkan. 
               Dari flora endemik hingga fauna langka, saksikan keindahan alam yang menjadi kebanggaan Nusantara.
             </p>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8 text-white/80">
+            <div className="flex flex-wrap gap-8 text-amber-100">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
                 <span className="text-sm font-medium">500+ Foto Terdata</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                 <span className="text-sm font-medium">Flora & Fauna</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-amber-300 rounded-full"></div>
                 <span className="text-sm font-medium">Seluruh Nusantara</span>
               </div>
             </div>
@@ -74,11 +73,11 @@ export function GalleryHero() {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white/60">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-amber-100">
         <div className="flex flex-col items-center gap-2">
           <span className="text-xs uppercase tracking-widest">Scroll</span>
-          <div className="w-6 h-10 border border-white/30 rounded-full flex justify-center">
-            <div className="w-1 h-3 bg-white/60 rounded-full mt-2 animate-bounce"></div>
+          <div className="w-6 h-10 border border-amber-200/30 rounded-full flex justify-center">
+            <div className="w-1 h-3 bg-amber-200/60 rounded-full mt-2 animate-bounce"></div>
           </div>
         </div>
       </div>

@@ -97,10 +97,10 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
   const totalPages = Math.ceil((data?.total ?? 0) / ITEMS_PER_PAGE);
 
   return (
-    <div className="bg-white">
+    <div className="bg-slate-50">
       <div className="container mx-auto max-w-7xl px-6 py-20">
         {/* Filters Section */}
-        <div className="mb-12">
+        <div className="mb-16">
           <FacetFilters
             defaultValues={{
               search: params.get('search') ?? '',
@@ -127,24 +127,24 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
         {/* Results Section */}
         <div>
           {/* Header with View Controls */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center justify-between mb-12">
             <div>
-              <h2 className="text-2xl font-light text-gray-900 mb-2">
+              <h2 className="text-3xl font-light text-slate-900 mb-3">
                 Hasil Pencarian
               </h2>
-              <p className="text-gray-600">
+              <p className="text-slate-600 text-lg">
                 {data?.total ?? 0} spesies fauna ditemukan
               </p>
             </div>
 
             {/* View Mode Toggle */}
-            <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Card
@@ -153,8 +153,8 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
                 onClick={() => setViewMode('list')}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-slate-900 shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 Row
@@ -164,7 +164,7 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
 
           {/* Error State */}
           {status === 'error' && (
-            <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
+            <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
               <div className="text-red-600 font-medium mb-2">Terjadi Kesalahan</div>
               <p className="text-red-500">Gagal memuat data fauna. Silakan coba lagi nanti.</p>
             </div>
@@ -172,9 +172,9 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
 
           {/* Empty State */}
           {items.length === 0 && status !== 'error' && (
-            <div className="rounded-2xl border border-gray-200 bg-gray-50 p-12 text-center">
-              <div className="text-gray-600 font-medium mb-2">Tidak Ada Data</div>
-              <p className="text-gray-500">Coba ubah filter atau kata kunci pencarian.</p>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-12 text-center">
+              <div className="text-slate-600 font-medium mb-2">Tidak Ada Data</div>
+              <p className="text-slate-500">Coba ubah filter atau kata kunci pencarian.</p>
             </div>
           )}
 
@@ -182,32 +182,35 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
           {items.length > 0 && (
             <div className={
               viewMode === 'grid' 
-                ? 'grid gap-6 md:grid-cols-2 xl:grid-cols-3' 
-                : 'space-y-4'
+                ? 'grid gap-8 md:grid-cols-2 xl:grid-cols-3' 
+                : 'space-y-6'
             }>
-              {items.map((fauna) => (
-                <EntityCard
-                  key={fauna.id}
-                  href={`/fauna/${fauna.id}`}
-                  title={fauna.nama_ilmiah}
-                  subtitle={fauna.nama_umum}
-                  image={fauna.gambar_utama}
-                  status={fauna.status_iucn}
-                  tags={[fauna.famili, fauna.wilayah].filter(Boolean) as string[]}
-                  variant={viewMode === 'list' ? 'horizontal' : 'vertical'}
-                />
+              {items.map((fauna, index) => (
+                <div key={fauna.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                  <EntityCard
+                    href={`/fauna/${fauna.id}`}
+                    title={fauna.nama_ilmiah}
+                    subtitle={fauna.nama_umum}
+                    image={fauna.gambar_utama}
+                    status={fauna.status_iucn}
+                    tags={[fauna.famili, fauna.wilayah].filter(Boolean) as string[]}
+                    variant={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                  />
+                </div>
               ))}
             </div>
           )}
 
           {/* Pagination */}
           {items.length > 0 && (
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={data?.total ?? 0}
-              itemsPerPage={ITEMS_PER_PAGE}
-            />
+            <div className="mt-16">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={data?.total ?? 0}
+                itemsPerPage={ITEMS_PER_PAGE}
+              />
+            </div>
           )}
         </div>
       </div>

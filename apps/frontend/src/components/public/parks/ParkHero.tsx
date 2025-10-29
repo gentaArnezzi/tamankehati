@@ -15,9 +15,8 @@ export function ParkHero() {
           className="object-cover object-center parallax-bg"
           sizes="100vw"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/55 to-black/30" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-black/20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+        {/* Subtle bottom overlay with standard dark brown */}
+        <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
       </div>
 
       {/* Content */}
@@ -25,7 +24,7 @@ export function ParkHero() {
         <div className="container mx-auto max-w-7xl px-6">
           <div className="max-w-4xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/90 px-6 py-3 text-sm font-medium uppercase tracking-widest backdrop-blur mb-8 text-black">
+            <div className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-950/40 px-6 py-3 text-sm font-medium uppercase tracking-widest backdrop-blur mb-8 text-amber-50">
               Jaringan Taman Kehati
             </div>
 
@@ -35,23 +34,23 @@ export function ParkHero() {
             </h1>
 
             {/* Description */}
-            <p className="text-lg leading-relaxed text-white/85 md:text-xl max-w-2xl">
+            <p className="text-lg leading-relaxed text-amber-50 md:text-xl max-w-2xl">
               Jelajahi jaringan taman konservasi keanekaragaman hayati di seluruh Indonesia. Temukan taman-taman yang melindungi spesies lokal dan mendukung upaya konservasi.
             </p>
 
             {/* Stats Indicators */}
             <div className="mt-10 flex flex-wrap gap-6">
               <div className="flex items-center gap-2">
-                <span className="block h-3 w-3 rounded-full bg-emerald-400" />
-                <span className="text-sm text-white/80">50+ Taman</span>
+                <span className="block h-3 w-3 rounded-full bg-amber-400" />
+                <span className="text-sm text-amber-100">50+ Taman</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="block h-3 w-3 rounded-full bg-blue-400" />
-                <span className="text-sm text-white/80">15+ Provinsi</span>
+                <span className="block h-3 w-3 rounded-full bg-amber-500" />
+                <span className="text-sm text-amber-100">15+ Provinsi</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="block h-3 w-3 rounded-full bg-orange-400" />
-                <span className="text-sm text-white/80">1000+ Spesies</span>
+                <span className="block h-3 w-3 rounded-full bg-amber-300" />
+                <span className="text-sm text-amber-100">1000+ Spesies</span>
               </div>
             </div>
           </div>
@@ -60,7 +59,7 @@ export function ParkHero() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
-        <ArrowDown className="h-8 w-8 text-white" />
+        <ArrowDown className="h-8 w-8 text-amber-100" />
       </div>
     </section>
   );

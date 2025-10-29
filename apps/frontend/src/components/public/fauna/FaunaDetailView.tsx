@@ -94,7 +94,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
   return (
     <div className="space-y-12">
       <JsonLd data={jsonLd} />
-      <section className="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="relative h-[320px] w-full md:h-[420px]">
           <Image
             src={heroImage}
@@ -108,7 +108,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
             <div className="flex flex-wrap items-center gap-3">
               {fauna.status_iucn && (
-                <Badge className="bg-blue-600 text-white hover:bg-blue-500">{fauna.status_iucn}</Badge>
+                <Badge className="bg-slate-900 text-white hover:bg-slate-800">{fauna.status_iucn}</Badge>
               )}
               {fauna.wilayah && (
                 <Badge variant="outline" className="border-white/40 bg-white/10 text-white">
@@ -116,12 +116,12 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
                 </Badge>
               )}
               {fauna.is_endemic && (
-                <Badge className="bg-amber-600 text-white hover:bg-amber-500">
+                <Badge className="bg-slate-700 text-white hover:bg-slate-600">
                   Endemik Indonesia
                 </Badge>
               )}
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">{fauna.nama_ilmiah}</h1>
+            <h1 className="mt-4 text-3xl font-light text-white md:text-4xl lg:text-5xl">{fauna.nama_ilmiah}</h1>
             {fauna.nama_umum && (
               <p className="text-lg text-white/80 md:text-xl">
                 {fauna.nama_umum}
@@ -134,9 +134,9 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
           <article className="space-y-8">
             {/* Deskripsi */}
             {fauna.deskripsi && (
-              <div className="space-y-3">
-                <h2 className="text-2xl font-semibold text-slate-900">Deskripsi</h2>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h2 className="text-2xl font-light text-slate-900">Deskripsi</h2>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {fauna.deskripsi}
                 </p>
               </div>
@@ -144,9 +144,9 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Morfologi */}
             {fauna.morfologi && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Morfologi</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Morfologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {fauna.morfologi}
                 </p>
               </div>
@@ -154,9 +154,9 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Habitat dan Ekologi */}
             {fauna.habitat && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Habitat dan Ekologi</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Habitat dan Ekologi</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {fauna.habitat}
                 </p>
               </div>
@@ -164,9 +164,9 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Habitat Sumber Makanan */}
             {fauna.habitat_sumber_makanan && (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Habitat dan Sumber Makanan</h3>
-                <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Habitat dan Sumber Makanan</h3>
+                <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {fauna.habitat_sumber_makanan}
                 </p>
               </div>
@@ -174,11 +174,11 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Sebaran Wilayah */}
             {fauna.sebaran?.length ? (
-              <div className="space-y-3">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran Wilayah</h3>
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Sebaran Wilayah</h3>
                 <ul className="flex flex-wrap gap-2 text-sm text-slate-600">
                   {fauna.sebaran.map((wilayah) => (
-                    <li key={wilayah} className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
+                    <li key={wilayah} className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                       {wilayah}
                     </li>
                   ))}
@@ -189,7 +189,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
             {/* Peta Geografis */}
             {fauna.koordinat && (
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-slate-900">Sebaran Geografis</h3>
+                <h3 className="text-xl font-medium text-slate-900">Sebaran Geografis</h3>
                 <LeafletMap
                   height="320px"
                   markers={[
@@ -212,8 +212,8 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
           </article>
 
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-blue-100 bg-blue-50/40 p-6">
-              <h2 className="text-lg font-semibold text-blue-900">Taksonomi</h2>
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-6">
+              <h2 className="text-lg font-medium text-slate-900">Taksonomi</h2>
               <dl className="mt-4 space-y-3 text-sm text-slate-700">
                 {taxonomyEntries(fauna).map((entry) => (
                   <div key={entry.label} className="flex justify-between gap-4">
@@ -226,15 +226,15 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
 
             {/* Park Information */}
             {fauna.park_info && (
-              <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold text-slate-900">Informasi Taman</h2>
+              <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+                <h2 className="text-lg font-medium text-slate-900">Informasi Taman</h2>
                 <div className="mt-4 space-y-3 text-sm text-slate-700">
                   <div className="flex justify-between gap-4">
                     <dt className="font-medium text-slate-600">Nama Taman</dt>
                     <dd className="text-right text-slate-800">
                       <Link 
                         href={`/taman/${fauna.park_info.id}`}
-                        className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-medium"
+                        className="text-slate-900 hover:text-slate-600 hover:underline transition-colors font-medium"
                       >
                         {fauna.park_info.name}
                       </Link>
@@ -265,10 +265,10 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
                     </div>
                   )}
                 </div>
-                <div className="mt-4 pt-4 border-t border-blue-100">
+                <div className="mt-4 pt-4 border-t border-slate-200">
                   <Link 
                     href={`/taman/${fauna.park_info.id}`}
-                    className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-slate-600 hover:underline transition-colors"
                   >
                     <MapPin className="w-4 h-4" />
                     Lihat Detail Taman
@@ -278,15 +278,15 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
               </div>
             )}
 
-            <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Status Perlindungan</h2>
+            <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h2 className="text-lg font-medium text-slate-900">Status Perlindungan</h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
                 Informasi status IUCN dan perlindungan nasional digunakan untuk menyusun prioritas intervensi serta edukasi
                 masyarakat.
               </p>
               <Link
                 href="https://ksdae.menlhk.go.id/info-bksda/"
-                className="mt-4 inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-500"
+                className="mt-4 inline-flex text-sm font-medium text-slate-900 hover:text-slate-600"
               >
                 Lihat pedoman perlindungan satwa
               </Link>
@@ -300,12 +300,12 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+              <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
               <p className="mt-1 text-sm text-slate-600">
                 Koleksi {galleryImages.length} foto untuk <span className="italic">{fauna.nama_ilmiah}</span>
               </p>
             </div>
-            <Badge variant="outline" className="hidden sm:inline-flex">
+            <Badge variant="outline" className="hidden sm:inline-flex border-slate-200 text-slate-700">
               {galleryImages.length} {galleryImages.length === 1 ? 'Foto' : 'Foto'}
             </Badge>
           </div>
@@ -314,7 +314,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
             {galleryImages.map((image, index) => (
               <div 
                 key={image.id} 
-                className="group relative overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm transition-all hover:shadow-lg hover:border-blue-200"
+                className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all hover:shadow-lg hover:border-slate-300"
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
@@ -326,7 +326,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-white/90 text-slate-700 hover:bg-white">
+                    <Badge className="bg-white/90 text-slate-700 hover:bg-white border-slate-200">
                       #{index + 1}
                     </Badge>
                   </div>
@@ -355,7 +355,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
       {loadingGallery && (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">Memuat galeri foto...</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -376,7 +376,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
       {!loadingGallery && galleryImages.length === 0 && (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <h2 className="text-2xl font-light text-slate-900">Galeri Foto</h2>
             <p className="mt-1 text-sm text-slate-600">
               Koleksi foto untuk <span className="italic">{fauna.nama_ilmiah}</span>
             </p>
@@ -407,7 +407,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
       {fauna.konten_terkait?.length ? (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Satwa Terkait</h2>
+            <h2 className="text-2xl font-light text-slate-900">Satwa Terkait</h2>
             <p className="text-sm text-slate-600">
               Kumpulan satwa dengan habitat serupa untuk mendukung pembelajaran lintas spesies.
             </p>

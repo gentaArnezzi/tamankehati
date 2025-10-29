@@ -30,8 +30,8 @@ export function TentangHero() {
         />
       </div>
 
-      {/* Ultra Minimalist Overlay */}
-      <div className="absolute inset-0 bg-black/10" />
+      {/* Subtle bottom overlay with standard dark brown */}
+      <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
       {/* Content */}
       <div className="relative z-10 flex h-full items-center">
@@ -44,20 +44,20 @@ export function TentangHero() {
 
             {/* Subtitle */}
             <div className="mb-24">
-              <h2 className="text-2xl font-light text-white/80 mb-8 md:text-3xl">
+              <h2 className="text-2xl font-light text-amber-50 mb-8 md:text-3xl">
                 Kawasan Konservasi Sumber Daya Alam Hayati
               </h2>
             </div>
 
             {/* Description */}
             <div className="max-w-5xl mb-20">
-              <p className="text-lg leading-relaxed text-white/70 font-light">
+              <p className="text-lg leading-relaxed text-amber-50 font-light">
                 Kawasan konservasi sumber daya alam hayati lokal di luar kawasan hutan yang bertujuan melestarikan spesies tumbuhan dan satwa asli, terutama yang terancam punah. Kawasan ini berfungsi sebagai pusat konservasi in-situ dan ex-situ serta menjadi sarana edukasi dan rekreasi bagi masyarakat.
               </p>
             </div>
 
             {/* Ministry Info */}
-            <div className="text-white/50 text-sm font-light">
+            <div className="text-amber-100 text-sm font-light">
               Dikelola oleh Kementerian Lingkungan Hidup
             </div>
           </div>
@@ -65,9 +65,9 @@ export function TentangHero() {
       </div>
 
       {/* Minimal Scroll Indicator */}
-      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-white/30">
-        <div className="w-6 h-10 border border-white/20 rounded-full flex justify-center">
-          <div className="w-1 h-3 bg-white/30 rounded-full mt-2 animate-bounce"></div>
+      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 text-amber-100">
+        <div className="w-6 h-10 border border-amber-200/30 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-amber-200/60 rounded-full mt-2 animate-bounce"></div>
         </div>
       </div>
     </section>

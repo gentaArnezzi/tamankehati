@@ -153,3 +153,26 @@ class PublicGaleriService:
         except Exception as e:
             print(f"Error getting gallery items: {e}")
             return [], 0
+
+
+class PublicChatbotService:
+    @staticmethod
+    async def send_message(message: str) -> str:
+        """Send a message to the chatbot and get a response"""
+        try:
+            # Simple response for now - can be enhanced with AI integration later
+            if "halo" in message.lower() or "hai" in message.lower():
+                return "Halo! Saya Tanya Kehati, asisten AI Anda. Ada yang bisa saya bantu tentang keanekaragaman hayati Indonesia?"
+            elif "flora" in message.lower():
+                return "Flora Indonesia sangat beragam! Kami memiliki data tentang berbagai spesies tanaman dari seluruh Nusantara. Apakah ada spesies tertentu yang ingin Anda ketahui?"
+            elif "fauna" in message.lower():
+                return "Fauna Indonesia menakjubkan! Dari burung endemik hingga mamalia langka, kami memiliki data lengkap tentang satwa liar Indonesia. Ada yang ingin Anda tanyakan?"
+            elif "taman" in message.lower() or "kehati" in message.lower():
+                return "Taman Kehati adalah kawasan konservasi yang melindungi keanekaragaman hayati Indonesia. Kami memiliki data tentang berbagai taman di seluruh Nusantara. Apakah ada taman tertentu yang ingin Anda ketahui?"
+            elif "konservasi" in message.lower():
+                return "Konservasi adalah upaya melindungi dan melestarikan keanekaragaman hayati. Di platform ini, Anda dapat menemukan data tentang flora, fauna, dan kegiatan konservasi di Indonesia."
+            else:
+                return "Terima kasih atas pertanyaan Anda! Saya Tanya Kehati, asisten AI yang siap membantu Anda menjelajahi keanekaragaman hayati Indonesia. Anda dapat bertanya tentang flora, fauna, taman kehati, atau kegiatan konservasi."
+        except Exception as e:
+            print(f"Error in chatbot service: {e}")
+            return "Maaf, terjadi kesalahan. Silakan coba lagi nanti."
