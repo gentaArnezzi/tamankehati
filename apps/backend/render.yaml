@@ -1,24 +1,25 @@
 services:
-  # Backend API
   - type: web
     name: tamankehati-backend
     runtime: python
     region: singapore
-    plan: free
+    plan: starter
     branch: main
     rootDir: apps/backend
-    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 2
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: false
       - key: DATABASE_URL
         sync: false
-        # Set this to your Railway database URL (postgresql+asyncpg://...)
       - key: DATABASE_URL_SYNC
         sync: false
-        # Set this to your Railway database URL (postgresql://...)
       - key: SECRET_KEY
         generateValue: true
         sync: false
@@ -26,13 +27,8 @@ services:
         value: HS256
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: 30
-      - key: ENVIRONMENT
-        value: production
-      - key: DEBUG
-        value: false
       - key: CORS_ORIGINS
         sync: false
-        # Set this to your Vercel frontend URL
       - key: UPLOAD_DIRECTORY
         value: /opt/render/project/src/uploads
       - key: MAX_FILE_SIZE
@@ -41,12 +37,8 @@ services:
         value: INFO
       - key: LOG_FORMAT
         value: json
-    autoDeploy: true
     disk:
       name: uploads
       mountPath: /opt/render/project/src/uploads
       sizeGB: 1
-
-# NOTE: Frontend deployed to Vercel, Database deployed to Railway
-# This file only contains backend service configuration
 
