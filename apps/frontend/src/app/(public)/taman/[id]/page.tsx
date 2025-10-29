@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { ParkDetailView } from '../../../../components/public/parks/ParkDetailView';
 import { JsonLd } from '../../../../components/public/seo/JsonLd';
-import { getArtikelPage, getTamanDetail } from '../../../../lib/api/public';
+import { getArtikelPage, getTamanDetail, getParkStats } from '../../../../lib/api/public';
 import type { TamanDetail } from '../../../../types/taman';
 
 type TamanDetailPageProps = {
@@ -32,17 +32,21 @@ export async function generateMetadata({ params }: TamanDetailPageProps): Promis
 export default async function TamanDetailPage({ params }: TamanDetailPageProps) {
   try {
     const { id } = await params;
-    const taman = await getTamanDetail(id);
+    const [taman, parkStats] = await Promise.all([
+      getTamanDetail(id),
+      getParkStats(parseInt(id)).catch(() => null), // Fetch real stats from stats endpoint
+    ]);
+    
     const relatedArticles = await getArtikelPage({ search: taman.name, limit: 4, offset: 0 }).catch(() => null);
 
     const enrichedTaman = {
       ...taman,
       artikel_terkait: relatedArticles?.items ?? [],
       statistik: {
-        flora: taman.statistik?.flora ?? 0,
-        fauna: taman.statistik?.fauna ?? 0,
-        artikel: 0, // Default value since artikel is not in the original statistik type
-        galeri: 0,  // Default value since galeri is not in the original statistik type
+        flora: parkStats?.total_flora ?? taman.statistik?.flora ?? 0,
+        fauna: parkStats?.total_fauna ?? taman.statistik?.fauna ?? 0,
+        artikel: parkStats?.total_artikel ?? 0,
+        galeri: 0,  // Gallery stats not available in current API
       },
     };
 

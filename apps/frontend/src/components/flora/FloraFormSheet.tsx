@@ -125,6 +125,11 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
     }
 
     setAiLoading(true);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
       const aiData = {
         local_name: formData.nama_umum || '',
@@ -140,20 +145,35 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(aiData)
+        body: JSON.stringify(aiData),
+        signal: controller.signal
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate description');
+        throw new Error(`Failed to generate description (${response.status})`);
       }
 
       const result = await response.json();
+      
+      // Validate that we got actual content
+      if (!result.description) {
+        throw new Error('AI tidak menghasilkan konten yang valid');
+      }
+      
       setFormData(prev => ({ ...prev, deskripsi: result.description }));
       toast.success('Deskripsi berhasil dibuat dengan AI!');
     } catch (error) {
       console.error('Error generating AI description:', error);
-      toast.error('Gagal membuat deskripsi. Pastikan Ollama sudah running.');
+      
+      if (error.name === 'AbortError') {
+        toast.error('AI generation timeout. Pastikan Ollama berjalan dan coba lagi.');
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.error('Tidak dapat terhubung ke AI service. Pastikan backend berjalan.');
+      } else {
+        toast.error(`Gagal membuat deskripsi: ${error.message}`);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setAiLoading(false);
     }
   };
@@ -165,6 +185,11 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
     }
 
     setAiLoading(true);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
       const aiData = {
         local_name: formData.nama_umum || '',
@@ -180,20 +205,35 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(aiData)
+        body: JSON.stringify(aiData),
+        signal: controller.signal
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate morphology');
+        throw new Error(`Failed to generate morphology (${response.status})`);
       }
 
       const result = await response.json();
+      
+      // Validate that we got actual content
+      if (!result.description) {
+        throw new Error('AI tidak menghasilkan konten yang valid');
+      }
+      
       setFormData(prev => ({ ...prev, morfologi: result.description }));
       toast.success('Morfologi berhasil dibuat dengan AI!');
     } catch (error) {
       console.error('Error generating AI morphology:', error);
-      toast.error('Gagal membuat morfologi.');
+      
+      if (error.name === 'AbortError') {
+        toast.error('AI generation timeout. Pastikan Ollama berjalan dan coba lagi.');
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.error('Tidak dapat terhubung ke AI service. Pastikan backend berjalan.');
+      } else {
+        toast.error(`Gagal membuat morfologi: ${error.message}`);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setAiLoading(false);
     }
   };
@@ -205,6 +245,11 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
     }
 
     setAiLoading(true);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
       const aiData = {
         local_name: formData.nama_umum || '',
@@ -220,20 +265,35 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(aiData)
+        body: JSON.stringify(aiData),
+        signal: controller.signal
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate benefits');
+        throw new Error(`Failed to generate benefits (${response.status})`);
       }
 
       const result = await response.json();
+      
+      // Validate that we got actual content
+      if (!result.description) {
+        throw new Error('AI tidak menghasilkan konten yang valid');
+      }
+      
       setFormData(prev => ({ ...prev, manfaat: result.description }));
       toast.success('Manfaat berhasil dibuat dengan AI!');
     } catch (error) {
       console.error('Error generating AI benefits:', error);
-      toast.error('Gagal membuat manfaat.');
+      
+      if (error.name === 'AbortError') {
+        toast.error('AI generation timeout. Pastikan Ollama berjalan dan coba lagi.');
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.error('Tidak dapat terhubung ke AI service. Pastikan backend berjalan.');
+      } else {
+        toast.error(`Gagal membuat manfaat: ${error.message}`);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setAiLoading(false);
     }
   };

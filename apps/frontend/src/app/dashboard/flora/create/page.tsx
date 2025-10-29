@@ -153,6 +153,11 @@ export default function CreateFloraPage() {
     }
 
     setAiLoading(true);
+    
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
     try {
       const aiData = {
         local_name: formData.nama_umum || '',
@@ -163,28 +168,36 @@ export default function CreateFloraPage() {
         iucn_status: formData.status_iucn || ''
       };
 
-      // Generate all three descriptions in parallel
+      // Generate all three descriptions in parallel with timeout
       const [descriptionRes, morphologyRes, benefitsRes] = await Promise.all([
         fetch('http://localhost:8000/api/v1/ai/public/generate-flora-description', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(aiData)
+          body: JSON.stringify(aiData),
+          signal: controller.signal
         }),
         fetch('http://localhost:8000/api/v1/ai/public/generate-flora-morphology', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(aiData)
+          body: JSON.stringify(aiData),
+          signal: controller.signal
         }),
         fetch('http://localhost:8000/api/v1/ai/public/generate-flora-benefits', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(aiData)
+          body: JSON.stringify(aiData),
+          signal: controller.signal
         })
       ]);
 
       // Check if all responses are ok
       if (!descriptionRes.ok || !morphologyRes.ok || !benefitsRes.ok) {
-        throw new Error('Failed to generate some AI content');
+        const errorDetails = [];
+        if (!descriptionRes.ok) errorDetails.push(`Deskripsi (${descriptionRes.status})`);
+        if (!morphologyRes.ok) errorDetails.push(`Morfologi (${morphologyRes.status})`);
+        if (!benefitsRes.ok) errorDetails.push(`Manfaat (${benefitsRes.status})`);
+        
+        throw new Error(`Gagal generate: ${errorDetails.join(', ')}`);
       }
 
       // Parse all responses
@@ -193,6 +206,11 @@ export default function CreateFloraPage() {
         morphologyRes.json(),
         benefitsRes.json()
       ]);
+
+      // Validate that we got actual content
+      if (!descriptionResult.description || !morphologyResult.description || !benefitsResult.description) {
+        throw new Error('AI tidak menghasilkan konten yang valid');
+      }
 
       // Update all fields at once
       setFormData(prev => ({
@@ -205,8 +223,16 @@ export default function CreateFloraPage() {
       toast.success('Semua deskripsi berhasil dibuat dengan AI!');
     } catch (error) {
       console.error('Error generating all AI content:', error);
-      toast.error('Gagal membuat deskripsi AI. Pastikan Ollama sudah running.');
+      
+      if (error.name === 'AbortError') {
+        toast.error('AI generation timeout. Pastikan Ollama berjalan dan coba lagi.');
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.error('Tidak dapat terhubung ke AI service. Pastikan backend berjalan.');
+      } else {
+        toast.error(`Gagal membuat deskripsi AI: ${error.message}`);
+      }
     } finally {
+      clearTimeout(timeoutId);
       setAiLoading(false);
     }
   };
