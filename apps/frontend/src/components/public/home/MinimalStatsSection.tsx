@@ -1,0 +1,122 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+
+export function MinimalStatsSection() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
+  
+  const [counts, setCounts] = useState({
+    flora: 0,
+    fauna: 0,
+    parks: 0,
+    research: 0,
+  });
+
+  const targets = {
+    flora: 320,
+    fauna: 180,
+    parks: 52,
+    research: 145,
+  };
+
+  useEffect(() => {
+    if (isInView) {
+      Object.keys(targets).forEach((key) => {
+        const target = targets[key as keyof typeof targets];
+        const duration = 2000;
+        const steps = 60;
+        const increment = target / steps;
+        let current = 0;
+
+        const timer = setInterval(() => {
+          current += increment;
+          if (current >= target) {
+            current = target;
+            clearInterval(timer);
+          }
+          setCounts(prev => ({ ...prev, [key]: Math.floor(current) }));
+        }, duration / steps);
+      });
+    }
+  }, [isInView]);
+
+  const stats = [
+    {
+      value: counts.flora,
+      label: 'Spesies Flora',
+      description: 'Terdokumentasi',
+    },
+    {
+      value: counts.fauna,
+      label: 'Spesies Fauna',
+      description: 'Teridentifikasi',
+    },
+    {
+      value: counts.parks,
+      label: 'Taman Konservasi',
+      description: 'Seluruh Indonesia',
+    },
+    {
+      value: counts.research,
+      label: 'Publikasi Ilmiah',
+      description: 'Riset Aktif',
+    },
+  ];
+
+  return (
+    <section ref={sectionRef} className="py-24 bg-white">
+      <div className="container mx-auto max-w-7xl px-6">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-20"
+        >
+          <h2 className="text-5xl md:text-6xl font-light text-slate-900 mb-6">
+            Data Real-Time
+          </h2>
+          <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Transparansi penuh untuk mendukung riset dan konservasi berkelanjutan
+          </p>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="text-5xl font-light text-slate-900 mb-2">
+                {stat.value}
+                <span className="text-3xl text-emerald-600">+</span>
+              </div>
+              <div className="text-base font-medium text-slate-700 mb-1">
+                {stat.label}
+              </div>
+              <div className="text-sm text-gray-500">
+                {stat.description}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Divider */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={isInView ? { scaleX: 1 } : {}}
+          transition={{ duration: 1, delay: 0.8 }}
+          className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent mt-20"
+        />
+      </div>
+    </section>
+  );
+}
+

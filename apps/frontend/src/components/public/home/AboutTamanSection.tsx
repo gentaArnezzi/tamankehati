@@ -25,7 +25,7 @@ export function AboutTamanSection() {
   ];
 
   return (
-    <section id="about-taman-section" className="py-32 bg-white">
+    <section id="about-taman-section" className="pt-12 pb-32 bg-white">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="text-center mb-12">
           <h2 className="text-5xl font-light text-slate-900 md:text-6xl mb-6">

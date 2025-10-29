@@ -47,36 +47,36 @@ export function AboutSection() {
     
 
   return (
-    <section id="about-section" className="relative min-h-[120vh] py-32">
+    <section id="about-section" className="relative min-h-[100vh] py-24 bg-white">
       {/* Arc Gallery Background */}
       <div className="absolute inset-0 z-0 -top-40">
         <ArcGalleryHero 
           images={forestImages}
           startAngle={20}
           endAngle={160}
-          radiusLg={700}
-          radiusMd={550}
-          radiusSm={400}
-          cardSizeLg={180}
-          cardSizeMd={140}
-          cardSizeSm={110}
+          radiusLg={550}
+          radiusMd={450}
+          radiusSm={350}
+          cardSizeLg={150}
+          cardSizeMd={120}
+          cardSizeSm={90}
         />
       </div>
       
       {/* Content Overlay */}
-      <div className="relative z-10 flex min-h-[120vh] items-end justify-center pb-40 pointer-events-none">
+      <div className="relative z-10 flex min-h-[100vh] items-end justify-center pb-32 pointer-events-none">
         <div className="container mx-auto max-w-7xl px-8 pointer-events-auto">
           <div className={`text-center transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             {/* Badge */}
-            <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-8 py-4 text-sm font-medium text-slate-800 mb-32 shadow-sm backdrop-blur-sm">
+            <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-8 py-4 text-sm font-light text-slate-800 mb-16 shadow-sm backdrop-blur-sm">
               Selamat Datang di Taman Kehati Indonesia
             </div>
             
             {/* Main Content */}
-            <div className="max-w-5xl mx-auto">
-              <p className="text-3xl leading-relaxed text-slate-800 mb-32 font-light tracking-wide">
+            <div className="max-w-4xl mx-auto">
+              <p className="text-2xl md:text-3xl leading-relaxed text-slate-800 font-light tracking-wide">
                 Sebuah benteng konservasi yang didedikasikan untuk melindungi dan melestarikan kekayaan flora dan fauna asli Nusantara. 
                 Temukan laboratorium alam kami, tempat spesies langka dirawat dan generasi baru terinspirasi untuk menjaga bumi.
               </p>

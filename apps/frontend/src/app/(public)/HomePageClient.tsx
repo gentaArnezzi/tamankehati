@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { HeroSection } from '../../components/public/home/HeroSection';
+import { motion } from 'framer-motion';
+import { MinimalHeroSection } from '../../components/public/home/MinimalHeroSection';
 import { AboutSection } from '../../components/public/home/AboutSection';
 import { AboutTamanSection } from '../../components/public/home/AboutTamanSection';
-import { CollectionsSection } from '../../components/public/home/CollectionsSection';
-import { StatsSection } from '../../components/public/home/StatsSection';
-import { CTASection } from '../../components/public/home/CTASection';
-import { LatestArticlesSection } from '../../components/public/home/LatestArticlesSection';
-import { GalleryHighlight } from '../../components/public/gallery/GalleryHighlight';
-import { getPublicStats, getLatestArticles, getGalleryHighlights, getTamanList } from '../../lib/api/public-client';
+import { MinimalStatsSection } from '../../components/public/home/MinimalStatsSection';
+import { MinimalFeaturedSection } from '../../components/public/home/MinimalFeaturedSection';
+import { MinimalMapSection } from '../../components/public/home/MinimalMapSection';
+import { MinimalTestimonialsSection } from '../../components/public/home/MinimalTestimonialsSection';
+import { MinimalNewsletterSection } from '../../components/public/home/MinimalNewsletterSection';
 import { FAQSection } from '../../components/public/home/FAQSection';
+import { getPublicStats, getLatestArticles, getGalleryHighlights } from '../../lib/api/public-client';
 import { JsonLd } from '../../components/public/seo/JsonLd';
 
 export default function HomePageClient() {
@@ -18,12 +19,10 @@ export default function HomePageClient() {
     stats: { total_flora: number; total_fauna: number; total_taman: number; } | null,
     articles: { id: string; judul: string; slug: string; excerpt: string; kategori: string; tanggal_publish: string; gambar_cover?: string; }[],
     gallery: { id: string; judul: string; url: string; jenis: string; wilayah?: string; }[],
-    parks: { id: number; name: string; slug: string; status: string; created_at: string; updated_at: string; area_ha?: number | null; description?: string | null; }[],
   }>({
     stats: null,
     articles: [],
     gallery: [],
-    parks: [],
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,27 +32,23 @@ export default function HomePageClient() {
       try {
         setLoading(true);
         
-        // Use fallback data immediately to avoid infinite loading
         const fallbackData = {
           stats: { total_flora: 0, total_fauna: 0, total_taman: 0 },
           articles: [],
-          gallery: [],
-          parks: []
+          gallery: []
         };
         
         setData(fallbackData);
         setLoading(false);
         
-        // Try to fetch real data in background
         try {
-          const [stats, articles, gallery, parks] = await Promise.all([
+          const [stats, articles, gallery] = await Promise.all([
             getPublicStats(),
             getLatestArticles(),
             getGalleryHighlights(),
-            getTamanList({ limit: 12 }),
           ]);
           
-          setData({ stats, articles, gallery, parks: parks.items });
+          setData({ stats, articles, gallery });
         } catch (err) {
           console.warn('Background data fetch failed, using fallback:', err);
         }
@@ -71,10 +66,14 @@ export default function HomePageClient() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center min-h-screen bg-white">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat data...</p>
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 border-2 border-gray-200 border-t-gray-900 rounded-full mx-auto mb-4"
+          />
+          <p className="text-sm text-gray-600">Memuat...</p>
         </div>
       </div>
     );
@@ -83,14 +82,15 @@ export default function HomePageClient() {
   if (error) {
     return (
       <main>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <p className="text-red-600">{error}</p>
+        <div className="flex items-center justify-center min-h-screen bg-white">
+          <div className="text-center max-w-md">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Terjadi Kesalahan</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-emerald-600 text-white rounded hover:bg-emerald-700"
+              className="px-6 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-all"
             >
-              Coba Lagi
+              Muat Ulang
             </button>
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function HomePageClient() {
   }
 
   return (
-    <main>
+    <main className="overflow-hidden">
       <JsonLd
         data={{
           '@context': 'https://schema.org',
@@ -115,17 +115,90 @@ export default function HomePageClient() {
           },
         }}
       />
-      <HeroSection />
+
+      {/* Minimal Hero with Search */}
+      <MinimalHeroSection />
+
+      {/* About Section with Arc Gallery (Foto Melingkar) */}
       <AboutSection />
+
+      {/* About Taman Kehati Section */}
       <AboutTamanSection />
-      <CollectionsSection />
-      <StatsSection />
 
-      <LatestArticlesSection articles={data.articles} />
+      {/* Stats Dashboard */}
+      <MinimalStatsSection />
 
+      {/* Featured Species */}
+      <MinimalFeaturedSection />
+
+      {/* Map Section */}
+      <MinimalMapSection />
+
+      {/* Testimonials */}
+      <MinimalTestimonialsSection />
+
+      {/* Newsletter */}
+      <MinimalNewsletterSection />
+
+      {/* FAQ */}
       <FAQSection />
 
-      <GalleryHighlight items={data.gallery} />
+      {/* Scroll to Top Button */}
+      <ScrollToTopButton />
     </main>
+  );
+}
+
+function ScrollToTopButton() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 500) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener('scroll', toggleVisibility);
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <>
+      {isVisible && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          onClick={scrollToTop}
+          className="fixed bottom-8 right-8 z-50 w-12 h-12 bg-gray-900 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-800 transition-all"
+          whileHover={{ y: -4 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M5 10l7-7m0 0l7 7m-7-7v18"
+            />
+          </svg>
+        </motion.button>
+      )}
+    </>
   );
 }
