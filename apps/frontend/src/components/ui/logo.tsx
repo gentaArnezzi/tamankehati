@@ -23,7 +23,7 @@ export function Logo({ size = 'md', variant = 'default', className = '' }: LogoP
 
   const LogoIcon = () => (
     <img
-      src="/logo/Logo_Kementerian_Lingkungan_Hidup_-_Badan_Pengendalian_Lingkungan_Hidup_(2024).png"
+      src="/logo/logo_klh.png"
       alt="Logo Kementerian Lingkungan Hidup"
       className={`${sizeClasses[size]} object-contain`}
     />

@@ -326,7 +326,7 @@ class PublicChatbotService:
     @staticmethod
     async def send_message(message: str) -> str:
         """
-        AI-powered chatbot with database check first.
+        AI-powered chatbot with secure database check.
         Checks database for relevant data before using AI.
         """
         try:
@@ -345,64 +345,106 @@ class PublicChatbotService:
                 break  # Important: break after first iteration
                     
         except Exception as e:
-            # Fallback to simple response if anything fails
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti atau hubungi administrator."
+            # Log error securely without exposing system information
+            print("Chatbot service error: Internal processing failure")
+            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti."
+    
     
     @staticmethod
     async def _search_database_for_relevant_data(db_session, message: str) -> str:
         """
         Search database for relevant data based on the user's question.
         Returns relevant data if found, None otherwise.
+        Uses parameterized queries to prevent SQL injection.
         """
         try:
-            from sqlalchemy import text
+            from sqlalchemy import select, and_
+            from domains.flora.models import Flora
+            from domains.fauna.models import Fauna
+            from domains.parks.models import Park
+            from domains.articles.models import Article
+            
             message_lower = message.lower()
             relevant_data = []
             
-            # Search for flora data
+            # Special handling for "taman kehati" questions
+            if any(word in message_lower for word in ['taman kehati', 'kehati', 'untuk apa taman kehati', 'apa itu taman kehati']):
+                # Add general information about Taman Kehati
+                relevant_data.append("Informasi Taman Kehati:")
+                relevant_data.append("- Taman Kehati adalah taman konservasi keanekaragaman hayati Indonesia")
+                relevant_data.append("- Tujuan: melindungi dan melestarikan flora dan fauna Indonesia")
+                relevant_data.append("- Fungsi: pendidikan, penelitian, dan konservasi")
+                relevant_data.append("- Data tersedia di website Taman Kehati")
+            
+            # Search for flora data using parameterized queries
             if any(word in message_lower for word in ['flora', 'tumbuhan', 'tanaman', 'pohon', 'bunga', 'rafflesia', 'anggrek']):
-                flora_query = text("SELECT scientific_name, local_name, description FROM flora WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
-                flora_result = await db_session.execute(flora_query)
+                flora_stmt = select(Flora.scientific_name, Flora.local_name, Flora.description).where(
+                    and_(
+                        Flora.status == "approved",
+                        Flora.deleted_at.is_(None)
+                    )
+                ).limit(3)
+                
+                flora_result = await db_session.execute(flora_stmt)
                 flora_data = flora_result.fetchall()
                 if flora_data:
-                    relevant_data.append("Data Flora:")
+                    relevant_data.append("Data Flora (Tersedia di website Taman Kehati):")
                     for flora in flora_data:
                         relevant_data.append(f"- {flora[1]} ({flora[0]})")
             
-            # Search for fauna data
+            # Search for fauna data using parameterized queries
             if any(word in message_lower for word in ['fauna', 'hewan', 'satwa', 'mamalia', 'burung', 'reptil', 'ikan', 'harimau', 'orangutan', 'komodo', 'badak']):
-                fauna_query = text("SELECT scientific_name, local_name, description FROM fauna WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
-                fauna_result = await db_session.execute(fauna_query)
+                fauna_stmt = select(Fauna.scientific_name, Fauna.local_name, Fauna.description).where(
+                    and_(
+                        Fauna.status == "approved",
+                        Fauna.deleted_at.is_(None)
+                    )
+                ).limit(3)
+                
+                fauna_result = await db_session.execute(fauna_stmt)
                 fauna_data = fauna_result.fetchall()
                 if fauna_data:
-                    relevant_data.append("Data Fauna:")
+                    relevant_data.append("Data Fauna (Tersedia di website Taman Kehati):")
                     for fauna in fauna_data:
                         relevant_data.append(f"- {fauna[1]} ({fauna[0]})")
             
-            # Search for parks data
-            if any(word in message_lower for word in ['taman', 'konservasi', 'kawasan', 'cagar', 'suaka']):
-                parks_query = text("SELECT name, provinsi, description FROM parks WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
-                parks_result = await db_session.execute(parks_query)
+            # Search for parks data using parameterized queries
+            if any(word in message_lower for word in ['taman', 'konservasi', 'kawasan', 'cagar', 'suaka', 'kehati']):
+                parks_stmt = select(Park.name, Park.provinsi, Park.description).where(
+                    and_(
+                        Park.status == "approved",
+                        Park.deleted_at.is_(None)
+                    )
+                ).limit(3)
+                
+                parks_result = await db_session.execute(parks_stmt)
                 parks_data = parks_result.fetchall()
                 if parks_data:
-                    relevant_data.append("Data Taman Konservasi:")
+                    relevant_data.append("Data Taman Konservasi (Tersedia di website Taman Kehati):")
                     for park in parks_data:
                         relevant_data.append(f"- {park[0]} di {park[1]}")
             
-            # Search for articles data
+            # Search for articles data using parameterized queries
             if any(word in message_lower for word in ['artikel', 'berita', 'informasi', 'pengetahuan']):
-                articles_query = text("SELECT title, summary FROM articles WHERE status = 'published' AND deleted_at IS NULL LIMIT 3")
-                articles_result = await db_session.execute(articles_query)
+                articles_stmt = select(Article.title, Article.summary).where(
+                    and_(
+                        Article.status == "published",
+                        Article.deleted_at.is_(None)
+                    )
+                ).limit(3)
+                
+                articles_result = await db_session.execute(articles_stmt)
                 articles_data = articles_result.fetchall()
                 if articles_data:
-                    relevant_data.append("Artikel Terkait:")
+                    relevant_data.append("Data Artikel (Tersedia di website Taman Kehati):")
                     for article in articles_data:
                         relevant_data.append(f"- {article[0]}")
             
             return "\n".join(relevant_data) if relevant_data else None
             
         except Exception as e:
-            print(f"Error searching database: {e}")
+            # Log error securely without exposing system information
+            print("Error searching database for chatbot data")
             return None
     
     @staticmethod
@@ -433,11 +475,14 @@ Berdasarkan data yang tersedia di database Taman Kehati:
 {relevant_data}
 
 Tugas Anda:
-- Gunakan data di atas untuk menjawab pertanyaan pengguna
+- Gunakan data di atas untuk menjawab pertanyaan pengguna dengan informatif
 - Berikan informasi yang akurat berdasarkan data yang tersedia
+- Jika data lengkap, berikan jawaban yang komprehensif
 - Jika data tidak lengkap, jelaskan apa yang tersedia dan apa yang tidak
 - Gunakan bahasa Indonesia yang mudah dipahami
 - Bersikap ramah, informatif, dan membantu
+- Fokus pada keanekaragaman hayati Indonesia
+- JANGAN membuat informasi yang tidak ada dalam data
 
 Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang tersedia."""
 
@@ -458,50 +503,28 @@ Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang terse
             return response
 
         except Exception as e:
-            print(f"Error generating AI response: {e}")
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda."
+            # Log error securely without exposing system information
+            print("AI response generation error: Internal processing failure")
+            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti."
     
     @staticmethod
     async def _handle_no_data_response(message: str) -> str:
         """
         Handle response when no relevant data is found in database.
+        Simply inform that data is not available on Taman Kehati website.
         """
-        return """Maaf, saya tidak memiliki data spesifik tentang pertanyaan Anda di database Taman Kehati saat ini.
+        return """Maaf, saya tidak memiliki data tentang pertanyaan Anda karena pada website Taman Kehati ini belum ditambahkan data tersebut.
 
 Namun, Anda dapat:
-• Mencari informasi di bagian Flora untuk data tumbuhan
-• Mencari informasi di bagian Fauna untuk data hewan  
+• Mencari informasi di bagian Flora untuk data tumbuhan yang tersedia
+• Mencari informasi di bagian Fauna untuk data hewan yang tersedia
 • Melihat Taman Konservasi yang tersedia
 • Membaca Artikel dan Berita terbaru
 • Menggunakan fitur Pencarian untuk mencari informasi spesifik
 
 Apakah ada topik lain tentang keanekaragaman hayati Indonesia yang ingin Anda ketahui?"""
+    
 
-    @staticmethod
-    async def _get_general_response(message: str) -> str:
-        """
-        Provide general responses about Indonesian biodiversity when specific data isn't found.
-        """
-        message_lower = message.lower()
-
-        # Check for common biodiversity questions
-        if any(word in message_lower for word in ['rafflesia', 'bunga bangkai']):
-            return "Rafflesia adalah bunga terbesar di dunia yang endemik di Indonesia. Rafflesia arnoldii dapat memiliki diameter hingga 1 meter dan berbau menyengat untuk menarik serangga penyerbuk."
-
-        elif any(word in message_lower for word in ['orangutan', 'orang utan']):
-            return "Orangutan adalah primata endemik Indonesia yang sangat terancam punah. Terdapat tiga spesies: orangutan Kalimantan (Pongo pygmaeus), orangutan Sumatera (Pongo abelii), dan orangutan Tapanuli (Pongo tapanuliensis)."
-
-        elif any(word in message_lower for word in ['komodo', 'komodo dragon']):
-            return "Komodo (Varanus komodoensis) adalah kadal terbesar di dunia yang hanya ditemukan di Indonesia, tepatnya di Taman Nasional Komodo. Komodo dapat tumbuh hingga 3 meter panjangnya."
-
-        elif any(word in message_lower for word in ['konservasi', 'conservation']):
-            return "Indonesia memiliki komitmen kuat terhadap konservasi keanekaragaman hayati. Sistem Taman Kehati ini merupakan bagian dari upaya nasional untuk melindungi flora dan fauna endemik Indonesia."
-
-        elif any(word in message_lower for word in ['endemik', 'endemic']):
-            return "Indonesia adalah negara dengan tingkat endemisme tertinggi di dunia. Lebih dari 1.500 spesies burung, mamalia, dan tumbuhan hanya dapat ditemukan di Indonesia."
-
-        else:
-            return f"Terima kasih atas minat Anda terhadap keanekaragaman hayati Indonesia. Sistem Taman Kehati memiliki informasi lengkap tentang:\n\n• Flora dan fauna endemik Indonesia\n• Kawasan konservasi di berbagai wilayah\n• Status konservasi IUCN\n• Artikel dan galeri edukasi\n\nSilakan ajukan pertanyaan yang lebih spesifik untuk mendapatkan informasi yang lebih detail!"
 
 
 class PublicSearchService:

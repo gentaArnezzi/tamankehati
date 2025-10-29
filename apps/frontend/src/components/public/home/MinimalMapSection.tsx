@@ -23,6 +23,11 @@ export function MinimalMapSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const [parks, setParks] = useState<any[]>([]);
+  const [stats, setStats] = useState<{
+    total_flora: number;
+    total_fauna: number;
+    total_taman: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Calculate park counts per region based on fetched data
@@ -63,22 +68,36 @@ export function MinimalMapSection() {
   ];
 
   useEffect(() => {
-    const fetchParks = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/public/parks?limit=100`);
-        if (response.ok) {
-          const data = await response.json();
-          // API returns array directly or object with items
-          const parksData = Array.isArray(data) ? data : (data.items || []);
-          setParks(parksData);
+        setLoading(true);
+        
+        // Fetch parks and stats data in parallel
+        const [parksResponse, statsResponse] = await Promise.all([
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/public/parks?limit=100`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/public/stats`)
+        ]);
+
+        // Process parks data
+        if (parksResponse.ok) {
+          const parksData = await parksResponse.json();
+          const parksArray = Array.isArray(parksData) ? parksData : (parksData.items || []);
+          setParks(parksArray);
+        }
+
+        // Process stats data
+        if (statsResponse.ok) {
+          const statsData = await statsResponse.json();
+          setStats(statsData);
         }
       } catch (error) {
-        console.error('Error fetching parks:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchParks();
+    
+    fetchData();
   }, []);
 
   return (
@@ -137,28 +156,30 @@ export function MinimalMapSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="relative z-0"
           >
-            {!loading && parks.length > 0 && (
+            {!loading && (
               <>
-                <MapWrapper
-                  center={[-2.5, 118.0]}
-                  zoom={5}
-                  scrollWheelZoom={true}
-                  height="600px"
-                  markers={parks
-                    .filter(park => park.latitude && park.longitude)
-                    .map(park => ({
-                      position: [parseFloat(park.latitude), parseFloat(park.longitude)] as [number, number],
-                      popup: `<div style="text-align: center;">
-                        <h3 style="font-weight: 600; color: #064e3b; margin-bottom: 4px;">${park.name}</h3>
-                        <p style="font-size: 0.875rem; color: #475569;">${park.provinsi || ''}</p>
-                        <a href="/taman/${park.id}" style="display: inline-block; margin-top: 8px; color: #10b981; font-weight: 600; text-decoration: none;">Lihat Detail →</a>
-                      </div>`,
-                      key: park.id,
-                    }))
-                  }
-                />
+                {parks.length > 0 && (
+                  <MapWrapper
+                    center={[-2.5, 118.0]}
+                    zoom={5}
+                    scrollWheelZoom={true}
+                    height="600px"
+                    markers={parks
+                      .filter(park => park.latitude && park.longitude)
+                      .map(park => ({
+                        position: [parseFloat(park.latitude), parseFloat(park.longitude)] as [number, number],
+                        popup: `<div style="text-align: center;">
+                          <h3 style="font-weight: 600; color: #064e3b; margin-bottom: 4px;">${park.name}</h3>
+                          <p style="font-size: 0.875rem; color: #475569;">${park.provinsi || ''}</p>
+                          <a href="/taman/${park.id}" style="display: inline-block; margin-top: 8px; color: #10b981; font-weight: 600; text-decoration: none;">Lihat Detail →</a>
+                        </div>`,
+                        key: park.id,
+                      }))
+                    }
+                  />
+                )}
                 
-                {/* Stats Overlay */}
+                {/* Stats Overlay - Always show */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -167,7 +188,9 @@ export function MinimalMapSection() {
                 >
                   <div className="grid grid-cols-3 gap-6 text-center">
                     <div>
-                      <div className="text-3xl font-light text-slate-900">{parks.length}</div>
+                      <div className="text-3xl font-light text-slate-900">
+                        {stats?.total_taman || parks.length || 0}
+                      </div>
                       <div className="text-sm text-slate-600 mt-1">Taman</div>
                     </div>
                     <div>
@@ -175,7 +198,9 @@ export function MinimalMapSection() {
                       <div className="text-sm text-slate-600 mt-1">Pulau</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-light text-slate-900">500+</div>
+                      <div className="text-3xl font-light text-slate-900">
+                        {stats ? `${(stats.total_flora + stats.total_fauna).toLocaleString()}+` : '500+'}
+                      </div>
                       <div className="text-sm text-slate-600 mt-1">Spesies</div>
                     </div>
                   </div>

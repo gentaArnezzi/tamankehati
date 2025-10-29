@@ -24,7 +24,7 @@ async def get_galeri(
         
         # Get items with pagination - only approved galleries
         query = text("""
-            SELECT id, title, image_url, region_code, created_at
+            SELECT id, title, image_url, entity_type, created_at
             FROM galleries 
             WHERE status = 'approved'
             ORDER BY created_at DESC 
@@ -39,8 +39,8 @@ async def get_galeri(
                 id=str(item.id),
                 judul=item.title or "",
                 url=item.image_url or "",
-                jenis=item.region_code or "",
-                wilayah=item.region_code or ""
+                jenis=item.entity_type or "",
+                wilayah=item.entity_type or ""
             ) for item in items],
             total=total,
             limit=limit,
