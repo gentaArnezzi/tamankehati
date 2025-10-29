@@ -15,24 +15,42 @@ router = APIRouter()
 async def get_stats(
     db: AsyncSession = Depends(get_session)
 ):
+    """
+    Get public statistics - only approved items, exclude deleted
+    """
     try:
-        # Get flora count
-        flora_query = text("SELECT COUNT(*) FROM flora WHERE status = 'approved'")
+        # Get flora count (approved only, exclude deleted)
+        flora_query = text("""
+            SELECT COUNT(*) FROM flora 
+            WHERE status = 'approved'
+            AND (deleted_at IS NULL OR deleted_at IS NULL)
+        """)
         flora_result = await db.execute(flora_query)
         total_flora = flora_result.scalar() or 0
 
-        # Get fauna count
-        fauna_query = text("SELECT COUNT(*) FROM fauna WHERE status = 'approved'")
+        # Get fauna count (approved only, exclude deleted)
+        fauna_query = text("""
+            SELECT COUNT(*) FROM fauna 
+            WHERE status = 'approved'
+            AND (deleted_at IS NULL OR deleted_at IS NULL)
+        """)
         fauna_result = await db.execute(fauna_query)
         total_fauna = fauna_result.scalar() or 0
 
-        # Get taman count
-        taman_query = text("SELECT COUNT(*) FROM parks WHERE status = 'approved'")
+        # Get taman count (published/approved only, exclude deleted)
+        taman_query = text("""
+            SELECT COUNT(*) FROM parks 
+            WHERE status IN ('approved', 'published')
+            AND (deleted_at IS NULL OR deleted_at IS NULL)
+        """)
         taman_result = await db.execute(taman_query)
         total_taman = taman_result.scalar() or 0
 
-        # Get artikel count
-        artikel_query = text("SELECT COUNT(*) FROM articles WHERE status = 'approved'")
+        # Get artikel count (approved only, exclude deleted if column exists)
+        artikel_query = text("""
+            SELECT COUNT(*) FROM articles 
+            WHERE status = 'approved'
+        """)
         artikel_result = await db.execute(artikel_query)
         total_artikel = artikel_result.scalar() or 0
 
