@@ -3,7 +3,6 @@ services:
   - type: web
     name: tamankehati-backend
     runtime: python
-    region: singapore
     plan: free
     branch: main
     rootDir: apps/backend
