@@ -8,6 +8,7 @@ import { type FloraDetail } from '../../../types/flora';
 import { Badge } from '../../ui/badge';
 import { EntityCard } from '../cards/EntityCard';
 import { JsonLd } from '../seo/JsonLd';
+import { MapPin, ArrowRight } from 'lucide-react';
 
 // Dynamically import LeafletMap with SSR disabled to avoid "window is not defined" error
 const LeafletMap = dynamic(
@@ -229,7 +230,14 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                 <div className="mt-4 space-y-3 text-sm text-slate-700">
                   <div className="flex justify-between gap-4">
                     <dt className="font-medium text-slate-600">Nama Taman</dt>
-                    <dd className="text-right text-slate-800">{flora.park_info.name}</dd>
+                    <dd className="text-right text-slate-800">
+                      <Link 
+                        href={`/taman/${flora.park_info.id}`}
+                        className="text-emerald-600 hover:text-emerald-800 hover:underline transition-colors font-medium"
+                      >
+                        {flora.park_info.name}
+                      </Link>
+                    </dd>
                   </div>
                   {flora.park_info.area_ha && (
                     <div className="flex justify-between gap-4">
@@ -255,6 +263,16 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       <dd className="text-sm text-slate-700 leading-relaxed">{flora.park_info.description}</dd>
                     </div>
                   )}
+                </div>
+                <div className="mt-4 pt-4 border-t border-emerald-100">
+                  <Link 
+                    href={`/taman/${flora.park_info.id}`}
+                    className="inline-flex items-center gap-2 text-sm font-medium text-emerald-600 hover:text-emerald-800 hover:underline transition-colors"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    Lihat Detail Taman
+                    <ArrowRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </div>
             )}
