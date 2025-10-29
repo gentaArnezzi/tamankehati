@@ -16,7 +16,6 @@ from core.database.base import Base
 # Import all models to ensure they're registered with Base.metadata
 import domains.articles.models
 import users.models
-# domains.zones.models removed - zones functionality removed
 import domains.flora.models
 import domains.fauna.models
 import domains.parks.models
