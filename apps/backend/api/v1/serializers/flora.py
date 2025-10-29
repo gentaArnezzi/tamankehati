@@ -15,17 +15,29 @@ class ParkRef(BaseModel):
 class FloraBase(BaseModel):
     local_name: Optional[str] = Field(None, description="Nama lokal flora")
     scientific_name: Optional[str] = Field(None, description="Nama ilmiah flora")
-    family: Optional[str] = None
-    genus: Optional[str] = None
+    family: Optional[str] = Field(None, description="Famili")
+    genus: Optional[str] = Field(None, description="Genus")
     species: Optional[str] = Field(None, description="Nama spesies flora")
+    synonym: Optional[str] = Field(None, description="Sinonim")
     description: Optional[str] = None
-    habitat: Optional[str] = Field(None, description="Habitat flora")
+    habitat: Optional[str] = Field(None, description="Data alami habitat")
     morphology: Optional[str] = Field(None, description="Deskripsi morfologi flora")
+    flowering_time: Optional[str] = Field(None, description="Waktu berbunga")
+    distribution: Optional[str] = Field(None, description="Penyebaran")
+    propagation_method: Optional[str] = Field(None, description="Metode perbanyakan")
     benefits: Optional[str] = Field(None, description="Manfaat atau kegunaan flora")
     uses: Optional[str] = Field(None, description="Kegunaan flora")
+    reference: Optional[str] = Field(None, description="Referensi")
     local_id: Optional[str] = Field(None, description="ID lokal flora")
+    
+    # Gambar
     image_url: Optional[str] = Field(None, description="URL gambar flora")
     gambar_utama: Optional[str] = Field(None, description="URL gambar utama flora")
+    leaf_image_url: Optional[str] = Field(None, description="Gambar pertelaan daun")
+    stem_image_url: Optional[str] = Field(None, description="Gambar batang percabangan")
+    flower_image_url: Optional[str] = Field(None, description="Gambar bunga")
+    fruit_image_url: Optional[str] = Field(None, description="Gambar buah")
+    
     is_endemic: bool = Field(False, description="Apakah endemik di Indonesia")
     iucn_status: Optional[IUCNStatus] = Field(None, description="Status konservasi IUCN")
 

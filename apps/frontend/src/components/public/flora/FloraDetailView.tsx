@@ -48,13 +48,12 @@ const taxonomyEntries = (flora: FloraDetail) =>
   [
     { label: 'Nama ilmiah', value: flora.nama_ilmiah },
     { label: 'Nama umum', value: flora.nama_umum },
+    { label: 'Sinonim', value: flora.sinonim },
     { label: 'Famili', value: flora.famili },
     { label: 'Genus', value: flora.genus },
     { label: 'Spesies', value: flora.spesies },
     { label: 'Ordo', value: flora.ordo },
     { label: 'Status IUCN', value: flora.status_iucn },
-    { label: 'Habitat', value: flora.habitat },
-    { label: 'Sebaran', value: flora.sebaran?.join(', ') },
   ].filter((entry) => entry.value);
 
 export function FloraDetailView({ flora }: FloraDetailViewProps) {
@@ -210,6 +209,95 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               </div>
             )}
 
+            {/* Gambar Detail Flora */}
+            {(flora.gambar_daun || flora.gambar_batang || flora.gambar_bunga || flora.gambar_buah) && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-xl font-medium text-slate-900">Dokumentasi Detail</h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Gambar detail morfologi untuk identifikasi lebih akurat
+                  </p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {flora.gambar_daun && (
+                    <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+                      <div className="aspect-square relative overflow-hidden bg-slate-100">
+                        <Image
+                          src={flora.gambar_daun.startsWith('http') ? flora.gambar_daun : `http://localhost:8000${flora.gambar_daun}`}
+                          alt={`Pertelaan daun ${flora.nama_ilmiah}`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="p-3 border-t border-slate-100">
+                        <h4 className="text-sm font-medium text-slate-900">Pertelaan Daun</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Detail struktur daun</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {flora.gambar_batang && (
+                    <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+                      <div className="aspect-square relative overflow-hidden bg-slate-100">
+                        <Image
+                          src={flora.gambar_batang.startsWith('http') ? flora.gambar_batang : `http://localhost:8000${flora.gambar_batang}`}
+                          alt={`Batang dan percabangan ${flora.nama_ilmiah}`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="p-3 border-t border-slate-100">
+                        <h4 className="text-sm font-medium text-slate-900">Batang</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Batang & percabangan</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {flora.gambar_bunga && (
+                    <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+                      <div className="aspect-square relative overflow-hidden bg-slate-100">
+                        <Image
+                          src={flora.gambar_bunga.startsWith('http') ? flora.gambar_bunga : `http://localhost:8000${flora.gambar_bunga}`}
+                          alt={`Bunga ${flora.nama_ilmiah}`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="p-3 border-t border-slate-100">
+                        <h4 className="text-sm font-medium text-slate-900">Bunga</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Detail struktur bunga</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {flora.gambar_buah && (
+                    <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
+                      <div className="aspect-square relative overflow-hidden bg-slate-100">
+                        <Image
+                          src={flora.gambar_buah.startsWith('http') ? flora.gambar_buah : `http://localhost:8000${flora.gambar_buah}`}
+                          alt={`Buah ${flora.nama_ilmiah}`}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
+                          sizes="(max-width: 768px) 50vw, 25vw"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      </div>
+                      <div className="p-3 border-t border-slate-100">
+                        <h4 className="text-sm font-medium text-slate-900">Buah</h4>
+                        <p className="text-xs text-slate-500 mt-0.5">Detail struktur buah</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Habitat */}
             {flora.habitat && (
               <div className="space-y-4">
@@ -227,6 +315,51 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                 <p className="whitespace-pre-line text-base leading-relaxed text-slate-600">
                   {flora.manfaat}
                 </p>
+              </div>
+            )}
+
+            {/* Informasi Tambahan */}
+            {(flora.sinonim || flora.waktu_berbunga || flora.penyebaran || flora.metode_perbanyakan) && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Informasi Tambahan</h3>
+                <dl className="grid gap-4 sm:grid-cols-2">
+                  {flora.sinonim && (
+                    <div className="space-y-1">
+                      <dt className="text-sm font-medium text-slate-600">Sinonim</dt>
+                      <dd className="text-base text-slate-800 italic">{flora.sinonim}</dd>
+                    </div>
+                  )}
+                  {flora.waktu_berbunga && (
+                    <div className="space-y-1">
+                      <dt className="text-sm font-medium text-slate-600">Waktu Berbunga</dt>
+                      <dd className="text-base text-slate-800">{flora.waktu_berbunga}</dd>
+                    </div>
+                  )}
+                  {flora.penyebaran && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <dt className="text-sm font-medium text-slate-600">Penyebaran</dt>
+                      <dd className="text-base text-slate-800 whitespace-pre-line">{flora.penyebaran}</dd>
+                    </div>
+                  )}
+                  {flora.metode_perbanyakan && (
+                    <div className="space-y-1 sm:col-span-2">
+                      <dt className="text-sm font-medium text-slate-600">Metode Perbanyakan</dt>
+                      <dd className="text-base text-slate-800 whitespace-pre-line">{flora.metode_perbanyakan}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
+
+            {/* Referensi */}
+            {flora.referensi && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-medium text-slate-900">Referensi</h3>
+                <div className="rounded-lg bg-slate-50 border border-slate-200 p-4">
+                  <p className="whitespace-pre-line text-sm leading-relaxed text-slate-700">
+                    {flora.referensi}
+                  </p>
+                </div>
               </div>
             )}
 
