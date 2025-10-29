@@ -15,6 +15,9 @@ export function ParkHero() {
           className="object-cover object-center parallax-bg"
           sizes="100vw"
         />
+        {/* Dark black overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+        
         {/* Subtle bottom overlay with standard dark brown */}
         <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
       </div>

@@ -1,6 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from typing import List, Tuple, Optional
+from ai.providers.ollama_provider import OllamaProvider
+from ai.providers.openai_provider import OpenAIProvider
+from ai.providers.base import ChatTurn
 
 
 class PublicStatsService:
@@ -158,21 +161,64 @@ class PublicGaleriService:
 class PublicChatbotService:
     @staticmethod
     async def send_message(message: str) -> str:
-        """Send a message to the chatbot and get a response"""
+        """Send a message to the chatbot and get an AI-powered response"""
         try:
-            # Simple response for now - can be enhanced with AI integration later
-            if "halo" in message.lower() or "hai" in message.lower():
-                return "Halo! Saya Tanya Kehati, asisten AI Anda. Ada yang bisa saya bantu tentang keanekaragaman hayati Indonesia?"
-            elif "flora" in message.lower():
-                return "Flora Indonesia sangat beragam! Kami memiliki data tentang berbagai spesies tanaman dari seluruh Nusantara. Apakah ada spesies tertentu yang ingin Anda ketahui?"
-            elif "fauna" in message.lower():
-                return "Fauna Indonesia menakjubkan! Dari burung endemik hingga mamalia langka, kami memiliki data lengkap tentang satwa liar Indonesia. Ada yang ingin Anda tanyakan?"
-            elif "taman" in message.lower() or "kehati" in message.lower():
-                return "Taman Kehati adalah kawasan konservasi yang melindungi keanekaragaman hayati Indonesia. Kami memiliki data tentang berbagai taman di seluruh Nusantara. Apakah ada taman tertentu yang ingin Anda ketahui?"
-            elif "konservasi" in message.lower():
-                return "Konservasi adalah upaya melindungi dan melestarikan keanekaragaman hayati. Di platform ini, Anda dapat menemukan data tentang flora, fauna, dan kegiatan konservasi di Indonesia."
-            else:
-                return "Terima kasih atas pertanyaan Anda! Saya Tanya Kehati, asisten AI yang siap membantu Anda menjelajahi keanekaragaman hayati Indonesia. Anda dapat bertanya tentang flora, fauna, taman kehati, atau kegiatan konservasi."
+            print(f"Chatbot received message: {message}")
+            
+            # Try to use OpenAI first, fallback to Ollama
+            provider = None
+            try:
+                provider = OpenAIProvider()
+                print("Using OpenAI provider")
+            except Exception as e:
+                print(f"OpenAI failed, trying Ollama: {e}")
+                try:
+                    provider = OllamaProvider()
+                    print("Using Ollama provider")
+                except Exception as e2:
+                    print(f"Ollama also failed: {e2}")
+                    raise e2
+            
+            # Build context-aware system prompt
+            system_prompt = """Anda adalah Tanya Kehati, asisten AI khusus untuk keanekaragaman hayati Indonesia. 
+
+Tugas Anda:
+- Menjawab pertanyaan tentang flora, fauna, taman konservasi, dan kegiatan konservasi di Indonesia
+- Memberikan informasi yang akurat dan terpercaya tentang keanekaragaman hayati Indonesia
+- Menggunakan bahasa Indonesia yang mudah dipahami
+- Bersikap ramah, informatif, dan membantu
+- Jika tidak tahu jawaban yang spesifik, arahkan pengguna ke fitur-fitur yang tersedia di platform
+
+Platform Taman Kehati memiliki:
+- Database flora dan fauna Indonesia
+- Informasi taman konservasi di berbagai wilayah
+- Status konservasi IUCN
+- Artikel dan galeri edukasi
+- Data kegiatan konservasi
+
+Jawablah pertanyaan dengan informatif dan bermanfaat."""
+
+            # Prepare messages for AI
+            messages: list[ChatTurn] = [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user", 
+                    "content": message
+                }
+            ]
+            
+            print("Generating AI response...")
+            # Generate AI response
+            response = await provider.generate(messages)
+            print(f"AI response generated: {response[:100]}...")
+            return response
+            
         except Exception as e:
-            print(f"Error in chatbot service: {e}")
-            return "Maaf, terjadi kesalahan. Silakan coba lagi nanti."
+            print(f"Error in AI chatbot service: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fallback to simple response if AI fails
+            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti atau hubungi administrator."

@@ -17,6 +17,9 @@ export function MisiHero() {
         />
       </div>
 
+      {/* Dark black overlay */}
+      <div className="absolute inset-0 bg-black/40" />
+      
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
       

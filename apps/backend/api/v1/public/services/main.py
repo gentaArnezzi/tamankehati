@@ -326,25 +326,156 @@ class PublicChatbotService:
     @staticmethod
     async def send_message(message: str) -> str:
         """
-        AI-powered chatbot with RAG (Retrieval-Augmented Generation) capabilities.
-        Uses the AI tooling system to retrieve relevant information from the database.
+        AI-powered chatbot with database check first.
+        Checks database for relevant data before using AI.
         """
         try:
-            # Get database session
+            # First, check if we have relevant data in the database
+            from core.database.session import get_session
             async for db_session in get_session():
-                # Try to use AI tools to get relevant information
-                tool_response = await maybe_run_tool(db_session, message)
-
-                if tool_response:
-                    # If we got a tool response, format it nicely for the user
-                    return f"Berdasarkan data yang tersedia:\n\n{tool_response}\n\nApakah ada yang ingin Anda ketahui lebih lanjut tentang keanekaragaman hayati Indonesia?"
+                # Try to find relevant data in database
+                relevant_data = await PublicChatbotService._search_database_for_relevant_data(db_session, message)
+                
+                if relevant_data:
+                    # If we found relevant data, use AI to provide a comprehensive answer
+                    return await PublicChatbotService._generate_ai_response_with_data(message, relevant_data)
                 else:
-                    # Fallback to general knowledge about Indonesian biodiversity
-                    return await PublicChatbotService._get_general_response(message)
+                    # If no relevant data found, tell user we don't have specific information
+                    return await PublicChatbotService._handle_no_data_response(message)
+                break  # Important: break after first iteration
+                    
+        except Exception as e:
+            # Fallback to simple response if anything fails
+            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti atau hubungi administrator."
+    
+    @staticmethod
+    async def _search_database_for_relevant_data(db_session, message: str) -> str:
+        """
+        Search database for relevant data based on the user's question.
+        Returns relevant data if found, None otherwise.
+        """
+        try:
+            from sqlalchemy import text
+            message_lower = message.lower()
+            relevant_data = []
+            
+            # Search for flora data
+            if any(word in message_lower for word in ['flora', 'tumbuhan', 'tanaman', 'pohon', 'bunga', 'rafflesia', 'anggrek']):
+                flora_query = text("SELECT scientific_name, local_name, description FROM flora WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
+                flora_result = await db_session.execute(flora_query)
+                flora_data = flora_result.fetchall()
+                if flora_data:
+                    relevant_data.append("Data Flora:")
+                    for flora in flora_data:
+                        relevant_data.append(f"- {flora[1]} ({flora[0]})")
+            
+            # Search for fauna data
+            if any(word in message_lower for word in ['fauna', 'hewan', 'satwa', 'mamalia', 'burung', 'reptil', 'ikan', 'harimau', 'orangutan', 'komodo', 'badak']):
+                fauna_query = text("SELECT scientific_name, local_name, description FROM fauna WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
+                fauna_result = await db_session.execute(fauna_query)
+                fauna_data = fauna_result.fetchall()
+                if fauna_data:
+                    relevant_data.append("Data Fauna:")
+                    for fauna in fauna_data:
+                        relevant_data.append(f"- {fauna[1]} ({fauna[0]})")
+            
+            # Search for parks data
+            if any(word in message_lower for word in ['taman', 'konservasi', 'kawasan', 'cagar', 'suaka']):
+                parks_query = text("SELECT name, provinsi, description FROM parks WHERE status = 'approved' AND deleted_at IS NULL LIMIT 3")
+                parks_result = await db_session.execute(parks_query)
+                parks_data = parks_result.fetchall()
+                if parks_data:
+                    relevant_data.append("Data Taman Konservasi:")
+                    for park in parks_data:
+                        relevant_data.append(f"- {park[0]} di {park[1]}")
+            
+            # Search for articles data
+            if any(word in message_lower for word in ['artikel', 'berita', 'informasi', 'pengetahuan']):
+                articles_query = text("SELECT title, summary FROM articles WHERE status = 'published' AND deleted_at IS NULL LIMIT 3")
+                articles_result = await db_session.execute(articles_query)
+                articles_data = articles_result.fetchall()
+                if articles_data:
+                    relevant_data.append("Artikel Terkait:")
+                    for article in articles_data:
+                        relevant_data.append(f"- {article[0]}")
+            
+            return "\n".join(relevant_data) if relevant_data else None
+            
+        except Exception as e:
+            print(f"Error searching database: {e}")
+            return None
+    
+    @staticmethod
+    async def _generate_ai_response_with_data(message: str, relevant_data: str) -> str:
+        """
+        Generate AI response using the relevant data found in database.
+        """
+        try:
+            # Import AI providers
+            from ai.providers.ollama_provider import OllamaProvider
+            from ai.providers.openai_provider import OpenAIProvider
+            from ai.providers.base import ChatTurn
+            
+            # Try to use OpenAI first, fallback to Ollama
+            provider = None
+            try:
+                provider = OpenAIProvider()
+            except Exception:
+                try:
+                    provider = OllamaProvider()
+                except Exception as e:
+                    raise e
+            
+            # Build context-aware system prompt with database data
+            system_prompt = f"""Anda adalah Tanya Kehati, asisten AI khusus untuk keanekaragaman hayati Indonesia. 
+
+Berdasarkan data yang tersedia di database Taman Kehati:
+{relevant_data}
+
+Tugas Anda:
+- Gunakan data di atas untuk menjawab pertanyaan pengguna
+- Berikan informasi yang akurat berdasarkan data yang tersedia
+- Jika data tidak lengkap, jelaskan apa yang tersedia dan apa yang tidak
+- Gunakan bahasa Indonesia yang mudah dipahami
+- Bersikap ramah, informatif, dan membantu
+
+Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang tersedia."""
+
+            # Prepare messages for AI
+            messages: list[ChatTurn] = [
+                {
+                    "role": "system",
+                    "content": system_prompt
+                },
+                {
+                    "role": "user", 
+                    "content": message
+                }
+            ]
+            
+            # Generate AI response
+            response = await provider.generate(messages)
+            return response
 
         except Exception as e:
-            print(f"AI Chatbot error: {e}")
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi."
+            print(f"Error generating AI response: {e}")
+            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda."
+    
+    @staticmethod
+    async def _handle_no_data_response(message: str) -> str:
+        """
+        Handle response when no relevant data is found in database.
+        """
+        return """Maaf, saya tidak memiliki data spesifik tentang pertanyaan Anda di database Taman Kehati saat ini.
+
+Namun, Anda dapat:
+• Mencari informasi di bagian Flora untuk data tumbuhan
+• Mencari informasi di bagian Fauna untuk data hewan  
+• Melihat Taman Konservasi yang tersedia
+• Membaca Artikel dan Berita terbaru
+• Menggunakan fitur Pencarian untuk mencari informasi spesifik
+
+Apakah ada topik lain tentang keanekaragaman hayati Indonesia yang ingin Anda ketahui?"""
 
     @staticmethod
     async def _get_general_response(message: str) -> str:

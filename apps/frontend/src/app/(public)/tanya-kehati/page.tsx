@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
 import { 
   Send, 
   Bot, 
@@ -118,26 +119,46 @@ export default function TanyaKehatiPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16 md:py-24 overflow-hidden">
-        <div className="absolute inset-0 opacity-5">
-          <div className="absolute inset-0" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, white 1px, transparent 0)`,
-            backgroundSize: '20px 20px'
-          }} />
+      {/* Hero Section with Background Image */}
+      <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0">
+          <Image
+            src="/home/hero.jpg"
+            alt="Tanya Kehati - Asisten AI untuk Keanekaragaman Hayati Indonesia"
+            fill
+            className="object-cover"
+            priority
+          />
+        </div>
+
+        {/* Dark black overlay */}
+        <div className="absolute inset-0 bg-black/40" />
+        
+        {/* Subtle bottom overlay with standard dark brown */}
+        <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
+
+        {/* Floating elements with brown theme */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-20 left-20 w-2 h-2 bg-amber-400 rounded-full animate-float"></div>
+          <div className="absolute top-40 right-32 w-1 h-1 bg-amber-500 rounded-full animate-float delay-1000"></div>
+          <div className="absolute bottom-32 left-1/4 w-1.5 h-1.5 bg-amber-300 rounded-full animate-float delay-500"></div>
         </div>
         
-        <div className="container mx-auto px-6 max-w-5xl relative z-10">
-          <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl mb-6">
-              <MessageCircle className="w-10 h-10 text-white" />
+        {/* Content */}
+        <div className="relative z-10 flex h-full items-center">
+          <div className="container mx-auto px-6 max-w-5xl">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-amber-950/40 backdrop-blur-sm rounded-2xl mb-6 border border-amber-800/30">
+                <MessageCircle className="w-10 h-10 text-amber-50" />
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-light text-white mb-4">
+                Tanya Kehati
+              </h1>
+              <p className="text-xl text-amber-50 max-w-2xl mx-auto">
+                Asisten AI untuk keanekaragaman hayati Indonesia. Dapatkan informasi tentang flora, fauna, taman konservasi, dan kegiatan konservasi.
+              </p>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Tanya Kehati
-            </h1>
-            <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-              Asisten AI untuk keanekaragaman hayati Indonesia. Dapatkan informasi tentang flora, fauna, taman konservasi, dan kegiatan konservasi.
-            </p>
           </div>
         </div>
       </section>

@@ -11,14 +11,12 @@ export function MinimalStatsSection() {
     flora: 0,
     fauna: 0,
     parks: 0,
-    research: 0,
   });
 
   const targets = {
     flora: 320,
     fauna: 180,
     parks: 52,
-    research: 145,
   };
 
   useEffect(() => {
@@ -57,12 +55,7 @@ export function MinimalStatsSection() {
       value: counts.parks,
       label: 'Taman Konservasi',
       description: 'Seluruh Indonesia',
-    },
-    {
-      value: counts.research,
-      label: 'Publikasi Ilmiah',
-      description: 'Riset Aktif',
-    },
+    }
   ];
 
   return (
@@ -85,7 +78,7 @@ export function MinimalStatsSection() {
         </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
           {stats.map((stat, index) => (
             <motion.div
               key={index}
