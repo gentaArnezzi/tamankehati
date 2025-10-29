@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Park, parksApi } from '../../lib/api-client';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
@@ -32,6 +32,7 @@ import {
   Save,
   X,
   Clock,
+  Camera,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
@@ -60,6 +61,13 @@ const InteractiveMapWrapper = dynamic(() => import('../ui/interactive-map-wrappe
   )
 });
 
+interface Gallery {
+  id: number;
+  title: string;
+  image_url: string;
+  description?: string;
+}
+
 interface ApprovedParkDetailsProps {
   park: Park;
   onParkUpdate?: (updatedPark: Park) => void;
@@ -68,6 +76,8 @@ interface ApprovedParkDetailsProps {
 export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
+  const [galleries, setGalleries] = useState<Gallery[]>([]);
+  const [loadingGallery, setLoadingGallery] = useState(false);
   const [editData, setEditData] = useState({
     name: park.name,
     area_ha: park.area_ha || 0,
@@ -88,6 +98,42 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     latitude: park.latitude || null,
     longitude: park.longitude || null,
   });
+
+  // Load galleries when component mounts or park changes
+  useEffect(() => {
+    loadGalleries();
+  }, [park.id]);
+
+  const loadGalleries = async () => {
+    if (!park.id) return;
+    
+    try {
+      setLoadingGallery(true);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/entity/park/${park.id}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+        }
+      );
+      
+      if (response.ok) {
+        const data = await response.json();
+        setGalleries(data.items || []);
+      }
+    } catch (error) {
+      console.error('Failed to load galleries:', error);
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  const getImageUrl = (url?: string) => {
+    if (!url) return '';
+    if (url.startsWith('http')) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+  };
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -556,6 +602,61 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
         {/* Tab: Profil */}
         <TabsContent value="profil" className="space-y-4">
+          {/* Main Image */}
+          {park.gambar_utama && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="w-5 h-5" />
+                  Foto Utama Taman
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <img
+                  src={getImageUrl(park.gambar_utama)}
+                  alt={park.name}
+                  className="w-full h-96 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                  onError={(e) => {
+                    console.error('Failed to load main image:', park.gambar_utama);
+                    (e.target as HTMLImageElement).style.display = 'none';
+                  }}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Gallery */}
+          {galleries.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Camera className="w-5 h-5" />
+                  Galeri Foto ({galleries.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {galleries.map((gallery) => (
+                    <div key={gallery.id} className="group relative">
+                      <img
+                        src={getImageUrl(gallery.image_url)}
+                        alt={gallery.title}
+                        className="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                        onError={(e) => {
+                          console.error('Failed to load gallery image:', gallery.image_url);
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                      {gallery.title && (
+                        <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">

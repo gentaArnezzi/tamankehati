@@ -201,7 +201,7 @@ async def create_park(
                 provinsi, kota_kabupaten, kecamatan, desa_kelurahan,
                 area_ha, kondisi_fisik, nilai_penting, tipe_ekoregion,
                 description, sejarah, visi, misi, nilai_dasar,
-                latitude, longitude,
+                latitude, longitude, gambar_utama,
                 status, submitted_by, created_at, updated_at
             )
             VALUES (
@@ -209,7 +209,7 @@ async def create_park(
                 :provinsi, :kota_kabupaten, :kecamatan, :desa_kelurahan,
                 :area_ha, :kondisi_fisik, :nilai_penting, :tipe_ekoregion,
                 :description, :sejarah, :visi, :misi, :nilai_dasar,
-                :latitude, :longitude,
+                :latitude, :longitude, :gambar_utama,
                 :status, :submitted_by, NOW(), NOW()
             )
             RETURNING id, name, slug, status, created_at, updated_at
@@ -235,6 +235,7 @@ async def create_park(
             "nilai_dasar": data.get("nilai_dasar"),
             "latitude": data.get("latitude"),
             "longitude": data.get("longitude"),
+            "gambar_utama": data.get("gambar_utama"),
             "status": data.get("status", "draft"),  # Use status from request, default to 'draft'
             "submitted_by": int(user.id)
         })
@@ -501,6 +502,7 @@ async def list_pending_approval_parks(
                 "kota_kabupaten": getattr(park, 'kota_kabupaten', ''),
                 "kecamatan": getattr(park, 'kecamatan', ''),
                 "desa_kelurahan": getattr(park, 'desa_kelurahan', ''),
+                "gambar_utama": getattr(park, 'gambar_utama', None),  # Park image for preview
                 "created_at": park.created_at.isoformat() if hasattr(park, 'created_at') and park.created_at else None,
                 "updated_at": park.updated_at.isoformat() if hasattr(park, 'updated_at') and park.updated_at else None,
                 "submitted_at": park.submitted_at.isoformat() if hasattr(park, 'submitted_at') and park.submitted_at else None,
@@ -550,6 +552,25 @@ async def approve_park(
         park.status = "approved"
         park.approved_at = datetime.utcnow()
         park.approved_by = int(user.id)
+        
+        # Auto-approve all galleries for this park
+        from domains.galleries.models import Gallery, GalleryStatus
+        gallery_stmt = select(Gallery).where(
+            Gallery.entity_type == 'park',
+            Gallery.entity_id == park_id,
+            Gallery.status.in_([GalleryStatus.draft.value, GalleryStatus.in_review.value]),
+            Gallery.deleted_at == None
+        )
+        gallery_result = await db.execute(gallery_stmt)
+        galleries = gallery_result.scalars().all()
+        
+        for gallery in galleries:
+            gallery.status = GalleryStatus.approved.value
+            gallery.approved_by = int(user.id)
+            gallery.approved_at = datetime.utcnow()
+        
+        if len(galleries) > 0:
+            print(f"✅ Auto-approved {len(galleries)} galleries for park {park_id}")
         
         # Assign park_id to the park submitter (if they don't have one yet)
         assign_to_user_id = park.submitted_by

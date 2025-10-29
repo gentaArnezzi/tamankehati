@@ -88,8 +88,12 @@ async def upload_gallery_image(
         print(f"File saved successfully to: {file_path}")
         print(f"File exists after save: {os.path.exists(file_path)}")
         
-        # Generate URL (in production, this would be your CDN/storage URL)
-        file_url = f"/uploads/{filename}"
+        # Generate full URL for frontend to access
+        # In production, this would be your CDN/storage URL
+        from core.config import get_settings
+        settings = get_settings()
+        base_url = settings.BASE_URL or "http://localhost:8000"
+        file_url = f"{base_url}/uploads/{filename}"
         
         return JSONResponse(content={
             "success": True,

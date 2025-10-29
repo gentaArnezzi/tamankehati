@@ -431,6 +431,26 @@ export function GroupedApprovalView() {
                   <CollapsibleContent>
                     <CardContent className="pt-0">
                       <div className="space-y-4 bg-white rounded-lg p-4 border border-blue-100">
+                        {/* Park Image */}
+                        {park.gambar_utama && (
+                          <div>
+                            <h4 className="font-semibold text-sm text-gray-700 mb-2">Foto Taman</h4>
+                            <img
+                              src={
+                                park.gambar_utama.startsWith('http') 
+                                  ? park.gambar_utama 
+                                  : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${park.gambar_utama}`
+                              }
+                              alt={park.name}
+                              className="w-full h-64 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
+                              onError={(e) => {
+                                console.error('Failed to load park image:', park.gambar_utama);
+                                (e.target as HTMLImageElement).style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        )}
+
                         {/* Basic Info */}
                         <div>
                           <h4 className="font-semibold text-sm text-gray-700 mb-2">Informasi Dasar</h4>

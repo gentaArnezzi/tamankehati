@@ -34,7 +34,8 @@ import {
   Target,
   BookOpen,
   ChevronRight,
-  Save
+  Save,
+  Camera
 } from 'lucide-react';
 import {
   Table,
@@ -45,6 +46,8 @@ import {
   TableRow,
 } from '../ui/table';
 import { ApprovedParkDetails } from './ApprovedParkDetails';
+import { FileUpload } from '../ui/file-upload';
+import { MultipleFileUpload } from '../ui/multiple-file-upload';
 import dynamic from 'next/dynamic';
 
 const InteractiveMapWrapper = dynamic(() => import('../ui/interactive-map-wrapper').then(mod => ({ default: mod.InteractiveMapWrapper })), { 
@@ -81,6 +84,7 @@ interface ParkFormData {
   status: string;
   latitude: number | null;
   longitude: number | null;
+  gambar_utama: string;
 }
 
 // Interfaces for Indonesian Region API
@@ -156,7 +160,16 @@ export function TamanSubmissionPage() {
     status: 'draft',
     latitude: null,
     longitude: null,
+    gambar_utama: '',
   });
+
+  // Image upload states
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  
+  // Gallery upload states
+  const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
 
   // Current tab state for multi-step form
   const [currentTab, setCurrentTab] = useState('profil');
@@ -199,6 +212,7 @@ export function TamanSubmissionPage() {
         status: 'draft',
         latitude: (draftPark as any).latitude || null,
         longitude: (draftPark as any).longitude || null,
+        gambar_utama: (draftPark as any).gambar_utama || '',
       });
     }
   }, [parks]); // Depend on parks, will update when parks load
@@ -289,6 +303,181 @@ export function TamanSubmissionPage() {
       setVillages([]);
     } finally {
       setLoadingVillages(false);
+    }
+  };
+
+  // Image upload functions
+  const uploadFile = async (file: File): Promise<string> => {
+    console.log('Uploading park image:', file.name, 'Size:', file.size);
+    
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        },
+        body: formDataUpload,
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+      }
+      
+      const result = await response.json();
+      console.log('Park image upload success:', result);
+      return result.url;
+    } catch (error) {
+      console.error('Park image upload error:', error);
+      throw error;
+    }
+  };
+
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    setUploading(true);
+
+    try {
+      const imageUrl = await uploadFile(file);
+      setFormData(prev => ({ ...prev, gambar_utama: imageUrl }));
+      toast.success('Gambar berhasil diupload');
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Gagal mengupload gambar');
+      setSelectedFile(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setFormData(prev => ({ ...prev, gambar_utama: '' }));
+  };
+
+  // Multiple files upload for gallery
+  const uploadMultipleFiles = async (files: File[]): Promise<string[]> => {
+    console.log('Uploading multiple park images:', files.length);
+    
+    const uploadPromises = files.map(async (file) => {
+      try {
+        return await uploadFile(file);
+      } catch (error) {
+        console.error(`Error uploading ${file.name}:`, error);
+        throw error;
+      }
+    });
+
+    return Promise.all(uploadPromises);
+  };
+
+  const handleGalleryFilesSelect = (files: File[]) => {
+    // Convert File[] to FileWithPreview[]
+    const filesWithPreview = files.map((file) => ({
+      file,
+      preview: URL.createObjectURL(file),
+      id: Math.random().toString(36).substring(7),
+    }));
+    
+    setSelectedFiles((prev) => [...prev, ...filesWithPreview]);
+  };
+
+  const handleGalleryFileRemove = (fileId: string) => {
+    setSelectedFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === fileId);
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview);
+      }
+      return prev.filter((f) => f.id !== fileId);
+    });
+  };
+
+  // Cleanup preview URLs on unmount
+  useEffect(() => {
+    return () => {
+      selectedFiles.forEach((file) => {
+        URL.revokeObjectURL(file.preview);
+      });
+    };
+  }, [selectedFiles]);
+
+  const submitGalleryImages = async (parkId: number, shouldSubmitForReview: boolean = false) => {
+    if (selectedFiles.length === 0) {
+      console.log('No gallery images to upload');
+      return;
+    }
+
+    try {
+      setUploadingGallery(true);
+      console.log(`Uploading ${selectedFiles.length} gallery images for park ${parkId}...`);
+
+      // Upload all files
+      const uploadedUrls = await uploadMultipleFiles(selectedFiles.map(f => f.file));
+      console.log('All gallery images uploaded:', uploadedUrls);
+
+      // Create gallery entries
+      const galleryPromises = uploadedUrls.map(async (url, index) => {
+        const galleryData = {
+          title: `${formData.name} - Foto ${index + 1}`,
+          description: '',
+          image_url: url,
+          entity_type: 'park',
+          entity_id: parkId,
+          park_id: parkId, // Also include park_id for reference
+        };
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          },
+          body: JSON.stringify(galleryData),
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error(`Failed to create gallery entry ${index + 1}:`, response.status, errorText);
+          throw new Error(`Failed to create gallery entry: ${response.status}`);
+        }
+
+        const result = await response.json();
+        
+        // Submit for review if park is being submitted for review
+        if (result.id && shouldSubmitForReview) {
+          try {
+            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/${result.id}/submit`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+              },
+            });
+            
+            if (submitResponse.ok) {
+              console.log(`Gallery ${result.id} submitted for review successfully`);
+            } else {
+              console.warn(`Failed to submit gallery ${result.id} for review`);
+            }
+          } catch (submitError) {
+            console.warn(`Error submitting gallery ${result.id} for review:`, submitError);
+          }
+        }
+
+        return result;
+      });
+
+      await Promise.all(galleryPromises);
+      console.log('All gallery entries created successfully');
+      toast.success(`${selectedFiles.length} foto galeri berhasil ditambahkan`);
+    } catch (error) {
+      console.error('Error submitting gallery:', error);
+      toast.error('Gagal mengupload beberapa foto galeri');
+    } finally {
+      setUploadingGallery(false);
     }
   };
 
@@ -416,16 +605,20 @@ export function TamanSubmissionPage() {
         desa_kelurahan: formData.desa_kelurahan,
         latitude: formData.latitude,    // ✅ Send coordinates to backend
         longitude: formData.longitude,  // ✅ Send coordinates to backend
+        gambar_utama: formData.gambar_utama,  // ✅ Send image URL to backend
         status: submitStatus, // Use status from button clicked
       };
 
       console.log('Taman data to submit:', parkData);
 
       // ✅ Check if we're editing existing draft or creating new
+      let createdParkId: number | null = null;
+      
       if (draftPark) {
         // UPDATE existing draft park
         const result = await parksApi.update(draftPark.id, parkData);
         console.log('Taman update result:', result);
+        createdParkId = draftPark.id;
         
         // If user clicked "Submit untuk Review", call submit endpoint
         if (submitStatus === 'in_review') {
@@ -440,6 +633,7 @@ export function TamanSubmissionPage() {
         // CREATE new draft park - always as draft first
         const result = await parksApi.create({ ...parkData, status: 'draft' });
         console.log('Taman create result:', result);
+        createdParkId = result.id ? parseInt(result.id) : null;
         
         // If user clicked "Submit untuk Review", call submit endpoint
         if (submitStatus === 'in_review' && result.id) {
@@ -450,6 +644,11 @@ export function TamanSubmissionPage() {
           toast.success('Taman berhasil disimpan sebagai draft!');
           setSuccess('Taman berhasil dibuat! Status: Draft');
         }
+      }
+
+      // Submit gallery images if any
+      if (createdParkId && selectedFiles.length > 0) {
+        await submitGalleryImages(createdParkId, submitStatus === 'in_review');
       }
 
       // Reload parks list to reflect changes
@@ -932,6 +1131,54 @@ export function TamanSubmissionPage() {
                     onChange={(e) => handleInputChange('pengelola', e.target.value)}
                   />
                   <p className="text-sm text-muted-foreground">Nama lembaga atau instansi yang mengelola taman</p>
+                        </div>
+
+                        {/* Upload Foto Taman */}
+                        <div className="space-y-2 md:col-span-2">
+                          <Label htmlFor="gambar_utama" className="flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            Foto Utama Taman
+                          </Label>
+                          {uploading && (
+                            <p className="text-sm text-gray-500 flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Mengupload gambar...
+                            </p>
+                          )}
+                          <FileUpload
+                            onFileSelect={handleFileSelect}
+                            onFileRemove={handleFileRemove}
+                            selectedFile={selectedFile}
+                            previewUrl={formData.gambar_utama}
+                            maxSize={5}
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Upload foto landscape taman (maksimal 5MB)
+                          </p>
+                        </div>
+
+                        {/* Upload Galeri Foto */}
+                        <div className="space-y-2 md:col-span-2">
+                          <Label className="flex items-center gap-2">
+                            <Camera className="w-4 h-4" />
+                            Galeri Foto Taman (Opsional)
+                          </Label>
+                          {uploadingGallery && (
+                            <p className="text-sm text-gray-500 flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              Mengupload galeri...
+                            </p>
+                          )}
+                          <MultipleFileUpload
+                            selectedFiles={selectedFiles}
+                            onFilesSelect={handleGalleryFilesSelect}
+                            onFileRemove={handleGalleryFileRemove}
+                            maxFiles={10}
+                            maxSize={5}
+                          />
+                          <p className="text-sm text-muted-foreground">
+                            Upload beberapa foto untuk galeri taman (maksimal 10 foto, masing-masing 5MB)
+                          </p>
                         </div>
                       </div>
                       </div>

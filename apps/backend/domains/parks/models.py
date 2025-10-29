@@ -65,6 +65,9 @@ class Park(Base):
     misi = Column(Text, comment="Misi Taman")
     nilai_dasar = Column(Text, comment="Nilai-nilai Dasar")
     
+    # Gambar
+    gambar_utama = Column(String(500), nullable=True, comment="URL gambar utama taman")
+    
     # Status
     status = Column(String(20), default="draft", nullable=False)
     

@@ -1089,6 +1089,7 @@ export interface Park {
   visi: string | null;
   misi: string | null;
   nilai_dasar: string | null;
+  gambar_utama: string | null;
   latitude: number | null;
   longitude: number | null;
   created_at: string;
