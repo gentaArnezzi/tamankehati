@@ -36,14 +36,14 @@ export function MinimalHeroSection() {
           priority
         />
         {/* Dark overlay untuk readability */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-white" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-white/70" />
       </motion.div>
 
       <motion.div 
         style={{ opacity, y }}
-        className="container mx-auto max-w-7xl px-6 py-32 relative z-10"
+        className="container mx-auto max-w-7xl px-6 py-20 relative z-10 -mt-20"
       >
-        <div className="max-w-4xl mx-auto text-center space-y-12">
+        <div className="max-w-4xl mx-auto text-center space-y-8">
           {/* Minimal Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -71,7 +71,7 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl text-white/90 max-w-2xl mx-auto leading-relaxed"
+            className="text-base md:text-lg text-white/90 max-w-2xl mx-auto leading-relaxed"
           >
             Portal terpadu untuk riset biodiversitas, edukasi konservasi, dan data ekologi Indonesia.
           </motion.p>
@@ -129,7 +129,7 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-12 border-t border-white/20"
+            className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 border-t border-white/20"
           >
             {[
               { value: '500+', label: 'Spesies' },
