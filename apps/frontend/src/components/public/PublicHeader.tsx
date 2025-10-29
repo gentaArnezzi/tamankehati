@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { ChevronDownIcon } from '@radix-ui/react-icons';
 import { TanyaKehatiButton } from './chat/TanyaKehatiChat';
+import { Logo } from '../ui/logo';
 
 export function PublicHeader() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -44,12 +45,13 @@ export function PublicHeader() {
       }`}>
         <div className="container mx-auto flex items-center justify-between px-6 py-4 max-w-7xl">
           <a 
-            className={`text-xl font-light transition-colors hover:text-slate-600 ${
-              !shouldBeTransparent ? 'text-slate-900' : 'text-white'
-            }`} 
+            className="transition-opacity hover:opacity-80" 
             href="/"
           >
-            Taman Kehati
+            <Logo 
+              size="md" 
+              className={!shouldBeTransparent ? 'text-slate-900' : 'text-white'} 
+            />
           </a>
           
           {/* Navigation - Always Visible */}

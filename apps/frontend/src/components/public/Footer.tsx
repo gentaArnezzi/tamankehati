@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '../ui/logo';
 
 const NAV_LINKS = [
   { label: 'Flora', href: '/flora' },
@@ -8,63 +9,91 @@ const NAV_LINKS = [
 ];
 
 const SUPPORT_LINKS = [
-  { label: 'Indeks Kehati', href: '/tentang' },
+  { label: 'Tentang', href: '/tentang' },
   { label: 'Kontak', href: '/kontak' },
 ];
 
 export function Footer() {
   return (
-    <footer className="bg-white py-20">
-      <div className="container mx-auto max-w-7xl px-6">
-        <div className="grid gap-16 md:grid-cols-4">
-          <div className="md:col-span-2 space-y-6">
-            <Link href="/" className="text-2xl font-semibold text-emerald-700">
-              Taman Kehati
+    <footer className="bg-slate-50 border-t border-slate-200">
+      <div className="container mx-auto max-w-6xl px-6 py-16">
+        {/* Main Footer Content */}
+        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+          {/* Brand Section */}
+          <div className="lg:col-span-5">
+            <Link href="/" className="inline-block mb-6">
+              <Logo size="lg" />
             </Link>
-            <p className="text-base leading-relaxed text-slate-600 max-w-md">
-              Portal nasional untuk data flora, fauna, dan taman konservasi. Dibangun untuk memperkuat riset, edukasi, serta
-              aksi lapangan keanekaragaman hayati Indonesia.
+            <p className="text-slate-600 leading-relaxed max-w-md text-sm">
+              Portal nasional untuk data flora, fauna, dan taman konservasi Indonesia. 
+              Memperkuat riset, edukasi, dan aksi lapangan keanekaragaman hayati.
             </p>
+            <div className="mt-6">
+              <p className="text-sm text-slate-500 mb-1">Kontak</p>
+              <a 
+                href="mailto:info@tamankehati.id" 
+                className="text-slate-700 hover:text-emerald-600 transition-colors text-sm"
+              >
+                info@tamankehati.id
+              </a>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-semibold uppercase tracking-wide text-slate-700 mb-6">Navigasi</h3>
-            <ul className="space-y-4 text-base text-slate-600">
+
+          {/* Navigation Links */}
+          <div className="lg:col-span-3">
+            <h3 className="text-sm font-medium text-slate-900 mb-4">Navigasi</h3>
+            <ul className="space-y-3">
               {NAV_LINKS.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="hover:text-emerald-600 transition-colors">
+                  <Link 
+                    href={item.href} 
+                    className="text-slate-600 hover:text-emerald-600 transition-colors text-sm"
+                  >
                     {item.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          <div>
-            <h3 className="text-base font-semibold uppercase tracking-wide text-slate-700 mb-6">Dukungan</h3>
-            <ul className="space-y-4 text-base text-slate-600">
+
+          {/* Support Links */}
+          <div className="lg:col-span-4">
+            <h3 className="text-sm font-medium text-slate-900 mb-4">Dukungan</h3>
+            <ul className="space-y-3">
               {SUPPORT_LINKS.map((item) => (
                 <li key={item.href}>
-                  <Link href={item.href} className="hover:text-emerald-600 transition-colors">
+                  <Link 
+                    href={item.href} 
+                    className="text-slate-600 hover:text-emerald-600 transition-colors text-sm"
+                  >
                     {item.label}
                   </Link>
                 </li>
               ))}
-              <li className="pt-4">
-                <p className="text-sm uppercase tracking-wide text-slate-500 mb-2">Kontak</p>
-                <p className="text-base text-slate-600">info@tamankehati.id</p>
-              </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-6 border-t border-slate-200 pt-8 text-base text-slate-500 md:flex-row">
-          <p>© {new Date().getFullYear()} Taman Kehati. Semua hak dilindungi.</p>
-          <div className="flex gap-8">
-            <Link href="/kebijakan-privasi" className="hover:text-emerald-600 transition-colors">
-              Kebijakan Privasi
-            </Link>
-            <Link href="/ketentuan" className="hover:text-emerald-600 transition-colors">
-              Ketentuan Penggunaan
-            </Link>
+        {/* Footer Bottom */}
+        <div className="mt-12 pt-8 border-t border-slate-200">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Taman Kehati. Semua hak dilindungi.
+            </p>
+            <div className="flex gap-6">
+              <Link 
+                href="/kebijakan-privasi" 
+                className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                Kebijakan Privasi
+              </Link>
+              <Link 
+                href="/ketentuan" 
+                className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
+              >
+                Ketentuan
+              </Link>
+            </div>
           </div>
         </div>
       </div>
