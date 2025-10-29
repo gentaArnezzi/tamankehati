@@ -22,19 +22,11 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [availableRegions, setAvailableRegions] = useState<{ id: number; name: string; code: string }[]>([]);
 
-  // Load available regions
+  // Load available regions - DISABLED: regions table removed from system
   useEffect(() => {
-    const loadRegions = async () => {
-      try {
-        const regions = await getAvailableRegions();
-        setAvailableRegions(regions);
-      } catch (error) {
-        console.error('Failed to load regions:', error);
-        setAvailableRegions([]);
-      }
-    };
-
-    loadRegions();
+    // Regions functionality has been removed from the system
+    // Parks now use park-based scoping instead of region-based
+    setAvailableRegions([]);
   }, []);
 
   // Ensure initialParams is a proper URLSearchParams object
@@ -95,7 +87,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
               <h2 className="text-2xl font-light text-gray-900 mb-2">
                 Hasil Pencarian
               </h2>
-              <p className="text-gray-600">
+              <p className="text-gray-600" suppressHydrationWarning>
                 {allItems.length} taman ditemukan
               </p>
             </div>

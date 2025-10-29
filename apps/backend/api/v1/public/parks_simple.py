@@ -40,16 +40,17 @@ async def list_parks(
     Get list of parks with optional filtering
     """
     # Base query without regions join (regions table doesn't exist, region_id removed)
+    # Only show approved and non-deleted parks
     base_query = """
         SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at
         FROM parks p
-        WHERE p.status = 'approved'
+        WHERE p.status = 'approved' AND p.deleted_at IS NULL
     """
     
     count_query = """
         SELECT COUNT(*)
         FROM parks p
-        WHERE p.status = 'approved'
+        WHERE p.status = 'approved' AND p.deleted_at IS NULL
     """
     
     params = {}
@@ -164,6 +165,7 @@ async def get_park(
     """
     try:
         # Get park details with ALL fields including submitted_by and submitted_at
+        # Only show approved and non-deleted parks
         park_query = """
             SELECT id, name, slug, status, area_ha, description, created_at, updated_at,
                    sk_penetapan, pengelola, tipe_ekoregion, kondisi_fisik, nilai_penting,
@@ -172,7 +174,7 @@ async def get_park(
                    latitude, longitude,
                    submitted_by, submitted_at, approved_by, approved_at, rejected_at
             FROM parks 
-            WHERE id = :park_id
+            WHERE id = :park_id AND status = 'approved' AND deleted_at IS NULL
         """
         
         result = await db.execute(text(park_query), {"park_id": park_id})
@@ -184,19 +186,19 @@ async def get_park(
         # Set region name to default
         region_name = "Indonesia"
         
-        # Get flora count for this park
+        # Get flora count for this park (approved and not deleted)
         flora_count = 0
         try:
-            flora_query = text("SELECT COUNT(*) FROM flora WHERE park_id = :park_id AND status = 'approved'")
+            flora_query = text("SELECT COUNT(*) FROM flora WHERE park_id = :park_id AND status = 'approved' AND deleted_at IS NULL")
             flora_result = await db.execute(flora_query, {"park_id": park_id})
             flora_count = flora_result.scalar() or 0
         except:
             flora_count = 0
         
-        # Get fauna count for this park
+        # Get fauna count for this park (approved and not deleted)
         fauna_count = 0
         try:
-            fauna_query = text("SELECT COUNT(*) FROM fauna WHERE park_id = :park_id AND status = 'approved'")
+            fauna_query = text("SELECT COUNT(*) FROM fauna WHERE park_id = :park_id AND status = 'approved' AND deleted_at IS NULL")
             fauna_result = await db.execute(fauna_query, {"park_id": park_id})
             fauna_count = fauna_result.scalar() or 0
         except:

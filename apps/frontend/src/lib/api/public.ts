@@ -121,8 +121,19 @@ export const getGalleryHighlights = cache(async (limit = 8): Promise<GalleryItem
 
 // Main Taman functions
 export const getTamanList = cache(async (params: SearchParams = {}) => {
-  // Backend returns array, so we need to wrap it in paginated format
-  const response = await fetch(`${API_BASE_URL}/api/public/parks/`, {
+  // Map frontend parameters to backend parameters
+  const backendParams: SearchParams = {};
+  
+  if (params.search) backendParams.search = params.search;
+  if (params.region) backendParams.wilayah = params.region; // Map region to wilayah
+  if (params.status) backendParams.status = params.status;
+  if (params.limit) backendParams.limit = params.limit;
+  if (params.offset) backendParams.offset = params.offset;
+
+  const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
+  console.log('[SSR] Fetching taman data from:', url);
+  
+  const response = await fetch(url, {
     headers: {
       'Content-Type': 'application/json',
     },
@@ -132,18 +143,15 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
   });
 
   if (!response.ok) {
-    throw new Error(`Gagal memuat data dari /api/public/parks/ (${response.status})`);
+    console.error(`[SSR] Failed to fetch parks: ${response.status} ${response.statusText}`);
+    throw new Error(`Gagal memuat data dari /api/public/parks (${response.status})`);
   }
 
   const data = await response.json();
+  console.log('[SSR] Parks data received:', JSON.stringify(data).substring(0, 200));
   
-  // The backend now returns a proper paginated response
-  return {
-    items: z.array(TamanPublicSchema).parse(data.items),
-    total: data.total,
-    limit: data.limit,
-    offset: data.offset,
-  };
+  // The backend now returns a proper paginated response with TamanPaginatedSchema format
+  return TamanPaginatedSchema.parse(data);
 });
 
 // Alias for consistency
