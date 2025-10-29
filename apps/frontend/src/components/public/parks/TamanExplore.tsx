@@ -1,16 +1,15 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { fetchTamanPage } from '../../../lib/api/public-client';
-import { getAvailableRegions } from '../../../lib/api/client';
 import { type TamanPaginated } from '../../../types/taman';
 import { EntityCard } from '../cards/EntityCard';
 import { TamanFilters } from './TamanFilters';
-import { Button } from '../../ui/button';
+import { Pagination } from '../../ui/pagination';
 
-// Region options will be loaded dynamically from API
+const ITEMS_PER_PAGE = 12;
 
 type TamanExploreProps = {
   initialData: TamanPaginated;
@@ -20,21 +19,12 @@ type TamanExploreProps = {
 export function TamanExplore({ initialData, initialParams }: TamanExploreProps) {
   const searchParams = useSearchParams();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [availableRegions, setAvailableRegions] = useState<{ id: number; name: string; code: string }[]>([]);
-
-  // Load available regions - DISABLED: regions table removed from system
-  useEffect(() => {
-    // Regions functionality has been removed from the system
-    // Parks now use park-based scoping instead of region-based
-    setAvailableRegions([]);
-  }, []);
 
   // Ensure initialParams is a proper URLSearchParams object
   const params = useMemo(() => {
     if (initialParams instanceof URLSearchParams) {
       return initialParams;
     }
-    // If it's not a URLSearchParams, create one from the current search params or empty
     return new URLSearchParams();
   }, [initialParams]);
 
@@ -46,30 +36,24 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
     return entries;
   }, [searchParams]);
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } = useInfiniteQuery({
+  // Get current page from params
+  const currentPage = Number(paramObj.page || 1);
+  const offset = (currentPage - 1) * ITEMS_PER_PAGE;
+
+  const { data, status } = useQuery({
     queryKey: ['taman', paramObj],
-    queryFn: ({ pageParam }) =>
+    queryFn: () =>
       fetchTamanPage({
         ...paramObj,
-        offset: pageParam?.offset ?? 0,
-        limit: 12,
+        offset,
+        limit: ITEMS_PER_PAGE,
       }),
-    getNextPageParam: (lastPage, allPages) => {
-      const totalFetched = allPages.reduce((sum, page) => sum + page.items.length, 0);
-      if (totalFetched < lastPage.total) {
-        return { offset: totalFetched };
-      }
-      return undefined;
-    },
-    initialPageParam: { offset: Number(params.get('offset') ?? 0) },
-    initialData: {
-      pages: [initialData],
-      pageParams: [{ offset: Number(params.get('offset') ?? 0) }],
-    },
+    initialData,
     refetchOnWindowFocus: false,
   });
 
-  const allItems = data?.pages.flatMap((page) => page.items) ?? [];
+  const items = data?.items ?? [];
+  const totalPages = Math.ceil((data?.total ?? 0) / ITEMS_PER_PAGE);
 
   return (
     <div className="bg-white">
@@ -88,7 +72,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
                 Hasil Pencarian
               </h2>
               <p className="text-gray-600" suppressHydrationWarning>
-                {allItems.length} taman ditemukan
+                {data?.total ?? 0} taman ditemukan
               </p>
             </div>
 
@@ -126,7 +110,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
           )}
 
           {/* Empty State */}
-          {allItems.length === 0 && status !== 'error' && (
+          {items.length === 0 && status !== 'error' && (
             <div className="rounded-2xl border border-gray-200 bg-gray-50 p-12 text-center">
               <div className="text-gray-600 font-medium mb-2">Tidak Ada Data</div>
               <p className="text-gray-500">Coba ubah filter atau kata kunci pencarian.</p>
@@ -134,13 +118,13 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
           )}
 
           {/* Results Grid/List */}
-          {allItems.length > 0 && (
+          {items.length > 0 && (
             <div className={
               viewMode === 'grid' 
                 ? 'grid gap-6 md:grid-cols-2 xl:grid-cols-3' 
                 : 'space-y-4'
             }>
-              {allItems.map((taman) => {
+              {items.map((taman) => {
                 // Region-based addressing removed - using user-based access control
                 const regionName = 'Indonesia';
                 
@@ -162,17 +146,14 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
             </div>
           )}
 
-          {/* Load More Button */}
-          {hasNextPage && (
-            <div className="mt-12 flex justify-center">
-              <Button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-full transition-colors"
-              >
-                {isFetchingNextPage ? 'Memuat...' : 'Muat Lebih Banyak'}
-              </Button>
-            </div>
+          {/* Pagination */}
+          {items.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={data?.total ?? 0}
+              itemsPerPage={ITEMS_PER_PAGE}
+            />
           )}
         </div>
       </div>
