@@ -1,2 +1,14 @@
 INFO:     Will watch for changes in these directories: ['/Users/irgyaarnezzi/Desktop/tamankehati_new/apps/backend']
-ERROR:    [Errno 48] Address already in use
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [23205] using WatchFiles
+INFO:     Started server process [23208]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+WARNING:  WatchFiles detected changes in 'api/v1/routes/dashboard.py'. Reloading...
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [23208]
+INFO:     Started server process [24313]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

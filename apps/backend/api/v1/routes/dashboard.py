@@ -84,11 +84,11 @@ async def get_dashboard(
         fauna_result = await db.execute(text(fauna_sql), filter_params)
         total_fauna = fauna_result.scalar() or 0
         
-        # Count parks (exclude deleted)
+        # Count parks (exclude deleted, only approved)
         if user.role == "regional_admin":
-            parks_sql = f"SELECT COUNT(*) FROM parks WHERE submitted_by = :user_id AND deleted_at IS NULL"
+            parks_sql = f"SELECT COUNT(*) FROM parks WHERE submitted_by = :user_id AND status = 'approved' AND deleted_at IS NULL"
         else:
-            parks_sql = "SELECT COUNT(*) FROM parks WHERE deleted_at IS NULL"
+            parks_sql = "SELECT COUNT(*) FROM parks WHERE status = 'approved' AND deleted_at IS NULL"
         parks_result = await db.execute(text(parks_sql), filter_params)
         total_parks = parks_result.scalar() or 0
         
@@ -191,8 +191,8 @@ async def test_dashboard(
         raise HTTPException(status_code=401, detail="Authentication required")
     
     try:
-        # Simple test query
-        result = await db.execute(text("SELECT COUNT(*) as count FROM parks"))
+        # Simple test query - only approved parks
+        result = await db.execute(text("SELECT COUNT(*) as count FROM parks WHERE status = 'approved' AND deleted_at IS NULL"))
         park_count = result.scalar() or 0
         
         return {
@@ -219,8 +219,8 @@ async def get_overview_simple(
         raise HTTPException(status_code=401, detail="Authentication required")
     
     try:
-        # Get basic counts
-        parks_result = await db.execute(text("SELECT COUNT(*) FROM parks"))
+        # Get basic counts - only approved entities
+        parks_result = await db.execute(text("SELECT COUNT(*) FROM parks WHERE status = 'approved' AND deleted_at IS NULL"))
         parks_count = parks_result.scalar() or 0
         
         flora_result = await db.execute(text("SELECT COUNT(*) FROM flora"))
@@ -307,6 +307,7 @@ async def get_comprehensive_simple(
                 COALESCE(AVG(p.area_ha), 0) as avg_area_ha
             FROM parks p
             WHERE p.created_at >= :start_date AND p.created_at <= :end_date 
+                AND p.status = 'approved'
                 AND p.deleted_at IS NULL
                 {parks_filter}
         """
@@ -426,6 +427,7 @@ async def get_comprehensive_simple(
                     AND p.provinsi != ''
                     AND p.created_at >= :start_date 
                     AND p.created_at <= :end_date
+                    AND p.status = 'approved'
                     AND p.deleted_at IS NULL
                 GROUP BY p.provinsi
                 ORDER BY (COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id)) DESC, parks DESC
@@ -450,6 +452,7 @@ async def get_comprehensive_simple(
                 WHERE p.submitted_by = :user_id 
                     AND p.created_at >= :start_date 
                     AND p.created_at <= :end_date
+                    AND p.status = 'approved'
                     AND p.deleted_at IS NULL
                 GROUP BY p.name
                 ORDER BY (COUNT(DISTINCT f.id) + COUNT(DISTINCT fa.id)) DESC
@@ -483,6 +486,7 @@ async def get_comprehensive_simple(
                 AND fa.status = 'approved' AND fa.deleted_at IS NULL
                 {'AND fa.submitted_by = :user_id' if user.role == 'regional_admin' else ''}
             WHERE p.created_at >= :start_date AND p.created_at <= :end_date 
+                AND p.status = 'approved'
                 AND p.deleted_at IS NULL
                 {parks_filter}
             GROUP BY p.name, p.area_ha
