@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
+import { fetchStats, StatsData } from '../../../lib/api/stats';
 
 export function MinimalStatsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -12,15 +13,43 @@ export function MinimalStatsSection() {
     fauna: 0,
     parks: 0,
   });
-
-  const targets = {
+  
+  const [targets, setTargets] = useState({
     flora: 320,
     fauna: 180,
     parks: 52,
-  };
+  });
+  
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch stats data on component mount
   useEffect(() => {
-    if (isInView) {
+    const loadStats = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const statsData = await fetchStats();
+        setTargets({
+          flora: statsData.total_flora,
+          fauna: statsData.total_fauna,
+          parks: statsData.total_taman,
+        });
+      } catch (err) {
+        console.error('Error loading stats:', err);
+        setError('Gagal memuat data statistik');
+        // Keep default targets if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStats();
+  }, []);
+
+  // Animation effect when in view
+  useEffect(() => {
+    if (isInView && !loading) {
       Object.keys(targets).forEach((key) => {
         const target = targets[key as keyof typeof targets];
         const duration = 2000;
@@ -38,7 +67,7 @@ export function MinimalStatsSection() {
         }, duration / steps);
       });
     }
-  }, [isInView]);
+  }, [isInView, loading, targets]);
 
   const stats = [
     {
@@ -69,7 +98,7 @@ export function MinimalStatsSection() {
           className="text-center mb-20"
         >
           <h2 className="text-5xl md:text-6xl font-light text-slate-900 mb-6">
-            Data Real-Time
+            Tentang Kehati
           </h2>
           <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-6"></div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -78,28 +107,64 @@ export function MinimalStatsSection() {
         </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
-          {stats.map((stat, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isInView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
-              className="text-center"
-            >
-              <div className="text-5xl font-light text-slate-900 mb-2">
-                {stat.value}
-                <span className="text-3xl text-emerald-600">+</span>
-              </div>
-              <div className="text-base font-medium text-slate-700 mb-1">
-                {stat.label}
-              </div>
-              <div className="text-sm text-gray-500">
-                {stat.description}
-              </div>
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-16">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Memuat statistik...</p>
+            </div>
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="text-red-600 mb-4">{error}</p>
+            <p className="text-gray-500 text-sm">Menampilkan data contoh</p>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12 mt-8">
+              {stats.map((stat, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                  className="text-center"
+                >
+                  <div className="text-5xl font-light text-slate-900 mb-2">
+                    {stat.value}
+                    <span className="text-3xl text-emerald-600">+</span>
+                  </div>
+                  <div className="text-base font-medium text-slate-700 mb-1">
+                    {stat.label}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {stat.description}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+            {stats.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                className="text-center"
+              >
+                <div className="text-5xl font-light text-slate-900 mb-2">
+                  {stat.value}
+                  <span className="text-3xl text-emerald-600">+</span>
+                </div>
+                <div className="text-base font-medium text-slate-700 mb-1">
+                  {stat.label}
+                </div>
+                <div className="text-sm text-gray-500">
+                  {stat.description}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Divider */}
         <motion.div
