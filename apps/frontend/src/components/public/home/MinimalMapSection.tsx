@@ -25,12 +25,41 @@ export function MinimalMapSection() {
   const [parks, setParks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Calculate park counts per region based on fetched data
+  const getRegionCount = (regionName: string) => {
+    return parks.filter((park) => {
+      const provinsi = park.provinsi?.toLowerCase() || '';
+      
+      // Map provinces to major islands
+      if (regionName === 'Sumatera') {
+        return provinsi.includes('sumatera') || provinsi.includes('aceh') || 
+               provinsi.includes('riau') || provinsi.includes('jambi') || 
+               provinsi.includes('bengkulu') || provinsi.includes('lampung') || 
+               provinsi.includes('bangka');
+      }
+      if (regionName === 'Jawa') {
+        return provinsi.includes('jawa') || provinsi.includes('jakarta') || 
+               provinsi.includes('banten') || provinsi.includes('yogyakarta');
+      }
+      if (regionName === 'Kalimantan') {
+        return provinsi.includes('kalimantan');
+      }
+      if (regionName === 'Sulawesi') {
+        return provinsi.includes('sulawesi') || provinsi.includes('gorontalo');
+      }
+      if (regionName === 'Papua') {
+        return provinsi.includes('papua') || provinsi.includes('maluku');
+      }
+      return false;
+    }).length;
+  };
+
   const regions = [
-    { name: 'Sumatera', parks: 15, x: '20%', y: '30%' },
-    { name: 'Jawa', parks: 12, x: '35%', y: '55%' },
-    { name: 'Kalimantan', parks: 18, x: '50%', y: '40%' },
-    { name: 'Sulawesi', parks: 9, x: '65%', y: '45%' },
-    { name: 'Papua', parks: 11, x: '80%', y: '50%' },
+    { name: 'Sumatera', parks: getRegionCount('Sumatera'), x: '20%', y: '30%' },
+    { name: 'Jawa', parks: getRegionCount('Jawa'), x: '35%', y: '55%' },
+    { name: 'Kalimantan', parks: getRegionCount('Kalimantan'), x: '50%', y: '40%' },
+    { name: 'Sulawesi', parks: getRegionCount('Sulawesi'), x: '65%', y: '45%' },
+    { name: 'Papua', parks: getRegionCount('Papua'), x: '80%', y: '50%' },
   ];
 
   useEffect(() => {
@@ -120,8 +149,8 @@ export function MinimalMapSection() {
                     .map(park => ({
                       position: [parseFloat(park.latitude), parseFloat(park.longitude)] as [number, number],
                       popup: `<div style="text-align: center;">
-                        <h3 style="font-weight: 600; color: #064e3b; margin-bottom: 4px;">${park.nama}</h3>
-                        <p style="font-size: 0.875rem; color: #475569;">${park.wilayah || ''}</p>
+                        <h3 style="font-weight: 600; color: #064e3b; margin-bottom: 4px;">${park.name}</h3>
+                        <p style="font-size: 0.875rem; color: #475569;">${park.provinsi || ''}</p>
                         <a href="/taman/${park.id}" style="display: inline-block; margin-top: 8px; color: #10b981; font-weight: 600; text-decoration: none;">Lihat Detail →</a>
                       </div>`,
                       key: park.id,

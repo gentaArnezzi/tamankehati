@@ -77,22 +77,14 @@ export function MapWrapper({ center, zoom, markers, scrollWheelZoom = true, heig
           .leaflet-pane {
             z-index: 10 !important;
           }
+          @keyframes ping {
+            75%, 100% {
+              transform: scale(3);
+              opacity: 0;
+            }
+          }
         `;
         document.head.appendChild(style);
-
-        // Add dummy connected markers for visual effect
-        const dummyLocations = [
-          { lat: 3.5952, lng: 98.6722, name: 'Taman Sumatera Utara' },      // Medan area
-          { lat: -6.2088, lng: 106.8456, name: 'Taman Jakarta' },           // Jakarta
-          { lat: -7.2575, lng: 112.7521, name: 'Taman Jawa Timur' },        // Surabaya area
-          { lat: 0.5071, lng: 101.4478, name: 'Taman Riau' },               // Riau
-          { lat: -0.9471, lng: 113.9213, name: 'Taman Kalimantan' },        // Kalimantan Tengah
-          { lat: -2.5489, lng: 118.0149, name: 'Taman Sulawesi' },          // Sulawesi Tengah
-          { lat: -3.3194, lng: 114.5906, name: 'Taman Kalimantan Selatan' },// Kalimantan Selatan
-          { lat: -0.8917, lng: 119.8707, name: 'Taman Sulawesi Tengah' },   // Sulawesi
-          { lat: -5.1477, lng: 119.4327, name: 'Taman Sulawesi Selatan' },  // Makassar area
-          { lat: -2.9761, lng: 140.7187, name: 'Taman Papua' },             // Papua
-        ];
 
         // Create custom emerald pin icon (larger and brighter)
         const createCustomIcon = () => {
@@ -136,14 +128,6 @@ export function MapWrapper({ center, zoom, markers, scrollWheelZoom = true, heig
                   opacity: 0.75;
                 "></div>
               </div>
-              <style>
-                @keyframes ping {
-                  75%, 100% {
-                    transform: scale(3);
-                    opacity: 0;
-                  }
-                }
-              </style>
             `,
             className: '',
             iconSize: [16, 16],
@@ -151,58 +135,40 @@ export function MapWrapper({ center, zoom, markers, scrollWheelZoom = true, heig
           });
         };
 
-        // Add connecting lines between locations
-        const lineCoordinates: [number, number][] = [
-          [dummyLocations[0].lat, dummyLocations[0].lng], // Medan
-          [dummyLocations[3].lat, dummyLocations[3].lng], // Riau
-          [dummyLocations[4].lat, dummyLocations[4].lng], // Kalimantan Tengah
-          [dummyLocations[6].lat, dummyLocations[6].lng], // Kalimantan Selatan
-          [dummyLocations[7].lat, dummyLocations[7].lng], // Sulawesi Tengah
-          [dummyLocations[8].lat, dummyLocations[8].lng], // Sulawesi Selatan
-          [dummyLocations[9].lat, dummyLocations[9].lng], // Papua
-        ];
-
-        const lineCoordinates2: [number, number][] = [
-          [dummyLocations[0].lat, dummyLocations[0].lng], // Medan
-          [dummyLocations[1].lat, dummyLocations[1].lng], // Jakarta
-          [dummyLocations[2].lat, dummyLocations[2].lng], // Surabaya
-          [dummyLocations[5].lat, dummyLocations[5].lng], // Sulawesi Tengah
-        ];
-
-        // Draw connection lines with dashed style (brighter and thicker)
-        L.polyline(lineCoordinates, {
-          color: '#10b981',
-          weight: 3,
-          opacity: 0.7,
-          dashArray: '10, 10',
-          smoothFactor: 1,
-        }).addTo(map);
-
-        L.polyline(lineCoordinates2, {
-          color: '#34d399',
-          weight: 3,
-          opacity: 0.6,
-          dashArray: '10, 10',
-          smoothFactor: 1,
-        }).addTo(map);
-
-        // Add dummy markers with custom icons
-        dummyLocations.forEach((location) => {
-          const marker = L.marker([location.lat, location.lng], {
-            icon: createCustomIcon(),
-          }).addTo(map);
-          
-          marker.bindPopup(`
-            <div style="text-align: center; padding: 4px;">
-              <div style="font-weight: 600; color: #064e3b; font-size: 13px;">${location.name}</div>
-            </div>
-          `);
-        });
-
-        // Add real park markers if provided (with different style)
+        // Add real park markers from database
         if (markers && markers.length > 0) {
+          // Draw connecting lines between parks for visual effect
+          if (markers.length > 1) {
+            const lineCoordinates: [number, number][] = markers.slice(0, Math.min(7, markers.length)).map(m => m.position);
+            const lineCoordinates2: [number, number][] = markers.slice(Math.max(0, markers.length - 5), markers.length).map(m => m.position);
+            
+            if (lineCoordinates.length > 1) {
+              L.polyline(lineCoordinates, {
+                color: '#10b981',
+                weight: 3,
+                opacity: 0.7,
+                dashArray: '10, 10',
+                smoothFactor: 1,
+              }).addTo(map);
+            }
+
+            if (lineCoordinates2.length > 1) {
+              L.polyline(lineCoordinates2, {
+                color: '#34d399',
+                weight: 3,
+                opacity: 0.6,
+                dashArray: '10, 10',
+                smoothFactor: 1,
+              }).addTo(map);
+            }
+          }
+
+          // Add markers for each park with custom icons
           markers.forEach((marker) => {
-            const leafletMarker = L.marker(marker.position).addTo(map);
+            const leafletMarker = L.marker(marker.position, {
+              icon: createCustomIcon(),
+            }).addTo(map);
+            
             if (marker.popup) {
               leafletMarker.bindPopup(marker.popup);
             }

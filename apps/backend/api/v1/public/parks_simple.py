@@ -18,6 +18,8 @@ class ParkResponse(BaseModel):
     description: Optional[str] = None
     gambar_utama: Optional[str] = None
     provinsi: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     created_at: str
     updated_at: str
 
@@ -45,7 +47,7 @@ async def list_parks(
     # Base query without regions join (regions table doesn't exist, region_id removed)
     # Only show approved and non-deleted parks
     base_query = """
-        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at, p.gambar_utama, p.provinsi
+        SELECT p.id, p.name, p.slug, p.status, p.area_ha, p.description, p.created_at, p.updated_at, p.gambar_utama, p.provinsi, p.latitude, p.longitude
         FROM parks p
         WHERE p.status = 'approved' AND p.deleted_at IS NULL
     """
@@ -115,6 +117,8 @@ async def list_parks(
                     description=row[5] if row[5] else None,
                     gambar_utama=row[8] if row[8] else None,
                     provinsi=row[9] if row[9] else None,
+                    latitude=float(row[10]) if row[10] else None,
+                    longitude=float(row[11]) if row[11] else None,
                     created_at=created_at_str,
                     updated_at=updated_at_str
                 ))
