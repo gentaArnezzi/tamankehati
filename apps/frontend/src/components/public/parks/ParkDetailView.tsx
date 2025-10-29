@@ -105,10 +105,10 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
             <div className="max-w-4xl">
               <div className="flex items-center gap-3 mb-4">
                 <Badge 
-                  variant={park.status === 'published' ? 'default' : 'secondary'} 
+                  variant={park.status === 'approved' ? 'default' : 'secondary'} 
                   className="text-sm bg-green-800 hover:bg-green-700 text-white"
                 >
-                  {park.status === 'published' ? 'Dipublikasikan' : 'Draft'}
+                  {park.status === 'approved' ? 'Dipublikasikan' : 'Draft'}
                 </Badge>
               </div>
               <h1 className="text-4xl md:text-6xl font-semibold text-white mb-4 drop-shadow-lg">
@@ -295,7 +295,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                           : 'bg-yellow-100 text-yellow-800'
                         }
                       >
-                        {park.status === 'approved' ? 'Published' : 'Draft'}
+                        {park.status === 'approved' ? 'Dipublikasikan' : 'Draft'}
                       </Badge>
                     </dd>
                   </div>

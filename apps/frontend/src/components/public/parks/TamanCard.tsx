@@ -25,10 +25,10 @@ export function TamanCard({ taman }: TamanCardProps) {
         />
         <div className="absolute top-3 right-3">
           <Badge 
-            variant={taman.status === 'published' ? 'default' : 'secondary'}
+            variant={taman.status === 'approved' ? 'default' : 'secondary'}
             className="bg-white/90 text-gray-700 hover:bg-white/90"
           >
-            {taman.status === 'published' ? 'Aktif' : 'Draft'}
+            {taman.status === 'approved' ? 'Aktif' : 'Draft'}
           </Badge>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
