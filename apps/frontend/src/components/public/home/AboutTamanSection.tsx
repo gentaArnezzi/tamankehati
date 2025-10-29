@@ -1,8 +1,12 @@
 'use client';
 
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { FeatureSteps } from '@/components/ui/feature-section';
 
 export function AboutTamanSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const features = [
     {
       step: 'Konservasi Keanekaragaman Hayati',
@@ -25,28 +29,49 @@ export function AboutTamanSection() {
   ];
 
   return (
-    <section id="about-taman-section" className="pt-12 pb-32 bg-white">
+    <section ref={ref} className="pt-12 pb-32 bg-white">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="text-center mb-12">
-          <h2 className="text-5xl font-light text-slate-900 md:text-6xl mb-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-5xl font-light text-slate-900 md:text-6xl mb-6"
+          >
             Apa itu Taman Kehati?
-          </h2>
-          <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full"></div>
+          </motion.h2>
+          <motion.div 
+            initial={{ width: 0 }}
+            animate={isInView ? { width: '6rem' } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="h-1 bg-emerald-500 mx-auto rounded-full"
+          />
         </div>
 
-        <FeatureSteps
-          features={features}
-          title=""
-          autoPlayInterval={5000}
-          className="py-0"
-        />
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          <FeatureSteps
+            features={features}
+            title=""
+            autoPlayInterval={5000}
+            className="py-0"
+          />
+        </motion.div>
 
-        <div className="mt-12 text-center">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className="mt-12 text-center"
+        >
           <div className="inline-flex items-center gap-3 text-emerald-600 font-medium">
-            <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
             Pelajari lebih lanjut tentang program konservasi kami
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

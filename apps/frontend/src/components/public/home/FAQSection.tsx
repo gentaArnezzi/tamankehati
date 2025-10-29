@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 
 interface FAQItem {
   question: string;
@@ -35,6 +36,8 @@ const faqData: FAQItem[] = [
 ];
 
 export function FAQSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const toggleFAQ = (index: number) => {
@@ -42,22 +45,41 @@ export function FAQSection() {
   };
 
   return (
-    <section className="bg-white py-24">
+    <section ref={ref} className="bg-white py-24">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center mb-20">
-          <h2 className="text-5xl font-light text-gray-900 mb-6">
+          <motion.h2 
+            initial={{ opacity: 0, y: 30 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="text-5xl font-light text-gray-900 mb-6"
+          >
             Pertanyaan yang Sering Diajukan
-          </h2>
-          <p className="text-lg text-gray-500">
+          </motion.h2>
+          <motion.div
+            initial={{ width: 0 }}
+            animate={isInView ? { width: '6rem' } : {}}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="h-1 bg-emerald-500 mx-auto rounded-full mb-6"
+          />
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-lg text-gray-500"
+          >
             Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan platform konservasi kami.
-          </p>
+          </motion.p>
         </div>
 
         <div className="max-w-4xl mx-auto">
           <div className="space-y-6">
             {faqData.map((faq, index) => (
-              <div
+              <motion.div
                 key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
                 className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
               >
                 <button
@@ -67,10 +89,10 @@ export function FAQSection() {
                   <h3 className="text-lg font-medium text-gray-900 pr-4">
                     {faq.question}
                   </h3>
-                  <svg
-                    className={`h-5 w-5 text-gray-500 transition-transform duration-200 flex-shrink-0 ${
-                      openIndex === index ? 'rotate-180' : ''
-                    }`}
+                  <motion.svg
+                    animate={{ rotate: openIndex === index ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="h-5 w-5 text-gray-500 flex-shrink-0"
                     viewBox="0 0 24 24"
                     fill="none"
                   >
@@ -81,7 +103,7 @@ export function FAQSection() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
-                  </svg>
+                  </motion.svg>
                 </button>
                 {openIndex === index && (
                   <div className="px-8 pb-6">
@@ -90,7 +112,7 @@ export function FAQSection() {
                     </p>
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

@@ -1,32 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
 import { ArcGalleryHero } from '@/components/ui/arc-gallery-hero-component';
 
 export function AboutSection() {
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    const element = document.getElementById('about-section');
-    if (element) {
-      observer.observe(element);
-    }
-
-    return () => {
-      if (element) {
-        observer.unobserve(element);
-      }
-    };
-  }, []);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   // Array of forest and nature images from Unsplash
   const forestImages = [
@@ -47,7 +27,7 @@ export function AboutSection() {
     
 
   return (
-    <section id="about-section" className="relative min-h-[100vh] py-24 bg-white">
+    <section ref={ref} className="relative min-h-[100vh] py-24 bg-white overflow-hidden">
       {/* Arc Gallery Background */}
       <div className="absolute inset-0 z-0 -top-40">
         <ArcGalleryHero 
@@ -66,21 +46,29 @@ export function AboutSection() {
       {/* Content Overlay */}
       <div className="relative z-10 flex min-h-[100vh] items-end justify-center pb-32 pointer-events-none">
         <div className="container mx-auto max-w-7xl px-8 pointer-events-auto">
-          <div className={`text-center transition-all duration-1000 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="text-center">
             {/* Badge */}
-            <div className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-8 py-4 text-sm font-light text-slate-800 mb-16 shadow-sm backdrop-blur-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-8 py-4 text-sm font-light text-slate-800 mb-16 shadow-sm backdrop-blur-sm"
+            >
               Selamat Datang di Taman Kehati Indonesia
-            </div>
+            </motion.div>
             
             {/* Main Content */}
-            <div className="max-w-4xl mx-auto">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="max-w-4xl mx-auto"
+            >
               <p className="text-2xl md:text-3xl leading-relaxed text-slate-800 font-light tracking-wide">
                 Sebuah benteng konservasi yang didedikasikan untuk melindungi dan melestarikan kekayaan flora dan fauna asli Nusantara. 
                 Temukan laboratorium alam kami, tempat spesies langka dirawat dan generasi baru terinspirasi untuk menjaga bumi.
               </p>
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>
