@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { publicApi } from '@/lib/public-api-client';
+import Link from 'next/link';
 
 interface Activity {
   id: string;
@@ -25,6 +26,7 @@ interface Activity {
   activity_date: string;
   location: string;
   park_name: string;
+  images?: string[];
   created_at: string;
   updated_at: string;
 }
@@ -151,16 +153,16 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
 
       {/* Activities Grid */}
       {loading && activities.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <Card key={i} className="overflow-hidden">
-              <CardHeader>
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-3 w-full mb-2" />
-                <Skeleton className="h-3 w-2/3" />
+              <CardContent className="p-0">
+                <Skeleton className="h-48 w-full" />
+                <div className="p-4 space-y-2">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                  <Skeleton className="h-3 w-full" />
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -180,42 +182,54 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredActivities.map((activity) => (
-              <Card key={activity.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg line-clamp-2">
-                    {activity.title}
-                  </CardTitle>
-                  <CardDescription className="flex items-center gap-2 text-sm">
-                    <Calendar className="h-4 w-4" />
-                    {formatDate(activity.activity_date)}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-0">
-                  {activity.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-3 mb-3">
-                      {activity.description}
-                    </p>
-                  )}
-                  
-                  {activity.location && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                      <MapPin className="h-4 w-4" />
-                      <span className="line-clamp-1">{activity.location}</span>
+              <Card key={activity.id} className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+                <Link href={`/kegiatan/${activity.id}`}>
+                  <CardContent className="p-0">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <img
+                        src={activity.images && activity.images.length > 0 
+                          ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${activity.images[0]}`
+                          : '/placeholder.svg'
+                        }
+                        alt={activity.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <div className="absolute top-3 right-3">
+                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-200">
+                          {formatDate(activity.activity_date)}
+                        </Badge>
+                      </div>
+                      {activity.images && activity.images.length > 1 && (
+                        <div className="absolute top-3 left-3">
+                          <Badge variant="secondary" className="bg-black/50 text-white border-transparent">
+                            +{activity.images.length - 1}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <Badge variant="outline" className="text-xs">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {formatTime(activity.activity_date)}
-                    </Badge>
-                    <Button variant="ghost" size="sm" className="h-8 px-2">
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardContent>
+                    <div className="p-4">
+                      <h3 className="font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                        {activity.title}
+                      </h3>
+                      <p className="text-sm text-slate-600 mt-1">
+                        {activity.park_name || 'Taman Konservasi'}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2 line-clamp-2">
+                        {activity.description || 'Deskripsi tidak tersedia'}
+                      </p>
+                      <div className="flex items-center justify-between mt-4">
+                        <span className="text-xs text-slate-500">
+                          {activity.location || 'Lokasi tidak tersedia'}
+                        </span>
+                        <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Link>
               </Card>
             ))}
           </div>

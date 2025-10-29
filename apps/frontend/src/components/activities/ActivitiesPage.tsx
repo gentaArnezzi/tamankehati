@@ -378,7 +378,7 @@ export function ActivitiesPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {(activity.status === 'draft' || activity.status === 'rejected') && (
+                        {(activity.status === 'draft' || activity.status === 'rejected' || activity.status === 'approved') && (
                           <Button
                             variant="ghost"
                             size="sm"

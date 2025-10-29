@@ -186,6 +186,7 @@ type ActivityAdminResponse = {
     // region_id: number;  // Removed - using user-based access control
   } | null;
   status: WorkflowStatus;
+  images?: string[] | null;
   created_by?: number | null;
   approved_by?: number | null;
   submitted_at?: string | null;
@@ -425,6 +426,7 @@ export interface Activity {
     // region_id: number;  // Removed - using user-based access control
   };
   status: WorkflowStatus;
+  images?: string[];
   created_by?: string;
   approved_by?: string;
   created_at?: string;
@@ -666,6 +668,7 @@ const mapActivity = (activity: ActivityAdminResponse): Activity => ({
     // region_id: activity.park.region_id,  // Removed - using user-based access control
   } : undefined,
   status: activity.status,
+  images: activity.images ?? undefined,
   created_by: activity.created_by ? String(activity.created_by) : undefined,
   approved_by: activity.approved_by ? String(activity.approved_by) : undefined,
   created_at: activity.created_at ?? undefined,
@@ -1243,6 +1246,35 @@ export const activitiesApi = {
       description: payload.description,
       activity_date: payload.activity_date,
       location: payload.location,
+      images: payload.images,
+    });
+    return mapActivity(response);
+  },
+
+  createWithImages: async (payload: {
+    title: string;
+    description?: string;
+    activity_date: string;
+    location?: string;
+    park_id: number;
+    images: File[];
+  }) => {
+    const formData = new FormData();
+    formData.append('title', payload.title);
+    if (payload.description) formData.append('description', payload.description);
+    formData.append('activity_date', payload.activity_date);
+    if (payload.location) formData.append('location', payload.location);
+    formData.append('park_id', payload.park_id.toString());
+    
+    // Add images
+    payload.images.forEach((file) => {
+      formData.append('images', file);
+    });
+
+    const response = await privateClient.post<ActivityAdminResponse>('/api/v1/activities/with-images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return mapActivity(response);
   },
@@ -1254,6 +1286,43 @@ export const activitiesApi = {
       description: payload.description,
       activity_date: payload.activity_date,
       location: payload.location,
+      images: payload.images,
+    });
+    return mapActivity(response);
+  },
+
+  updateWithImages: async (id: string | number, payload: {
+    title?: string;
+    description?: string;
+    activity_date?: string;
+    location?: string;
+    park_id?: number;
+    images?: File[];
+    existing_images?: string[];
+  }) => {
+    const formData = new FormData();
+    if (payload.title) formData.append('title', payload.title);
+    if (payload.description) formData.append('description', payload.description);
+    if (payload.activity_date) formData.append('activity_date', payload.activity_date);
+    if (payload.location) formData.append('location', payload.location);
+    if (payload.park_id) formData.append('park_id', payload.park_id.toString());
+    
+    // Add existing images if provided
+    if (payload.existing_images && payload.existing_images.length > 0) {
+      formData.append('existing_images', JSON.stringify(payload.existing_images));
+    }
+    
+    // Add new images if provided
+    if (payload.images && payload.images.length > 0) {
+      payload.images.forEach((file) => {
+        formData.append('images', file);
+      });
+    }
+
+    const response = await privateClient.put<ActivityAdminResponse>(`/api/v1/activities/${id}/with-images`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return mapActivity(response);
   },

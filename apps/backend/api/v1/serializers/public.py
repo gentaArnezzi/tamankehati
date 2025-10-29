@@ -186,6 +186,7 @@ class ActivityPublicBase(BaseModel):
     activity_date: Optional[str]
     location: Optional[str]
     park_name: Optional[str]
+    images: Optional[list[str]] = None
     created_at: Optional[str]
     updated_at: Optional[str]
 
@@ -197,6 +198,7 @@ class ActivityPublicOut(ActivityPublicBase):
     activity_date: str
     location: str
     park_name: str
+    images: Optional[list[str]] = None
     created_at: str
     updated_at: str
 

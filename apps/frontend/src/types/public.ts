@@ -132,6 +132,7 @@ export const PublicStatsSchema = z.object({
   total_flora: z.number().default(0),
   total_fauna: z.number().default(0),
   total_taman: z.number().default(0),
+  total_artikel: z.number().default(0),
 });
 
 export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>

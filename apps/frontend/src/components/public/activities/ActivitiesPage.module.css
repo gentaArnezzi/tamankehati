@@ -1,0 +1,44 @@
+/* Minimalist Styles for Activities Page */
+
+.minimal-hover {
+  transition: all 0.2s ease;
+}
+
+.minimal-hover:hover {
+  transform: translateY(-2px);
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.section-divider {
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgb(229, 231, 235), transparent);
+}
+
+.proCard {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heroOverlay {
+  background: linear-gradient(to bottom, rgba(16, 185, 129, 0.3), rgba(59, 130, 246, 0.2));
+}
+
+.subtleGrid {
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px;
+}

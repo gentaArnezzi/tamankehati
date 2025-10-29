@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from api.v1.serializers.public import ActivityPublicOut, ActivityPublicListResponse
 from core.database.session import get_session
+import json
 
 router = APIRouter()
 
@@ -24,7 +25,7 @@ async def get_activities(
         # Build base query for approved activities only
         base_query = """
             SELECT a.id, a.title, a.description, a.activity_date, a.location, 
-                   a.created_at, a.updated_at, p.name as park_name
+                   a.images, a.created_at, a.updated_at, p.name as park_name
             FROM activities a
             LEFT JOIN parks p ON a.park_id = p.id
             WHERE a.status = 'approved'
@@ -63,18 +64,27 @@ async def get_activities(
         items = result.fetchall()
         
         # Build response
-        activity_items = [
-            ActivityPublicOut(
+        activity_items = []
+        for item in items:
+            # Parse images JSON if it exists
+            images = []
+            if item.images:
+                try:
+                    images = json.loads(item.images)
+                except (json.JSONDecodeError, TypeError):
+                    images = []
+            
+            activity_items.append(ActivityPublicOut(
                 id=str(item.id),
                 title=item.title or "",
                 description=item.description or "",
                 activity_date=str(item.activity_date) if item.activity_date else "",
                 location=item.location or "",
                 park_name=item.park_name or "",
+                images=images,
                 created_at=str(item.created_at) if item.created_at else "",
                 updated_at=str(item.updated_at) if item.updated_at else ""
-            ) for item in items
-        ]
+            ))
         
         return ActivityPublicListResponse(
             items=activity_items,
@@ -105,7 +115,7 @@ async def get_activities_by_park(
         # Build query for specific park
         base_query = """
             SELECT a.id, a.title, a.description, a.activity_date, a.location, 
-                   a.created_at, a.updated_at, p.name as park_name
+                   a.images, a.created_at, a.updated_at, p.name as park_name
             FROM activities a
             LEFT JOIN parks p ON a.park_id = p.id
             WHERE a.status = 'approved' AND a.park_id = :park_id
@@ -138,18 +148,27 @@ async def get_activities_by_park(
         items = result.fetchall()
         
         # Build response
-        activity_items = [
-            ActivityPublicOut(
+        activity_items = []
+        for item in items:
+            # Parse images JSON if it exists
+            images = []
+            if item.images:
+                try:
+                    images = json.loads(item.images)
+                except (json.JSONDecodeError, TypeError):
+                    images = []
+            
+            activity_items.append(ActivityPublicOut(
                 id=str(item.id),
                 title=item.title or "",
                 description=item.description or "",
                 activity_date=str(item.activity_date) if item.activity_date else "",
                 location=item.location or "",
                 park_name=item.park_name or "",
+                images=images,
                 created_at=str(item.created_at) if item.created_at else "",
                 updated_at=str(item.updated_at) if item.updated_at else ""
-            ) for item in items
-        ]
+            ))
         
         return ActivityPublicListResponse(
             items=activity_items,
@@ -167,26 +186,40 @@ async def get_activities_by_park(
 
 @router.get("/{activity_id}", response_model=ActivityPublicOut)
 async def get_activity_by_id(
-    activity_id: int,
+    activity_id: str,
     db: AsyncSession = Depends(get_session)
 ):
     """
     Get a specific approved activity by ID
     """
     try:
+        # Convert string ID to integer
+        try:
+            activity_id_int = int(activity_id)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid activity ID format")
+        
         query = text("""
             SELECT a.id, a.title, a.description, a.activity_date, a.location, 
-                   a.created_at, a.updated_at, p.name as park_name
+                   a.images, a.created_at, a.updated_at, p.name as park_name
             FROM activities a
             LEFT JOIN parks p ON a.park_id = p.id
             WHERE a.id = :activity_id AND a.status = 'approved'
         """)
         
-        result = await db.execute(query, {"activity_id": activity_id})
+        result = await db.execute(query, {"activity_id": activity_id_int})
         item = result.fetchone()
         
         if not item:
             raise HTTPException(status_code=404, detail="Activity not found")
+        
+        # Parse images JSON if it exists
+        images = []
+        if item.images:
+            try:
+                images = json.loads(item.images)
+            except (json.JSONDecodeError, TypeError):
+                images = []
         
         return ActivityPublicOut(
             id=str(item.id),
@@ -195,6 +228,7 @@ async def get_activity_by_id(
             activity_date=str(item.activity_date) if item.activity_date else "",
             location=item.location or "",
             park_name=item.park_name or "",
+            images=images,
             created_at=str(item.created_at) if item.created_at else "",
             updated_at=str(item.updated_at) if item.updated_at else ""
         )

@@ -20,6 +20,7 @@ class Activity(Base):
     description = Column(Text)
     activity_date = Column(Date, nullable=False)
     location = Column(String(255))
+    images = Column(Text, nullable=True)  # JSON string of image URLs
 
     status = Column(
         String(50),
@@ -41,11 +42,11 @@ class Activity(Base):
     updated_at = Column(
         DateTime(timezone=True),
         server_default=func.now(),
-        onupdate=func.now(),
+        onupdate=func.now,
         nullable=False,
     )
 
-    # Relationships - park relationship disabled to prevent circular import
-    # park = relationship("domains.parks.models.Park", back_populates="activities", lazy="joined")
+    # Relationships
+    park = relationship("domains.parks.models.Park", lazy="joined")
     submitted_by_user = relationship("User", foreign_keys=[submitted_by], lazy="joined")
     approved_by_user = relationship("User", foreign_keys=[approved_by], lazy="joined")

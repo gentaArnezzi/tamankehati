@@ -473,3 +473,7 @@ app.include_router(indonesia_regions.router, prefix="/api/v1/indonesia", tags=["
 app.include_router(public_router, prefix="/api/public", tags=["Public"])
 # Bypass API removed - public APIs now working!
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+

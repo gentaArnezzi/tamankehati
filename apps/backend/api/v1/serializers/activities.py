@@ -1,6 +1,7 @@
 from datetime import datetime, date
-from typing import Optional
-from pydantic import BaseModel, Field, computed_field
+from typing import Optional, List
+import json
+from pydantic import BaseModel, Field, computed_field, field_validator
 from api.v1.serializers.common import WorkflowStatus, PaginatedResponse
 
 class ParkRef(BaseModel):
@@ -16,6 +17,7 @@ class ActivityBase(BaseModel):
     description: Optional[str] = Field(None, description="Deskripsi kegiatan", examples=["Penanaman pohon lokal bersama masyarakat sekitar"])
     activity_date: date = Field(..., description="Tanggal pelaksanaan kegiatan", examples=["2025-11-10"])
     location: Optional[str] = Field(None, description="Lokasi kegiatan", examples=["Area tengah taman"])
+    images: Optional[List[str]] = Field(None, description="Daftar URL gambar kegiatan", examples=[["/uploads/image1.jpg", "/uploads/image2.jpg"]])
 
 class ActivityIn(ActivityBase):
     park_id: int = Field(..., description="ID taman tempat kegiatan", examples=[1])
@@ -36,10 +38,21 @@ class ActivityOut(ActivityBase):
     rejection_reason: Optional[str] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    created_by: Optional[str] = None
 
     class Config:
         from_attributes = True
-
+    
+    @field_validator('images', mode='before')
+    @classmethod
+    def parse_images(cls, v):
+        if isinstance(v, str):
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                return []
+        return v or []
+    
     @computed_field(return_type=Optional[str])
     @property
     def wilayah(self) -> Optional[str]:

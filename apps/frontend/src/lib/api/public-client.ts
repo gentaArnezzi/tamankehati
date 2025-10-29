@@ -118,7 +118,7 @@ export const fetchTamanDetail = (id: string) =>
 // Additional public API functions for homepage
 export async function getPublicStats() {
   try {
-    const response = await fetch(`${API_BASE_URL}/public/stats`);
+    const response = await fetch(`${API_BASE_URL}/api/public/stats/`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -137,7 +137,7 @@ export async function getPublicStats() {
 
 export async function getLatestArticles(limit = 6) {
   try {
-    const response = await fetch(`${API_BASE_URL}/public/artikel?limit=${limit}`);
+    const response = await fetch(`${API_BASE_URL}/api/public/artikel/?limit=${limit}`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -151,7 +151,7 @@ export async function getLatestArticles(limit = 6) {
 
 export async function getGalleryHighlights() {
   try {
-    const response = await fetch(`${API_BASE_URL}/public/galeri?limit=6`);
+    const response = await fetch(`${API_BASE_URL}/api/public/galeri/?limit=6`);
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

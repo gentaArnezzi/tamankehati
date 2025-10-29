@@ -64,6 +64,10 @@ export function PublicHeader() {
                   <div className="font-medium text-emerald-700">Taman Konservasi</div>
                   <div className="text-xs text-slate-500 mt-1">Area perlindungan alam</div>
                 </a>
+                <a href="/kegiatan" className="block px-5 py-4 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors border-b border-slate-100">
+                  <div className="font-medium text-emerald-700">Kegiatan Konservasi</div>
+                  <div className="text-xs text-slate-500 mt-1">Aktivitas dan program konservasi</div>
+                </a>
                 <a href="/artikel" className="block px-5 py-4 text-sm text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                   <div className="font-medium text-emerald-700">Artikel</div>
                   <div className="text-xs text-slate-500 mt-1">Informasi dan berita</div>

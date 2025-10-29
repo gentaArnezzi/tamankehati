@@ -236,3 +236,97 @@ async def upload_multiple_gallery_images(
         "total_failed": len(failed_files),
         "message": f"Uploaded {len(uploaded_files)} files successfully"
     })
+
+@router.post("/activity-images")
+async def upload_activity_images(
+    files: List[UploadFile] = File(...),
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user)
+):
+    """
+    Upload multiple image files for activities
+    """
+    # Check user permissions - allow all authenticated users to upload activity images
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required"
+        )
+    
+    # Validate number of files
+    if len(files) > 10:  # Max 10 files at once
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Maximum 10 files allowed per upload"
+        )
+    
+    if len(files) == 0:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No files provided"
+        )
+    
+    uploaded_files = []
+    failed_files = []
+    
+    for file in files:
+        try:
+            # Validate file
+            if not file.filename:
+                failed_files.append({
+                    "filename": "unknown",
+                    "error": "No filename provided"
+                })
+                continue
+            
+            if not is_allowed_file(file.filename):
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
+                })
+                continue
+            
+            # Check file size
+            file_content = await file.read()
+            if len(file_content) > MAX_FILE_SIZE:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
+                })
+                continue
+            
+            # Generate unique filename
+            filename = generate_filename(file.filename)
+            file_path = os.path.join(UPLOAD_DIR, filename)
+            
+            # Save file
+            async with aiofiles.open(file_path, 'wb') as f:
+                await f.write(file_content)
+            
+            # Generate URL
+            file_url = f"/uploads/{filename}"
+            
+            uploaded_files.append({
+                "filename": filename,
+                "original_name": file.filename,
+                "url": file_url,
+                "size": len(file_content)
+            })
+            
+        except Exception as e:
+            failed_files.append({
+                "filename": file.filename,
+                "error": str(e)
+            })
+            # Clean up file if upload failed
+            if 'file_path' in locals() and os.path.exists(file_path):
+                os.remove(file_path)
+    
+    return JSONResponse(content={
+        "success": len(uploaded_files) > 0,
+        "uploaded_files": uploaded_files,
+        "failed_files": failed_files,
+        "total_uploaded": len(uploaded_files),
+        "total_failed": len(failed_files),
+        "message": f"Uploaded {len(uploaded_files)} files successfully"
+    })

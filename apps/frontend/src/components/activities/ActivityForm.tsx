@@ -25,10 +25,11 @@ import {
 } from '../ui/form';
 import { Calendar } from '../ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Upload, X, Image as ImageIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { cn } from '../../lib/utils';
+import { toast } from 'sonner';
 
 const activitySchema = z.object({
   title: z.string().min(1, 'Judul kegiatan wajib diisi'),
@@ -36,6 +37,7 @@ const activitySchema = z.object({
   activity_date: z.string().min(1, 'Tanggal kegiatan wajib diisi'),
   location: z.string().optional(),
   park_id: z.number().optional(),
+  images: z.array(z.string()).optional(),
 });
 
 type ActivityFormData = z.infer<typeof activitySchema>;
@@ -54,6 +56,11 @@ export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel 
     activity?.activity_date ? new Date(activity.activity_date) : undefined
   );
   const [calendarOpen, setCalendarOpen] = useState(false);
+  const [existingImages, setExistingImages] = useState<string[]>(activity?.images || []);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [images, setImages] = useState<string[]>(activity?.images || []);
+  const [uploading, setUploading] = useState(false);
+
 
   const form = useForm<ActivityFormData>({
     resolver: zodResolver(activitySchema),
@@ -63,8 +70,11 @@ export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel 
       activity_date: activity?.activity_date ?? '',
       location: activity?.location ?? '',
       park_id: activity?.park_id ?? userParkId ?? 1,
+      images: activity?.images ?? [],
     },
   });
+
+  const { setValue } = form;
 
   const resetFormValues = (activity?: Activity | null) => {
     form.reset({
@@ -88,6 +98,60 @@ export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel 
     }
   }, [date, form]);
 
+  // Sync existing images when activity changes
+  useEffect(() => {
+    if (activity?.images) {
+      setExistingImages(activity.images);
+      setImages(activity.images);
+    }
+  }, [activity?.images]);
+
+  // Sync images with form field
+  useEffect(() => {
+    form.setValue('images', images);
+  }, [images, form]);
+
+  const handleImageUpload = async (files: FileList) => {
+    if (files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const newFiles = Array.from(files);
+      const newImageFiles = [...imageFiles, ...newFiles];
+      const newImageUrls = newFiles.map(file => URL.createObjectURL(file));
+      
+      // Combine existing images with new images
+      const combinedImages = [...existingImages, ...newImageUrls];
+      
+      setImageFiles(newImageFiles);
+      setImages(combinedImages);
+      setValue('images', combinedImages);
+      toast.success(`${newFiles.length} gambar berhasil ditambahkan`);
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Gagal menambahkan gambar');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    const isExistingImage = index < existingImages.length;
+    
+    if (isExistingImage) {
+      // Remove from existing images
+      setExistingImages(prev => prev.filter((_, i) => i !== index));
+      // Update the combined images array
+      setImages(prev => prev.filter((_, i) => i !== index));
+    } else {
+      // Remove from new files (adjust index for new files)
+      const newFileIndex = index - existingImages.length;
+      setImageFiles(prev => prev.filter((_, i) => i !== newFileIndex));
+      // Update the combined images array
+      setImages(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = async (data: ActivityFormData) => {
     try {
       setSubmitting(true);
@@ -95,15 +159,31 @@ export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel 
       const submitData = {
         ...data,
         activity_date: date ? format(date, 'yyyy-MM-dd') : data.activity_date,
-        park_id: userParkId || data.park_id,
+        park_id: userParkId || data.park_id || 1,
       };
       
       if (activity) {
         // Update existing activity
-        await activitiesApi.update(activity.id, submitData);
+        if (imageFiles.length > 0 || existingImages.length !== (activity.images?.length || 0)) {
+          // If there are new files or existing images were modified, use with-images endpoint
+          await activitiesApi.updateWithImages(activity.id, {
+            ...submitData,
+            images: imageFiles,
+            existing_images: existingImages, // Send existing images separately
+          });
+        } else {
+          await activitiesApi.update(activity.id, submitData);
+        }
       } else {
         // Create new activity
-        await activitiesApi.create(submitData);
+        if (imageFiles.length > 0) {
+          await activitiesApi.createWithImages({
+            ...submitData,
+            images: imageFiles,
+          });
+        } else {
+          await activitiesApi.create(submitData);
+        }
       }
       
       onSuccess();
@@ -243,11 +323,96 @@ export function ActivityForm({ activity, parks, userParkId, onSuccess, onCancel 
           )}
         />
 
+        {/* Image Upload Section */}
+        <FormField
+          control={form.control}
+          name="images"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Gambar Kegiatan</FormLabel>
+              <FormControl>
+                <div className="space-y-4">
+                  {/* Upload Button */}
+                  <div className="flex items-center gap-4">
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => {
+                        if (e.target.files) {
+                          handleImageUpload(e.target.files);
+                        }
+                      }}
+                      className="hidden"
+                      id="image-upload"
+                      disabled={uploading}
+                    />
+                    <label
+                      htmlFor="image-upload"
+                      className="flex items-center gap-2 px-4 py-2 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span className="text-sm">
+                        {uploading ? 'Mengupload...' : 'Upload Gambar'}
+                      </span>
+                    </label>
+                    <span className="text-xs text-muted-foreground">
+                      Maksimal 10 gambar
+                    </span>
+                  </div>
+
+                  {/* Image Preview */}
+                  {images.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {images.map((image, index) => {
+                        const isExistingImage = index < existingImages.length;
+                        const imageUrl = isExistingImage 
+                          ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${image}`
+                          : image; // For new files, image is already a blob URL
+                        
+                        return (
+                          <div key={index} className="relative group">
+                            <img
+                              src={imageUrl}
+                              alt={`Activity image ${index + 1}`}
+                              className="w-full h-24 object-cover rounded-lg border"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                            {isExistingImage && (
+                              <div className="absolute bottom-1 left-1 bg-blue-500 text-white text-xs px-1 rounded">
+                                Existing
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {images.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-8 border border-dashed border-gray-300 rounded-lg">
+                      <ImageIcon className="h-8 w-8 text-gray-400 mb-2" />
+                      <p className="text-sm text-gray-500">Belum ada gambar</p>
+                    </div>
+                  )}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
         <div className="flex justify-end gap-3">
           <Button type="button" variant="outline" onClick={onCancel}>
             Batal
           </Button>
-          <Button type="submit" disabled={submitting}>
+          <Button type="submit" disabled={submitting || uploading}>
             {submitting ? 'Menyimpan...' : activity ? 'Update' : 'Simpan'}
           </Button>
         </div>

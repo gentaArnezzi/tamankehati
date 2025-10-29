@@ -65,6 +65,7 @@ type ActivityPublicResponse = {
   activity_date: string;
   location: string;
   park_name: string;
+  images?: string[];
   created_at: string;
   updated_at: string;
 };
@@ -146,6 +147,7 @@ const mapActivity = (item: ActivityPublicResponse) => ({
   activity_date: item.activity_date,
   location: item.location,
   park_name: item.park_name,
+  images: item.images,
   created_at: item.created_at,
   updated_at: item.updated_at,
 });
