@@ -390,6 +390,16 @@ async def get_fauna_simple():
 async def healthz():
     return {"ok": True}
 
+@app.get("/debug-cors")
+async def debug_cors():
+    import os
+    env_origins = os.getenv("CORS_ALLOW_ORIGINS")
+    return {
+        "env_origins": env_origins,
+        "env_origins_list": [o.strip() for o in env_origins.split(",")] if env_origins else None,
+        "default_origins": DEFAULT_CORS_ORIGINS
+    }
+
 # ------------------------------------------------------------------------------
 # OPENAPI (keep)
 # ------------------------------------------------------------------------------
