@@ -145,7 +145,7 @@ DEFAULT_CORS_ORIGINS: List[str] = [
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",
-    "https://tamankehati-8x6q.vercel.app",
+    "https://tamankehati-8x6q.vercel.app",  # Frontend production URL
 ]
 env_origins = os.getenv("CORS_ALLOW_ORIGINS")
 allow_origins = (
