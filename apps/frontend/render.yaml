@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: tamankehati-frontend
+    env: node
+    rootDir: apps/frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://tamankehati-backend-pxnu.onrender.com
+      - key: NEXT_PUBLIC_APP_NAME
+        value: Taman Kehati
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: 1
