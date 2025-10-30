@@ -167,7 +167,7 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
   if (params.limit) backendParams.limit = params.limit;
   if (params.offset) backendParams.offset = params.offset;
 
-  const url = `${API_BASE_URL}/api/public/parks/${buildQuery(backendParams)}`;
+  const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
   console.log("[SSR] Fetching taman data from:", url);
 
   const response = await fetch(url, {
