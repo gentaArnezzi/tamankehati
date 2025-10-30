@@ -6,6 +6,7 @@ Kotak tour terlalu besar sehingga menutupi element yang sedang di-highlight. Use
 ## Solusi
 Perkecil ukuran popover tour supaya lebih compact dan tidak menutupi element yang di-highlight.
 
+
 ## Perubahan Ukuran
 
 ### Popover Width
