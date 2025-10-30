@@ -1,0 +1,35 @@
+{
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  },
+  "services": {
+    "fastapi-container": {
+      "source": "apps/backend",
+      "buildCommand": "pip install -r requirements.txt",
+      "startCommand": "uvicorn main:app --host 0.0.0.0 --port $PORT",
+      "healthcheckPath": "/docs",
+      "environment": {
+        "PYTHON_VERSION": "3.10",
+        "SECRET_KEY": "your-super-secret-key-change-in-production-2024",
+        "CORS_ORIGINS": "*",
+        "ENVIRONMENT": "production",
+        "DEBUG": "false"
+      }
+    },
+    "nextjs_best_practices": {
+      "source": "apps/frontend",
+      "buildCommand": "npm install && npm run build",
+      "startCommand": "npm start",
+      "healthcheckPath": "/",
+      "environment": {
+        "NODE_ENV": "production",
+        "NEXT_TELEMETRY_DISABLED": "1",
+        "NEXT_PUBLIC_API_URL": "https://fastapi-container-production-6c40.up.railway.app"
+      }
+    }
+  }
+}
