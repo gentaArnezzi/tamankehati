@@ -203,6 +203,10 @@ async def any_options(full_path: str):
 async def health_check():
     return {"status": "ok"}
 
+@app.get("/healthz/")
+async def healthz():
+    return {"status": "ok"}
+
 @app.get("/")
 async def root():
     return {

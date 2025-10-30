@@ -1,6 +1,7 @@
 # Core FastAPI and async dependencies
 fastapi==0.115.6
 uvicorn[standard]==0.32.1
+gunicorn==23.0.0
 
 # Database dependencies
 sqlalchemy==2.0.36
