@@ -8,6 +8,7 @@ from typing import Sequence, AsyncIterator, Optional
 from .base import ChatTurn, LLMProvider
 import httpx
 
+
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 GOOGLE_MODEL = os.getenv("GOOGLE_MODEL", "gemini-1.5-flash")
 GOOGLE_API_BASE = "https://generativelanguage.googleapis.com/v1beta"
