@@ -10,6 +10,11 @@ from domains.galleries.models import Gallery
 # from domains.zones.models import Zone  # Temporarily removed
 from core.database.session import get_session
 from ai.services.tooling import maybe_run_tool
+from .constants import (
+    CHATBOT_ERROR_GENERAL,
+    CHATBOT_NO_DATA_RESPONSE,
+    AI_PROVIDER_ERROR
+)
 import re
 
 
@@ -347,7 +352,7 @@ class PublicChatbotService:
         except Exception as e:
             # Log error securely without exposing system information
             print("Chatbot service error: Internal processing failure")
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti."
+            return CHATBOT_ERROR_GENERAL
     
     
     @staticmethod
@@ -505,7 +510,7 @@ Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang terse
         except Exception as e:
             # Log error securely without exposing system information
             print("AI response generation error: Internal processing failure")
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti."
+            return AI_PROVIDER_ERROR
     
     @staticmethod
     async def _handle_no_data_response(message: str) -> str:
@@ -513,16 +518,7 @@ Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang terse
         Handle response when no relevant data is found in database.
         Simply inform that data is not available on Taman Kehati website.
         """
-        return """Maaf, saya tidak memiliki data tentang pertanyaan Anda karena pada website Taman Kehati ini belum ditambahkan data tersebut.
-
-Namun, Anda dapat:
-• Mencari informasi di bagian Flora untuk data tumbuhan yang tersedia
-• Mencari informasi di bagian Fauna untuk data hewan yang tersedia
-• Melihat Taman Konservasi yang tersedia
-• Membaca Artikel dan Berita terbaru
-• Menggunakan fitur Pencarian untuk mencari informasi spesifik
-
-Apakah ada topik lain tentang keanekaragaman hayati Indonesia yang ingin Anda ketahui?"""
+        return CHATBOT_NO_DATA_RESPONSE
     
 
 

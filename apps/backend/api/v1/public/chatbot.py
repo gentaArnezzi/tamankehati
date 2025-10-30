@@ -1,6 +1,11 @@
 from fastapi import APIRouter, Request, HTTPException, status
 from api.v1.serializers.public import ChatMessageRequest, ChatMessageResponse
 from api.v1.public.services import PublicChatbotService
+from api.v1.public.constants import (
+    CHATBOT_ERROR_GENERAL,
+    RATE_LIMIT_EXCEEDED,
+    INVALID_MESSAGE_EMPTY
+)
 import time
 from typing import Dict
 
@@ -71,7 +76,7 @@ async def send_chat_message(request: Request, chat_request: ChatMessageRequest):
     if not check_rate_limit(client_ip, limit=10, window=60):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail="Terlalu banyak permintaan. Silakan coba lagi dalam 1 menit.",
+            detail=RATE_LIMIT_EXCEEDED,
             headers={"Retry-After": "60"}
         )
     
@@ -81,7 +86,7 @@ async def send_chat_message(request: Request, chat_request: ChatMessageRequest):
     if not sanitized_message:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Pesan tidak boleh kosong."
+            detail=INVALID_MESSAGE_EMPTY
         )
     
     try:
@@ -92,5 +97,5 @@ async def send_chat_message(request: Request, chat_request: ChatMessageRequest):
         print(f"Chatbot error for IP {client_ip}: Internal processing error")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Terjadi kesalahan dalam memproses pesan Anda. Silakan coba lagi nanti."
+            detail=CHATBOT_ERROR_GENERAL
         )

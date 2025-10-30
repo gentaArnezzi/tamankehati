@@ -4,6 +4,7 @@ from typing import List, Tuple, Optional
 from ai.providers.ollama_provider import OllamaProvider
 from ai.providers.openai_provider import OpenAIProvider
 from ai.providers.base import ChatTurn
+from .constants import CHATBOT_ERROR_WITH_CONTACT
 
 
 class PublicStatsService:
@@ -221,4 +222,4 @@ Jawablah pertanyaan dengan informatif dan bermanfaat."""
             import traceback
             traceback.print_exc()
             # Fallback to simple response if AI fails
-            return "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi nanti atau hubungi administrator."
+            return CHATBOT_ERROR_WITH_CONTACT
