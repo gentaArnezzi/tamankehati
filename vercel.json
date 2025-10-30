@@ -3,5 +3,8 @@
     "env": {
       "NODE_VERSION": "22"
     }
-  }
+  },
+  "installCommand": "cd apps/frontend && npm install --legacy-peer-deps",
+  "buildCommand": "cd apps/frontend && npm run build",
+  "outputDirectory": "apps/frontend/.next"
 }
