@@ -439,7 +439,7 @@ export function GroupedApprovalView() {
                               src={
                                 park.gambar_utama.startsWith('http') 
                                   ? park.gambar_utama 
-                                  : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${park.gambar_utama}`
+                                  : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${park.gambar_utama}`
                               }
                               alt={park.name}
                               className="w-full h-64 object-cover rounded-lg border-2 border-gray-200 shadow-sm"

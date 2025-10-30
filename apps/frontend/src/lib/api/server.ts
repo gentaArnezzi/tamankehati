@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // Server-side API functions for Next.js App Router
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
 
 // Taman schemas
 const TamanPublicSchema = z.object({

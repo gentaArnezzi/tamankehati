@@ -126,7 +126,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
   const loadRegions = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/crud/regions/`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/crud/regions/`);
       if (!response.ok) {
         throw new Error('Gagal memuat regions');
       }
@@ -155,7 +155,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -270,7 +270,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
           park_id: parkId, // Also include park_id for reference
         };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -290,7 +290,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         // Submit for review if park is being submitted for review
         if (result.id && shouldSubmitForReview) {
           try {
-            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/${result.id}/submit`, {
+            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${result.id}/submit`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -360,7 +360,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
       console.log('Park data to submit:', dataToSubmit);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/parks/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/parks/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

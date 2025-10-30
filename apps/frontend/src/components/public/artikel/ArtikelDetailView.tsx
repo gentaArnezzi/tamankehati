@@ -60,7 +60,7 @@ export function ArtikelDetailView({ artikel, related = [] }: ArtikelDetailViewPr
     artikel.gambar_cover && artikel.gambar_cover.trim()
       ? artikel.gambar_cover.startsWith('http')
         ? artikel.gambar_cover
-        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${artikel.gambar_cover}`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${artikel.gambar_cover}`
       : 'https://images.unsplash.com/photo-1493815793585-d94ccbc86df0?w=1600&auto=format&fit=crop';
 
   const kategori = artikel.kategori;

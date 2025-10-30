@@ -165,7 +165,7 @@ export default function ParkApprovalDetailPage() {
             try {
               console.log(`Fetching galleries for ${entityType} #${entityId}...`);
               const galleriesResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/${entityType}/${entityId}`,
+                `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/${entityType}/${entityId}`,
                 {
                   headers: {
                     'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,

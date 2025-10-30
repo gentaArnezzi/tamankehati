@@ -32,7 +32,7 @@ interface CollapsibleApprovalItemProps {
 const getFullImageUrl = (url: string | undefined) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url.startsWith('/') ? '' : '/'}${url}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
 export function CollapsibleApprovalItem({

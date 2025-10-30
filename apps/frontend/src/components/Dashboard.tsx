@@ -56,7 +56,7 @@ export function Dashboard() {
   const loadRegionalAdminData = async () => {
     try {
       const token = localStorage.getItem('auth_token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
       
       const headers = {
         'Authorization': `Bearer ${token}`,

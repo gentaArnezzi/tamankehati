@@ -10,7 +10,7 @@ from domains.galleries.models import Gallery
 # from domains.zones.models import Zone  # Temporarily removed
 from core.database.session import get_session
 from ai.services.tooling import maybe_run_tool
-from .constants import (
+from ..constants import (
     CHATBOT_ERROR_GENERAL,
     CHATBOT_NO_DATA_RESPONSE,
     AI_PROVIDER_ERROR

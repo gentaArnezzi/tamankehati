@@ -85,7 +85,7 @@ export default function TentangPage() {
 
   const fetchInsights = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/public/dashboard/insights`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/public/dashboard/insights`);
       if (response.ok) {
         const data = await response.json();
         setInsights(data);

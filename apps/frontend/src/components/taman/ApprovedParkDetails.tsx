@@ -130,7 +130,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/park/${park.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/park/${park.id}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -155,7 +155,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
   const getImageUrl = (url?: string) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url}`;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
   };
 
   // Main image upload handlers
@@ -181,11 +181,11 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         name: file.name,
         size: file.size,
         type: file.type,
-        url: `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`
+        url: `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`
       });
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
         {
           method: 'POST',
           headers: {
@@ -276,7 +276,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         });
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
           {
             method: 'POST',
             headers: {
@@ -344,7 +344,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         };
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/`,
+          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/`,
           {
             method: 'POST',
             headers: {
@@ -382,7 +382,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/${galleryId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${galleryId}`,
         {
           method: 'DELETE',
           headers: {
@@ -416,7 +416,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
       console.log('Auth token:', localStorage.getItem('auth_token'));
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
         {
           method: 'POST',
           headers: {

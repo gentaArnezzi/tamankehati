@@ -77,7 +77,7 @@ export function RegionalAnnouncementsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/?status_filter=published&limit=100`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/announcements/?status_filter=published&limit=100`,
         {
           headers: {
             'Content-Type': 'application/json',

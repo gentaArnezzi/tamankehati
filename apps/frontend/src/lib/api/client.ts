@@ -2,7 +2,7 @@ import { HttpClient } from '../http-client';
 import { PublicStatsSchema } from '../../types/public';
 import { z } from 'zod';
 
-const client = new HttpClient(process.env.NEXT_PUBLIC_API_URL || '${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}');
+const client = new HttpClient(process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com');
 
 export const getParkStats = async (parkId: number) => {
   const response = await client.get(`/api/public/stats/park/${parkId}`);

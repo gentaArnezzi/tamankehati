@@ -75,7 +75,7 @@ export function FaunaDetail({ id }: FaunaDetailProps) {
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <div className="aspect-video relative overflow-hidden">
         <img
-          src={fauna.gambar_utama ? (fauna.gambar_utama.startsWith('http') ? fauna.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${fauna.gambar_utama}`) : 'https://images.unsplash.com/photo-1535931735360-24c79a9f4d26?w=1200'}
+          src={fauna.gambar_utama ? (fauna.gambar_utama.startsWith('http') ? fauna.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${fauna.gambar_utama}`) : 'https://images.unsplash.com/photo-1535931735360-24c79a9f4d26?w=1200'}
           alt={fauna.nama_spesies}
           className="w-full h-full object-cover"
         />

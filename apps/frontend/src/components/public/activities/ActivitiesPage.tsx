@@ -545,7 +545,7 @@ export function ActivitiesPage() {
                       }`}>
                         <img
                           src={activity.images && activity.images.length > 0 
-                            ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${activity.images[0]}`
+                            ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${activity.images[0]}`
                             : '/placeholder.svg'
                           }
                           alt={activity.title}

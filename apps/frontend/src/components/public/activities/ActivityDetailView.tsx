@@ -40,7 +40,7 @@ const formatTime = (dateString: string) => {
 
 export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
   const heroImage = activity.images && activity.images.length > 0 
-    ? (activity.images[0].startsWith('http') ? activity.images[0] : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${activity.images[0]}`)
+    ? (activity.images[0].startsWith('http') ? activity.images[0] : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${activity.images[0]}`)
     : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&auto=format&fit=crop';
 
   const jsonLd = {
@@ -181,7 +181,7 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
-                    src={image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image}`}
+                    src={image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image}`}
                     alt={`${activity.title} - Foto ${index + 2}`}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"

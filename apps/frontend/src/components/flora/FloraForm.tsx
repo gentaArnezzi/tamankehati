@@ -171,7 +171,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
     setLoadingGalleries(true);
     try {
       // ✅ Fix: Use correct endpoint with entity_type and entity_id in path
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/flora/${floraId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/flora/${floraId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -219,7 +219,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
     // Actually delete galleries that were marked
     const deletePromises = Array.from(galleriesToDelete).map(async (galleryId) => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/${galleryId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${galleryId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -262,7 +262,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -293,7 +293,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
         formData.append('files', file);
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -818,7 +818,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
                     {existingGalleries.map((gallery) => {
                       // Safe image URL handling
                       const imageUrl = gallery.image_url 
-                        ? (gallery.image_url.startsWith('http') ? gallery.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${gallery.image_url}`)
+                        ? (gallery.image_url.startsWith('http') ? gallery.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${gallery.image_url}`)
                         : '/placeholder-image.png'; // Fallback image
                       
                       const isMarkedForDeletion = galleriesToDelete.has(gallery.id);
