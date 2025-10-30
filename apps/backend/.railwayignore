@@ -1,0 +1,13 @@
+# Ignore large/unnecessary files during railway up
+uploads/**
+venv/**
+__pycache__/**
+*.pyc
+*.log
+.alembic/**
+.env
+.env.*
+# Node/other caches just in case
+node_modules/**
+.dist/**
+.next/**
