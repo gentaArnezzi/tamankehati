@@ -145,7 +145,8 @@ export function CollapsibleDashboardLayout({
         console.log('🔄 Fetching pending approval counts...');
 
         // ✅ Use unified approvals endpoint that returns counts for all entities
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/approvals', {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+        const response = await fetch(`${apiUrl}/api/v1/approvals`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
