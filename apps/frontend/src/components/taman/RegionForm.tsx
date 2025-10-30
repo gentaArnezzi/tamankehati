@@ -1,13 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Loader2, Plus, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Loader2, Plus, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface RegionFormProps {
   onSuccess?: () => void;
@@ -23,41 +29,45 @@ interface RegionFormData {
 
 export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
   const [formData, setFormData] = useState<RegionFormData>({
-    name: '',
-    code: '',
-    timezone: 'Asia/Jakarta',
+    name: "",
+    code: "",
+    timezone: "Asia/Jakarta",
     is_active: true,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/crud/regions/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/crud/regions/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Gagal membuat region');
+        throw new Error(errorData.detail || "Gagal membuat region");
       }
 
       const result = await response.json();
       toast.success(`Region "${result.name}" berhasil dibuat`);
-      
+
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal membuat region';
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal membuat region";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -65,8 +75,11 @@ export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
     }
   };
 
-  const handleChange = (field: keyof RegionFormData, value: string | boolean) => {
-    setFormData(prev => ({
+  const handleChange = (
+    field: keyof RegionFormData,
+    value: string | boolean,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -97,7 +110,7 @@ export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
               id="name"
               type="text"
               value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value)}
               placeholder="Contoh: DKI Jakarta"
               required
             />
@@ -109,7 +122,9 @@ export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
               id="code"
               type="text"
               value={formData.code}
-              onChange={(e) => handleChange('code', e.target.value.toUpperCase())}
+              onChange={(e) =>
+                handleChange("code", e.target.value.toUpperCase())
+              }
               placeholder="Contoh: JKT"
               required
               maxLength={10}
@@ -122,7 +137,7 @@ export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
               id="timezone"
               type="text"
               value={formData.timezone}
-              onChange={(e) => handleChange('timezone', e.target.value)}
+              onChange={(e) => handleChange("timezone", e.target.value)}
               placeholder="Asia/Jakarta"
             />
           </div>
@@ -132,7 +147,7 @@ export function RegionForm({ onSuccess, onCancel }: RegionFormProps) {
               type="checkbox"
               id="is_active"
               checked={formData.is_active}
-              onChange={(e) => handleChange('is_active', e.target.checked)}
+              onChange={(e) => handleChange("is_active", e.target.checked)}
               className="rounded"
             />
             <Label htmlFor="is_active">Region Aktif</Label>

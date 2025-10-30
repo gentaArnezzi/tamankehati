@@ -1,17 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, MapPin, AlertTriangle, Info, ExternalLink } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  AlertTriangle,
+  Info,
+  ExternalLink,
+} from "lucide-react";
+import Link from "next/link";
 
 interface Species {
   id: number;
   name: string;
   scientificName: string;
-  type: 'flora' | 'fauna';
+  type: "flora" | "fauna";
   image: string;
-  status: 'Kritis' | 'Terancam' | 'Rentan' | 'Aman';
+  status: "Kritis" | "Terancam" | "Rentan" | "Aman";
   region: string;
   description: string;
   facts: string[];
@@ -29,10 +36,10 @@ export function FeaturedSpeciesSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const element = document.getElementById('featured-species-section');
+    const element = document.getElementById("featured-species-section");
     if (element) {
       observer.observe(element);
     }
@@ -47,78 +54,90 @@ export function FeaturedSpeciesSection() {
   const featuredSpecies: Species[] = [
     {
       id: 1,
-      name: 'Rafflesia Arnoldii',
-      scientificName: 'Rafflesia arnoldii',
-      type: 'flora',
-      image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=800&h=600&fit=crop',
-      status: 'Kritis',
-      region: 'Sumatera',
-      description: 'Bunga terbesar di dunia dengan diameter mencapai 1 meter. Dikenal sebagai "bunga bangkai" karena aromanya yang menyengat.',
+      name: "Rafflesia Arnoldii",
+      scientificName: "Rafflesia arnoldii",
+      type: "flora",
+      image:
+        "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=800&h=600&fit=crop",
+      status: "Kritis",
+      region: "Sumatera",
+      description:
+        'Bunga terbesar di dunia dengan diameter mencapai 1 meter. Dikenal sebagai "bunga bangkai" karena aromanya yang menyengat.',
       facts: [
-        'Diameter bunga mencapai 100 cm dengan berat hingga 10 kg',
-        'Tidak memiliki akar, batang, atau daun',
-        'Hanya mekar 5-7 hari dalam setahun',
-        'Parasit pada tumbuhan Tetrastigma'
-      ]
+        "Diameter bunga mencapai 100 cm dengan berat hingga 10 kg",
+        "Tidak memiliki akar, batang, atau daun",
+        "Hanya mekar 5-7 hari dalam setahun",
+        "Parasit pada tumbuhan Tetrastigma",
+      ],
     },
     {
       id: 2,
-      name: 'Orangutan Sumatera',
-      scientificName: 'Pongo abelii',
-      type: 'fauna',
-      image: 'https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=800&h=600&fit=crop',
-      status: 'Kritis',
-      region: 'Sumatera Utara',
-      description: 'Primata besar yang hanya ditemukan di hutan Sumatera. Mereka adalah hewan paling cerdas di dunia setelah manusia.',
+      name: "Orangutan Sumatera",
+      scientificName: "Pongo abelii",
+      type: "fauna",
+      image:
+        "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=800&h=600&fit=crop",
+      status: "Kritis",
+      region: "Sumatera Utara",
+      description:
+        "Primata besar yang hanya ditemukan di hutan Sumatera. Mereka adalah hewan paling cerdas di dunia setelah manusia.",
       facts: [
-        'DNA 97% sama dengan manusia',
-        'Dapat menggunakan alat untuk mencari makanan',
-        'Hidup hingga 50-60 tahun di alam liar',
-        'Populasi tersisa < 14,000 individu'
-      ]
+        "DNA 97% sama dengan manusia",
+        "Dapat menggunakan alat untuk mencari makanan",
+        "Hidup hingga 50-60 tahun di alam liar",
+        "Populasi tersisa < 14,000 individu",
+      ],
     },
     {
       id: 3,
-      name: 'Komodo',
-      scientificName: 'Varanus komodoensis',
-      type: 'fauna',
-      image: 'https://images.unsplash.com/photo-1534188753412-5de315c1f1c0?w=800&h=600&fit=crop',
-      status: 'Rentan',
-      region: 'Nusa Tenggara Timur',
-      description: 'Kadal terbesar di dunia yang hanya ditemukan di Indonesia, dapat tumbuh hingga 3 meter dan memiliki gigitan beracun.',
+      name: "Komodo",
+      scientificName: "Varanus komodoensis",
+      type: "fauna",
+      image:
+        "https://images.unsplash.com/photo-1534188753412-5de315c1f1c0?w=800&h=600&fit=crop",
+      status: "Rentan",
+      region: "Nusa Tenggara Timur",
+      description:
+        "Kadal terbesar di dunia yang hanya ditemukan di Indonesia, dapat tumbuh hingga 3 meter dan memiliki gigitan beracun.",
       facts: [
-        'Panjang tubuh mencapai 3 meter',
-        'Berat dapat mencapai 70 kg',
-        'Dapat berlari hingga 20 km/jam',
-        'Air liur mengandung 50 jenis bakteri berbahaya'
-      ]
+        "Panjang tubuh mencapai 3 meter",
+        "Berat dapat mencapai 70 kg",
+        "Dapat berlari hingga 20 km/jam",
+        "Air liur mengandung 50 jenis bakteri berbahaya",
+      ],
     },
     {
       id: 4,
-      name: 'Anggrek Hitam',
-      scientificName: 'Coelogyne pandurata',
-      type: 'flora',
-      image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=600&fit=crop',
-      status: 'Terancam',
-      region: 'Kalimantan',
-      description: 'Anggrek endemik Kalimantan dengan bunga berwarna hitam yang sangat langka dan eksotis.',
+      name: "Anggrek Hitam",
+      scientificName: "Coelogyne pandurata",
+      type: "flora",
+      image:
+        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=800&h=600&fit=crop",
+      status: "Terancam",
+      region: "Kalimantan",
+      description:
+        "Anggrek endemik Kalimantan dengan bunga berwarna hitam yang sangat langka dan eksotis.",
       facts: [
-        'Bunga berbentuk seperti biola',
-        'Warna hitam sebenarnya hijau tua gelap',
-        'Tumbuh di ketinggian 0-300 mdpl',
-        'Mekar di musim semi'
-      ]
-    }
+        "Bunga berbentuk seperti biola",
+        "Warna hitam sebenarnya hijau tua gelap",
+        "Tumbuh di ketinggian 0-300 mdpl",
+        "Mekar di musim semi",
+      ],
+    },
   ];
 
   const currentSpecies = featuredSpecies[currentIndex];
 
-  const getStatusColor = (status: Species['status']) => {
+  const getStatusColor = (status: Species["status"]) => {
     switch (status) {
-      case 'Kritis': return 'red';
-      case 'Terancam': return 'orange';
-      case 'Rentan': return 'yellow';
-      case 'Aman': return 'green';
+      case "Kritis":
+        return "red";
+      case "Terancam":
+        return "orange";
+      case "Rentan":
+        return "yellow";
+      case "Aman":
+        return "green";
     }
   };
 
@@ -129,7 +148,9 @@ export function FeaturedSpeciesSection() {
 
   const prevSlide = () => {
     setDirection(-1);
-    setCurrentIndex((prev) => (prev - 1 + featuredSpecies.length) % featuredSpecies.length);
+    setCurrentIndex(
+      (prev) => (prev - 1 + featuredSpecies.length) % featuredSpecies.length,
+    );
   };
 
   // Auto slide
@@ -141,27 +162,33 @@ export function FeaturedSpeciesSection() {
   const slideVariants = {
     enter: (direction: number) => ({
       x: direction > 0 ? 1000 : -1000,
-      opacity: 0
+      opacity: 0,
     }),
     center: {
       zIndex: 1,
       x: 0,
-      opacity: 1
+      opacity: 1,
     },
     exit: (direction: number) => ({
       zIndex: 0,
       x: direction < 0 ? 1000 : -1000,
-      opacity: 0
-    })
+      opacity: 0,
+    }),
   };
 
   return (
-    <section id="featured-species-section" className="py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+    <section
+      id="featured-species-section"
+      className="py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2310b981' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="container mx-auto max-w-7xl px-6 relative">
@@ -183,7 +210,8 @@ export function FeaturedSpeciesSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Setiap bulan kami menampilkan spesies unik Indonesia yang membutuhkan perhatian khusus untuk konservasi
+            Setiap bulan kami menampilkan spesies unik Indonesia yang
+            membutuhkan perhatian khusus untuk konservasi
           </p>
         </motion.div>
 
@@ -199,7 +227,7 @@ export function FeaturedSpeciesSection() {
               exit="exit"
               transition={{
                 x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.2 }
+                opacity: { duration: 0.2 },
               }}
               className="bg-white rounded-3xl shadow-2xl overflow-hidden"
             >
@@ -212,21 +240,27 @@ export function FeaturedSpeciesSection() {
                     className="absolute inset-0 w-full h-full object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  
+
                   {/* Type Badge */}
                   <div className="absolute top-6 left-6">
-                    <span className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-white/30 ${
-                      currentSpecies.type === 'flora' 
-                        ? 'bg-emerald-500/90 text-white' 
-                        : 'bg-teal-500/90 text-white'
-                    }`}>
-                      {currentSpecies.type === 'flora' ? '🌿 Flora' : '🦎 Fauna'}
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-white/30 ${
+                        currentSpecies.type === "flora"
+                          ? "bg-emerald-500/90 text-white"
+                          : "bg-teal-500/90 text-white"
+                      }`}
+                    >
+                      {currentSpecies.type === "flora"
+                        ? "🌿 Flora"
+                        : "🦎 Fauna"}
                     </span>
                   </div>
 
                   {/* Status Badge */}
                   <div className="absolute top-6 right-6">
-                    <span className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-white/30 bg-${getStatusColor(currentSpecies.status)}-500/90 text-white flex items-center gap-2`}>
+                    <span
+                      className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md border border-white/30 bg-${getStatusColor(currentSpecies.status)}-500/90 text-white flex items-center gap-2`}
+                    >
                       <AlertTriangle className="w-4 h-4" />
                       {currentSpecies.status}
                     </span>
@@ -236,7 +270,9 @@ export function FeaturedSpeciesSection() {
                   <div className="absolute bottom-6 left-6">
                     <div className="flex items-center gap-2 text-white bg-black/30 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
                       <MapPin className="w-4 h-4" />
-                      <span className="text-sm font-medium">{currentSpecies.region}</span>
+                      <span className="text-sm font-medium">
+                        {currentSpecies.region}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -260,7 +296,9 @@ export function FeaturedSpeciesSection() {
                   <div className="mb-8">
                     <div className="flex items-center gap-2 mb-4">
                       <Info className="w-5 h-5 text-emerald-600" />
-                      <h4 className="font-semibold text-gray-900">Fakta Menarik</h4>
+                      <h4 className="font-semibold text-gray-900">
+                        Fakta Menarik
+                      </h4>
                     </div>
                     <ul className="space-y-3">
                       {currentSpecies.facts.map((fact, i) => (
@@ -318,8 +356,8 @@ export function FeaturedSpeciesSection() {
                 }}
                 className={`transition-all ${
                   index === currentIndex
-                    ? 'w-12 h-3 bg-emerald-600'
-                    : 'w-3 h-3 bg-gray-300 hover:bg-gray-400'
+                    ? "w-12 h-3 bg-emerald-600"
+                    : "w-3 h-3 bg-gray-300 hover:bg-gray-400"
                 } rounded-full`}
               />
             ))}
@@ -329,4 +367,3 @@ export function FeaturedSpeciesSection() {
     </section>
   );
 }
-

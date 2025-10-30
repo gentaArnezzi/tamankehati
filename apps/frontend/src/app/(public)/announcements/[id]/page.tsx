@@ -1,24 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../../components/ui/card';
-import { Badge } from '../../../../components/ui/badge';
-import { Button } from '../../../../components/ui/button';
-import { Skeleton } from '../../../../components/ui/skeleton';
-import { Alert, AlertDescription } from '../../../../components/ui/alert';
-import { 
-  Calendar, 
-  Eye, 
-  Pin, 
-  Star, 
-  Tag, 
+import { useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { Skeleton } from "../../../../components/ui/skeleton";
+import { Alert, AlertDescription } from "../../../../components/ui/alert";
+import {
+  Calendar,
+  Eye,
+  Pin,
+  Star,
+  Tag,
   Clock,
   FileText,
   ArrowLeft,
-  AlertCircle
-} from 'lucide-react';
-import Link from 'next/link';
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
 
 interface AnnouncementDetail {
   id: number;
@@ -39,9 +45,11 @@ interface AnnouncementDetail {
 
 export default function AnnouncementDetailPage() {
   const params = useParams();
-  const [announcement, setAnnouncement] = useState<AnnouncementDetail | null>(null);
+  const [announcement, setAnnouncement] = useState<AnnouncementDetail | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (params.id) {
@@ -52,20 +60,20 @@ export default function AnnouncementDetailPage() {
   const loadAnnouncementDetail = async () => {
     try {
       setLoading(true);
-      setError('');
-      
+      setError("");
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/announcements/public/${params.id}`
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/announcements/public/${params.id}`,
       );
 
       if (!response.ok) {
-        throw new Error('Pengumuman tidak ditemukan');
+        throw new Error("Pengumuman tidak ditemukan");
       }
 
       const data = await response.json();
       setAnnouncement(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat pengumuman');
+      setError(err instanceof Error ? err.message : "Gagal memuat pengumuman");
     } finally {
       setLoading(false);
     }
@@ -73,23 +81,27 @@ export default function AnnouncementDetailPage() {
 
   const getTypeBadge = (type: string) => {
     const colors = {
-      general: 'bg-gray-100 text-gray-800',
-      system: 'bg-blue-100 text-blue-800',
-      maintenance: 'bg-yellow-100 text-yellow-800',
-      security: 'bg-red-100 text-red-800',
-      policy: 'bg-purple-100 text-purple-800',
+      general: "bg-gray-100 text-gray-800",
+      system: "bg-blue-100 text-blue-800",
+      maintenance: "bg-yellow-100 text-yellow-800",
+      security: "bg-red-100 text-red-800",
+      policy: "bg-purple-100 text-purple-800",
     };
 
     const labels = {
-      general: 'Umum',
-      system: 'Sistem',
-      maintenance: 'Pemeliharaan',
-      security: 'Keamanan',
-      policy: 'Kebijakan',
+      general: "Umum",
+      system: "Sistem",
+      maintenance: "Pemeliharaan",
+      security: "Keamanan",
+      policy: "Kebijakan",
     };
 
     return (
-      <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
         {labels[type as keyof typeof labels] || type}
       </Badge>
     );
@@ -97,29 +109,33 @@ export default function AnnouncementDetailPage() {
 
   const getPriorityBadge = (priority: number) => {
     const colors = {
-      0: 'bg-gray-100 text-gray-800',
-      1: 'bg-yellow-100 text-yellow-800',
-      2: 'bg-red-100 text-red-800',
+      0: "bg-gray-100 text-gray-800",
+      1: "bg-yellow-100 text-yellow-800",
+      2: "bg-red-100 text-red-800",
     };
 
     const labels = {
-      0: 'Normal',
-      1: 'Tinggi',
-      2: 'Mendesak',
+      0: "Normal",
+      1: "Tinggi",
+      2: "Mendesak",
     };
 
     return (
-      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {labels[priority as keyof typeof labels] || 'Normal'}
+      <Badge
+        className={
+          colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {labels[priority as keyof typeof labels] || "Normal"}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -184,24 +200,25 @@ export default function AnnouncementDetailPage() {
             {getTypeBadge(announcement.announcement_type)}
             {getPriorityBadge(announcement.priority)}
           </div>
-          
+
           <h1 className="text-4xl font-bold mb-4 flex items-center gap-2">
             <AlertCircle className="h-8 w-8 text-blue-600" />
             {announcement.title}
           </h1>
-          
+
           {announcement.summary && (
-            <p className="text-xl text-muted-foreground mb-6">{announcement.summary}</p>
+            <p className="text-xl text-muted-foreground mb-6">
+              {announcement.summary}
+            </p>
           )}
-          
+
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               <span>
-                {announcement.published_at 
+                {announcement.published_at
                   ? formatDate(announcement.published_at)
-                  : formatDate(announcement.created_at)
-                }
+                  : formatDate(announcement.created_at)}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -225,7 +242,7 @@ export default function AnnouncementDetailPage() {
               alt={announcement.title}
               className="w-full h-auto rounded-lg shadow-md"
               onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).style.display = "none";
               }}
             />
           </div>
@@ -251,7 +268,7 @@ export default function AnnouncementDetailPage() {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {announcement.tags.split(',').map((tag, index) => (
+                {announcement.tags.split(",").map((tag, index) => (
                   <Badge key={index} variant="outline">
                     {tag.trim()}
                   </Badge>

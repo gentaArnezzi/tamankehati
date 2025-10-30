@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import Image from 'next/image';
-import { ArrowDown } from 'lucide-react';
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowDown } from "lucide-react";
 
 export function ParkHero() {
   return (
@@ -17,7 +17,7 @@ export function ParkHero() {
         />
         {/* Dark black overlay */}
         <div className="absolute inset-0 bg-black/40" />
-        
+
         {/* Subtle bottom overlay with standard dark brown */}
         <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
       </div>
@@ -38,7 +38,9 @@ export function ParkHero() {
 
             {/* Description */}
             <p className="text-lg leading-relaxed text-amber-50 md:text-xl max-w-2xl">
-              Jelajahi jaringan taman konservasi keanekaragaman hayati di seluruh Indonesia. Temukan taman-taman yang melindungi spesies lokal dan mendukung upaya konservasi.
+              Jelajahi jaringan taman konservasi keanekaragaman hayati di
+              seluruh Indonesia. Temukan taman-taman yang melindungi spesies
+              lokal dan mendukung upaya konservasi.
             </p>
 
             {/* Stats Indicators */}

@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { CollapsibleDashboardLayout } from '../../../components/CollapsibleDashboardLayout';
-import { AnnouncementsPage } from '../../../components/announcements/AnnouncementsPage';
-import { RegionalAnnouncementsPage } from '../../../components/announcements/RegionalAnnouncementsPage';
-import { useAuth } from '../../../lib/useAuth';
-import { useRouter, usePathname } from 'next/navigation';
+import { useEffect } from "react";
+import { CollapsibleDashboardLayout } from "../../../components/CollapsibleDashboardLayout";
+import { AnnouncementsPage } from "../../../components/announcements/AnnouncementsPage";
+import { RegionalAnnouncementsPage } from "../../../components/announcements/RegionalAnnouncementsPage";
+import { useAuth } from "../../../lib/useAuth";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function AnnouncementsDashboardPage() {
   const { user, logout, loading } = useAuth();
@@ -15,7 +15,7 @@ export default function AnnouncementsDashboardPage() {
   // Redirect to login if not authenticated (must be in useEffect, not during render)
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [loading, user, router]);
 
@@ -25,7 +25,7 @@ export default function AnnouncementsDashboardPage() {
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push("/login");
   };
 
   // Show loading spinner while checking auth
@@ -59,7 +59,7 @@ export default function AnnouncementsDashboardPage() {
       onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
-      {user.role === 'super_admin' ? (
+      {user.role === "super_admin" ? (
         <AnnouncementsPage />
       ) : (
         <RegionalAnnouncementsPage />

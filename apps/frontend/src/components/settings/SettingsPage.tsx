@@ -1,22 +1,28 @@
-import { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Switch } from '../ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Settings, Palette, Bell, Key, Shield } from 'lucide-react';
-import { toast } from 'sonner';
-import { Separator } from '../ui/separator';
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import { Switch } from "../ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Settings, Palette, Bell, Key, Shield } from "lucide-react";
+import { toast } from "sonner";
+import { Separator } from "../ui/separator";
 
 export function SettingsPage() {
   const [saving, setSaving] = useState(false);
-  
+
   // Theme settings
-  const [primaryColor, setPrimaryColor] = useState('#233c2b');
-  const [secondaryColor, setSecondaryColor] = useState('#356447');
-  const [backgroundColor, setBackgroundColor] = useState('#f4f0ee');
+  const [primaryColor, setPrimaryColor] = useState("#233c2b");
+  const [secondaryColor, setSecondaryColor] = useState("#356447");
+  const [backgroundColor, setBackgroundColor] = useState("#f4f0ee");
 
   // Notification settings
   const [emailNotifications, setEmailNotifications] = useState(true);
@@ -24,21 +30,23 @@ export function SettingsPage() {
   const [weeklyReport, setWeeklyReport] = useState(false);
 
   // System settings
-  const [siteName, setSiteName] = useState('Taman Kehati');
-  const [siteDescription, setSiteDescription] = useState('Portal Nasional Keanekaragaman Hayati Indonesia');
-  const [bannerMessage, setBannerMessage] = useState('');
+  const [siteName, setSiteName] = useState("Taman Kehati");
+  const [siteDescription, setSiteDescription] = useState(
+    "Portal Nasional Keanekaragaman Hayati Indonesia",
+  );
+  const [bannerMessage, setBannerMessage] = useState("");
   const [maintenanceMode, setMaintenanceMode] = useState(false);
 
   // API settings
-  const [apiKey, setApiKey] = useState('');
+  const [apiKey, setApiKey] = useState("");
 
   const handleSaveTheme = async () => {
     setSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Pengaturan tema berhasil disimpan');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Pengaturan tema berhasil disimpan");
     } catch (error) {
-      toast.error('Gagal menyimpan pengaturan tema');
+      toast.error("Gagal menyimpan pengaturan tema");
     } finally {
       setSaving(false);
     }
@@ -47,10 +55,10 @@ export function SettingsPage() {
   const handleSaveNotifications = async () => {
     setSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Pengaturan notifikasi berhasil disimpan');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Pengaturan notifikasi berhasil disimpan");
     } catch (error) {
-      toast.error('Gagal menyimpan pengaturan notifikasi');
+      toast.error("Gagal menyimpan pengaturan notifikasi");
     } finally {
       setSaving(false);
     }
@@ -59,26 +67,29 @@ export function SettingsPage() {
   const handleSaveSystem = async () => {
     setSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success('Pengaturan sistem berhasil disimpan');
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      toast.success("Pengaturan sistem berhasil disimpan");
     } catch (error) {
-      toast.error('Gagal menyimpan pengaturan sistem');
+      toast.error("Gagal menyimpan pengaturan sistem");
     } finally {
       setSaving(false);
     }
   };
 
   const handleGenerateApiKey = () => {
-    const newKey = 'tk_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const newKey =
+      "tk_" +
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15);
     setApiKey(newKey);
-    toast.success('API Key baru telah dibuat');
+    toast.success("API Key baru telah dibuat");
   };
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl mb-2 flex items-center gap-2">
-          <Settings className="h-8 w-8" style={{ color: '#356447' }} />
+          <Settings className="h-8 w-8" style={{ color: "#356447" }} />
           Pengaturan Sistem
         </h1>
         <p className="text-muted-foreground">
@@ -182,12 +193,21 @@ export function SettingsPage() {
 
               <div className="space-y-4">
                 <h4>Pratinjau</h4>
-                <div className="p-6 border rounded-lg" style={{ backgroundColor }}>
+                <div
+                  className="p-6 border rounded-lg"
+                  style={{ backgroundColor }}
+                >
                   <div className="space-y-4">
                     <Button style={{ backgroundColor: primaryColor }}>
                       Tombol Utama
                     </Button>
-                    <Button variant="outline" style={{ borderColor: secondaryColor, color: secondaryColor }}>
+                    <Button
+                      variant="outline"
+                      style={{
+                        borderColor: secondaryColor,
+                        color: secondaryColor,
+                      }}
+                    >
                       Tombol Sekunder
                     </Button>
                   </div>
@@ -195,8 +215,12 @@ export function SettingsPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={handleSaveTheme} disabled={saving} style={{ backgroundColor: '#233c2b' }}>
-                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                <Button
+                  onClick={handleSaveTheme}
+                  disabled={saving}
+                  style={{ backgroundColor: "#233c2b" }}
+                >
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
               </div>
             </CardContent>
@@ -255,8 +279,12 @@ export function SettingsPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={handleSaveNotifications} disabled={saving} style={{ backgroundColor: '#233c2b' }}>
-                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                <Button
+                  onClick={handleSaveNotifications}
+                  disabled={saving}
+                  style={{ backgroundColor: "#233c2b" }}
+                >
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
               </div>
             </CardContent>
@@ -326,8 +354,12 @@ export function SettingsPage() {
               </div>
 
               <div className="flex justify-end">
-                <Button onClick={handleSaveSystem} disabled={saving} style={{ backgroundColor: '#233c2b' }}>
-                  {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+                <Button
+                  onClick={handleSaveSystem}
+                  disabled={saving}
+                  style={{ backgroundColor: "#233c2b" }}
+                >
+                  {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
               </div>
             </CardContent>
@@ -346,7 +378,8 @@ export function SettingsPage() {
             <CardContent className="space-y-6">
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-900">
-                  <strong>Perhatian:</strong> API Key memberikan akses ke data sistem. Jangan bagikan kunci API Anda kepada siapa pun.
+                  <strong>Perhatian:</strong> API Key memberikan akses ke data
+                  sistem. Jangan bagikan kunci API Anda kepada siapa pun.
                 </p>
               </div>
 
@@ -376,16 +409,29 @@ export function SettingsPage() {
                 <div className="space-y-2">
                   <h4 className="text-sm">Endpoint API</h4>
                   <div className="p-3 bg-gray-50 rounded border font-mono text-sm">
-                    <p className="mb-1">Base URL: <code>http://localhost:8000/api/v1</code></p>
-                    <p className="mb-1">Headers: <code>Authorization: Bearer {'<API_KEY>'}</code></p>
+                    <p className="mb-1">
+                      Base URL: <code>http://localhost:8000/api/v1</code>
+                    </p>
+                    <p className="mb-1">
+                      Headers: <code>Authorization: Bearer {"<API_KEY>"}</code>
+                    </p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <h4 className="text-sm">Dokumentasi</h4>
                   <p className="text-sm text-muted-foreground">
-                    Akses dokumentasi API lengkap di{' '}
-                    <a href=`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/docs" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    Akses dokumentasi API lengkap di{" "}
+                    <a
+                      href={
+                        (process.env.NEXT_PUBLIC_API_URL ||
+                          "https://tamankehati-backend-pxnu.onrender.com") +
+                        "/docs"
+                      }
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline"
+                    >
                       http://localhost:8000/docs
                     </a>
                   </p>

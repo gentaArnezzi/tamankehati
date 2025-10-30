@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 export function CTASection() {
   const [isVisible, setIsVisible] = useState(false);
@@ -14,10 +14,10 @@ export function CTASection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const element = document.getElementById('cta-section');
+    const element = document.getElementById("cta-section");
     if (element) {
       observer.observe(element);
     }
@@ -43,15 +43,18 @@ export function CTASection() {
       </div>
 
       <div className="relative container mx-auto max-w-7xl px-6">
-        <div className={`text-center text-white transition-all duration-1000 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div
+          className={`text-center text-white transition-all duration-1000 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
           <h2 className="text-4xl font-light mb-6 md:text-5xl">
             Bergabunglah dengan Misi Konservasi
           </h2>
           <p className="max-w-3xl mx-auto text-xl text-white/90 mb-12">
-            Jelajahi keanekaragaman hayati Indonesia, pelajari tentang konservasi, 
-            dan dukung upaya pelestarian untuk masa depan yang berkelanjutan.
+            Jelajahi keanekaragaman hayati Indonesia, pelajari tentang
+            konservasi, dan dukung upaya pelestarian untuk masa depan yang
+            berkelanjutan.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -77,9 +80,11 @@ export function CTASection() {
         </div>
 
         {/* Floating Cards */}
-        <div className={`mt-16 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-        }`}>
+        <div
+          className={`mt-16 grid md:grid-cols-3 gap-8 transition-all duration-1000 delay-300 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+          }`}
+        >
           <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
             <div className="text-4xl mb-4">🔬</div>
             <h3 className="text-xl font-light text-white mb-2">Penelitian</h3>
@@ -87,7 +92,7 @@ export function CTASection() {
               Dukung penelitian keanekaragaman hayati dan konservasi
             </p>
           </div>
-          
+
           <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
             <div className="text-4xl mb-4">📚</div>
             <h3 className="text-xl font-light text-white mb-2">Edukasi</h3>
@@ -95,7 +100,7 @@ export function CTASection() {
               Pelajari tentang pentingnya konservasi dan pelestarian
             </p>
           </div>
-          
+
           <div className="text-center p-6 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20">
             <div className="text-4xl mb-4">🌱</div>
             <h3 className="text-xl font-light text-white mb-2">Aksi</h3>

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
+import { Card } from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '../ui/collapsible';
+} from "../ui/collapsible";
 import {
   CheckCircle,
   ChevronDown,
@@ -15,11 +15,11 @@ import {
   Loader2,
   Image as ImageIcon,
   XCircle,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface CollapsibleApprovalItemProps {
   item: any;
-  entityType: 'flora' | 'fauna' | 'kegiatan';
+  entityType: "flora" | "fauna" | "kegiatan";
   detail: any | null;
   isExpanded: boolean;
   isLoadingDetail: boolean;
@@ -30,9 +30,9 @@ interface CollapsibleApprovalItemProps {
 
 // Helper to ensure full URL
 const getFullImageUrl = (url: string | undefined) => {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url.startsWith('/') ? '' : '/'}${url}`;
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url.startsWith("/") ? "" : "/"}${url}`;
 };
 
 export function CollapsibleApprovalItem({
@@ -46,25 +46,27 @@ export function CollapsibleApprovalItem({
   onReject,
 }: CollapsibleApprovalItemProps) {
   const borderColor = {
-    flora: 'border-l-green-500',
-    fauna: 'border-l-blue-500',
-    kegiatan: 'border-l-purple-500',
+    flora: "border-l-green-500",
+    fauna: "border-l-blue-500",
+    kegiatan: "border-l-purple-500",
   }[entityType];
 
   const badgeColor = {
-    flora: 'bg-green-100 text-green-700 border-green-300',
-    fauna: 'bg-blue-100 text-blue-700 border-blue-300',
-    kegiatan: 'bg-purple-100 text-purple-700 border-purple-300',
+    flora: "bg-green-100 text-green-700 border-green-300",
+    fauna: "bg-blue-100 text-blue-700 border-blue-300",
+    kegiatan: "bg-purple-100 text-purple-700 border-purple-300",
   }[entityType];
 
   const typeLabel = {
-    flora: 'Flora',
-    fauna: 'Fauna',
-    kegiatan: 'Kegiatan',
+    flora: "Flora",
+    fauna: "Fauna",
+    kegiatan: "Kegiatan",
   }[entityType];
 
   return (
-    <Card className={`border-l-4 ${borderColor} transition-all hover:shadow-md`}>
+    <Card
+      className={`border-l-4 ${borderColor} transition-all hover:shadow-md`}
+    >
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
         <div className="p-4">
           {/* Header */}
@@ -78,18 +80,32 @@ export function CollapsibleApprovalItem({
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
                   <Badge className={badgeColor}>{typeLabel}</Badge>
-                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-300 text-xs">
-                    {item.status === 'in_review' ? 'Menunggu Review' : item.status}
+                  <Badge
+                    variant="outline"
+                    className="bg-amber-50 text-amber-700 border-amber-300 text-xs"
+                  >
+                    {item.status === "in_review"
+                      ? "Menunggu Review"
+                      : item.status}
                   </Badge>
                 </div>
-                <h4 className="font-semibold text-base italic truncate">{item.title}</h4>
+                <h4 className="font-semibold text-base italic truncate">
+                  {item.title}
+                </h4>
                 <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
                   <span>ID: #{item.entityId}</span>
-                  <span>{item.submittedAt ? new Date(item.submittedAt).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}</span>
+                  <span>
+                    {item.submittedAt
+                      ? new Date(item.submittedAt).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                        })
+                      : "-"}
+                  </span>
                 </div>
               </div>
             </CollapsibleTrigger>
-            
+
             <div className="flex gap-2 flex-shrink-0">
               <Button
                 onClick={onApprove}
@@ -100,11 +116,7 @@ export function CollapsibleApprovalItem({
                 Setujui
               </Button>
               {onReject && (
-                <Button
-                  onClick={onReject}
-                  variant="destructive"
-                  size="sm"
-                >
+                <Button onClick={onReject} variant="destructive" size="sm">
                   <XCircle className="h-4 w-4 mr-1" />
                   Tolak
                 </Button>
@@ -122,7 +134,7 @@ export function CollapsibleApprovalItem({
               ) : detail ? (
                 <div className="space-y-6">
                   {/* Flora Detail */}
-                  {entityType === 'flora' && (
+                  {entityType === "flora" && (
                     <>
                       {/* Image */}
                       {detail.gambar_utama ? (
@@ -133,8 +145,11 @@ export function CollapsibleApprovalItem({
                             className="w-full h-64 object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              console.error('Failed to load main image:', detail.gambar_utama);
-                              target.style.display = 'none';
+                              console.error(
+                                "Failed to load main image:",
+                                detail.gambar_utama,
+                              );
+                              target.style.display = "none";
                             }}
                           />
                         </div>
@@ -143,7 +158,9 @@ export function CollapsibleApprovalItem({
                           <div className="flex items-center justify-center h-64">
                             <div className="text-center">
                               <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                              <p className="mt-2 text-sm text-gray-500">Gambar tidak tersedia</p>
+                              <p className="mt-2 text-sm text-gray-500">
+                                Gambar tidak tersedia
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -156,28 +173,40 @@ export function CollapsibleApprovalItem({
                             Galeri Gambar ({detail.galleries.length})
                           </h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {detail.galleries.map((gallery: any, index: number) => (
-                              <div key={gallery.id || index} className="relative group">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                                  <img
-                                    src={getFullImageUrl(gallery.image_url)}
-                                    alt={gallery.title || 'Gallery image'}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load gallery image:', gallery.image_url);
-                                      target.style.display = 'none';
-                                    }}
-                                  />
+                            {detail.galleries.map(
+                              (gallery: any, index: number) => (
+                                <div
+                                  key={gallery.id || index}
+                                  className="relative group"
+                                >
+                                  <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                    <img
+                                      src={getFullImageUrl(gallery.image_url)}
+                                      alt={gallery.title || "Gallery image"}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        console.error(
+                                          "Failed to load gallery image:",
+                                          gallery.image_url,
+                                        );
+                                        target.style.display = "none";
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ),
+                            )}
                           </div>
                         </div>
                       )}
 
                       {/* Gambar Detail Flora */}
-                      {(detail.gambar_daun || detail.gambar_batang || detail.gambar_bunga || detail.gambar_buah) && (
+                      {(detail.gambar_daun ||
+                        detail.gambar_batang ||
+                        detail.gambar_bunga ||
+                        detail.gambar_buah) && (
                         <div>
                           <h4 className="text-sm font-medium text-gray-900 mb-3">
                             Dokumentasi Detail Flora
@@ -191,15 +220,23 @@ export function CollapsibleApprovalItem({
                                     alt="Pertelaan Daun"
                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                                     onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load leaf image:', detail.gambar_daun);
-                                      target.style.display = 'none';
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      console.error(
+                                        "Failed to load leaf image:",
+                                        detail.gambar_daun,
+                                      );
+                                      target.style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">Pertelaan Daun</p>
-                                  <p className="text-[10px] text-gray-500">Detail struktur daun</p>
+                                  <p className="text-xs font-medium text-gray-900">
+                                    Pertelaan Daun
+                                  </p>
+                                  <p className="text-[10px] text-gray-500">
+                                    Detail struktur daun
+                                  </p>
                                 </div>
                               </div>
                             )}
@@ -211,15 +248,23 @@ export function CollapsibleApprovalItem({
                                     alt="Batang/Percabangan"
                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                                     onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load stem image:', detail.gambar_batang);
-                                      target.style.display = 'none';
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      console.error(
+                                        "Failed to load stem image:",
+                                        detail.gambar_batang,
+                                      );
+                                      target.style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">Batang</p>
-                                  <p className="text-[10px] text-gray-500">Batang & percabangan</p>
+                                  <p className="text-xs font-medium text-gray-900">
+                                    Batang
+                                  </p>
+                                  <p className="text-[10px] text-gray-500">
+                                    Batang & percabangan
+                                  </p>
                                 </div>
                               </div>
                             )}
@@ -231,15 +276,23 @@ export function CollapsibleApprovalItem({
                                     alt="Bunga"
                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                                     onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load flower image:', detail.gambar_bunga);
-                                      target.style.display = 'none';
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      console.error(
+                                        "Failed to load flower image:",
+                                        detail.gambar_bunga,
+                                      );
+                                      target.style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">Bunga</p>
-                                  <p className="text-[10px] text-gray-500">Detail struktur bunga</p>
+                                  <p className="text-xs font-medium text-gray-900">
+                                    Bunga
+                                  </p>
+                                  <p className="text-[10px] text-gray-500">
+                                    Detail struktur bunga
+                                  </p>
                                 </div>
                               </div>
                             )}
@@ -251,45 +304,108 @@ export function CollapsibleApprovalItem({
                                     alt="Buah"
                                     className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                                     onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load fruit image:', detail.gambar_buah);
-                                      target.style.display = 'none';
+                                      const target =
+                                        e.target as HTMLImageElement;
+                                      console.error(
+                                        "Failed to load fruit image:",
+                                        detail.gambar_buah,
+                                      );
+                                      target.style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">Buah</p>
-                                  <p className="text-[10px] text-gray-500">Detail struktur buah</p>
+                                  <p className="text-xs font-medium text-gray-900">
+                                    Buah
+                                  </p>
+                                  <p className="text-[10px] text-gray-500">
+                                    Detail struktur buah
+                                  </p>
                                 </div>
                               </div>
                             )}
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="grid md:grid-cols-2 gap-4">
-                        <DetailField label="Nama Ilmiah" value={detail.nama_ilmiah} italic />
-                        <DetailField label="Nama Umum" value={detail.nama_umum} />
+                        <DetailField
+                          label="Nama Ilmiah"
+                          value={detail.nama_ilmiah}
+                          italic
+                        />
+                        <DetailField
+                          label="Nama Umum"
+                          value={detail.nama_umum}
+                        />
                         <DetailField label="Famili" value={detail.famili} />
                         <DetailField label="Genus" value={detail.genus} />
-                        <DetailField label="Sinonim" value={detail.sinonim} italic />
-                        <DetailField label="Waktu Berbunga" value={detail.waktu_berbunga} />
-                        <DetailField label="Status IUCN" value={detail.status_iucn} />
-                        <DetailField label="Endemik" value={detail.is_endemic ? 'Ya' : 'Tidak'} />
+                        <DetailField
+                          label="Sinonim"
+                          value={detail.sinonim}
+                          italic
+                        />
+                        <DetailField
+                          label="Waktu Berbunga"
+                          value={detail.waktu_berbunga}
+                        />
+                        <DetailField
+                          label="Status IUCN"
+                          value={detail.status_iucn}
+                        />
+                        <DetailField
+                          label="Endemik"
+                          value={detail.is_endemic ? "Ya" : "Tidak"}
+                        />
                       </div>
-                      
-                      <DetailField label="Deskripsi Umum" value={detail.deskripsi} fullWidth multiline />
-                      <DetailField label="Morfologi" value={detail.morfologi} fullWidth multiline />
-                      <DetailField label="Habitat" value={detail.habitat} fullWidth multiline />
-                      <DetailField label="Manfaat" value={detail.manfaat} fullWidth multiline />
-                      <DetailField label="Penyebaran" value={detail.penyebaran} fullWidth multiline />
-                      <DetailField label="Metode Perbanyakan" value={detail.metode_perbanyakan} fullWidth multiline />
-                      <DetailField label="Referensi" value={detail.referensi} fullWidth multiline />
+
+                      <DetailField
+                        label="Deskripsi Umum"
+                        value={detail.deskripsi}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Morfologi"
+                        value={detail.morfologi}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Habitat"
+                        value={detail.habitat}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Manfaat"
+                        value={detail.manfaat}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Penyebaran"
+                        value={detail.penyebaran}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Metode Perbanyakan"
+                        value={detail.metode_perbanyakan}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Referensi"
+                        value={detail.referensi}
+                        fullWidth
+                        multiline
+                      />
                     </>
                   )}
 
                   {/* Fauna Detail */}
-                  {entityType === 'fauna' && (
+                  {entityType === "fauna" && (
                     <>
                       {/* Image */}
                       {detail.gambar_utama ? (
@@ -300,8 +416,11 @@ export function CollapsibleApprovalItem({
                             className="w-full h-64 object-cover"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
-                              console.error('Failed to load main image:', detail.gambar_utama);
-                              target.style.display = 'none';
+                              console.error(
+                                "Failed to load main image:",
+                                detail.gambar_utama,
+                              );
+                              target.style.display = "none";
                             }}
                           />
                         </div>
@@ -310,7 +429,9 @@ export function CollapsibleApprovalItem({
                           <div className="flex items-center justify-center h-64">
                             <div className="text-center">
                               <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                              <p className="mt-2 text-sm text-gray-500">Gambar tidak tersedia</p>
+                              <p className="mt-2 text-sm text-gray-500">
+                                Gambar tidak tersedia
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -323,50 +444,102 @@ export function CollapsibleApprovalItem({
                             Galeri Gambar ({detail.galleries.length})
                           </h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                            {detail.galleries.map((gallery: any, index: number) => (
-                              <div key={gallery.id || index} className="relative group">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                                  <img
-                                    src={getFullImageUrl(gallery.image_url)}
-                                    alt={gallery.title || 'Gallery image'}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      console.error('Failed to load gallery image:', gallery.image_url);
-                                      target.style.display = 'none';
-                                    }}
-                                  />
+                            {detail.galleries.map(
+                              (gallery: any, index: number) => (
+                                <div
+                                  key={gallery.id || index}
+                                  className="relative group"
+                                >
+                                  <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                    <img
+                                      src={getFullImageUrl(gallery.image_url)}
+                                      alt={gallery.title || "Gallery image"}
+                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                      onError={(e) => {
+                                        const target =
+                                          e.target as HTMLImageElement;
+                                        console.error(
+                                          "Failed to load gallery image:",
+                                          gallery.image_url,
+                                        );
+                                        target.style.display = "none";
+                                      }}
+                                    />
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ),
+                            )}
                           </div>
                         </div>
                       )}
-                      
+
                       <div className="grid md:grid-cols-2 gap-4">
-                        <DetailField label="Nama Ilmiah" value={detail.nama_ilmiah} italic />
-                        <DetailField label="Nama Umum" value={detail.nama_umum} />
+                        <DetailField
+                          label="Nama Ilmiah"
+                          value={detail.nama_ilmiah}
+                          italic
+                        />
+                        <DetailField
+                          label="Nama Umum"
+                          value={detail.nama_umum}
+                        />
                         <DetailField label="Ordo" value={detail.ordo} />
-                        <DetailField label="Status IUCN" value={detail.status_iucn} />
-                        <DetailField label="Endemik" value={detail.is_endemic ? 'Ya' : 'Tidak'} />
-                        <DetailField label="Status Hama" value={detail.status_hama} />
-                        <DetailField label="Tingkat Hama" value={detail.tingkat_hama} />
+                        <DetailField
+                          label="Status IUCN"
+                          value={detail.status_iucn}
+                        />
+                        <DetailField
+                          label="Endemik"
+                          value={detail.is_endemic ? "Ya" : "Tidak"}
+                        />
+                        <DetailField
+                          label="Status Hama"
+                          value={detail.status_hama}
+                        />
+                        <DetailField
+                          label="Tingkat Hama"
+                          value={detail.tingkat_hama}
+                        />
                       </div>
-                      
-                      <DetailField label="Habitat & Sumber Makanan" value={detail.habitat_sumber_makanan} fullWidth multiline />
-                      <DetailField label="Deskripsi" value={detail.deskripsi} fullWidth multiline />
+
+                      <DetailField
+                        label="Habitat & Sumber Makanan"
+                        value={detail.habitat_sumber_makanan}
+                        fullWidth
+                        multiline
+                      />
+                      <DetailField
+                        label="Deskripsi"
+                        value={detail.deskripsi}
+                        fullWidth
+                        multiline
+                      />
                     </>
                   )}
 
                   {/* Kegiatan Detail */}
-                  {entityType === 'kegiatan' && (
+                  {entityType === "kegiatan" && (
                     <>
                       <div className="grid md:grid-cols-2 gap-4">
                         <DetailField label="Judul" value={detail.title} />
-                        <DetailField label="Tanggal" value={detail.date ? new Date(detail.date).toLocaleDateString('id-ID') : '-'} />
+                        <DetailField
+                          label="Tanggal"
+                          value={
+                            detail.date
+                              ? new Date(detail.date).toLocaleDateString(
+                                  "id-ID",
+                                )
+                              : "-"
+                          }
+                        />
                       </div>
-                      
-                      <DetailField label="Deskripsi" value={detail.description} fullWidth multiline />
+
+                      <DetailField
+                        label="Deskripsi"
+                        value={detail.description}
+                        fullWidth
+                        multiline
+                      />
                     </>
                   )}
                 </div>
@@ -391,16 +564,25 @@ interface DetailFieldProps {
   italic?: boolean;
 }
 
-function DetailField({ label, value, fullWidth, multiline, italic }: DetailFieldProps) {
-  const displayValue = value || '-';
-  
+function DetailField({
+  label,
+  value,
+  fullWidth,
+  multiline,
+  italic,
+}: DetailFieldProps) {
+  const displayValue = value || "-";
+
   return (
-    <div className={fullWidth ? 'col-span-full' : ''}>
-      <div className="text-xs font-medium text-muted-foreground mb-1">{label}</div>
-      <div className={`text-sm ${italic ? 'italic' : ''} ${multiline ? 'whitespace-pre-wrap leading-relaxed' : 'font-medium'}`}>
+    <div className={fullWidth ? "col-span-full" : ""}>
+      <div className="text-xs font-medium text-muted-foreground mb-1">
+        {label}
+      </div>
+      <div
+        className={`text-sm ${italic ? "italic" : ""} ${multiline ? "whitespace-pre-wrap leading-relaxed" : "font-medium"}`}
+      >
         {displayValue}
       </div>
     </div>
   );
 }
-

@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Badge } from '../../ui/badge';
-import { Calendar, MapPin, Clock, Activity as ActivityIcon, ArrowRight } from 'lucide-react';
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "../../ui/badge";
+import {
+  Calendar,
+  MapPin,
+  Clock,
+  Activity as ActivityIcon,
+  ArrowRight,
+} from "lucide-react";
 
 type ActivityDetail = {
   id: string;
@@ -23,41 +29,47 @@ type ActivityDetailViewProps = {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const formatTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleTimeString('id-ID', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
-  const heroImage = activity.images && activity.images.length > 0 
-    ? (activity.images[0].startsWith('http') ? activity.images[0] : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${activity.images[0]}`)
-    : 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&auto=format&fit=crop';
+  const heroImage =
+    activity.images && activity.images.length > 0
+      ? activity.images[0].startsWith("http")
+        ? activity.images[0]
+        : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${activity.images[0]}`
+      : "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1600&auto=format&fit=crop";
 
   const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Event',
+    "@context": "https://schema.org",
+    "@type": "Event",
     name: activity.title,
     description: activity.description,
     startDate: activity.activity_date,
     location: {
-      '@type': 'Place',
+      "@type": "Place",
       name: activity.location,
     },
     organizer: {
-      '@type': 'Organization',
+      "@type": "Organization",
       name: activity.park_name,
     },
-    image: activity.images && activity.images.length > 0 ? activity.images[0] : undefined,
+    image:
+      activity.images && activity.images.length > 0
+        ? activity.images[0]
+        : undefined,
   };
 
   return (
@@ -78,11 +90,16 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
               <Badge className="bg-emerald-600 text-white hover:bg-emerald-500">
                 {formatDate(activity.activity_date)}
               </Badge>
-              <Badge variant="outline" className="border-white/40 bg-white/10 text-white">
+              <Badge
+                variant="outline"
+                className="border-white/40 bg-white/10 text-white"
+              >
                 {activity.location}
               </Badge>
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">{activity.title}</h1>
+            <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">
+              {activity.title}
+            </h1>
             <p className="text-lg text-white/80 md:text-xl">
               {activity.park_name}
             </p>
@@ -94,7 +111,9 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
             {/* Deskripsi */}
             {activity.description && (
               <div className="space-y-3">
-                <h2 className="text-2xl font-semibold text-slate-900">Deskripsi Kegiatan</h2>
+                <h2 className="text-2xl font-semibold text-slate-900">
+                  Deskripsi Kegiatan
+                </h2>
                 <p className="whitespace-pre-line text-base leading-relaxed text-slate-700">
                   {activity.description}
                 </p>
@@ -104,34 +123,48 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
 
           <aside className="space-y-6">
             <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6">
-              <h2 className="text-lg font-semibold text-emerald-900">Informasi Kegiatan</h2>
+              <h2 className="text-lg font-semibold text-emerald-900">
+                Informasi Kegiatan
+              </h2>
               <dl className="mt-4 space-y-3 text-sm text-slate-700">
                 <div className="flex justify-between gap-4">
                   <dt className="font-medium text-slate-600">Tanggal</dt>
-                  <dd className="text-right text-slate-800">{formatDate(activity.activity_date)}</dd>
+                  <dd className="text-right text-slate-800">
+                    {formatDate(activity.activity_date)}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="font-medium text-slate-600">Waktu</dt>
-                  <dd className="text-right text-slate-800">{formatTime(activity.activity_date)}</dd>
+                  <dd className="text-right text-slate-800">
+                    {formatTime(activity.activity_date)}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="font-medium text-slate-600">Lokasi</dt>
-                  <dd className="text-right text-slate-800">{activity.location}</dd>
+                  <dd className="text-right text-slate-800">
+                    {activity.location}
+                  </dd>
                 </div>
                 <div className="flex justify-between gap-4">
                   <dt className="font-medium text-slate-600">Taman</dt>
-                  <dd className="text-right text-slate-800">{activity.park_name}</dd>
+                  <dd className="text-right text-slate-800">
+                    {activity.park_name}
+                  </dd>
                 </div>
               </dl>
             </div>
 
             <div className="rounded-2xl border border-blue-100 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Tentang Taman</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Tentang Taman
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Kegiatan ini dilaksanakan di {activity.park_name}, sebuah taman konservasi yang berdedikasi untuk melestarikan keanekaragaman hayati Indonesia.
+                Kegiatan ini dilaksanakan di {activity.park_name}, sebuah taman
+                konservasi yang berdedikasi untuk melestarikan keanekaragaman
+                hayati Indonesia.
               </p>
               <div className="mt-4 pt-4 border-t border-blue-100">
-                <Link 
+                <Link
                   href="/taman"
                   className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
@@ -143,9 +176,12 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
             </div>
 
             <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold text-slate-900">Kegiatan Lainnya</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Kegiatan Lainnya
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                Temukan berbagai kegiatan konservasi dan edukasi lainnya yang dilaksanakan di taman-taman konservasi Indonesia.
+                Temukan berbagai kegiatan konservasi dan edukasi lainnya yang
+                dilaksanakan di taman-taman konservasi Indonesia.
               </p>
               <Link
                 href="/kegiatan"
@@ -163,25 +199,33 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+              <h2 className="text-2xl font-semibold text-slate-900">
+                Galeri Foto
+              </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Koleksi {activity.images.length} foto untuk kegiatan <span className="italic">{activity.title}</span>
+                Koleksi {activity.images.length} foto untuk kegiatan{" "}
+                <span className="italic">{activity.title}</span>
               </p>
             </div>
             <Badge variant="outline" className="hidden sm:inline-flex">
-              {activity.images.length} {activity.images.length === 1 ? 'Foto' : 'Foto'}
+              {activity.images.length}{" "}
+              {activity.images.length === 1 ? "Foto" : "Foto"}
             </Badge>
           </div>
-          
+
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {activity.images.slice(1).map((image, index) => (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="group relative overflow-hidden rounded-xl border border-emerald-100 bg-white shadow-sm transition-all hover:shadow-lg hover:border-emerald-200"
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
-                    src={image.startsWith('http') ? image : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image}`}
+                    src={
+                      image.startsWith("http")
+                        ? image
+                        : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image}`
+                    }
                     alt={`${activity.title} - Foto ${index + 2}`}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -195,8 +239,12 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
                   </div>
                 </div>
                 <div className="p-4 space-y-1">
-                  <h3 className="font-medium text-slate-900 text-sm line-clamp-1">{activity.title}</h3>
-                  <p className="text-xs text-slate-600 line-clamp-2">Foto dokumentasi kegiatan</p>
+                  <h3 className="font-medium text-slate-900 text-sm line-clamp-1">
+                    {activity.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 line-clamp-2">
+                    Foto dokumentasi kegiatan
+                  </p>
                 </div>
               </div>
             ))}
@@ -208,9 +256,12 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
       {(!activity.images || activity.images.length <= 1) && (
         <section className="space-y-6">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">Galeri Foto</h2>
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Galeri Foto
+            </h2>
             <p className="mt-1 text-sm text-slate-600">
-              Koleksi foto untuk kegiatan <span className="italic">{activity.title}</span>
+              Koleksi foto untuk kegiatan{" "}
+              <span className="italic">{activity.title}</span>
             </p>
           </div>
           <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 p-12 text-center">
@@ -228,9 +279,12 @@ export function ActivityDetailView({ activity }: ActivityDetailViewProps) {
                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
               />
             </svg>
-            <h3 className="mt-4 text-sm font-medium text-slate-900">Belum ada foto galeri</h3>
+            <h3 className="mt-4 text-sm font-medium text-slate-900">
+              Belum ada foto galeri
+            </h3>
             <p className="mt-2 text-sm text-slate-500">
-              Galeri foto untuk kegiatan ini belum tersedia atau masih dalam proses persetujuan.
+              Galeri foto untuk kegiatan ini belum tersedia atau masih dalam
+              proses persetujuan.
             </p>
           </div>
         </section>

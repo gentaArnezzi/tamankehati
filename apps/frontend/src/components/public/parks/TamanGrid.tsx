@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Grid, List, Filter } from 'lucide-react';
-import { Button } from '../../ui/button';
-import { TamanCard } from './TamanCard';
-import { Skeleton } from '../../ui/skeleton';
-import type { TamanPublic } from '../../../types/public';
+import { useState } from "react";
+import { Grid, List, Filter } from "lucide-react";
+import { Button } from "../../ui/button";
+import { TamanCard } from "./TamanCard";
+import { Skeleton } from "../../ui/skeleton";
+import type { TamanPublic } from "../../../types/public";
 
 interface TamanGridProps {
   tamanList: TamanPublic[];
@@ -14,8 +14,13 @@ interface TamanGridProps {
   onFilterToggle?: () => void;
 }
 
-export function TamanGrid({ tamanList, isLoading = false, total = 0, onFilterToggle }: TamanGridProps) {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+export function TamanGrid({
+  tamanList,
+  isLoading = false,
+  total = 0,
+  onFilterToggle,
+}: TamanGridProps) {
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
 
   if (isLoading) {
@@ -32,7 +37,7 @@ export function TamanGrid({ tamanList, isLoading = false, total = 0, onFilterTog
             <Skeleton className="h-10 w-10" />
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="space-y-3">
@@ -51,14 +56,10 @@ export function TamanGrid({ tamanList, isLoading = false, total = 0, onFilterTog
       {/* Header with View Controls */}
       <div className="flex items-center justify-between">
         <div className="space-y-1">
-          <h2 className="text-2xl font-semibold text-gray-900">
-            Taman Kehati
-          </h2>
-          <p className="text-gray-600">
-            {total} taman ditemukan
-          </p>
+          <h2 className="text-2xl font-semibold text-gray-900">Taman Kehati</h2>
+          <p className="text-gray-600">{total} taman ditemukan</p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {/* Filter Toggle */}
           <Button
@@ -70,21 +71,21 @@ export function TamanGrid({ tamanList, isLoading = false, total = 0, onFilterTog
             <Filter className="h-4 w-4 mr-2" />
             Filter
           </Button>
-          
+
           {/* View Mode Toggle */}
           <div className="flex items-center bg-gray-100 rounded-lg p-1">
             <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
+              variant={viewMode === "grid" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('grid')}
+              onClick={() => setViewMode("grid")}
               className="h-8 w-8 p-0"
             >
               <Grid className="h-4 w-4" />
             </Button>
             <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
+              variant={viewMode === "list" ? "default" : "ghost"}
               size="sm"
-              onClick={() => setViewMode('list')}
+              onClick={() => setViewMode("list")}
               className="h-8 w-8 p-0"
             >
               <List className="h-4 w-4" />
@@ -102,16 +103,16 @@ export function TamanGrid({ tamanList, isLoading = false, total = 0, onFilterTog
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             Tidak ada taman ditemukan
           </h3>
-          <p className="text-gray-500">
-            Coba ubah filter pencarian Anda
-          </p>
+          <p className="text-gray-500">Coba ubah filter pencarian Anda</p>
         </div>
       ) : (
-        <div className={
-          viewMode === 'grid' 
-            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            : "space-y-4"
-        }>
+        <div
+          className={
+            viewMode === "grid"
+              ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+              : "space-y-4"
+          }
+        >
           {tamanList.map((taman) => (
             <TamanCard key={taman.id} taman={taman} />
           ))}

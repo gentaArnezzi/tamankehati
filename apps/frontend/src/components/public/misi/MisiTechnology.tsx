@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Database, 
-  Camera, 
-  Map, 
-  Smartphone, 
-  Cloud, 
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Database,
+  Camera,
+  Map,
+  Smartphone,
+  Cloud,
   Microscope,
   Satellite,
   Brain,
   ArrowRight,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 export function MisiTechnology() {
   const [activeTech, setActiveTech] = useState(0);
@@ -23,29 +23,31 @@ export function MisiTechnology() {
       id: 1,
       icon: Database,
       title: "Sistem Database Terintegrasi",
-      description: "Platform terpusat untuk mengelola data flora, fauna, dan ekosistem",
+      description:
+        "Platform terpusat untuk mengelola data flora, fauna, dan ekosistem",
       image: "/tech/database.jpg",
       features: [
         "Penyimpanan data real-time",
         "Integrasi dengan sistem GIS",
         "Backup otomatis dan redundansi",
-        "API untuk akses data eksternal"
+        "API untuk akses data eksternal",
       ],
-      color: "from-blue-500 to-cyan-500"
+      color: "from-blue-500 to-cyan-500",
     },
     {
       id: 2,
       icon: Camera,
       title: "Identifikasi Visual AI",
-      description: "Teknologi kecerdasan buatan untuk identifikasi spesies dari foto",
+      description:
+        "Teknologi kecerdasan buatan untuk identifikasi spesies dari foto",
       image: "/tech/ai-camera.jpg",
       features: [
         "Machine learning untuk identifikasi",
         "Akurasi identifikasi 95%+",
         "Dukungan multi-bahasa",
-        "Integrasi dengan database spesies"
+        "Integrasi dengan database spesies",
       ],
-      color: "from-green-500 to-emerald-500"
+      color: "from-green-500 to-emerald-500",
     },
     {
       id: 3,
@@ -57,9 +59,9 @@ export function MisiTechnology() {
         "Peta interaktif real-time",
         "Analisis hotspot keanekaragaman",
         "Overlay data lingkungan",
-        "Export data untuk penelitian"
+        "Export data untuk penelitian",
       ],
-      color: "from-purple-500 to-pink-500"
+      color: "from-purple-500 to-pink-500",
     },
     {
       id: 4,
@@ -71,9 +73,9 @@ export function MisiTechnology() {
         "Offline data access",
         "GPS tracking terintegrasi",
         "Upload foto langsung",
-        "Sinkronisasi otomatis"
+        "Sinkronisasi otomatis",
       ],
-      color: "from-orange-500 to-red-500"
+      color: "from-orange-500 to-red-500",
     },
     {
       id: 5,
@@ -85,9 +87,9 @@ export function MisiTechnology() {
         "Skalabilitas otomatis",
         "99.9% uptime guarantee",
         "Global CDN",
-        "Security enterprise-grade"
+        "Security enterprise-grade",
       ],
-      color: "from-indigo-500 to-blue-500"
+      color: "from-indigo-500 to-blue-500",
     },
     {
       id: 6,
@@ -99,17 +101,21 @@ export function MisiTechnology() {
         "Analisis statistik lanjutan",
         "Visualisasi data interaktif",
         "Model prediktif",
-        "Kolaborasi penelitian"
+        "Kolaborasi penelitian",
       ],
-      color: "from-teal-500 to-green-500"
-    }
+      color: "from-teal-500 to-green-500",
+    },
   ];
 
   const stats = [
     { label: "Data Points", value: "2.5M+", color: "text-blue-600" },
-    { label: "Spesies Teridentifikasi", value: "15,000+", color: "text-green-600" },
+    {
+      label: "Spesies Teridentifikasi",
+      value: "15,000+",
+      color: "text-green-600",
+    },
     { label: "Pengguna Aktif", value: "10,000+", color: "text-purple-600" },
-    { label: "Uptime", value: "99.9%", color: "text-orange-600" }
+    { label: "Uptime", value: "99.9%", color: "text-orange-600" },
   ];
 
   return (
@@ -121,7 +127,7 @@ export function MisiTechnology() {
             Teknologi & Inovasi
           </h2>
           <p className="text-xl text-gray-600 max-w-4xl mx-auto leading-relaxed">
-            Kami menggunakan teknologi terdepan untuk mempermudah konservasi, 
+            Kami menggunakan teknologi terdepan untuk mempermudah konservasi,
             penelitian, dan akses data keanekaragaman hayati Indonesia.
           </p>
         </div>
@@ -131,18 +137,20 @@ export function MisiTechnology() {
           {technologies.map((tech, index) => {
             const Icon = tech.icon;
             const isActive = activeTech === index;
-            
+
             return (
               <Card
                 key={tech.id}
                 className={`cursor-pointer transition-all duration-300 hover:shadow-xl group ${
-                  isActive ? 'shadow-xl scale-105 border-2' : 'hover:scale-102'
+                  isActive ? "shadow-xl scale-105 border-2" : "hover:scale-102"
                 }`}
                 onClick={() => setActiveTech(index)}
               >
                 <CardContent className="p-6">
                   <div className="text-center">
-                    <div className={`w-16 h-16 bg-gradient-to-br ${tech.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}>
+                    <div
+                      className={`w-16 h-16 bg-gradient-to-br ${tech.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300`}
+                    >
                       <Icon className="w-8 h-8 text-white" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">
@@ -152,7 +160,9 @@ export function MisiTechnology() {
                       {tech.description}
                     </p>
                     <div className="flex items-center justify-center text-gray-500 group-hover:text-gray-700 transition-colors">
-                      <span className="text-sm font-medium">Pelajari Lebih Lanjut</span>
+                      <span className="text-sm font-medium">
+                        Pelajari Lebih Lanjut
+                      </span>
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </div>
@@ -169,7 +179,9 @@ export function MisiTechnology() {
             <div className="relative h-80 lg:h-auto">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                 <div className="text-center">
-                  <div className={`w-24 h-24 bg-gradient-to-br ${technologies[activeTech].color} rounded-2xl flex items-center justify-center mx-auto mb-4`}>
+                  <div
+                    className={`w-24 h-24 bg-gradient-to-br ${technologies[activeTech].color} rounded-2xl flex items-center justify-center mx-auto mb-4`}
+                  >
                     {(() => {
                       const Icon = technologies[activeTech].icon;
                       return <Icon className="w-12 h-12 text-white" />;
@@ -196,7 +208,9 @@ export function MisiTechnology() {
                 <ul className="space-y-3">
                   {technologies[activeTech].features.map((feature, index) => (
                     <li key={index} className="flex items-start gap-3">
-                      <div className={`w-2 h-2 bg-gradient-to-r ${technologies[activeTech].color} rounded-full mt-2 flex-shrink-0`} />
+                      <div
+                        className={`w-2 h-2 bg-gradient-to-r ${technologies[activeTech].color} rounded-full mt-2 flex-shrink-0`}
+                      />
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
@@ -222,8 +236,8 @@ export function MisiTechnology() {
               Dampak Teknologi Kami
             </h3>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Teknologi yang kami kembangkan telah memberikan dampak nyata 
-              dalam konservasi keanekaragaman hayati Indonesia.
+              Teknologi yang kami kembangkan telah memberikan dampak nyata dalam
+              konservasi keanekaragaman hayati Indonesia.
             </p>
           </div>
 
@@ -233,9 +247,7 @@ export function MisiTechnology() {
                 <div className={`text-4xl font-bold ${stat.color} mb-2`}>
                   {stat.value}
                 </div>
-                <div className="text-gray-600 font-medium">
-                  {stat.label}
-                </div>
+                <div className="text-gray-600 font-medium">{stat.label}</div>
               </div>
             ))}
           </div>
@@ -250,8 +262,8 @@ export function MisiTechnology() {
                   Unduh Informasi Teknologi
                 </h3>
                 <p className="text-gray-300 mb-8 text-lg">
-                  Dapatkan dokumentasi lengkap tentang teknologi yang kami gunakan 
-                  untuk konservasi keanekaragaman hayati.
+                  Dapatkan dokumentasi lengkap tentang teknologi yang kami
+                  gunakan untuk konservasi keanekaragaman hayati.
                 </p>
                 <div className="flex flex-wrap gap-4 justify-center">
                   <button className="px-8 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-2">
@@ -270,4 +282,3 @@ export function MisiTechnology() {
     </section>
   );
 }
-

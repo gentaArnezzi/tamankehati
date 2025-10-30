@@ -1,9 +1,16 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { Badge } from '../../ui/badge';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../ui/card';
-import { MapPin, Ruler } from 'lucide-react';
-import type { ParkPublic } from '../../../types/public';
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "../../ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import { MapPin, Ruler } from "lucide-react";
+import type { ParkPublic } from "../../../types/public";
 
 interface ParkCardProps {
   park: ParkPublic;
@@ -21,7 +28,7 @@ export function ParkCard({ park }: ParkCardProps) {
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
-      
+
       <CardHeader className="pb-2">
         <CardTitle className="text-lg">
           <Link href={`/parks/${park.id}`} className="hover:underline">
@@ -32,24 +39,23 @@ export function ParkCard({ park }: ParkCardProps) {
           {park.description}
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="pb-4 flex-1">
         <div className="flex items-center text-sm text-muted-foreground mb-2">
           <MapPin className="mr-1 h-4 w-4 flex-shrink-0" />
           <span className="truncate">Indonesia</span>
         </div>
-        
+
         {park.area_ha && (
           <div className="flex items-center text-sm text-muted-foreground">
             <Ruler className="mr-1 h-4 w-4 flex-shrink-0" />
             <span>Luas: {park.area_ha.toLocaleString()} ha</span>
           </div>
         )}
-        
       </CardContent>
-      
+
       <CardFooter className="pt-0">
-        <Link 
+        <Link
           href={`/parks/${park.id}`}
           className="w-full text-sm font-medium text-primary hover:underline"
         >

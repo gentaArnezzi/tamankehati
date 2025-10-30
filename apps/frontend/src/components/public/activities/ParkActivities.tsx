@@ -1,23 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Button } from '../../ui/button';
-import { Skeleton } from '../../ui/skeleton';
-import { Alert, AlertDescription } from '../../ui/alert';
-import { 
-  Calendar, 
-  MapPin, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Button } from "../../ui/button";
+import { Skeleton } from "../../ui/skeleton";
+import { Alert, AlertDescription } from "../../ui/alert";
+import {
+  Calendar,
+  MapPin,
   Search,
   Filter,
   ChevronRight,
   Activity as ActivityIcon,
-  Clock
-} from 'lucide-react';
-import { Input } from '../../ui/input';
-import { publicApi } from '@/lib/public-api-client';
-import Link from 'next/link';
+  Clock,
+} from "lucide-react";
+import { Input } from "../../ui/input";
+import { publicApi } from "@/lib/public-api-client";
+import Link from "next/link";
 
 interface Activity {
   id: string;
@@ -38,18 +44,18 @@ interface ParkActivitiesProps {
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const formatTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleTimeString('id-ID', { 
-    hour: '2-digit', 
-    minute: '2-digit' 
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
@@ -57,17 +63,17 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [hasNextPage, setHasNextPage] = useState(false);
   const itemsPerPage = 6;
 
-  const loadActivities = async (page = 1, search = '') => {
+  const loadActivities = async (page = 1, search = "") => {
     try {
       setLoading(true);
       setError(null);
-      
+
       const params = {
         limit: itemsPerPage,
         offset: (page - 1) * itemsPerPage,
@@ -75,18 +81,19 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
       };
 
       const response = await publicApi.getActivitiesByPark(parkId, params);
-      
+
       if (page === 1) {
         setActivities(response.items);
       } else {
-        setActivities(prev => [...prev, ...response.items]);
+        setActivities((prev) => [...prev, ...response.items]);
       }
-      
+
       setTotalItems(response.total);
       setHasNextPage(response.hasNext);
       setCurrentPage(page);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal memuat kegiatan';
+      const message =
+        err instanceof Error ? err.message : "Gagal memuat kegiatan";
       setError(message);
     } finally {
       setLoading(false);
@@ -108,9 +115,10 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
     }
   };
 
-  const filteredActivities = activities.filter(activity =>
-    activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    activity.description.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredActivities = activities.filter(
+    (activity) =>
+      activity.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      activity.description.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (error) {
@@ -174,24 +182,27 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
             Belum ada kegiatan
           </h3>
           <p className="text-sm text-muted-foreground">
-            {searchQuery 
+            {searchQuery
               ? `Tidak ada kegiatan yang cocok dengan pencarian "${searchQuery}"`
-              : 'Belum ada kegiatan yang dipublikasikan untuk taman ini'
-            }
+              : "Belum ada kegiatan yang dipublikasikan untuk taman ini"}
           </p>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredActivities.map((activity) => (
-              <Card key={activity.id} className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <Card
+                key={activity.id}
+                className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              >
                 <Link href={`/kegiatan/${activity.id}`}>
                   <CardContent className="p-0">
                     <div className="relative h-48 w-full overflow-hidden">
                       <img
-                        src={activity.images && activity.images.length > 0 
-                          ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${activity.images[0]}`
-                          : '/placeholder.svg'
+                        src={
+                          activity.images && activity.images.length > 0
+                            ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${activity.images[0]}`
+                            : "/placeholder.svg"
                         }
                         alt={activity.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
@@ -199,13 +210,19 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <div className="absolute top-3 right-3">
-                        <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 border-emerald-200">
+                        <Badge
+                          variant="secondary"
+                          className="bg-emerald-100 text-emerald-800 border-emerald-200"
+                        >
                           {formatDate(activity.activity_date)}
                         </Badge>
                       </div>
                       {activity.images && activity.images.length > 1 && (
                         <div className="absolute top-3 left-3">
-                          <Badge variant="secondary" className="bg-black/50 text-white border-transparent">
+                          <Badge
+                            variant="secondary"
+                            className="bg-black/50 text-white border-transparent"
+                          >
                             +{activity.images.length - 1}
                           </Badge>
                         </div>
@@ -216,14 +233,14 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
                         {activity.title}
                       </h3>
                       <p className="text-sm text-slate-600 mt-1">
-                        {activity.park_name || 'Taman Konservasi'}
+                        {activity.park_name || "Taman Konservasi"}
                       </p>
                       <p className="text-xs text-slate-500 mt-2 line-clamp-2">
-                        {activity.description || 'Deskripsi tidak tersedia'}
+                        {activity.description || "Deskripsi tidak tersedia"}
                       </p>
                       <div className="flex items-center justify-between mt-4">
                         <span className="text-xs text-slate-500">
-                          {activity.location || 'Lokasi tidak tersedia'}
+                          {activity.location || "Lokasi tidak tersedia"}
                         </span>
                         <ChevronRight className="w-4 h-4 text-emerald-600 group-hover:translate-x-1 transition-transform" />
                       </div>
@@ -237,8 +254,8 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
           {/* Load More Button */}
           {hasNextPage && (
             <div className="text-center">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={loadMore}
                 disabled={loading}
                 className="min-w-32"
@@ -249,7 +266,7 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
                     Memuat...
                   </>
                 ) : (
-                  'Muat Lebih Banyak'
+                  "Muat Lebih Banyak"
                 )}
               </Button>
             </div>
@@ -259,4 +276,3 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
     </div>
   );
 }
-

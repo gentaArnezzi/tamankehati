@@ -1,4 +1,4 @@
-import { Flora } from '../../lib/api-client';
+import { Flora } from "../../lib/api-client";
 import {
   Table,
   TableBody,
@@ -6,10 +6,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Eye, Pencil, Trash2, Send } from 'lucide-react';
+} from "../ui/table";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Eye, Pencil, Trash2, Send } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,8 +19,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '../ui/alert-dialog';
-import { useState } from 'react';
+} from "../ui/alert-dialog";
+import { useState } from "react";
 
 interface FloraTableProps {
   data: Flora[];
@@ -31,40 +31,53 @@ interface FloraTableProps {
   onSubmitReview: (id: string) => void;
 }
 
-export function FloraTable({ 
-  data, 
-  loading, 
-  onEdit, 
-  onView, 
+export function FloraTable({
+  data,
+  loading,
+  onEdit,
+  onView,
   onDelete,
-  onSubmitReview 
+  onSubmitReview,
 }: FloraTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const getStatusBadge = (status: string) => {
-    const variants: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
-      draft: { label: 'Draft', variant: 'secondary' },
-      in_review: { label: 'Dalam Peninjauan', variant: 'default' },
-      approved: { label: 'Disetujui', variant: 'outline' },
-      rejected: { label: 'Ditolak', variant: 'destructive' },
+    const variants: Record<
+      string,
+      {
+        label: string;
+        variant: "default" | "secondary" | "destructive" | "outline";
+      }
+    > = {
+      draft: { label: "Draft", variant: "secondary" },
+      in_review: { label: "Dalam Peninjauan", variant: "default" },
+      approved: { label: "Disetujui", variant: "outline" },
+      rejected: { label: "Ditolak", variant: "destructive" },
     };
-    
+
     const config = variants[status] || variants.draft;
     return (
-      <Badge variant={config.variant} className={status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' : ''}>
+      <Badge
+        variant={config.variant}
+        className={
+          status === "approved"
+            ? "bg-green-100 text-green-800 border-green-200"
+            : ""
+        }
+      >
         {config.label}
       </Badge>
     );
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
+    if (!dateString) return "-";
     const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
     });
   };
 
@@ -74,11 +87,21 @@ export function FloraTable({
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Nama Ilmiah</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Nama Lokal</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Famili</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 text-right">Aksi</TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Nama Ilmiah
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Nama Lokal
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Famili
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Status
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 text-right">
+                Aksi
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -116,12 +139,26 @@ export function FloraTable({
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-12 text-center">
         <div className="flex flex-col items-center justify-center">
           <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-            <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            <svg
+              className="w-8 h-8 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+              />
             </svg>
           </div>
-          <p className="text-gray-900 font-medium mb-1">Tidak ada data flora ditemukan</p>
-          <p className="text-sm text-gray-500">Coba ubah filter atau tambah data baru</p>
+          <p className="text-gray-900 font-medium mb-1">
+            Tidak ada data flora ditemukan
+          </p>
+          <p className="text-sm text-gray-500">
+            Coba ubah filter atau tambah data baru
+          </p>
         </div>
       </div>
     );
@@ -133,32 +170,57 @@ export function FloraTable({
         <Table>
           <TableHeader>
             <TableRow className="border-b border-gray-100 hover:bg-transparent">
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Nama Ilmiah</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Nama Lokal</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Famili</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Genus</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Morfologi</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Manfaat / Kegunaan</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Status IUCN</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Status</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">Tanggal</TableHead>
-              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 text-right">Aksi</TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Nama Ilmiah
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Nama Lokal
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Famili
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Genus
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Morfologi
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Manfaat / Kegunaan
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Status IUCN
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Status
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Tanggal
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4 text-right">
+                Aksi
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data.map((flora) => (
-              <TableRow key={flora.id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <TableRow
+                key={flora.id}
+                className="border-b border-gray-50 hover:bg-gray-50/50 transition-colors"
+              >
                 <TableCell className="py-4">
-                  <span className="font-medium italic">{flora.nama_ilmiah}</span>
+                  <span className="font-medium italic">
+                    {flora.nama_ilmiah}
+                  </span>
                 </TableCell>
-                <TableCell className="py-4">{flora.nama_umum || '-'}</TableCell>
-                <TableCell className="py-4">{flora.famili || '-'}</TableCell>
-                <TableCell className="py-4">{flora.genus || '-'}</TableCell>
+                <TableCell className="py-4">{flora.nama_umum || "-"}</TableCell>
+                <TableCell className="py-4">{flora.famili || "-"}</TableCell>
+                <TableCell className="py-4">{flora.genus || "-"}</TableCell>
                 <TableCell className="py-4 max-w-[200px] truncate">
-                  {flora.morfologi || '-'}
+                  {flora.morfologi || "-"}
                 </TableCell>
                 <TableCell className="py-4 max-w-[200px] truncate">
-                  {flora.manfaat || '-'}
+                  {flora.manfaat || "-"}
                 </TableCell>
                 <TableCell className="py-4">
                   {flora.status_iucn ? (
@@ -166,10 +228,12 @@ export function FloraTable({
                       {flora.status_iucn}
                     </Badge>
                   ) : (
-                    '-'
+                    "-"
                   )}
                 </TableCell>
-                <TableCell className="py-4">{getStatusBadge(flora.status)}</TableCell>
+                <TableCell className="py-4">
+                  {getStatusBadge(flora.status)}
+                </TableCell>
                 <TableCell className="py-4 text-sm text-muted-foreground">
                   {formatDate(flora.created_at)}
                 </TableCell>
@@ -183,7 +247,8 @@ export function FloraTable({
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
-                    {(flora.status === 'draft' || flora.status === 'approved') && (
+                    {(flora.status === "draft" ||
+                      flora.status === "approved") && (
                       <>
                         <Button
                           variant="ghost"
@@ -193,13 +258,13 @@ export function FloraTable({
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
-                        {flora.status === 'draft' && (
+                        {flora.status === "draft" && (
                           <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => onSubmitReview(flora.id)}
                             title="Ajukan untuk Ditinjau"
-                            style={{ color: '#356447' }}
+                            style={{ color: "#356447" }}
                           >
                             <Send className="h-4 w-4" />
                           </Button>
@@ -215,7 +280,7 @@ export function FloraTable({
                         </Button>
                       </>
                     )}
-                    {flora.status === 'rejected' && (
+                    {flora.status === "rejected" && (
                       <Button
                         variant="ghost"
                         size="sm"
@@ -238,7 +303,8 @@ export function FloraTable({
           <AlertDialogHeader>
             <AlertDialogTitle>Konfirmasi Penghapusan</AlertDialogTitle>
             <AlertDialogDescription>
-              Apakah Anda yakin ingin menghapus data flora ini? Tindakan ini tidak dapat dibatalkan.
+              Apakah Anda yakin ingin menghapus data flora ini? Tindakan ini
+              tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { PublicAnnouncements } from '../../../components/announcements/PublicAnnouncements';
+import { PublicAnnouncements } from "../../../components/announcements/PublicAnnouncements";
 
 export default function AnnouncementsPage() {
   return (
@@ -11,7 +11,7 @@ export default function AnnouncementsPage() {
           Informasi terkini dan pengumuman penting dari Taman Kehati
         </p>
       </div>
-      
+
       <PublicAnnouncements />
     </div>
   );

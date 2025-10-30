@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function DemoAIPage() {
   const router = useRouter();
 
   useEffect(() => {
     // Redirect to dashboard AI Demo page
-    router.replace('/dashboard/ai-demo');
+    router.replace("/dashboard/ai-demo");
   }, [router]);
 
   return (

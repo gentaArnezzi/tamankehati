@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  redirect('/dashboard/taman/galeri');
+  redirect("/dashboard/taman/galeri");
 }

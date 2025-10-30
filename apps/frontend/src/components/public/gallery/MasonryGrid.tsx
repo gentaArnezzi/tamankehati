@@ -1,6 +1,6 @@
-import Image from 'next/image';
-import { cn } from '../../ui/utils';
-import type { GalleryItem } from '../../../types/gallery';
+import Image from "next/image";
+import { cn } from "../../ui/utils";
+import type { GalleryItem } from "../../../types/gallery";
 
 type MasonryGridProps = {
   items: GalleryItem[];
@@ -10,14 +10,14 @@ type MasonryGridProps = {
 
 export function MasonryGrid({ items, onSelect, className }: MasonryGridProps) {
   return (
-    <div className={cn('columns-1 gap-4 sm:columns-2 lg:columns-3', className)}>
+    <div className={cn("columns-1 gap-4 sm:columns-2 lg:columns-3", className)}>
       {items.map((item) => {
         const imageSrc =
           item.thumbnail && item.thumbnail.trim()
             ? item.thumbnail
             : item.url && item.url.trim()
               ? item.url
-              : '/hero/forest.webp';
+              : "/hero/forest.webp";
         return (
           <figure
             key={item.id}
@@ -42,7 +42,9 @@ export function MasonryGrid({ items, onSelect, className }: MasonryGridProps) {
             </button>
 
             <figcaption className="space-y-2 p-4">
-              <p className="text-sm font-semibold text-slate-800">{item.judul}</p>
+              <p className="text-sm font-semibold text-slate-800">
+                {item.judul}
+              </p>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
                 {item.wilayah && <span>{item.wilayah}</span>}
                 {item.jenis && (
@@ -51,7 +53,9 @@ export function MasonryGrid({ items, onSelect, className }: MasonryGridProps) {
                   </span>
                 )}
                 {item.entitas && (
-                  <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-600">{item.entitas}</span>
+                  <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-600">
+                    {item.entitas}
+                  </span>
                 )}
               </div>
             </figcaption>

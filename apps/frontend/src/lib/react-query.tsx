@@ -1,9 +1,9 @@
 // src/lib/react-query.tsx
-'use client';
+"use client";
 
-import React, { ReactNode } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import React, { ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 interface ReactQueryProviderProps {
   children: ReactNode;
@@ -29,15 +29,15 @@ const queryClient = new QueryClient({
   },
 });
 
-export const ReactQueryProvider: React.FC<ReactQueryProviderProps> = ({ children }) => {
+export const ReactQueryProvider: React.FC<ReactQueryProviderProps> = ({
+  children,
+}) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
       {/* Temporarily disable DevTools to avoid chunk loading errors */}
-      {false && process.env.NODE_ENV === 'development' && (
-        <ReactQueryDevtools 
-          initialIsOpen={false}
-        />
+      {false && process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
       )}
     </QueryClientProvider>
   );

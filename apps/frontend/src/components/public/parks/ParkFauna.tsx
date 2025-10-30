@@ -1,14 +1,14 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Skeleton } from '../../ui/skeleton';
-import { PawPrint, ArrowRight } from 'lucide-react';
-import { getFaunaList } from '../../../lib/api/client-public';
-import type { FaunaPublic } from '../../../types/public';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Card, CardContent } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Skeleton } from "../../ui/skeleton";
+import { PawPrint, ArrowRight } from "lucide-react";
+import { getFaunaList } from "../../../lib/api/client-public";
+import type { FaunaPublic } from "../../../types/public";
 
 interface ParkFaunaProps {
   parkId: number;
@@ -26,8 +26,8 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
         const response = await getFaunaList({ taman: parkId, limit: 6 });
         setFauna(response.items || []);
       } catch (err) {
-        setError('Gagal memuat data fauna');
-        console.error('Error fetching fauna:', err);
+        setError("Gagal memuat data fauna");
+        console.error("Error fetching fauna:", err);
       } finally {
         setLoading(false);
       }
@@ -75,12 +75,15 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {fauna.map((item) => (
-        <Card key={item.id} className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <Card
+          key={item.id}
+          className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        >
           <Link href={`/fauna/${item.id}`}>
             <CardContent className="p-0">
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
-                  src={item.gambar_utama || '/placeholder.svg'}
+                  src={item.gambar_utama || "/placeholder.svg"}
                   alt={item.nama_umum || item.nama_ilmiah}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -88,13 +91,19 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute top-3 right-3">
-                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 border-blue-200">
-                    {item.status_iucn || 'N/A'}
+                  <Badge
+                    variant="secondary"
+                    className="bg-blue-100 text-blue-800 border-blue-200"
+                  >
+                    {item.status_iucn || "N/A"}
                   </Badge>
                 </div>
                 {item.is_endemic && (
                   <div className="absolute top-3 left-3">
-                    <Badge variant="secondary" className="bg-amber-100 text-amber-800 border-amber-200">
+                    <Badge
+                      variant="secondary"
+                      className="bg-amber-100 text-amber-800 border-amber-200"
+                    >
                       Endemik
                     </Badge>
                   </div>
@@ -105,14 +114,14 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
                   {item.nama_ilmiah}
                 </h3>
                 <p className="text-sm text-slate-600 mt-1">
-                  {item.nama_umum || 'Nama umum tidak tersedia'}
+                  {item.nama_umum || "Nama umum tidak tersedia"}
                 </p>
                 <p className="text-xs text-slate-500 mt-2 line-clamp-2">
-                  {item.deskripsi || 'Deskripsi tidak tersedia'}
+                  {item.deskripsi || "Deskripsi tidak tersedia"}
                 </p>
                 <div className="flex items-center justify-between mt-4">
                   <span className="text-xs text-slate-500">
-                    {item.famili || 'Famili tidak tersedia'}
+                    {item.famili || "Famili tidak tersedia"}
                   </span>
                   <ArrowRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform" />
                 </div>

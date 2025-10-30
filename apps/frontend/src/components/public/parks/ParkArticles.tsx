@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { Card, CardContent } from '../../ui/card';
-import { Badge } from '../../ui/badge';
-import { Skeleton } from '../../ui/skeleton';
-import { BookOpen, ArrowRight, Calendar } from 'lucide-react';
-import { formatDate } from '../../../lib/utils';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { Card, CardContent } from "../../ui/card";
+import { Badge } from "../../ui/badge";
+import { Skeleton } from "../../ui/skeleton";
+import { BookOpen, ArrowRight, Calendar } from "lucide-react";
+import { formatDate } from "../../../lib/utils";
 
 interface Article {
   id: string;
@@ -36,8 +36,8 @@ export function ParkArticles({ parkId }: ParkArticlesProps) {
         // For now, we'll show a placeholder
         setArticles([]);
       } catch (err) {
-        setError('Gagal memuat data artikel');
-        console.error('Error fetching articles:', err);
+        setError("Gagal memuat data artikel");
+        console.error("Error fetching articles:", err);
       } finally {
         setLoading(false);
       }
@@ -89,12 +89,15 @@ export function ParkArticles({ parkId }: ParkArticlesProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {articles.map((article) => (
-        <Card key={article.id} className="group overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <Card
+          key={article.id}
+          className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
+        >
           <Link href={`/artikel/${article.id}`}>
             <CardContent className="p-0">
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
-                  src={article.image || '/placeholder.svg'}
+                  src={article.image || "/placeholder.svg"}
                   alt={article.title}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -102,7 +105,10 @@ export function ParkArticles({ parkId }: ParkArticlesProps) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 <div className="absolute top-3 right-3">
-                  <Badge variant="secondary" className="bg-gradient-to-r from-green-100 to-blue-100 text-slate-800 border-slate-200">
+                  <Badge
+                    variant="secondary"
+                    className="bg-gradient-to-r from-green-100 to-blue-100 text-slate-800 border-slate-200"
+                  >
                     {article.category}
                   </Badge>
                 </div>
@@ -129,5 +135,3 @@ export function ParkArticles({ parkId }: ParkArticlesProps) {
     </div>
   );
 }
-
-

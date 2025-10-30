@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { MisiHero } from './MisiHero';
-import { MisiTheoryOfChange } from './MisiTheoryOfChange';
-import { MisiCTA } from './MisiCTA';
+import { MisiHero } from "./MisiHero";
+import { MisiTheoryOfChange } from "./MisiTheoryOfChange";
+import { MisiCTA } from "./MisiCTA";
 
 export function MisiPage() {
   return (

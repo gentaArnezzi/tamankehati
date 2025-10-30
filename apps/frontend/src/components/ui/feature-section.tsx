@@ -1,23 +1,23 @@
-"use client"
+"use client";
 
-import React, { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import Image from "next/image"
-import { cn } from "@/lib/utils"
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
+import { cn } from "@/lib/utils";
 
 interface Feature {
-  step: string
-  title?: string
-  content: string
-  image: string
+  step: string;
+  title?: string;
+  content: string;
+  image: string;
 }
 
 interface FeatureStepsProps {
-  features: Feature[]
-  className?: string
-  title?: string
-  autoPlayInterval?: number
-  imageHeight?: string
+  features: Feature[];
+  className?: string;
+  title?: string;
+  autoPlayInterval?: number;
+  imageHeight?: string;
 }
 
 export function FeatureSteps({
@@ -27,21 +27,21 @@ export function FeatureSteps({
   autoPlayInterval = 3000,
   imageHeight = "h-[400px]",
 }: FeatureStepsProps) {
-  const [currentFeature, setCurrentFeature] = useState(0)
-  const [progress, setProgress] = useState(0)
+  const [currentFeature, setCurrentFeature] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
       if (progress < 100) {
-        setProgress((prev) => prev + 100 / (autoPlayInterval / 100))
+        setProgress((prev) => prev + 100 / (autoPlayInterval / 100));
       } else {
-        setCurrentFeature((prev) => (prev + 1) % features.length)
-        setProgress(0)
+        setCurrentFeature((prev) => (prev + 1) % features.length);
+        setProgress(0);
       }
-    }, 100)
+    }, 100);
 
-    return () => clearInterval(timer)
-  }, [progress, features.length, autoPlayInterval])
+    return () => clearInterval(timer);
+  }, [progress, features.length, autoPlayInterval]);
 
   return (
     <div className={cn("p-8 md:p-12", className)}>
@@ -89,7 +89,7 @@ export function FeatureSteps({
 
           <div
             className={cn(
-              "order-1 md:order-2 relative h-[200px] md:h-[300px] lg:h-[400px] overflow-hidden rounded-lg"
+              "order-1 md:order-2 relative h-[200px] md:h-[300px] lg:h-[400px] overflow-hidden rounded-lg",
             )}
           >
             <AnimatePresence mode="wait">
@@ -120,6 +120,5 @@ export function FeatureSteps({
         </div>
       </div>
     </div>
-  )
+  );
 }
-

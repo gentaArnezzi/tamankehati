@@ -1,14 +1,26 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Loader2, Edit, X } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Loader2, Edit, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface RegionEditFormProps {
   onSuccess?: () => void;
@@ -31,48 +43,56 @@ interface RegionFormData {
 
 // Timezone Indonesia
 const INDONESIA_TIMEZONES = [
-  { value: 'Asia/Jakarta', label: 'WIB (Jakarta)' },
-  { value: 'Asia/Makassar', label: 'WITA (Makassar)' },
-  { value: 'Asia/Jayapura', label: 'WIT (Jayapura)' },
+  { value: "Asia/Jakarta", label: "WIB (Jakarta)" },
+  { value: "Asia/Makassar", label: "WITA (Makassar)" },
+  { value: "Asia/Jayapura", label: "WIT (Jayapura)" },
 ];
 
-export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEditFormProps) {
+export function RegionEditForm({
+  onSuccess,
+  onCancel,
+  regionToEdit,
+}: RegionEditFormProps) {
   const [formData, setFormData] = useState<RegionFormData>({
     name: regionToEdit.name,
     code: regionToEdit.code,
-    timezone: regionToEdit.timezone || 'Asia/Jakarta',
+    timezone: regionToEdit.timezone || "Asia/Jakarta",
     is_active: regionToEdit.is_active,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/crud/regions/${regionToEdit.id}/`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/crud/regions/${regionToEdit.id}/`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
         },
-        body: JSON.stringify(formData),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Gagal mengupdate region');
+        throw new Error(errorData.detail || "Gagal mengupdate region");
       }
 
       const result = await response.json();
       toast.success(`Region "${result.name}" berhasil diupdate`);
-      
+
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal mengupdate region';
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal mengupdate region";
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -80,8 +100,11 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
     }
   };
 
-  const handleChange = (field: keyof RegionFormData, value: string | boolean) => {
-    setFormData(prev => ({
+  const handleChange = (
+    field: keyof RegionFormData,
+    value: string | boolean,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -94,9 +117,7 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
           <Edit className="h-5 w-5" />
           Edit Region
         </CardTitle>
-        <CardDescription>
-          Edit region {regionToEdit.name}
-        </CardDescription>
+        <CardDescription>Edit region {regionToEdit.name}</CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -112,7 +133,7 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
               id="name"
               type="text"
               value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
+              onChange={(e) => handleChange("name", e.target.value)}
               placeholder="Contoh: DKI Jakarta"
               required
             />
@@ -124,7 +145,9 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
               id="code"
               type="text"
               value={formData.code}
-              onChange={(e) => handleChange('code', e.target.value.toUpperCase())}
+              onChange={(e) =>
+                handleChange("code", e.target.value.toUpperCase())
+              }
               placeholder="Contoh: JKT"
               required
               maxLength={10}
@@ -135,7 +158,7 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
             <Label htmlFor="timezone">Timezone</Label>
             <Select
               value={formData.timezone}
-              onValueChange={(value) => handleChange('timezone', value)}
+              onValueChange={(value) => handleChange("timezone", value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Pilih timezone" />
@@ -155,7 +178,7 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
               type="checkbox"
               id="is_active"
               checked={formData.is_active}
-              onChange={(e) => handleChange('is_active', e.target.checked)}
+              onChange={(e) => handleChange("is_active", e.target.checked)}
               className="rounded"
             />
             <Label htmlFor="is_active">Region Aktif</Label>

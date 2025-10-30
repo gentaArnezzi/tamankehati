@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import type { ReactNode } from 'react';
-import { Suspense } from 'react';
-import { PublicHeader } from './PublicHeader';
-import { Footer } from './Footer';
-import { RouteAnalytics } from './analytics/RouteAnalytics';
+import type { ReactNode } from "react";
+import { Suspense } from "react";
+import { PublicHeader } from "./PublicHeader";
+import { Footer } from "./Footer";
+import { RouteAnalytics } from "./analytics/RouteAnalytics";
 
 type PublicLayoutProps = {
   children: ReactNode;

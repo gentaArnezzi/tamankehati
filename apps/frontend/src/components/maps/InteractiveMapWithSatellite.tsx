@@ -1,17 +1,29 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  MapPin, 
-  TreePine, 
-  Bird, 
-  Users, 
-  Eye, 
+import {
+  MapPin,
+  TreePine,
+  Bird,
+  Users,
+  Eye,
   Filter,
   Layers,
   Search,
@@ -30,8 +42,8 @@ import {
   Maximize2,
   Minimize2,
   Grid3X3,
-  List
-} from 'lucide-react';
+  List,
+} from "lucide-react";
 
 // Data taman nasional Indonesia dengan koordinat yang lebih akurat
 const nationalParksData = [
@@ -46,14 +58,15 @@ const nationalParksData = [
     endemic: 45,
     status: "World Heritage Site",
     established: 1980,
-    description: "Rumah bagi orangutan Sumatra dan harimau Sumatra yang terancam punah.",
+    description:
+      "Rumah bagi orangutan Sumatra dan harimau Sumatra yang terancam punah.",
     flora: 320,
     fauna: 130,
     threats: ["Deforestasi", "Perburuan liar", "Konflik manusia-satwa"],
     conservation: "Kritis",
     category: "Terrestrial",
     elevation: "0-3404m",
-    climate: "Tropical Rainforest"
+    climate: "Tropical Rainforest",
   },
   {
     id: 2,
@@ -66,14 +79,15 @@ const nationalParksData = [
     endemic: 28,
     status: "World Heritage Site",
     established: 1982,
-    description: "Melindungi ekosistem hutan hujan tropis dan gunung berapi aktif.",
+    description:
+      "Melindungi ekosistem hutan hujan tropis dan gunung berapi aktif.",
     flora: 280,
     fauna: 100,
     threats: ["Pertambangan", "Perkebunan", "Perburuan"],
     conservation: "Tinggi",
     category: "Terrestrial",
     elevation: "200-3805m",
-    climate: "Tropical Rainforest"
+    climate: "Tropical Rainforest",
   },
   {
     id: 3,
@@ -86,14 +100,15 @@ const nationalParksData = [
     endemic: 23,
     status: "World Heritage Site",
     established: 1982,
-    description: "Kawasan konservasi penting untuk harimau Sumatra dan badak Sumatra.",
+    description:
+      "Kawasan konservasi penting untuk harimau Sumatra dan badak Sumatra.",
     flora: 200,
     fauna: 90,
     threats: ["Perrambahan", "Perburuan", "Fragmentasi habitat"],
     conservation: "Kritis",
     category: "Terrestrial",
     elevation: "0-1831m",
-    climate: "Tropical Rainforest"
+    climate: "Tropical Rainforest",
   },
   {
     id: 4,
@@ -106,14 +121,15 @@ const nationalParksData = [
     endemic: 15,
     status: "Ramsar Site",
     established: 1989,
-    description: "Sekolah gajah pertama di Indonesia dan habitat badak Sumatra.",
+    description:
+      "Sekolah gajah pertama di Indonesia dan habitat badak Sumatra.",
     flora: 120,
     fauna: 60,
     threats: ["Perrambahan", "Konflik manusia-satwa"],
     conservation: "Tinggi",
     category: "Terrestrial",
     elevation: "0-100m",
-    climate: "Tropical Wetland"
+    climate: "Tropical Wetland",
   },
   {
     id: 5,
@@ -133,7 +149,7 @@ const nationalParksData = [
     conservation: "Kritis",
     category: "Terrestrial",
     elevation: "0-620m",
-    climate: "Tropical Rainforest"
+    climate: "Tropical Rainforest",
   },
   {
     id: 6,
@@ -153,7 +169,7 @@ const nationalParksData = [
     conservation: "Sedang",
     category: "Terrestrial",
     elevation: "2100-3676m",
-    climate: "Temperate Highland"
+    climate: "Temperate Highland",
   },
   {
     id: 7,
@@ -173,7 +189,7 @@ const nationalParksData = [
     conservation: "Tinggi",
     category: "Marine",
     elevation: "0-735m",
-    climate: "Tropical Savanna"
+    climate: "Tropical Savanna",
   },
   {
     id: 8,
@@ -186,14 +202,15 @@ const nationalParksData = [
     endemic: 89,
     status: "World Heritage Site",
     established: 1997,
-    description: "Taman nasional terbesar di Asia Tenggara dengan keanekaragaman hayati tinggi.",
+    description:
+      "Taman nasional terbesar di Asia Tenggara dengan keanekaragaman hayati tinggi.",
     flora: 450,
     fauna: 200,
     threats: ["Pertambangan", "Perrambahan", "Perburuan"],
     conservation: "Tinggi",
     category: "Terrestrial",
     elevation: "0-4884m",
-    climate: "Tropical to Alpine"
+    climate: "Tropical to Alpine",
   },
   {
     id: 9,
@@ -213,7 +230,7 @@ const nationalParksData = [
     conservation: "Kritis",
     category: "Terrestrial",
     elevation: "0-200m",
-    climate: "Tropical Rainforest"
+    climate: "Tropical Rainforest",
   },
   {
     id: 10,
@@ -233,8 +250,8 @@ const nationalParksData = [
     conservation: "Tinggi",
     category: "Marine",
     elevation: "0-1344m",
-    climate: "Tropical Marine"
-  }
+    climate: "Tropical Marine",
+  },
 ];
 
 interface InteractiveMapProps {
@@ -242,50 +259,69 @@ interface InteractiveMapProps {
 }
 
 export function InteractiveMap({ className }: InteractiveMapProps) {
-  const [selectedLayer, setSelectedLayer] = useState<'all' | 'flora' | 'fauna' | 'endemic'>('all');
-  const [selectedConservation, setSelectedConservation] = useState<'all' | 'kritis' | 'tinggi' | 'sedang'>('all');
-  const [selectedCategory, setSelectedCategory] = useState<'all' | 'terrestrial' | 'marine'>('all');
+  const [selectedLayer, setSelectedLayer] = useState<
+    "all" | "flora" | "fauna" | "endemic"
+  >("all");
+  const [selectedConservation, setSelectedConservation] = useState<
+    "all" | "kritis" | "tinggi" | "sedang"
+  >("all");
+  const [selectedCategory, setSelectedCategory] = useState<
+    "all" | "terrestrial" | "marine"
+  >("all");
   const [selectedPark, setSelectedPark] = useState<any>(null);
-  const [mapView, setMapView] = useState<'grid' | 'list' | 'satellite'>('grid');
-  const [mapType, setMapType] = useState<'street' | 'satellite' | 'terrain'>('street');
+  const [mapView, setMapView] = useState<"grid" | "list" | "satellite">("grid");
+  const [mapType, setMapType] = useState<"street" | "satellite" | "terrain">(
+    "street",
+  );
 
-  const filteredParks = nationalParksData.filter(park => {
-    const layerMatch = selectedLayer === 'all' || 
-      (selectedLayer === 'flora' && park.flora > 200) ||
-      (selectedLayer === 'fauna' && park.fauna > 80) ||
-      (selectedLayer === 'endemic' && park.endemic > 20);
-    
-    const conservationMatch = selectedConservation === 'all' || 
+  const filteredParks = nationalParksData.filter((park) => {
+    const layerMatch =
+      selectedLayer === "all" ||
+      (selectedLayer === "flora" && park.flora > 200) ||
+      (selectedLayer === "fauna" && park.fauna > 80) ||
+      (selectedLayer === "endemic" && park.endemic > 20);
+
+    const conservationMatch =
+      selectedConservation === "all" ||
       park.conservation.toLowerCase() === selectedConservation;
-    
-    const categoryMatch = selectedCategory === 'all' || 
+
+    const categoryMatch =
+      selectedCategory === "all" ||
       park.category.toLowerCase() === selectedCategory;
-    
+
     return layerMatch && conservationMatch && categoryMatch;
   });
 
   const getConservationColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'kritis': return '#EF4444';
-      case 'tinggi': return '#F59E0B';
-      case 'sedang': return '#10B981';
-      default: return '#6B7280';
+      case "kritis":
+        return "#EF4444";
+      case "tinggi":
+        return "#F59E0B";
+      case "sedang":
+        return "#10B981";
+      default:
+        return "#6B7280";
     }
   };
 
   const getConservationIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'kritis': return '🔴';
-      case 'tinggi': return '🟡';
-      case 'sedang': return '🟢';
-      default: return '⚪';
+      case "kritis":
+        return "🔴";
+      case "tinggi":
+        return "🟡";
+      case "sedang":
+        return "🟢";
+      default:
+        return "⚪";
     }
   };
 
   const openInGoogleMaps = (coordinates: [number, number], name: string) => {
     const [lat, lng] = coordinates;
     const url = `https://www.google.com/maps?q=${lat},${lng}&z=10`;
-    window.open(url, '_blank');
+    window.open(url, "_blank");
   };
 
   // Satellite view dengan Leaflet yang sederhana
@@ -299,16 +335,16 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
         try {
           // Load CSS
           if (!document.querySelector('link[href*="leaflet"]')) {
-            const link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+            const link = document.createElement("link");
+            link.rel = "stylesheet";
+            link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
             document.head.appendChild(link);
           }
 
           // Load JS
           if (!(window as any).L) {
-            const script = document.createElement('script');
-            script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+            const script = document.createElement("script");
+            script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
             script.onload = () => {
               setMapLoaded(true);
             };
@@ -320,7 +356,7 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
             setMapLoaded(true);
           }
         } catch (error) {
-          console.error('Error loading Leaflet:', error);
+          console.error("Error loading Leaflet:", error);
           setMapError(true);
         }
       };
@@ -333,7 +369,7 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
 
       const mapId = `satellite-map-${Date.now()}`;
       const mapContainer = document.getElementById(mapId);
-      
+
       if (!mapContainer || !(window as any).L) return;
 
       try {
@@ -341,19 +377,26 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
         const map = (window as any).L.map(mapId).setView([-2.0, 118.0], 5);
 
         // Add satellite tile layer
-        const satelliteLayer = (window as any).L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-          attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        }).addTo(map);
+        const satelliteLayer = (window as any).L.tileLayer(
+          "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          {
+            attribution:
+              "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
+          },
+        ).addTo(map);
 
         // Add markers for each park
         filteredParks.forEach((park) => {
-          const marker = (window as any).L.circleMarker([park.coordinates[0], park.coordinates[1]], {
-            radius: Math.max(8, Math.min(20, park.area / 1000)),
-            color: getConservationColor(park.conservation),
-            fillColor: getConservationColor(park.conservation),
-            fillOpacity: 0.7,
-            weight: 2
-          }).addTo(map);
+          const marker = (window as any).L.circleMarker(
+            [park.coordinates[0], park.coordinates[1]],
+            {
+              radius: Math.max(8, Math.min(20, park.area / 1000)),
+              color: getConservationColor(park.conservation),
+              fillColor: getConservationColor(park.conservation),
+              fillOpacity: 0.7,
+              weight: 2,
+            },
+          ).addTo(map);
 
           marker.bindPopup(`
             <div style="min-width: 200px;">
@@ -381,7 +424,7 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
           }
         };
       } catch (error) {
-        console.error('Error creating map:', error);
+        console.error("Error creating map:", error);
         setMapError(true);
       }
     }, [mapLoaded, mapError, filteredParks]);
@@ -391,10 +434,12 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
         <div className="h-96 bg-gradient-to-br from-red-100 to-orange-100 rounded-lg flex items-center justify-center">
           <div className="text-center">
             <Satellite className="h-16 w-16 text-red-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Error Memuat Satellite View</h3>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Error Memuat Satellite View
+            </h3>
             <p className="text-gray-600 mb-4">Gagal memuat peta satelit</p>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => {
                 setMapError(false);
                 setMapLoaded(false);
@@ -420,7 +465,7 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
     }
 
     return (
-      <div 
+      <div
         id={`satellite-map-${Date.now()}`}
         className="h-96 w-full rounded-lg"
         style={{ zIndex: 1 }}
@@ -433,7 +478,10 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
       {/* Map Controls */}
       <div className="flex flex-wrap gap-4 items-center justify-between">
         <div className="flex gap-2">
-          <Select value={selectedLayer} onValueChange={(value: any) => setSelectedLayer(value)}>
+          <Select
+            value={selectedLayer}
+            onValueChange={(value: any) => setSelectedLayer(value)}
+          >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Filter Layer" />
             </SelectTrigger>
@@ -445,7 +493,10 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
             </SelectContent>
           </Select>
 
-          <Select value={selectedConservation} onValueChange={(value: any) => setSelectedConservation(value)}>
+          <Select
+            value={selectedConservation}
+            onValueChange={(value: any) => setSelectedConservation(value)}
+          >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Status Konservasi" />
             </SelectTrigger>
@@ -457,7 +508,10 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
             </SelectContent>
           </Select>
 
-          <Select value={selectedCategory} onValueChange={(value: any) => setSelectedCategory(value)}>
+          <Select
+            value={selectedCategory}
+            onValueChange={(value: any) => setSelectedCategory(value)}
+          >
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Kategori" />
             </SelectTrigger>
@@ -470,26 +524,26 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
         </div>
 
         <div className="flex gap-2">
-          <Button 
-            variant={mapView === 'grid' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setMapView('grid')}
+          <Button
+            variant={mapView === "grid" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMapView("grid")}
           >
             <Grid3X3 className="h-4 w-4 mr-1" />
             Grid
           </Button>
-          <Button 
-            variant={mapView === 'list' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setMapView('list')}
+          <Button
+            variant={mapView === "list" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMapView("list")}
           >
             <List className="h-4 w-4 mr-1" />
             List
           </Button>
-          <Button 
-            variant={mapView === 'satellite' ? 'default' : 'outline'} 
-            size="sm" 
-            onClick={() => setMapView('satellite')}
+          <Button
+            variant={mapView === "satellite" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setMapView("satellite")}
           >
             <Satellite className="h-4 w-4 mr-1" />
             Satellite
@@ -503,17 +557,22 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
           <CardTitle className="flex items-center gap-2">
             <MapPin className="h-5 w-5" />
             Peta Interaktif Taman Nasional Indonesia
-            {mapView === 'satellite' && <Badge variant="secondary" className="ml-2">🛰️ Satellite View</Badge>}
+            {mapView === "satellite" && (
+              <Badge variant="secondary" className="ml-2">
+                🛰️ Satellite View
+              </Badge>
+            )}
           </CardTitle>
           <CardDescription>
-            {filteredParks.length} dari {nationalParksData.length} taman nasional ditampilkan
+            {filteredParks.length} dari {nationalParksData.length} taman
+            nasional ditampilkan
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="h-96 w-full rounded-lg overflow-hidden border bg-gradient-to-br from-green-50 to-blue-50">
-            {mapView === 'satellite' ? (
+            {mapView === "satellite" ? (
               <SatelliteMap />
-            ) : mapView === 'grid' ? (
+            ) : mapView === "grid" ? (
               <div className="h-full p-4">
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 h-full overflow-y-auto">
                   {filteredParks.map((park) => (
@@ -523,33 +582,50 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                       onClick={() => setSelectedPark(park)}
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-semibold text-sm text-gray-900 line-clamp-2">{park.name}</h3>
-                        <Badge 
-                          variant="outline" 
-                          style={{ backgroundColor: getConservationColor(park.conservation) }}
+                        <h3 className="font-semibold text-sm text-gray-900 line-clamp-2">
+                          {park.name}
+                        </h3>
+                        <Badge
+                          variant="outline"
+                          style={{
+                            backgroundColor: getConservationColor(
+                              park.conservation,
+                            ),
+                          }}
                           className="text-white border-0 text-xs"
                         >
                           {getConservationIcon(park.conservation)}
                         </Badge>
                       </div>
-                      
+
                       <div className="space-y-1 text-xs text-gray-600">
-                        <p><strong>Lokasi:</strong> {park.location}</p>
-                        <p><strong>Luas:</strong> {park.area.toLocaleString()} ha</p>
+                        <p>
+                          <strong>Lokasi:</strong> {park.location}
+                        </p>
+                        <p>
+                          <strong>Luas:</strong> {park.area.toLocaleString()} ha
+                        </p>
                         <div className="flex gap-2 text-xs">
-                          <span className="text-green-600">🌿 {park.flora}</span>
+                          <span className="text-green-600">
+                            🌿 {park.flora}
+                          </span>
                           <span className="text-blue-600">🐾 {park.fauna}</span>
-                          <span className="text-purple-600">⭐ {park.endemic}</span>
+                          <span className="text-purple-600">
+                            ⭐ {park.endemic}
+                          </span>
                         </div>
                       </div>
-                      
+
                       <Button
                         size="sm"
                         variant="outline"
                         className="w-full mt-2 text-xs"
                         onClick={(e) => {
                           e.stopPropagation();
-                          openInGoogleMaps(park.coordinates as [number, number], park.name);
+                          openInGoogleMaps(
+                            park.coordinates as [number, number],
+                            park.name,
+                          );
                         }}
                       >
                         <ExternalLink className="h-3 w-3 mr-1" />
@@ -571,20 +647,31 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <h3 className="font-semibold text-gray-900">{park.name}</h3>
-                            <Badge 
-                              variant="outline" 
-                              style={{ backgroundColor: getConservationColor(park.conservation) }}
+                            <h3 className="font-semibold text-gray-900">
+                              {park.name}
+                            </h3>
+                            <Badge
+                              variant="outline"
+                              style={{
+                                backgroundColor: getConservationColor(
+                                  park.conservation,
+                                ),
+                              }}
                               className="text-white border-0"
                             >
-                              {getConservationIcon(park.conservation)} {park.conservation}
+                              {getConservationIcon(park.conservation)}{" "}
+                              {park.conservation}
                             </Badge>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{park.location}</p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {park.location}
+                          </p>
                           <div className="flex gap-4 text-sm text-gray-600">
                             <span>Luas: {park.area.toLocaleString()} ha</span>
                             <span>Spesies: {park.species}</span>
-                            <span>Pengunjung: {park.visitors.toLocaleString()}</span>
+                            <span>
+                              Pengunjung: {park.visitors.toLocaleString()}
+                            </span>
                           </div>
                         </div>
                         <Button
@@ -592,7 +679,10 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                           variant="outline"
                           onClick={(e) => {
                             e.stopPropagation();
-                            openInGoogleMaps(park.coordinates as [number, number], park.name);
+                            openInGoogleMaps(
+                              park.coordinates as [number, number],
+                              park.name,
+                            );
                           }}
                         >
                           <ExternalLink className="h-4 w-4 mr-1" />
@@ -626,31 +716,39 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                 <TabsTrigger value="threats">Ancaman</TabsTrigger>
                 <TabsTrigger value="location">Lokasi</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="overview" className="space-y-4">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="text-center p-3 bg-green-50 rounded-lg">
                     <TreePine className="h-6 w-6 text-green-600 mx-auto mb-1" />
                     <p className="text-sm font-medium">Flora</p>
-                    <p className="text-lg font-bold text-green-600">{selectedPark.flora}</p>
+                    <p className="text-lg font-bold text-green-600">
+                      {selectedPark.flora}
+                    </p>
                   </div>
                   <div className="text-center p-3 bg-blue-50 rounded-lg">
                     <Bird className="h-6 w-6 text-blue-600 mx-auto mb-1" />
                     <p className="text-sm font-medium">Fauna</p>
-                    <p className="text-lg font-bold text-blue-600">{selectedPark.fauna}</p>
+                    <p className="text-lg font-bold text-blue-600">
+                      {selectedPark.fauna}
+                    </p>
                   </div>
                   <div className="text-center p-3 bg-purple-50 rounded-lg">
                     <Shield className="h-6 w-6 text-purple-600 mx-auto mb-1" />
                     <p className="text-sm font-medium">Endemik</p>
-                    <p className="text-lg font-bold text-purple-600">{selectedPark.endemic}</p>
+                    <p className="text-lg font-bold text-purple-600">
+                      {selectedPark.endemic}
+                    </p>
                   </div>
                   <div className="text-center p-3 bg-orange-50 rounded-lg">
                     <Users className="h-6 w-6 text-orange-600 mx-auto mb-1" />
                     <p className="text-sm font-medium">Pengunjung</p>
-                    <p className="text-lg font-bold text-orange-600">{selectedPark.visitors.toLocaleString()}</p>
+                    <p className="text-lg font-bold text-orange-600">
+                      {selectedPark.visitors.toLocaleString()}
+                    </p>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h4 className="font-semibold">Deskripsi</h4>
                   <p className="text-gray-600">{selectedPark.description}</p>
@@ -658,22 +756,44 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <h5 className="font-medium text-sm mb-2">Informasi Geografis</h5>
-                    <p className="text-sm text-gray-600"><strong>Kategori:</strong> {selectedPark.category}</p>
-                    <p className="text-sm text-gray-600"><strong>Elevasi:</strong> {selectedPark.elevation}</p>
-                    <p className="text-sm text-gray-600"><strong>Iklim:</strong> {selectedPark.climate}</p>
+                    <h5 className="font-medium text-sm mb-2">
+                      Informasi Geografis
+                    </h5>
+                    <p className="text-sm text-gray-600">
+                      <strong>Kategori:</strong> {selectedPark.category}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Elevasi:</strong> {selectedPark.elevation}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Iklim:</strong> {selectedPark.climate}
+                    </p>
                   </div>
                   <div className="p-3 bg-gray-50 rounded-lg">
-                    <h5 className="font-medium text-sm mb-2">Informasi Administratif</h5>
-                    <p className="text-sm text-gray-600"><strong>Luas:</strong> {selectedPark.area.toLocaleString()} ha</p>
-                    <p className="text-sm text-gray-600"><strong>Didirikan:</strong> {selectedPark.established}</p>
-                    <p className="text-sm text-gray-600"><strong>Status:</strong> {selectedPark.status}</p>
+                    <h5 className="font-medium text-sm mb-2">
+                      Informasi Administratif
+                    </h5>
+                    <p className="text-sm text-gray-600">
+                      <strong>Luas:</strong>{" "}
+                      {selectedPark.area.toLocaleString()} ha
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Didirikan:</strong> {selectedPark.established}
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      <strong>Status:</strong> {selectedPark.status}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={() => openInGoogleMaps(selectedPark.coordinates as [number, number], selectedPark.name)}
+                    onClick={() =>
+                      openInGoogleMaps(
+                        selectedPark.coordinates as [number, number],
+                        selectedPark.name,
+                      )
+                    }
                     className="flex-1"
                   >
                     <ExternalLink className="h-4 w-4 mr-2" />
@@ -687,7 +807,7 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                   </Button>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="biodiversity" className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="p-4 border rounded-lg">
@@ -695,50 +815,83 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                       <TreePine className="h-4 w-4 text-green-600" />
                       Keanekaragaman Flora
                     </h4>
-                    <p className="text-sm text-gray-600">Total spesies flora: <strong>{selectedPark.flora}</strong></p>
-                    <p className="text-sm text-gray-600">Endemik: <strong>{Math.round(selectedPark.flora * 0.3)}</strong></p>
-                    <p className="text-sm text-gray-600">Persentase endemik: <strong>30%</strong></p>
+                    <p className="text-sm text-gray-600">
+                      Total spesies flora: <strong>{selectedPark.flora}</strong>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Endemik:{" "}
+                      <strong>{Math.round(selectedPark.flora * 0.3)}</strong>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Persentase endemik: <strong>30%</strong>
+                    </p>
                   </div>
                   <div className="p-4 border rounded-lg">
                     <h4 className="font-semibold mb-2 flex items-center gap-2">
                       <Bird className="h-4 w-4 text-blue-600" />
                       Keanekaragaman Fauna
                     </h4>
-                    <p className="text-sm text-gray-600">Total spesies fauna: <strong>{selectedPark.fauna}</strong></p>
-                    <p className="text-sm text-gray-600">Endemik: <strong>{Math.round(selectedPark.fauna * 0.2)}</strong></p>
-                    <p className="text-sm text-gray-600">Persentase endemik: <strong>20%</strong></p>
+                    <p className="text-sm text-gray-600">
+                      Total spesies fauna: <strong>{selectedPark.fauna}</strong>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Endemik:{" "}
+                      <strong>{Math.round(selectedPark.fauna * 0.2)}</strong>
+                    </p>
+                    <p className="text-sm text-gray-600">
+                      Persentase endemik: <strong>20%</strong>
+                    </p>
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="conservation" className="space-y-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Status Konservasi</h4>
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge 
-                      variant="outline" 
-                      style={{ backgroundColor: getConservationColor(selectedPark.conservation) }}
+                    <Badge
+                      variant="outline"
+                      style={{
+                        backgroundColor: getConservationColor(
+                          selectedPark.conservation,
+                        ),
+                      }}
                       className="text-white border-0"
                     >
-                      {getConservationIcon(selectedPark.conservation)} {selectedPark.conservation}
+                      {getConservationIcon(selectedPark.conservation)}{" "}
+                      {selectedPark.conservation}
                     </Badge>
-                    <span className="text-sm text-gray-600">{selectedPark.status}</span>
+                    <span className="text-sm text-gray-600">
+                      {selectedPark.status}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600">Didirikan: <strong>{selectedPark.established}</strong></p>
-                  <p className="text-sm text-gray-600">Luas area: <strong>{selectedPark.area.toLocaleString()} ha</strong></p>
+                  <p className="text-sm text-gray-600">
+                    Didirikan: <strong>{selectedPark.established}</strong>
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Luas area:{" "}
+                    <strong>{selectedPark.area.toLocaleString()} ha</strong>
+                  </p>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="threats" className="space-y-4">
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold mb-2 text-red-600">Ancaman Utama</h4>
+                  <h4 className="font-semibold mb-2 text-red-600">
+                    Ancaman Utama
+                  </h4>
                   <ul className="space-y-1">
-                    {selectedPark.threats.map((threat: string, index: number) => (
-                      <li key={index} className="text-sm text-gray-600 flex items-center gap-2">
-                        <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                        {threat}
-                      </li>
-                    ))}
+                    {selectedPark.threats.map(
+                      (threat: string, index: number) => (
+                        <li
+                          key={index}
+                          className="text-sm text-gray-600 flex items-center gap-2"
+                        >
+                          <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                          {threat}
+                        </li>
+                      ),
+                    )}
                   </ul>
                 </div>
               </TabsContent>
@@ -747,15 +900,31 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold mb-2">Informasi Lokasi</h4>
                   <div className="space-y-2 text-sm">
-                    <p><strong>Koordinat:</strong> {selectedPark.coordinates[0]}, {selectedPark.coordinates[1]}</p>
-                    <p><strong>Provinsi:</strong> {selectedPark.location}</p>
-                    <p><strong>Kategori:</strong> {selectedPark.category}</p>
-                    <p><strong>Elevasi:</strong> {selectedPark.elevation}</p>
-                    <p><strong>Iklim:</strong> {selectedPark.climate}</p>
+                    <p>
+                      <strong>Koordinat:</strong> {selectedPark.coordinates[0]},{" "}
+                      {selectedPark.coordinates[1]}
+                    </p>
+                    <p>
+                      <strong>Provinsi:</strong> {selectedPark.location}
+                    </p>
+                    <p>
+                      <strong>Kategori:</strong> {selectedPark.category}
+                    </p>
+                    <p>
+                      <strong>Elevasi:</strong> {selectedPark.elevation}
+                    </p>
+                    <p>
+                      <strong>Iklim:</strong> {selectedPark.climate}
+                    </p>
                   </div>
                   <div className="mt-4">
                     <Button
-                      onClick={() => openInGoogleMaps(selectedPark.coordinates as [number, number], selectedPark.name)}
+                      onClick={() =>
+                        openInGoogleMaps(
+                          selectedPark.coordinates as [number, number],
+                          selectedPark.name,
+                        )
+                      }
                       className="w-full"
                     >
                       <Navigation className="h-4 w-4 mr-2" />
@@ -797,8 +966,12 @@ export function InteractiveMap({ className }: InteractiveMapProps) {
             </div>
           </div>
           <div className="mt-4 text-xs text-gray-500">
-            <p><strong>View Modes:</strong> Grid, List, dan Satellite View</p>
-            <p><strong>Satellite:</strong> Menggunakan Esri World Imagery</p>
+            <p>
+              <strong>View Modes:</strong> Grid, List, dan Satellite View
+            </p>
+            <p>
+              <strong>Satellite:</strong> Menggunakan Esri World Imagery
+            </p>
           </div>
         </CardContent>
       </Card>

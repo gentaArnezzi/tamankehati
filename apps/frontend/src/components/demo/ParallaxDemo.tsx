@@ -1,11 +1,9 @@
-"use client"
+"use client";
 
-import { useEffect } from "react"
-import { motion, stagger, useAnimate } from "motion/react"
+import { useEffect } from "react";
+import { motion, stagger, useAnimate } from "motion/react";
 
-import Floating, {
-  FloatingElement,
-} from "@/components/ui/parallax-floating"
+import Floating, { FloatingElement } from "@/components/ui/parallax-floating";
 
 const exampleImages = [
   {
@@ -56,14 +54,18 @@ const exampleImages = [
     link: "https://unsplash.com/photos/a-table-topped-with-two-wine-glasses-and-plates-Ig0gRAHspV0",
     title: "A table topped with two wine glasses and plates",
   },
-]
+];
 
 const ParallaxDemo = () => {
-  const [scope, animate] = useAnimate()
+  const [scope, animate] = useAnimate();
 
   useEffect(() => {
-    animate("img", { opacity: [0, 1] }, { duration: 0.5, delay: stagger(0.15) })
-  }, [])
+    animate(
+      "img",
+      { opacity: [0, 1] },
+      { duration: 0.5, delay: stagger(0.15) },
+    );
+  }, []);
 
   return (
     <div
@@ -145,7 +147,7 @@ const ParallaxDemo = () => {
         </FloatingElement>
       </Floating>
     </div>
-  )
-}
+  );
+};
 
-export { ParallaxDemo }
+export { ParallaxDemo };

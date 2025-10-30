@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, MotionConfig } from 'framer-motion';
-import { Menu as MenuIcon, X } from 'lucide-react';
-import * as React from 'react'
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, MotionConfig } from "framer-motion";
+import { Menu as MenuIcon, X } from "lucide-react";
+import * as React from "react";
 
 export type IMenu = {
   id: number;
@@ -20,7 +20,7 @@ type MenuProps = {
 
 const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
   const [hovered, setHovered] = useState<number | null>(null);
-  const [currentPath, setCurrentPath] = useState(explicitPath || '');
+  const [currentPath, setCurrentPath] = useState(explicitPath || "");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -31,10 +31,10 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
 
       // Listen for URL changes if using client-side routing
       const handlePopState = () => updatePath();
-      window.addEventListener('popstate', handlePopState);
+      window.addEventListener("popstate", handlePopState);
 
       return () => {
-        window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener("popstate", handlePopState);
       };
     }
   }, [explicitPath]);
@@ -47,7 +47,7 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
   };
 
   return (
-    <MotionConfig transition={{ bounce: 0, type: 'tween' }}>
+    <MotionConfig transition={{ bounce: 0, type: "tween" }}>
       <nav className="relative">
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center">
@@ -60,8 +60,8 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                     className={`
                       relative flex items-center justify-center rounded-lg px-4 py-2 transition-all
                       hover:bg-foreground/5
-                      ${hovered === item?.id ? 'bg-foreground/5' : ''}
-                      ${active ? 'font-semibold text-primary bg-primary/10' : 'text-foreground/80'}
+                      ${hovered === item?.id ? "bg-foreground/5" : ""}
+                      ${active ? "font-semibold text-primary bg-primary/10" : "text-foreground/80"}
                     `}
                     onMouseEnter={() => setHovered(item.id)}
                     onMouseLeave={() => setHovered(null)}
@@ -74,12 +74,12 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                       layout
                       layoutId={`cursor`}
                       className="absolute h-0.5 w-full bg-primary"
-                      style={{ bottom: '-2px' }}
+                      style={{ bottom: "-2px" }}
                     />
                   )}
                   {item?.dropdown && hovered === item?.id && (
                     <div
-                      className='absolute left-0 top-full z-50'
+                      className="absolute left-0 top-full z-50"
                       onMouseEnter={() => setHovered(item.id)}
                       onMouseLeave={() => setHovered(null)}
                     >
@@ -89,8 +89,8 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                         initial={{ y: 10, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         exit={{ y: 10, opacity: 0 }}
-                        className='mt-2 flex w-64 flex-col rounded-lg bg-background border shadow-lg overflow-hidden'
-                        layoutId={'dropdown'}
+                        className="mt-2 flex w-64 flex-col rounded-lg bg-background border shadow-lg overflow-hidden"
+                        layoutId={"dropdown"}
                       >
                         {item?.items?.map((nav) => {
                           const isDropdownActive = isActive(nav.url);
@@ -100,7 +100,7 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                               href={`${nav?.url}`}
                               className={`
                                 w-full p-3 hover:bg-muted transition-colors 
-                                ${isDropdownActive ? 'font-semibold bg-muted text-primary' : 'text-foreground/80'}
+                                ${isDropdownActive ? "font-semibold bg-muted text-primary" : "text-foreground/80"}
                               `}
                             >
                               {nav?.title}
@@ -123,7 +123,11 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
             className="p-2 rounded-md text-foreground hover:bg-muted focus:outline-none"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : (
+              <MenuIcon className="h-6 w-6" />
+            )}
           </button>
 
           {/* Mobile menu dropdown */}
@@ -143,7 +147,7 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                         <a
                           className={`
                             block px-6 py-3 text-left transition-colors
-                            ${active ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/80 hover:bg-muted'}
+                            ${active ? "bg-primary/10 text-primary font-medium" : "text-foreground/80 hover:bg-muted"}
                           `}
                           href={item?.url}
                           onClick={() => setMobileMenuOpen(false)}
@@ -160,7 +164,7 @@ const Menu = ({ list, currentPath: explicitPath }: MenuProps) => {
                                   href={subItem.url}
                                   className={`
                                     block px-4 py-2 rounded-md text-sm transition-colors
-                                    ${subActive ? 'bg-primary/10 text-primary font-medium' : 'text-foreground/70 hover:bg-muted'}
+                                    ${subActive ? "bg-primary/10 text-primary font-medium" : "text-foreground/70 hover:bg-muted"}
                                   `}
                                   onClick={() => setMobileMenuOpen(false)}
                                 >

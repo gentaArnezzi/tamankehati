@@ -1,13 +1,18 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { parksApi } from '../../../../lib/api-client';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../../components/ui/card';
-import { Badge } from '../../../../components/ui/badge';
-import { Button } from '../../../../components/ui/button';
-import { ArrowLeft, TreePine, Camera } from 'lucide-react';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { parksApi } from "../../../../lib/api-client";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../components/ui/card";
+import { Badge } from "../../../../components/ui/badge";
+import { Button } from "../../../../components/ui/button";
+import { ArrowLeft, TreePine, Camera } from "lucide-react";
+import { toast } from "sonner";
 
 interface Gallery {
   id: number;
@@ -20,7 +25,7 @@ export default function TamanDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  
+
   const [taman, setTaman] = useState<any>(null);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,8 +42,8 @@ export default function TamanDetailPage() {
       const data = await parksApi.getById(id);
       setTaman(data);
     } catch (error) {
-      console.error('Failed to load taman detail:', error);
-      toast.error('Gagal memuat detail taman');
+      console.error("Failed to load taman detail:", error);
+      toast.error("Gagal memuat detail taman");
     } finally {
       setLoading(false);
     }
@@ -48,43 +53,54 @@ export default function TamanDetailPage() {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/park/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/entity/park/${id}`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
-      
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Gallery response:', result);
+        console.log("Gallery response:", result);
         setGalleries(result.data || result.items || []);
       } else {
-        console.error('Gallery load failed:', response.status, response.statusText);
+        console.error(
+          "Gallery load failed:",
+          response.status,
+          response.statusText,
+        );
       }
     } catch (error) {
-      console.error('Failed to load galleries:', error);
+      console.error("Failed to load galleries:", error);
     } finally {
       setLoadingGallery(false);
     }
   };
 
   const getImageUrl = (url?: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
   };
 
   const getStatusBadge = (status?: string) => {
     const statusMap = {
-      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-800' },
-      in_review: { label: 'Menunggu Persetujuan', className: 'bg-yellow-100 text-yellow-800' },
-      approved: { label: 'Disetujui', className: 'bg-green-100 text-green-800' },
-      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800' },
+      draft: { label: "Draft", className: "bg-gray-100 text-gray-800" },
+      in_review: {
+        label: "Menunggu Persetujuan",
+        className: "bg-yellow-100 text-yellow-800",
+      },
+      approved: {
+        label: "Disetujui",
+        className: "bg-green-100 text-green-800",
+      },
+      rejected: { label: "Ditolak", className: "bg-red-100 text-red-800" },
     };
-    
-    const config = statusMap[status as keyof typeof statusMap] || statusMap.draft;
+
+    const config =
+      statusMap[status as keyof typeof statusMap] || statusMap.draft;
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
@@ -105,7 +121,7 @@ export default function TamanDetailPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">Data taman tidak ditemukan</p>
-            <Button onClick={() => router.push('/dashboard')} className="mt-4">
+            <Button onClick={() => router.push("/dashboard")} className="mt-4">
               Kembali
             </Button>
           </CardContent>
@@ -115,18 +131,14 @@ export default function TamanDetailPage() {
   }
 
   const handleBack = () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   return (
     <div className="container max-w-5xl mx-auto py-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          className="gap-2"
-        >
+        <Button variant="ghost" onClick={handleBack} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Kembali
         </Button>
@@ -141,13 +153,9 @@ export default function TamanDetailPage() {
               <TreePine className="h-8 w-8 text-green-700" />
             </div>
             <div className="flex-1">
-              <CardTitle className="text-3xl mb-2">
-                {taman.name}
-              </CardTitle>
+              <CardTitle className="text-3xl mb-2">{taman.name}</CardTitle>
               {taman.slug && (
-                <p className="text-sm text-muted-foreground">
-                  {taman.slug}
-                </p>
+                <p className="text-sm text-muted-foreground">{taman.slug}</p>
               )}
             </div>
           </div>
@@ -166,8 +174,11 @@ export default function TamanDetailPage() {
                 alt={taman.name}
                 className="w-full h-96 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                 onError={(e) => {
-                  console.error('Failed to load main image:', taman.gambar_utama);
-                  (e.target as HTMLImageElement).style.display = 'none';
+                  console.error(
+                    "Failed to load main image:",
+                    taman.gambar_utama,
+                  );
+                  (e.target as HTMLImageElement).style.display = "none";
                 }}
               />
             </div>
@@ -188,12 +199,17 @@ export default function TamanDetailPage() {
                       alt={gallery.title}
                       className="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
                       onError={(e) => {
-                        console.error('Failed to load gallery image:', gallery.image_url);
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        console.error(
+                          "Failed to load gallery image:",
+                          gallery.image_url,
+                        );
+                        (e.target as HTMLImageElement).style.display = "none";
                       }}
                     />
                     {gallery.title && (
-                      <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                      <p className="text-xs text-gray-600 mt-1 truncate">
+                        {gallery.title}
+                      </p>
                     )}
                   </div>
                 ))}
@@ -208,19 +224,23 @@ export default function TamanDetailPage() {
               <dl className="space-y-2">
                 <div>
                   <dt className="text-sm text-muted-foreground">Nama</dt>
-                  <dd className="font-medium">{taman.name || '-'}</dd>
+                  <dd className="font-medium">{taman.name || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Area (Ha)</dt>
-                  <dd className="font-medium">{taman.area_ha ? `${taman.area_ha} Ha` : '-'}</dd>
+                  <dd className="font-medium">
+                    {taman.area_ha ? `${taman.area_ha} Ha` : "-"}
+                  </dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-muted-foreground">SK Penetapan</dt>
-                  <dd className="font-medium">{taman.sk_penetapan || '-'}</dd>
+                  <dt className="text-sm text-muted-foreground">
+                    SK Penetapan
+                  </dt>
+                  <dd className="font-medium">{taman.sk_penetapan || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Pengelola</dt>
-                  <dd className="font-medium">{taman.pengelola || '-'}</dd>
+                  <dd className="font-medium">{taman.pengelola || "-"}</dd>
                 </div>
               </dl>
             </div>
@@ -230,19 +250,23 @@ export default function TamanDetailPage() {
               <dl className="space-y-2">
                 <div>
                   <dt className="text-sm text-muted-foreground">Provinsi</dt>
-                  <dd className="font-medium">{taman.provinsi || '-'}</dd>
+                  <dd className="font-medium">{taman.provinsi || "-"}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-muted-foreground">Kota/Kabupaten</dt>
-                  <dd className="font-medium">{taman.kota_kabupaten || '-'}</dd>
+                  <dt className="text-sm text-muted-foreground">
+                    Kota/Kabupaten
+                  </dt>
+                  <dd className="font-medium">{taman.kota_kabupaten || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Kecamatan</dt>
-                  <dd className="font-medium">{taman.kecamatan || '-'}</dd>
+                  <dd className="font-medium">{taman.kecamatan || "-"}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-muted-foreground">Desa/Kelurahan</dt>
-                  <dd className="font-medium">{taman.desa_kelurahan || '-'}</dd>
+                  <dt className="text-sm text-muted-foreground">
+                    Desa/Kelurahan
+                  </dt>
+                  <dd className="font-medium">{taman.desa_kelurahan || "-"}</dd>
                 </div>
               </dl>
             </div>
@@ -259,25 +283,33 @@ export default function TamanDetailPage() {
           )}
 
           {/* Additional Info */}
-          {(taman.kondisi_fisik || taman.nilai_penting || taman.tipe_ekoregion) && (
+          {(taman.kondisi_fisik ||
+            taman.nilai_penting ||
+            taman.tipe_ekoregion) && (
             <div>
               <h3 className="font-semibold mb-3 text-lg">Informasi Tambahan</h3>
               <dl className="grid md:grid-cols-3 gap-4">
                 {taman.kondisi_fisik && (
                   <div>
-                    <dt className="text-sm text-muted-foreground">Kondisi Fisik</dt>
+                    <dt className="text-sm text-muted-foreground">
+                      Kondisi Fisik
+                    </dt>
                     <dd className="font-medium">{taman.kondisi_fisik}</dd>
                   </div>
                 )}
                 {taman.nilai_penting && (
                   <div>
-                    <dt className="text-sm text-muted-foreground">Nilai Penting</dt>
+                    <dt className="text-sm text-muted-foreground">
+                      Nilai Penting
+                    </dt>
                     <dd className="font-medium">{taman.nilai_penting}</dd>
                   </div>
                 )}
                 {taman.tipe_ekoregion && (
                   <div>
-                    <dt className="text-sm text-muted-foreground">Tipe Ekoregion</dt>
+                    <dt className="text-sm text-muted-foreground">
+                      Tipe Ekoregion
+                    </dt>
                     <dd className="font-medium">{taman.tipe_ekoregion}</dd>
                   </div>
                 )}
@@ -287,7 +319,9 @@ export default function TamanDetailPage() {
 
           {/* Metadata */}
           <div className="pt-6 border-t">
-            <h3 className="font-semibold mb-3 text-sm text-muted-foreground">Metadata</h3>
+            <h3 className="font-semibold mb-3 text-sm text-muted-foreground">
+              Metadata
+            </h3>
             <dl className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
                 <dt className="text-muted-foreground">ID</dt>
@@ -295,7 +329,7 @@ export default function TamanDetailPage() {
               </div>
               <div>
                 <dt className="text-muted-foreground">Submitted By</dt>
-                <dd className="font-medium">{taman.submitted_by || '-'}</dd>
+                <dd className="font-medium">{taman.submitted_by || "-"}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Status</dt>
@@ -308,4 +342,3 @@ export default function TamanDetailPage() {
     </div>
   );
 }
-

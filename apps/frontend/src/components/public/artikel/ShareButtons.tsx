@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { usePathname } from 'next/navigation';
-import { useState } from 'react';
-import { Share2, Copy, Twitter, MessageCircle } from 'lucide-react';
-import { Button } from '../../ui/button';
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Share2, Copy, Twitter, MessageCircle } from "lucide-react";
+import { Button } from "../../ui/button";
 
 type ShareButtonsProps = {
   title: string;
@@ -11,21 +11,21 @@ type ShareButtonsProps = {
 };
 
 const buildShareUrl = (base: string, path: string) => {
-  const normalizedBase = base.replace(/\/$/, '');
+  const normalizedBase = base.replace(/\/$/, "");
   return `${normalizedBase}${path}`;
 };
 
 export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
-  const shareUrl = buildShareUrl(baseUrl, pathname ?? '/');
+  const shareUrl = buildShareUrl(baseUrl, pathname ?? "/");
 
   const handleShare = async () => {
-    if (typeof navigator !== 'undefined' && navigator.share) {
+    if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title, url: shareUrl });
       } catch (error) {
-        console.error('Gagal membagikan tautan', error);
+        console.error("Gagal membagikan tautan", error);
       }
       return;
     }
@@ -35,7 +35,7 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Gagal menyalin tautan', error);
+      console.error("Gagal menyalin tautan", error);
     }
   };
 
@@ -48,7 +48,7 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
         onClick={handleShare}
       >
         <Share2 className="h-4 w-4" />
-        {copied ? 'Tautan disalin' : 'Bagikan'}
+        {copied ? "Tautan disalin" : "Bagikan"}
       </Button>
       <a
         href={`https://twitter.com/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`}
@@ -56,8 +56,7 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:border-emerald-200 hover:text-emerald-600"
       >
-        <Twitter className="h-4 w-4" />
-        X (Twitter)
+        <Twitter className="h-4 w-4" />X (Twitter)
       </a>
       <a
         href={`https://wa.me/?text=${encodeURIComponent(`${title} %0A${shareUrl}`)}`}
@@ -73,18 +72,18 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
         variant="ghost"
         className="gap-2 text-slate-600 hover:text-emerald-600"
         onClick={async () => {
-          if (typeof navigator === 'undefined' || !navigator.clipboard) return;
+          if (typeof navigator === "undefined" || !navigator.clipboard) return;
           try {
             await navigator.clipboard.writeText(shareUrl);
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           } catch (error) {
-            console.error('Gagal menyalin tautan', error);
+            console.error("Gagal menyalin tautan", error);
           }
         }}
       >
         <Copy className="h-4 w-4" />
-        {copied ? 'Disalin!' : 'Salin tautan'}
+        {copied ? "Disalin!" : "Salin tautan"}
       </Button>
     </div>
   );

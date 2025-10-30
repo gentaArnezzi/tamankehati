@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState } from "react";
+import Image from "next/image";
 
 type ImageWithFallbackProps = {
   src?: string | null;
@@ -11,7 +11,7 @@ type ImageWithFallbackProps = {
   className?: string;
   sizes?: string;
   priority?: boolean;
-  loading?: 'lazy' | 'eager';
+  loading?: "lazy" | "eager";
   width?: number;
   height?: number;
 };
@@ -21,20 +21,22 @@ export function ImageWithFallback({
   alt,
   title,
   fill = false,
-  className = '',
+  className = "",
   sizes,
   priority = false,
-  loading = 'lazy',
+  loading = "lazy",
   width,
   height,
 }: ImageWithFallbackProps) {
   const [imageError, setImageError] = useState(false);
-  
-  const shouldShowFallback = !src || src.trim() === '' || imageError;
-  
+
+  const shouldShowFallback = !src || src.trim() === "" || imageError;
+
   if (shouldShowFallback) {
     return (
-      <div className={`relative flex items-center justify-center bg-slate-800 ${className}`}>
+      <div
+        className={`relative flex items-center justify-center bg-slate-800 ${className}`}
+      >
         <div className="text-center text-white max-w-full p-6 md:p-8 lg:p-12">
           <p className="text-xl md:text-2xl lg:text-3xl font-light italic line-clamp-3">
             {title}
@@ -43,15 +45,17 @@ export function ImageWithFallback({
       </div>
     );
   }
-  
+
   const imageProps: any = {
-    src: src.startsWith('http') ? src : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${src}`,
+    src: src.startsWith("http")
+      ? src
+      : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`,
     alt,
     className,
     sizes,
     onError: () => setImageError(true),
   };
-  
+
   // Priority and loading are mutually exclusive
   // Only set priority if true, otherwise use loading
   if (priority) {
@@ -59,14 +63,13 @@ export function ImageWithFallback({
   } else if (loading) {
     imageProps.loading = loading;
   }
-  
+
   if (fill) {
     imageProps.fill = true;
   } else {
     imageProps.width = width;
     imageProps.height = height;
   }
-  
+
   return <Image {...imageProps} />;
 }
-

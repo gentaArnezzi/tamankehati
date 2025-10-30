@@ -1,13 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Clock, Plus, Leaf, Bird, MapPin, Image as ImageIcon, FileText } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import {
+  Clock,
+  Plus,
+  Leaf,
+  Bird,
+  MapPin,
+  Image as ImageIcon,
+  FileText,
+} from "lucide-react";
+import Link from "next/link";
 
 interface Update {
   id: number;
-  type: 'flora' | 'fauna' | 'park' | 'article' | 'gallery';
+  type: "flora" | "fauna" | "park" | "article" | "gallery";
   title: string;
   description: string;
   time: string;
@@ -25,10 +33,10 @@ export function RecentUpdatesSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const element = document.getElementById('updates-section');
+    const element = document.getElementById("updates-section");
     if (element) {
       observer.observe(element);
     }
@@ -43,83 +51,101 @@ export function RecentUpdatesSection() {
   const updates: Update[] = [
     {
       id: 1,
-      type: 'flora',
-      title: 'Rafflesia Arnoldii - Bunga Raksasa Sumatera',
-      description: 'Data baru ditambahkan untuk spesies Rafflesia Arnoldii dengan lokasi penemuan terbaru di Bengkulu',
-      time: '2 jam yang lalu',
-      user: 'Dr. Siti Rahma',
-      thumbnail: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=200&h=200&fit=crop'
+      type: "flora",
+      title: "Rafflesia Arnoldii - Bunga Raksasa Sumatera",
+      description:
+        "Data baru ditambahkan untuk spesies Rafflesia Arnoldii dengan lokasi penemuan terbaru di Bengkulu",
+      time: "2 jam yang lalu",
+      user: "Dr. Siti Rahma",
+      thumbnail:
+        "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=200&h=200&fit=crop",
     },
     {
       id: 2,
-      type: 'fauna',
-      title: 'Orangutan Tapanuli - Update Populasi',
-      description: 'Sensus terbaru menunjukkan peningkatan populasi orangutan tapanuli di kawasan Batang Toru',
-      time: '5 jam yang lalu',
-      user: 'Tim Konservasi',
-      thumbnail: 'https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=200&h=200&fit=crop'
+      type: "fauna",
+      title: "Orangutan Tapanuli - Update Populasi",
+      description:
+        "Sensus terbaru menunjukkan peningkatan populasi orangutan tapanuli di kawasan Batang Toru",
+      time: "5 jam yang lalu",
+      user: "Tim Konservasi",
+      thumbnail:
+        "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=200&h=200&fit=crop",
     },
     {
       id: 3,
-      type: 'park',
-      title: 'Taman Nasional Way Kambas',
-      description: 'Informasi terbaru tentang program konservasi gajah sumatera di Way Kambas',
-      time: '1 hari yang lalu',
-      user: 'Pengelola Taman',
-      thumbnail: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=200&fit=crop'
+      type: "park",
+      title: "Taman Nasional Way Kambas",
+      description:
+        "Informasi terbaru tentang program konservasi gajah sumatera di Way Kambas",
+      time: "1 hari yang lalu",
+      user: "Pengelola Taman",
+      thumbnail:
+        "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=200&h=200&fit=crop",
     },
     {
       id: 4,
-      type: 'article',
-      title: 'Strategi Konservasi Hutan Hujan Tropis',
-      description: 'Artikel baru tentang pendekatan inovatif dalam konservasi hutan hujan Indonesia',
-      time: '2 hari yang lalu',
-      user: 'Prof. Budi Santoso',
-      thumbnail: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=200&fit=crop'
+      type: "article",
+      title: "Strategi Konservasi Hutan Hujan Tropis",
+      description:
+        "Artikel baru tentang pendekatan inovatif dalam konservasi hutan hujan Indonesia",
+      time: "2 hari yang lalu",
+      user: "Prof. Budi Santoso",
+      thumbnail:
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=200&h=200&fit=crop",
     },
     {
       id: 5,
-      type: 'gallery',
-      title: 'Foto Dokumentasi Jalak Bali',
-      description: '15 foto baru ditambahkan ke galeri dokumentasi Jalak Bali di Taman Nasional Bali Barat',
-      time: '3 hari yang lalu',
-      user: 'Wildlife Photographer',
-      thumbnail: 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=200&h=200&fit=crop'
+      type: "gallery",
+      title: "Foto Dokumentasi Jalak Bali",
+      description:
+        "15 foto baru ditambahkan ke galeri dokumentasi Jalak Bali di Taman Nasional Bali Barat",
+      time: "3 hari yang lalu",
+      user: "Wildlife Photographer",
+      thumbnail:
+        "https://images.unsplash.com/photo-1552728089-57bdde30beb3?w=200&h=200&fit=crop",
     },
     {
       id: 6,
-      type: 'flora',
-      title: 'Anggrek Hitam Kalimantan',
-      description: 'Penemuan koloni baru anggrek hitam di kawasan Kalimantan Tengah',
-      time: '4 hari yang lalu',
-      user: 'Tim Eksplorasi',
-      thumbnail: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=200&h=200&fit=crop'
-    }
+      type: "flora",
+      title: "Anggrek Hitam Kalimantan",
+      description:
+        "Penemuan koloni baru anggrek hitam di kawasan Kalimantan Tengah",
+      time: "4 hari yang lalu",
+      user: "Tim Eksplorasi",
+      thumbnail:
+        "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=200&h=200&fit=crop",
+    },
   ];
 
-  const getTypeConfig = (type: Update['type']) => {
+  const getTypeConfig = (type: Update["type"]) => {
     switch (type) {
-      case 'flora':
-        return { icon: Leaf, color: 'emerald', label: 'Flora' };
-      case 'fauna':
-        return { icon: Bird, color: 'teal', label: 'Fauna' };
-      case 'park':
-        return { icon: MapPin, color: 'green', label: 'Taman' };
-      case 'article':
-        return { icon: FileText, color: 'blue', label: 'Artikel' };
-      case 'gallery':
-        return { icon: ImageIcon, color: 'purple', label: 'Galeri' };
+      case "flora":
+        return { icon: Leaf, color: "emerald", label: "Flora" };
+      case "fauna":
+        return { icon: Bird, color: "teal", label: "Fauna" };
+      case "park":
+        return { icon: MapPin, color: "green", label: "Taman" };
+      case "article":
+        return { icon: FileText, color: "blue", label: "Artikel" };
+      case "gallery":
+        return { icon: ImageIcon, color: "purple", label: "Galeri" };
     }
   };
 
   return (
-    <section id="updates-section" className="py-32 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden">
+    <section
+      id="updates-section"
+      className="py-32 bg-gradient-to-b from-white via-gray-50 to-white relative overflow-hidden"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `linear-gradient(to right, #10b981 1px, transparent 1px), linear-gradient(to bottom, #10b981 1px, transparent 1px)`,
-          backgroundSize: '40px 40px'
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `linear-gradient(to right, #10b981 1px, transparent 1px), linear-gradient(to bottom, #10b981 1px, transparent 1px)`,
+            backgroundSize: "40px 40px",
+          }}
+        />
       </div>
 
       <div className="container mx-auto max-w-7xl px-6 relative">
@@ -166,22 +192,32 @@ export function RecentUpdatesSection() {
                     className="relative pl-24"
                   >
                     {/* Timeline Icon */}
-                    <div className={`absolute left-0 w-16 h-16 bg-gradient-to-br from-${config.color}-500 to-${config.color}-600 rounded-2xl shadow-lg shadow-${config.color}-500/50 flex items-center justify-center`}
-                         style={{
-                           background: `linear-gradient(135deg, ${
-                             config.color === 'emerald' ? '#10b981' :
-                             config.color === 'teal' ? '#14b8a6' :
-                             config.color === 'green' ? '#22c55e' :
-                             config.color === 'blue' ? '#3b82f6' :
-                             '#a855f7'
-                           }, ${
-                             config.color === 'emerald' ? '#059669' :
-                             config.color === 'teal' ? '#0d9488' :
-                             config.color === 'green' ? '#16a34a' :
-                             config.color === 'blue' ? '#2563eb' :
-                             '#9333ea'
-                           })`
-                         }}>
+                    <div
+                      className={`absolute left-0 w-16 h-16 bg-gradient-to-br from-${config.color}-500 to-${config.color}-600 rounded-2xl shadow-lg shadow-${config.color}-500/50 flex items-center justify-center`}
+                      style={{
+                        background: `linear-gradient(135deg, ${
+                          config.color === "emerald"
+                            ? "#10b981"
+                            : config.color === "teal"
+                              ? "#14b8a6"
+                              : config.color === "green"
+                                ? "#22c55e"
+                                : config.color === "blue"
+                                  ? "#3b82f6"
+                                  : "#a855f7"
+                        }, ${
+                          config.color === "emerald"
+                            ? "#059669"
+                            : config.color === "teal"
+                              ? "#0d9488"
+                              : config.color === "green"
+                                ? "#16a34a"
+                                : config.color === "blue"
+                                  ? "#2563eb"
+                                  : "#9333ea"
+                        })`,
+                      }}
+                    >
                       <Icon className="w-8 h-8 text-white" />
                     </div>
 
@@ -258,10 +294,10 @@ export function RecentUpdatesSection() {
           className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6"
         >
           {[
-            { label: 'Update Hari Ini', value: '24', icon: Clock },
-            { label: 'Kontributor Aktif', value: '18', icon: Plus },
-            { label: 'Data Baru (Minggu Ini)', value: '156', icon: FileText },
-            { label: 'Verifikasi Pending', value: '7', icon: Clock }
+            { label: "Update Hari Ini", value: "24", icon: Clock },
+            { label: "Kontributor Aktif", value: "18", icon: Plus },
+            { label: "Data Baru (Minggu Ini)", value: "156", icon: FileText },
+            { label: "Verifikasi Pending", value: "7", icon: Clock },
           ].map((stat, i) => (
             <motion.div
               key={i}
@@ -271,7 +307,9 @@ export function RecentUpdatesSection() {
               className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 text-center"
             >
               <stat.icon className="w-8 h-8 text-emerald-600 mx-auto mb-3" />
-              <div className="text-3xl font-bold text-gray-900 mb-1">{stat.value}</div>
+              <div className="text-3xl font-bold text-gray-900 mb-1">
+                {stat.value}
+              </div>
               <div className="text-sm text-gray-600">{stat.label}</div>
             </motion.div>
           ))}
@@ -280,4 +318,3 @@ export function RecentUpdatesSection() {
     </section>
   );
 }
-

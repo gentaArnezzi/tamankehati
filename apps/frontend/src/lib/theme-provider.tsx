@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import React, {
   createContext,
@@ -7,9 +7,9 @@ import React, {
   useEffect,
   useMemo,
   useState,
-} from 'react';
+} from "react";
 
-type Theme = 'dark' | 'light' | 'system';
+type Theme = "dark" | "light" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
@@ -22,18 +22,20 @@ type ThemeProviderState = {
   setTheme: (theme: Theme) => void;
 };
 
-const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined);
+const ThemeProviderContext = createContext<ThemeProviderState | undefined>(
+  undefined,
+);
 
 const getSystemTheme = () =>
-  window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 
 export function ThemeProvider({
   children,
-  defaultTheme = 'light',
-  storageKey = 'taman-kehati-theme',
+  defaultTheme = "light",
+  storageKey = "taman-kehati-theme",
 }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return defaultTheme;
     }
 
@@ -42,7 +44,7 @@ export function ThemeProvider({
       return storedTheme;
     }
 
-    if (defaultTheme === 'system') {
+    if (defaultTheme === "system") {
       return getSystemTheme();
     }
 
@@ -50,15 +52,15 @@ export function ThemeProvider({
   });
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === "undefined") {
       return;
     }
 
     const root = window.document.documentElement;
     const applyThemeToDocument = (value: Theme) => {
-      root.classList.remove('light', 'dark');
+      root.classList.remove("light", "dark");
 
-      if (value === 'system') {
+      if (value === "system") {
         root.classList.add(getSystemTheme());
         return;
       }
@@ -68,28 +70,28 @@ export function ThemeProvider({
 
     applyThemeToDocument(theme);
 
-    if (theme !== 'system') {
+    if (theme !== "system") {
       return;
     }
 
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const handleChange = (event: MediaQueryListEvent) => {
-      applyThemeToDocument(event.matches ? 'dark' : 'light');
+      applyThemeToDocument(event.matches ? "dark" : "light");
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
   const handleSetTheme = useCallback(
     (value: Theme) => {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         window.localStorage.setItem(storageKey, value);
       }
 
       setTheme(value);
     },
-    [storageKey]
+    [storageKey],
   );
 
   const value = useMemo<ThemeProviderState>(
@@ -97,11 +99,13 @@ export function ThemeProvider({
       theme,
       setTheme: handleSetTheme,
     }),
-    [handleSetTheme, theme]
+    [handleSetTheme, theme],
   );
 
   return (
-    <ThemeProviderContext.Provider value={value}>{children}</ThemeProviderContext.Provider>
+    <ThemeProviderContext.Provider value={value}>
+      {children}
+    </ThemeProviderContext.Provider>
   );
 }
 
@@ -109,7 +113,7 @@ export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
 
   return context;

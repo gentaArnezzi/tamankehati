@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { ArtikelPublicSchema, PaginatedResponseSchema } from './public';
+import { z } from "zod";
+import { ArtikelPublicSchema, PaginatedResponseSchema } from "./public";
 
 export const ArtikelDetailSchema = ArtikelPublicSchema.extend({
   konten_html: z.string().nullish(),
@@ -9,7 +9,8 @@ export const ArtikelDetailSchema = ArtikelPublicSchema.extend({
   estimasi_waktu_baca: z.number().nullish(),
 }).passthrough();
 
-export const ArtikelPaginatedSchema = PaginatedResponseSchema(ArtikelPublicSchema);
+export const ArtikelPaginatedSchema =
+  PaginatedResponseSchema(ArtikelPublicSchema);
 
 export type ArtikelDetail = z.infer<typeof ArtikelDetailSchema>;
 export type ArtikelPaginated = z.infer<typeof ArtikelPaginatedSchema>;

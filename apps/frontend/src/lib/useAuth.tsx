@@ -1,6 +1,14 @@
-import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
-import { authApi, authStorage, userApi, User } from './api-client';
-import { toast } from 'sonner';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useMemo,
+  useCallback,
+} from "react";
+import { authApi, authStorage, userApi, User } from "./api-client";
+import { toast } from "sonner";
 
 // ✅ FIXED: Using unified api-client.ts (fetch-based HttpClient)
 // Removed duplicate api.ts (axios-based ApiClient)
@@ -18,7 +26,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -49,34 +56,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadUser = useCallback(async () => {
     try {
       // ✅ ALWAYS fetch from API to get latest data (including profile_picture_url)
-      console.log('🔄 Fetching user profile from API...');
+      console.log("🔄 Fetching user profile from API...");
       const fallbackEmail = authStorage.readEmail() ?? undefined;
       const userData = await resolveUserProfile(fallbackEmail);
-      console.log('✅ User profile loaded from API:', userData);
+      console.log("✅ User profile loaded from API:", userData);
       setUser(userData);
       authStorage.saveUser(userData);
-
     } catch (error) {
-      console.warn('Failed to load user from API:', error);
-      
+      console.warn("Failed to load user from API:", error);
+
       // ✅ FALLBACK: Try to get user data from localStorage if API fails
-      const storedUser = localStorage.getItem('auth_user');
+      const storedUser = localStorage.getItem("auth_user");
       if (storedUser) {
         try {
           const userData = JSON.parse(storedUser);
-          console.log('⚠️ Using cached user from localStorage:', userData);
+          console.log("⚠️ Using cached user from localStorage:", userData);
           setUser(userData);
           setLoading(false);
           return;
         } catch (parseError) {
-          console.warn('Failed to parse stored user data:', parseError);
+          console.warn("Failed to parse stored user data:", parseError);
         }
       }
-      
+
       // Token invalid or expired - clear all auth data
-      localStorage.removeItem('auth_token');
-      localStorage.removeItem('auth_user');
-      localStorage.removeItem('auth_email');
+      localStorage.removeItem("auth_token");
+      localStorage.removeItem("auth_user");
+      localStorage.removeItem("auth_email");
       authStorage.clearToken();
       authStorage.clearUser();
       authStorage.clearEmail();
@@ -91,8 +97,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // ✅ Now useEffect can safely reference loadUser
   useEffect(() => {
     // Check for existing token on mount
-    const storedToken = localStorage.getItem('auth_token');
-    
+    const storedToken = localStorage.getItem("auth_token");
+
     if (storedToken) {
       setToken(storedToken);
       // HttpClient auto-reads token from localStorage, no need to manually set
@@ -109,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const accessToken = response.access_token;
 
       if (!accessToken) {
-        throw new Error('Token tidak ditemukan pada respons');
+        throw new Error("Token tidak ditemukan pada respons");
       }
 
       // Save token and email
@@ -119,38 +125,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       // Create user object from login response (supports both flat and nested structure)
       const userProfile: User = {
-        id: String(response.user_id || response.user?.id || ''),
+        id: String(response.user_id || response.user?.id || ""),
         email: response.email || response.user?.email || email,
         nama: response.name || response.user?.display_name || email,
-        role: (response.role || response.user?.role || 'regional_admin') as 'super_admin' | 'regional_admin',
-        profile_picture_url: response.profile_picture_url ?? response.user?.profile_picture_url ?? null,
+        role: (response.role || response.user?.role || "regional_admin") as
+          | "super_admin"
+          | "regional_admin",
+        profile_picture_url:
+          response.profile_picture_url ??
+          response.user?.profile_picture_url ??
+          null,
         is_active: response.user?.is_active ?? true,
         created_at: response.user?.created_at || new Date().toISOString(),
-        updated_at: response.user?.updated_at || new Date().toISOString()
+        updated_at: response.user?.updated_at || new Date().toISOString(),
       };
 
       authStorage.saveUser(userProfile);
       setUser(userProfile);
-      
+
       // ✅ Fetch complete user data from API after login
       // This ensures profile_picture_url and other fields are up-to-date
       try {
-        console.log('🔄 Fetching complete user profile after login...');
+        console.log("🔄 Fetching complete user profile after login...");
         const completeProfile = await authApi.getProfile();
-        console.log('✅ Complete profile loaded:', completeProfile);
+        console.log("✅ Complete profile loaded:", completeProfile);
         setUser(completeProfile);
         authStorage.saveUser(completeProfile);
       } catch (profileError) {
-        console.warn('⚠️ Could not fetch complete profile, using login data:', profileError);
+        console.warn(
+          "⚠️ Could not fetch complete profile, using login data:",
+          profileError,
+        );
         // Keep using userProfile from login response if profile fetch fails
       }
-      
-      toast.success('Berhasil masuk ke sistem');
+
+      toast.success("Berhasil masuk ke sistem");
     } catch (error) {
       const status = (error as Error & { status?: number }).status;
       const message = status
-        ? 'Email atau password salah'
-        : 'Layanan autentikasi tidak tersedia. Coba lagi nanti.';
+        ? "Email atau password salah"
+        : "Layanan autentikasi tidak tersedia. Coba lagi nanti.";
       toast.error(message);
       throw new Error(message);
     }
@@ -163,45 +177,45 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authStorage.clearEmail();
     setToken(null);
     setUser(null);
-    toast.success('Berhasil keluar dari sistem');
+    toast.success("Berhasil keluar dari sistem");
   }, []);
 
   const refreshUser = useCallback(async () => {
-    const currentToken = localStorage.getItem('auth_token');
+    const currentToken = localStorage.getItem("auth_token");
     if (!currentToken) {
-      console.warn('No token found, cannot refresh user');
+      console.warn("No token found, cannot refresh user");
       return;
     }
-    
+
     try {
-      console.log('🔄 Refreshing user data from API...');
+      console.log("🔄 Refreshing user data from API...");
       const profile = await authApi.getProfile();
-      console.log('✅ User data refreshed:', profile);
+      console.log("✅ User data refreshed:", profile);
       setUser(profile);
       authStorage.saveUser(profile);
     } catch (error) {
-      console.error('❌ Failed to refresh user:', error);
+      console.error("❌ Failed to refresh user:", error);
       // If refresh fails, try fallback
       try {
         const fallbackEmail = authStorage.readEmail();
         if (fallbackEmail) {
           const fallbackUser = await userApi.findByEmail(fallbackEmail);
           if (fallbackUser) {
-            console.log('✅ User data loaded from fallback:', fallbackUser);
+            console.log("✅ User data loaded from fallback:", fallbackUser);
             setUser(fallbackUser);
             authStorage.saveUser(fallbackUser);
             return;
           }
         }
       } catch (fallbackError) {
-        console.error('❌ Fallback also failed:', fallbackError);
+        console.error("❌ Fallback also failed:", fallbackError);
       }
       throw error;
     }
   }, []);
 
   const updateUser = useCallback((userData: Partial<User>) => {
-    setUser(prev => {
+    setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...userData };
       authStorage.saveUser(updated);
@@ -209,24 +223,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const hasRole = useCallback((roles: string | string[]): boolean => {
-    if (!user) return false;
-    const roleArray = Array.isArray(roles) ? roles : [roles];
-    return roleArray.includes(user.role);
-  }, [user]);
+  const hasRole = useCallback(
+    (roles: string | string[]): boolean => {
+      if (!user) return false;
+      const roleArray = Array.isArray(roles) ? roles : [roles];
+      return roleArray.includes(user.role);
+    },
+    [user],
+  );
 
-
-  const value = useMemo(() => ({
-    user,
-    token,
-    loading,
-    login,
-    logout,
-    refreshUser,
-    updateUser,
-    isAuthenticated: !!token && !!user,
-    hasRole,
-  }), [user, token, loading, login, logout, refreshUser, updateUser, hasRole]);
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      loading,
+      login,
+      logout,
+      refreshUser,
+      updateUser,
+      isAuthenticated: !!token && !!user,
+      hasRole,
+    }),
+    [user, token, loading, login, logout, refreshUser, updateUser, hasRole],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
@@ -234,7 +253,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth harus digunakan dalam AuthProvider');
+    throw new Error("useAuth harus digunakan dalam AuthProvider");
   }
   return context;
 }

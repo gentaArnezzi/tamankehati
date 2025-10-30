@@ -1,49 +1,58 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../lib/useAuth';
-import { userApi, User } from '../../lib/api-client';
-import { UserTable } from './UserTable';
-import { UserForm } from './UserForm';
-import { AddUserForm } from './AddUserForm';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { 
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../lib/useAuth";
+import { userApi, User } from "../../lib/api-client";
+import { UserTable } from "./UserTable";
+import { UserForm } from "./UserForm";
+import { AddUserForm } from "./AddUserForm";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { Card, CardContent } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Plus, Search, Filter, RefreshCw, AlertCircle, Users } from 'lucide-react';
-import { toast } from 'sonner';
+} from "../ui/select";
+import { Card, CardContent } from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Plus,
+  Search,
+  Filter,
+  RefreshCw,
+  AlertCircle,
+  Users,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export function UserPage() {
   const { user: currentUser, isAuthenticated } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('name_asc');
-  
+  const [error, setError] = useState("");
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("name_asc");
+
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState<'create' | 'edit' | 'preview'>('create');
+  const [formMode, setFormMode] = useState<"create" | "edit" | "preview">(
+    "create",
+  );
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  
+
   // State untuk form add user terpisah
   const [addFormOpen, setAddFormOpen] = useState(false);
 
   useEffect(() => {
     // Redirect to login if not authenticated
     if (!isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
       return;
     }
     loadData();
@@ -52,40 +61,44 @@ export function UserPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      setError('');
-      
+      setError("");
+
       // Check if user is authenticated
       if (!currentUser) {
-        setError('Anda harus login untuk mengakses data pengguna');
+        setError("Anda harus login untuk mengakses data pengguna");
         setLoading(false);
         return;
       }
-      
+
       const users = await userApi.list({
         limit: 200,
         offset: 0,
         q: searchQuery || undefined,
-        is_active: statusFilter === 'all' ? undefined : statusFilter === 'active',
+        is_active:
+          statusFilter === "all" ? undefined : statusFilter === "active",
         sort: sortBy,
       });
 
       let filteredData = users;
 
-      if (roleFilter !== 'all') {
+      if (roleFilter !== "all") {
         filteredData = filteredData.filter((u) => u.role === roleFilter);
       }
 
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        filteredData = filteredData.filter((u) =>
-          u.nama?.toLowerCase().includes(query) ||
-          u.email.toLowerCase().includes(query)
+        filteredData = filteredData.filter(
+          (u) =>
+            u.nama?.toLowerCase().includes(query) ||
+            u.email.toLowerCase().includes(query),
         );
       }
 
       setData(filteredData);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat data pengguna');
+      setError(
+        err instanceof Error ? err.message : "Gagal memuat data pengguna",
+      );
     } finally {
       setLoading(false);
     }
@@ -99,13 +112,13 @@ export function UserPage() {
     try {
       setLoading(true);
       // Fetch detailed user data with park and region info
-      const userDetail = await userApi.getDetail(user.id, 'park,region');
+      const userDetail = await userApi.getDetail(user.id, "park,region");
       setSelectedUser(userDetail);
-      setFormMode('preview');
+      setFormMode("preview");
       setFormOpen(true);
     } catch (err) {
-      console.error('Error fetching user details:', err);
-      toast.error('Gagal memuat detail pengguna');
+      console.error("Error fetching user details:", err);
+      toast.error("Gagal memuat detail pengguna");
     } finally {
       setLoading(false);
     }
@@ -113,7 +126,7 @@ export function UserPage() {
 
   const handleEdit = (user: User) => {
     setSelectedUser(user);
-    setFormMode('edit');
+    setFormMode("edit");
     setFormOpen(true);
   };
 
@@ -125,9 +138,9 @@ export function UserPage() {
     password?: string;
   }) => {
     try {
-      if (formMode === 'create') {
+      if (formMode === "create") {
         if (!formData.password || formData.password.length < 8) {
-          throw new Error('Password minimal 8 karakter untuk pengguna baru');
+          throw new Error("Password minimal 8 karakter untuk pengguna baru");
         }
 
         const createdUser = await userApi.create({
@@ -141,12 +154,12 @@ export function UserPage() {
           await userApi.deactivate(createdUser.id);
         }
 
-        toast.success('Pengguna berhasil ditambahkan');
+        toast.success("Pengguna berhasil ditambahkan");
       } else if (selectedUser) {
         let password: string | undefined;
         if (formData.password) {
           if (formData.password.length < 8) {
-            throw new Error('Password minimal 8 karakter');
+            throw new Error("Password minimal 8 karakter");
           }
           password = formData.password;
         }
@@ -168,11 +181,12 @@ export function UserPage() {
           }
         }
 
-        toast.success('Data pengguna berhasil diperbarui');
+        toast.success("Data pengguna berhasil diperbarui");
       }
       loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menyimpan data';
+      const message =
+        err instanceof Error ? err.message : "Gagal menyimpan data";
       toast.error(message);
       throw err;
     }
@@ -186,10 +200,13 @@ export function UserPage() {
         await userApi.deactivate(id);
       }
 
-      toast.success(isActive ? 'Pengguna diaktifkan' : 'Pengguna dinonaktifkan');
+      toast.success(
+        isActive ? "Pengguna diaktifkan" : "Pengguna dinonaktifkan",
+      );
       loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal mengubah status pengguna';
+      const message =
+        err instanceof Error ? err.message : "Gagal mengubah status pengguna";
       toast.error(message);
     }
   };
@@ -197,10 +214,11 @@ export function UserPage() {
   const handleDelete = async (id: string) => {
     try {
       await userApi.delete(id);
-      toast.success('Pengguna berhasil dihapus');
+      toast.success("Pengguna berhasil dihapus");
       loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menghapus pengguna';
+      const message =
+        err instanceof Error ? err.message : "Gagal menghapus pengguna";
       toast.error(message);
     }
   };
@@ -210,14 +228,14 @@ export function UserPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl mb-2 flex items-center gap-2">
-            <Users className="h-8 w-8" style={{ color: '#356447' }} />
+            <Users className="h-8 w-8" style={{ color: "#356447" }} />
             Manajemen Pengguna
           </h1>
           <p className="text-muted-foreground">
             Kelola akun pengguna sistem Taman Kehati
           </p>
         </div>
-        <Button onClick={handleCreate} style={{ backgroundColor: '#233c2b' }}>
+        <Button onClick={handleCreate} style={{ backgroundColor: "#233c2b" }}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah Pengguna
         </Button>
@@ -266,7 +284,6 @@ export function UserPage() {
               </SelectContent>
             </Select>
 
-
             <div className="flex gap-2">
               <div className="flex-1">
                 <Select value={sortBy} onValueChange={setSortBy}>
@@ -299,26 +316,40 @@ export function UserPage() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Total Pengguna</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              Total Pengguna
+            </div>
             <div className="text-2xl">{data.length}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Pengguna Aktif</div>
-            <div className="text-2xl text-green-600">{data.filter(u => u.is_active).length}</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              Pengguna Aktif
+            </div>
+            <div className="text-2xl text-green-600">
+              {data.filter((u) => u.is_active).length}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Pengguna Nonaktif</div>
-            <div className="text-2xl text-red-600">{data.filter(u => !u.is_active).length}</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              Pengguna Nonaktif
+            </div>
+            <div className="text-2xl text-red-600">
+              {data.filter((u) => !u.is_active).length}
+            </div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Admin Regional</div>
-            <div className="text-2xl">{data.filter(u => u.role === 'regional_admin').length}</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              Admin Regional
+            </div>
+            <div className="text-2xl">
+              {data.filter((u) => u.role === "regional_admin").length}
+            </div>
           </CardContent>
         </Card>
       </div>

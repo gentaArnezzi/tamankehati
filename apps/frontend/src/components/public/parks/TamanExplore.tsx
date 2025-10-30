@@ -1,60 +1,60 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'next/navigation';
-import { fetchTamanPage } from '../../../lib/api/public-client';
-import { type TamanPaginated } from '../../../types/taman';
-import { EntityCard } from '../cards/EntityCard';
-import { FacetFilters } from '../filters/FacetFilters';
-import { Pagination } from '../../ui/pagination';
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { fetchTamanPage } from "../../../lib/api/public-client";
+import { type TamanPaginated } from "../../../types/taman";
+import { EntityCard } from "../cards/EntityCard";
+import { FacetFilters } from "../filters/FacetFilters";
+import { Pagination } from "../../ui/pagination";
 
 const ITEMS_PER_PAGE = 12;
 
 // Helper to get full image URL
 const getImageUrl = (url?: string | null) => {
   if (!url) return null;
-  if (url.startsWith('http')) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
+  if (url.startsWith("http")) return url;
+  return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
 };
 const PROVINSI_OPTIONS = [
-  'Aceh',
-  'Sumatera Utara',
-  'Sumatera Barat',
-  'Riau',
-  'Kepulauan Riau',
-  'Jambi',
-  'Sumatera Selatan',
-  'Bengkulu',
-  'Lampung',
-  'Kepulauan Bangka Belitung',
-  'Kalimantan Barat',
-  'Kalimantan Tengah',
-  'Kalimantan Selatan',
-  'Kalimantan Timur',
-  'Kalimantan Utara',
-  'Banten',
-  'Jawa Barat',
-  'Jawa Tengah',
-  'DI Yogyakarta',
-  'Jawa Timur',
-  'Bali',
-  'Nusa Tenggara Barat',
-  'Nusa Tenggara Timur',
-  'Sulawesi Utara',
-  'Sulawesi Tengah',
-  'Sulawesi Selatan',
-  'Sulawesi Tenggara',
-  'Gorontalo',
-  'Sulawesi Barat',
-  'Maluku',
-  'Maluku Utara',
-  'Papua',
-  'Papua Barat',
-  'Papua Tengah',
-  'Papua Pegunungan',
-  'Papua Selatan',
-  'Papua Barat Daya',
+  "Aceh",
+  "Sumatera Utara",
+  "Sumatera Barat",
+  "Riau",
+  "Kepulauan Riau",
+  "Jambi",
+  "Sumatera Selatan",
+  "Bengkulu",
+  "Lampung",
+  "Kepulauan Bangka Belitung",
+  "Kalimantan Barat",
+  "Kalimantan Tengah",
+  "Kalimantan Selatan",
+  "Kalimantan Timur",
+  "Kalimantan Utara",
+  "Banten",
+  "Jawa Barat",
+  "Jawa Tengah",
+  "DI Yogyakarta",
+  "Jawa Timur",
+  "Bali",
+  "Nusa Tenggara Barat",
+  "Nusa Tenggara Timur",
+  "Sulawesi Utara",
+  "Sulawesi Tengah",
+  "Sulawesi Selatan",
+  "Sulawesi Tenggara",
+  "Gorontalo",
+  "Sulawesi Barat",
+  "Maluku",
+  "Maluku Utara",
+  "Papua",
+  "Papua Barat",
+  "Papua Tengah",
+  "Papua Pegunungan",
+  "Papua Selatan",
+  "Papua Barat Daya",
 ];
 
 type TamanExploreProps = {
@@ -62,9 +62,12 @@ type TamanExploreProps = {
   initialParams: URLSearchParams;
 };
 
-export function TamanExplore({ initialData, initialParams }: TamanExploreProps) {
+export function TamanExplore({
+  initialData,
+  initialParams,
+}: TamanExploreProps) {
   const searchParams = useSearchParams();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Ensure initialParams is a proper URLSearchParams object
   const params = useMemo(() => {
@@ -87,7 +90,7 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const { data, status } = useQuery({
-    queryKey: ['taman', paramObj],
+    queryKey: ["taman", paramObj],
     queryFn: () =>
       fetchTamanPage({
         ...paramObj,
@@ -108,8 +111,8 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
         <div className="mb-12">
           <FacetFilters
             defaultValues={{
-              search: params.get('search') ?? '',
-              wilayah: params.get('provinsi') ?? params.get('wilayah') ?? '',
+              search: params.get("search") ?? "",
+              wilayah: params.get("provinsi") ?? params.get("wilayah") ?? "",
             }}
             options={{
               famili: [],
@@ -119,8 +122,8 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
             targetPath="/taman"
             title="Filter Taman"
             fieldLabels={{
-              search: 'Kata kunci',
-              wilayah: 'Provinsi',
+              search: "Kata kunci",
+              wilayah: "Provinsi",
             }}
           />
         </div>
@@ -141,21 +144,21 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
             {/* View Mode Toggle */}
             <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Card
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Row
@@ -164,41 +167,55 @@ export function TamanExplore({ initialData, initialParams }: TamanExploreProps) 
           </div>
 
           {/* Error State */}
-          {status === 'error' && (
+          {status === "error" && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-              <div className="text-red-600 font-medium mb-2">Terjadi Kesalahan</div>
-              <p className="text-red-500">Gagal memuat data taman. Silakan coba lagi nanti.</p>
+              <div className="text-red-600 font-medium mb-2">
+                Terjadi Kesalahan
+              </div>
+              <p className="text-red-500">
+                Gagal memuat data taman. Silakan coba lagi nanti.
+              </p>
             </div>
           )}
 
           {/* Empty State */}
-          {items.length === 0 && status !== 'error' && (
+          {items.length === 0 && status !== "error" && (
             <div className="rounded-xl border border-slate-200 bg-white p-12 text-center">
-              <div className="text-slate-600 font-medium mb-2">Tidak Ada Data</div>
-              <p className="text-slate-500">Coba ubah filter atau kata kunci pencarian.</p>
+              <div className="text-slate-600 font-medium mb-2">
+                Tidak Ada Data
+              </div>
+              <p className="text-slate-500">
+                Coba ubah filter atau kata kunci pencarian.
+              </p>
             </div>
           )}
 
           {/* Results Grid/List */}
           {items.length > 0 && (
-            <div className={
-              viewMode === 'grid' 
-                ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                : 'space-y-6'
-            }>
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  : "space-y-6"
+              }
+            >
               {items.map((taman, index) => {
                 return (
-                  <div key={taman.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                  <div
+                    key={taman.id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
                     <EntityCard
                       href={`/taman/${taman.id}`}
                       title={taman.name}
                       subtitle={taman.description || undefined}
                       image={getImageUrl(taman.gambar_utama)}
-                      region={taman.provinsi || 'Indonesia'}
+                      region={taman.provinsi || "Indonesia"}
                       area={taman.area_ha || undefined}
                       created_at={taman.created_at}
                       tags={[]} // No tags for now
-                      variant={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                      variant={viewMode === "list" ? "horizontal" : "vertical"}
                     />
                   </div>
                 );

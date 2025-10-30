@@ -1,14 +1,9 @@
-import { Fauna, galleryApi } from '../../lib/api-client';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog';
-import { Badge } from '../ui/badge';
-import { Separator } from '../ui/separator';
-import { Calendar, MapPin, Users, FileText, Heart } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Fauna, galleryApi } from "../../lib/api-client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import { Calendar, MapPin, Users, FileText, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface FaunaDetailProps {
   open: boolean;
@@ -17,23 +12,25 @@ interface FaunaDetailProps {
 }
 
 export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
-  const [galleryImages, setGalleryImages] = useState<Array<{
-    id: number;
-    title: string;
-    description: string;
-    image_url: string;
-    entity_type: string;
-    entity_id: number;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  }>>([]);
+  const [galleryImages, setGalleryImages] = useState<
+    Array<{
+      id: number;
+      title: string;
+      description: string;
+      image_url: string;
+      entity_type: string;
+      entity_id: number;
+      status: string;
+      created_at: string;
+      updated_at: string;
+    }>
+  >([]);
   const [loadingGallery, setLoadingGallery] = useState(false);
 
   useEffect(() => {
     if (data?.id && open) {
       // Only try to fetch gallery if backend is available
-      const enableGallery = process.env.NEXT_PUBLIC_ENABLE_GALLERY !== 'false';
+      const enableGallery = process.env.NEXT_PUBLIC_ENABLE_GALLERY !== "false";
       if (enableGallery) {
         fetchGalleryImages();
       } else {
@@ -45,10 +42,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
 
   const fetchGalleryImages = async () => {
     if (!data?.id) return;
-    
+
     try {
       setLoadingGallery(true);
-      const response = await galleryApi.getByEntity('fauna', data.id);
+      const response = await galleryApi.getByEntity("fauna", data.id);
       if (response.success && response.data) {
         setGalleryImages(response.data);
       } else {
@@ -58,8 +55,8 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
     } catch (error: any) {
       // Silently handle error - gallery is optional feature
       // Only log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('Gallery fetch skipped - backend may not be available');
+      if (process.env.NODE_ENV === "development") {
+        console.debug("Gallery fetch skipped - backend may not be available");
       }
       setGalleryImages([]);
     } finally {
@@ -71,27 +68,38 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
 
   const getStatusBadge = (status: string) => {
     const config = {
-      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-800 border-gray-200' },
-      in_review: { label: 'Dalam Review', className: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
-      approved: { label: 'Disetujui', className: 'bg-green-100 text-green-800 border-green-200' },
-      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800 border-red-200' },
-    }[status] || { label: status, className: 'bg-gray-100 text-gray-800 border-gray-200' };
+      draft: {
+        label: "Draft",
+        className: "bg-gray-100 text-gray-800 border-gray-200",
+      },
+      in_review: {
+        label: "Dalam Review",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      },
+      approved: {
+        label: "Disetujui",
+        className: "bg-green-100 text-green-800 border-green-200",
+      },
+      rejected: {
+        label: "Ditolak",
+        className: "bg-red-100 text-red-800 border-red-200",
+      },
+    }[status] || {
+      label: status,
+      className: "bg-gray-100 text-gray-800 border-gray-200",
+    };
 
-    return (
-      <Badge className={config.className}>
-        {config.label}
-      </Badge>
-    );
+    return <Badge className={config.className}>{config.label}</Badge>;
   };
 
   const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return '-';
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -117,11 +125,15 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.gambar_utama && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_utama}`}
+                src={
+                  data.gambar_utama.startsWith("http")
+                    ? data.gambar_utama
+                    : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_utama}`
+                }
                 alt={data.nama_ilmiah}
                 className="w-full h-64 object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                  (e.target as HTMLImageElement).src = "/placeholder-image.png";
                 }}
               />
             </div>
@@ -130,10 +142,13 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {/* Gallery Images */}
           <div>
             <h3 className="flex items-center gap-2 mb-3">
-              <FileText className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+              <FileText
+                className="h-5 w-5"
+                style={{ color: "rgb(53, 100, 71)" }}
+              />
               <span>Galeri Gambar ({galleryImages.length})</span>
             </h3>
-            
+
             {loadingGallery ? (
               <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
                 <p className="text-sm text-gray-500">Memuat galeri gambar...</p>
@@ -144,20 +159,31 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image.image_url}`}
+                        src={
+                          image.image_url.startsWith("http")
+                            ? image.image_url
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image.image_url}`
+                        }
                         alt={image.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="mt-2">
-                      <p className="text-xs font-medium text-gray-900 truncate" title={image.title}>
+                      <p
+                        className="text-xs font-medium text-gray-900 truncate"
+                        title={image.title}
+                      >
                         {image.title}
                       </p>
                       {image.description && (
-                        <p className="text-xs text-gray-500 truncate" title={image.description}>
+                        <p
+                          className="text-xs text-gray-500 truncate"
+                          title={image.description}
+                        >
                           {image.description}
                         </p>
                       )}
@@ -168,8 +194,12 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
             ) : (
               <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                 <FileText className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Belum ada gambar di galeri</p>
-                <p className="text-xs text-gray-400 mt-1">Gambar dapat ditambahkan melalui menu galeri</p>
+                <p className="text-sm text-gray-500">
+                  Belum ada gambar di galeri
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Gambar dapat ditambahkan melalui menu galeri
+                </p>
               </div>
             )}
           </div>
@@ -177,31 +207,41 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {/* Informasi Taksonomi */}
           <div>
             <h3 className="flex items-center gap-2 mb-3">
-              <Users className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+              <Users
+                className="h-5 w-5"
+                style={{ color: "rgb(53, 100, 71)" }}
+              />
               <span>Informasi Taksonomi</span>
             </h3>
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Nama Ilmiah</p>
-                <p className="italic">{data.nama_ilmiah || '-'}</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Nama Ilmiah
+                </p>
+                <p className="italic">{data.nama_ilmiah || "-"}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Nama Umum</p>
-                <p>{data.nama_umum || '-'}</p>
+                <p>{data.nama_umum || "-"}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Ordo</p>
-                <p>{data.ordo || '-'}</p>
+                <p>{data.ordo || "-"}</p>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Status IUCN</p>
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  {data.status_iucn || 'NE'}
+                <p className="text-sm text-muted-foreground mb-1">
+                  Status IUCN
+                </p>
+                <Badge
+                  variant="outline"
+                  className="bg-blue-50 text-blue-700 border-blue-200"
+                >
+                  {data.status_iucn || "NE"}
                 </Badge>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Endemik</p>
-                <p>{data.is_endemic ? 'Ya' : 'Tidak'}</p>
+                <p>{data.is_endemic ? "Ya" : "Tidak"}</p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground mb-1">Status</p>
@@ -221,7 +261,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.morphology && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <Users className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <Users
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Morfologi</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -234,7 +277,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.deskripsi && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <FileText
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Deskripsi</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -247,7 +293,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.habitat && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <MapPin className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <MapPin
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Habitat</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -260,7 +309,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.diet && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <Heart className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <Heart
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Makanan</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -273,7 +325,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.behavior && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <Users className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <Users
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Perilaku</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -286,7 +341,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.habitat_sumber_makanan && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <MapPin className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <MapPin
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Habitat / Sumber Makanan</span>
               </h3>
               <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
@@ -299,13 +357,22 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.status_hama && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: 'rgb(53, 100, 71)' }} />
+                <FileText
+                  className="h-5 w-5"
+                  style={{ color: "rgb(53, 100, 71)" }}
+                />
                 <span>Status Hama</span>
               </h3>
               <div className="p-4 bg-gray-50 rounded-lg">
-                <p className="mb-2"><span className="font-semibold">Status:</span> {data.status_hama}</p>
+                <p className="mb-2">
+                  <span className="font-semibold">Status:</span>{" "}
+                  {data.status_hama}
+                </p>
                 {data.tingkat_hama && (
-                  <p><span className="font-semibold">Tingkat:</span> {data.tingkat_hama}</p>
+                  <p>
+                    <span className="font-semibold">Tingkat:</span>{" "}
+                    {data.tingkat_hama}
+                  </p>
                 )}
               </div>
             </div>
@@ -319,7 +386,7 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
               <p className="text-muted-foreground mb-1">Taman</p>
               <p className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                {data.park?.name || '-'}
+                {data.park?.name || "-"}
               </p>
             </div>
             <div>

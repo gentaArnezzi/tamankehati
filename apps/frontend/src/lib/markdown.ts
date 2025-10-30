@@ -5,10 +5,10 @@ export type MarkdownHeading = {
 };
 
 export type MarkdownNode =
-  | { type: 'paragraph'; content: string[] }
-  | { type: 'heading'; id: string; level: number; text: string }
-  | { type: 'list'; items: string[] }
-  | { type: 'code'; language: string | null; content: string[] };
+  | { type: "paragraph"; content: string[] }
+  | { type: "heading"; id: string; level: number; text: string }
+  | { type: "list"; items: string[] }
+  | { type: "code"; language: string | null; content: string[] };
 
 export type MarkdownParseResult = {
   nodes: MarkdownNode[];
@@ -20,8 +20,8 @@ export const slugify = (text: string) =>
   text
     .toLowerCase()
     .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-');
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-");
 
 export function parseMarkdown(markdown: string): MarkdownParseResult {
   const result: MarkdownParseResult = {
@@ -30,22 +30,25 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
     wordCount: 0,
   };
 
-  const lines = markdown.replace(/\r\n/g, '\n').split('\n');
+  const lines = markdown.replace(/\r\n/g, "\n").split("\n");
   let paragraph: string[] = [];
   let listItems: string[] = [];
   let codeBlock: { language: string | null; content: string[] } | null = null;
 
   const flushParagraph = () => {
     if (paragraph.length) {
-      result.nodes.push({ type: 'paragraph', content: paragraph });
-      result.wordCount += paragraph.join(' ').split(/\s+/).filter(Boolean).length;
+      result.nodes.push({ type: "paragraph", content: paragraph });
+      result.wordCount += paragraph
+        .join(" ")
+        .split(/\s+/)
+        .filter(Boolean).length;
       paragraph = [];
     }
   };
 
   const flushList = () => {
     if (listItems.length) {
-      result.nodes.push({ type: 'list', items: listItems });
+      result.nodes.push({ type: "list", items: listItems });
       listItems.forEach((item) => {
         result.wordCount += item.split(/\s+/).filter(Boolean).length;
       });
@@ -55,7 +58,11 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
 
   const flushCode = () => {
     if (codeBlock) {
-      result.nodes.push({ type: 'code', language: codeBlock.language, content: codeBlock.content });
+      result.nodes.push({
+        type: "code",
+        language: codeBlock.language,
+        content: codeBlock.content,
+      });
       codeBlock = null;
     }
   };
@@ -64,7 +71,7 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
     const line = rawLine.trimEnd();
 
     if (codeBlock) {
-      if (line.startsWith('```')) {
+      if (line.startsWith("```")) {
         flushCode();
         return;
       }
@@ -78,7 +85,7 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
       return;
     }
 
-    if (line.startsWith('```')) {
+    if (line.startsWith("```")) {
       flushParagraph();
       flushList();
       codeBlock = {
@@ -95,13 +102,13 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
       const level = headingMatch[1].length;
       const text = headingMatch[2].trim();
       const id = slugify(text);
-      result.nodes.push({ type: 'heading', id, level, text });
+      result.nodes.push({ type: "heading", id, level, text });
       result.headings.push({ id, level, text });
       result.wordCount += text.split(/\s+/).filter(Boolean).length;
       return;
     }
 
-    if (line.startsWith('- ')) {
+    if (line.startsWith("- ")) {
       flushParagraph();
       listItems.push(line.slice(2).trim());
       return;

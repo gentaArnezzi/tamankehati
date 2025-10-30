@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import React, { ReactNode, useEffect, useState } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React, { ReactNode, useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 interface ReactQueryProviderProps {
   children: ReactNode;
@@ -33,16 +33,16 @@ const SafeReactQueryDevtools = () => {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (process.env.NODE_ENV !== 'development') return;
+    if (process.env.NODE_ENV !== "development") return;
 
     // Only load DevTools if not in error state
     if (!error) {
-      import('@tanstack/react-query-devtools')
+      import("@tanstack/react-query-devtools")
         .then((module) => {
           setDevTools(() => module.ReactQueryDevtools);
         })
         .catch((err) => {
-          console.warn('Failed to load React Query DevTools:', err);
+          console.warn("Failed to load React Query DevTools:", err);
           setError(true);
         });
     }
@@ -52,14 +52,12 @@ const SafeReactQueryDevtools = () => {
     return null;
   }
 
-  return (
-    <DevTools 
-      initialIsOpen={false}
-    />
-  );
+  return <DevTools initialIsOpen={false} />;
 };
 
-export const ReactQueryProvider: React.FC<ReactQueryProviderProps> = ({ children }) => {
+export const ReactQueryProvider: React.FC<ReactQueryProviderProps> = ({
+  children,
+}) => {
   return (
     <QueryClientProvider client={queryClient}>
       {children}

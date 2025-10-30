@@ -1,17 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://tamankehati-backend.onrender.com';
+const BACKEND_URL =
+  process.env.NEXT_PUBLIC_BACKEND_URL ||
+  "https://tamankehati-backend.onrender.com";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const query = searchParams.get('q') ?? '';
-  const limit = searchParams.get('limit') ?? '20';
+  const query = searchParams.get("q") ?? "";
+  const limit = searchParams.get("limit") ?? "20";
 
   if (!query.trim()) {
-    return NextResponse.json({ 
-      query: '', 
-      results: [], 
-      total: 0 
+    return NextResponse.json({
+      query: "",
+      results: [],
+      total: 0,
     });
   }
 
@@ -20,11 +22,11 @@ export async function GET(request: Request) {
     const response = await fetch(
       `${BACKEND_URL}/api/v1/public/search?q=${encodeURIComponent(query)}&limit=${limit}`,
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -32,21 +34,21 @@ export async function GET(request: Request) {
     }
 
     const data = await response.json();
-    
+
     return NextResponse.json({
       query: data.query,
       results: data.results || [],
-      total: data.total || 0
+      total: data.total || 0,
     });
   } catch (error) {
-    console.error('Gagal menjalankan pencarian global', error);
-    
+    console.error("Gagal menjalankan pencarian global", error);
+
     // Return empty results on error instead of 500 to prevent UI breaking
-    return NextResponse.json({ 
-      query, 
-      results: [], 
+    return NextResponse.json({
+      query,
+      results: [],
       total: 0,
-      error: 'Gagal melakukan pencarian. Silakan coba lagi.'
+      error: "Gagal melakukan pencarian. Silakan coba lagi.",
     });
   }
 }

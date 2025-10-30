@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ReactNode, useMemo, useState } from 'react';
+import { ReactNode, useMemo, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -18,10 +18,10 @@ import {
   ChevronsLeft,
   ChevronsRight,
   Settings,
-} from 'lucide-react';
-import type { User } from '../lib/api-client';
-import { ScrollArea } from './ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+} from "lucide-react";
+import type { User } from "../lib/api-client";
+import { ScrollArea } from "./ui/scroll-area";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 
 interface DashboardLayoutBaseProps {
   children: ReactNode;
@@ -39,45 +39,95 @@ type NavItem = {
 };
 
 const resolveCurrentPage = (path: string) => {
-  if (path === '/dashboard') return 'dashboard';
-  if (path.startsWith('/dashboard/comprehensive')) return 'comprehensive';
-  if (path.startsWith('/dashboard/users')) return 'users';
-  if (path.startsWith('/dashboard/approval')) return 'approval';
-  if (path.startsWith('/dashboard/announcements')) return 'announcements';
-  if (path.startsWith('/dashboard/announcement')) return 'announcements';
-  if (path.startsWith('/dashboard/taman/berita')) return 'berita';
-  if (path.startsWith('/dashboard/taman/flora')) return 'flora';
-  if (path.startsWith('/dashboard/taman/fauna')) return 'fauna';
-  if (path.startsWith('/dashboard/taman')) return 'taman';
-  if (path.startsWith('/dashboard/taman/activities')) return 'activities';
-  return 'dashboard';
+  if (path === "/dashboard") return "dashboard";
+  if (path.startsWith("/dashboard/comprehensive")) return "comprehensive";
+  if (path.startsWith("/dashboard/users")) return "users";
+  if (path.startsWith("/dashboard/approval")) return "approval";
+  if (path.startsWith("/dashboard/announcements")) return "announcements";
+  if (path.startsWith("/dashboard/announcement")) return "announcements";
+  if (path.startsWith("/dashboard/taman/berita")) return "berita";
+  if (path.startsWith("/dashboard/taman/flora")) return "flora";
+  if (path.startsWith("/dashboard/taman/fauna")) return "fauna";
+  if (path.startsWith("/dashboard/taman")) return "taman";
+  if (path.startsWith("/dashboard/taman/activities")) return "activities";
+  return "dashboard";
 };
 
-const buildNavItems = (role?: User['role'] | null): NavItem[] => {
+const buildNavItems = (role?: User["role"] | null): NavItem[] => {
   const baseItems: NavItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { id: 'comprehensive', label: 'Analytics', icon: BarChart3, path: '/dashboard/comprehensive' },
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      path: "/dashboard",
+    },
+    {
+      id: "comprehensive",
+      label: "Analytics",
+      icon: BarChart3,
+      path: "/dashboard/comprehensive",
+    },
   ];
 
-  if (role === 'super_admin') {
+  if (role === "super_admin") {
     return [
       ...baseItems,
-      { id: 'users', label: 'Pengguna', icon: Users, path: '/dashboard/users' },
-      { id: 'approval', label: 'Persetujuan', icon: CheckCircle, path: '/dashboard/approval' },
-      { id: 'announcements', label: 'Pengumuman', icon: Megaphone, path: '/dashboard/announcements' },
-      { id: 'berita', label: 'Artikel & Berita', icon: FileText, path: '/dashboard/taman/berita' },
+      { id: "users", label: "Pengguna", icon: Users, path: "/dashboard/users" },
+      {
+        id: "approval",
+        label: "Persetujuan",
+        icon: CheckCircle,
+        path: "/dashboard/approval",
+      },
+      {
+        id: "announcements",
+        label: "Pengumuman",
+        icon: Megaphone,
+        path: "/dashboard/announcements",
+      },
+      {
+        id: "berita",
+        label: "Artikel & Berita",
+        icon: FileText,
+        path: "/dashboard/taman/berita",
+      },
     ];
   }
 
-  if (role === 'regional_admin') {
+  if (role === "regional_admin") {
     return [
       ...baseItems,
-      { id: 'announcements', label: 'Pengumuman', icon: Megaphone, path: '/dashboard/announcements' },
-      { id: 'taman', label: 'Taman', icon: TreePine, path: '/dashboard/taman' },
-      { id: 'flora', label: 'Flora', icon: TreePine, path: '/dashboard/taman/flora' },
-      { id: 'fauna', label: 'Fauna', icon: Bird, path: '/dashboard/taman/fauna' },
-      { id: 'activities', label: 'Kegiatan', icon: Calendar, path: '/dashboard/taman/activities' },
-      { id: 'ai-demo', label: 'AI Demo', icon: Sparkles, path: '/dashboard/ai-demo' },
+      {
+        id: "announcements",
+        label: "Pengumuman",
+        icon: Megaphone,
+        path: "/dashboard/announcements",
+      },
+      { id: "taman", label: "Taman", icon: TreePine, path: "/dashboard/taman" },
+      {
+        id: "flora",
+        label: "Flora",
+        icon: TreePine,
+        path: "/dashboard/taman/flora",
+      },
+      {
+        id: "fauna",
+        label: "Fauna",
+        icon: Bird,
+        path: "/dashboard/taman/fauna",
+      },
+      {
+        id: "activities",
+        label: "Kegiatan",
+        icon: Calendar,
+        path: "/dashboard/taman/activities",
+      },
+      {
+        id: "ai-demo",
+        label: "AI Demo",
+        icon: Sparkles,
+        path: "/dashboard/ai-demo",
+      },
     ];
   }
 
@@ -95,7 +145,7 @@ export function DashboardLayoutBase({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const navItems = useMemo(() => buildNavItems(user?.role), [user?.role]);
   const currentPage = resolveCurrentPage(currentPath);
-  const avatarInitial = user?.nama?.charAt(0)?.toUpperCase() ?? 'U';
+  const avatarInitial = user?.nama?.charAt(0)?.toUpperCase() ?? "U";
 
   const handleNavigation = (path: string) => {
     onNavigate(path);
@@ -146,17 +196,22 @@ export function DashboardLayoutBase({
           {/* User Section */}
           <div className="ml-auto flex items-center gap-3 sm:gap-4">
             <div className="text-right hidden md:block">
-              <p className="text-sm font-medium text-black leading-tight">{user?.nama}</p>
+              <p className="text-sm font-medium text-black leading-tight">
+                {user?.nama}
+              </p>
               <p className="text-xs text-gray-500">
-                {user?.role === 'super_admin' && 'Super Admin'}
-                {user?.role === 'regional_admin' && 'Regional Admin'}
+                {user?.role === "super_admin" && "Super Admin"}
+                {user?.role === "regional_admin" && "Regional Admin"}
               </p>
             </div>
-            <Avatar key={user?.profile_picture_url || 'no-avatar-header-base'} className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
+            <Avatar
+              key={user?.profile_picture_url || "no-avatar-header-base"}
+              className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0"
+            >
               {user?.profile_picture_url && (
-                <AvatarImage 
-                  src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${user.profile_picture_url}`}
-                  alt={user?.nama || user?.display_name || 'Profile photo'}
+                <AvatarImage
+                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+                  alt={user?.nama || user?.display_name || "Profile photo"}
                 />
               )}
               <AvatarFallback className="bg-black text-white font-medium text-sm">
@@ -182,19 +237,22 @@ export function DashboardLayoutBase({
             fixed lg:sticky top-14 left-0 z-40 h-[calc(100vh-3.5rem)]
             bg-black border-r border-gray-800
             transition-all duration-300 ease-in-out
-            ${mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-            ${sidebarCollapsed ? 'lg:w-16' : 'w-64 sm:w-72 lg:w-60'}
+            ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+            ${sidebarCollapsed ? "lg:w-16" : "w-64 sm:w-72 lg:w-60"}
           `}
         >
           <ScrollArea className="h-full">
             {/* User Info - Mobile Only */}
             <div className="lg:hidden px-4 py-4 border-b border-gray-800">
               <div className="flex items-center gap-3">
-                <Avatar key={user?.profile_picture_url || 'no-avatar-mobile-base'} className="h-10 w-10">
+                <Avatar
+                  key={user?.profile_picture_url || "no-avatar-mobile-base"}
+                  className="h-10 w-10"
+                >
                   {user?.profile_picture_url && (
-                    <AvatarImage 
-                      src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${user.profile_picture_url}`}
-                      alt={user?.nama || user?.display_name || 'Profile photo'}
+                    <AvatarImage
+                      src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+                      alt={user?.nama || user?.display_name || "Profile photo"}
                     />
                   )}
                   <AvatarFallback className="bg-white text-black font-medium">
@@ -204,8 +262,8 @@ export function DashboardLayoutBase({
                 <div>
                   <p className="text-sm font-medium text-white">{user?.nama}</p>
                   <p className="text-xs text-gray-400">
-                    {user?.role === 'super_admin' && 'Super Admin'}
-                    {user?.role === 'regional_admin' && 'Regional Admin'}
+                    {user?.role === "super_admin" && "Super Admin"}
+                    {user?.role === "regional_admin" && "Regional Admin"}
                   </p>
                 </div>
               </div>
@@ -227,10 +285,11 @@ export function DashboardLayoutBase({
                     className={`
                       relative w-full flex items-center rounded-lg
                       text-sm font-medium transition-all duration-200
-                      ${sidebarCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-3 py-2.5'}
-                      ${isActive 
-                        ? 'bg-white text-black shadow-sm' 
-                        : 'text-gray-300 hover:text-white hover:bg-gray-900'
+                      ${sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5"}
+                      ${
+                        isActive
+                          ? "bg-white text-black shadow-sm"
+                          : "text-gray-300 hover:text-white hover:bg-gray-900"
                       }
                     `}
                     title={sidebarCollapsed ? item.label : undefined}
@@ -245,26 +304,28 @@ export function DashboardLayoutBase({
             </nav>
 
             {/* Divider */}
-            <div className={`py-2 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
+            <div className={`py-2 ${sidebarCollapsed ? "px-2" : "px-3"}`}>
               <div className="h-px bg-gray-800"></div>
             </div>
 
             {/* Settings & Logout */}
-            <div className={`pb-6 space-y-1 ${sidebarCollapsed ? 'px-2' : 'px-3'}`}>
+            <div
+              className={`pb-6 space-y-1 ${sidebarCollapsed ? "px-2" : "px-3"}`}
+            >
               {/* Settings Button */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  handleNavigation('/dashboard/settings');
+                  handleNavigation("/dashboard/settings");
                 }}
                 className={`
                   w-full flex items-center rounded-lg text-sm font-medium
                   text-gray-400 hover:text-white hover:bg-gray-900 transition-all duration-200
-                  ${sidebarCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-3 py-2.5'}
-                  ${currentPath === '/dashboard/settings' ? 'bg-white text-black' : ''}
+                  ${sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5"}
+                  ${currentPath === "/dashboard/settings" ? "bg-white text-black" : ""}
                 `}
-                title={sidebarCollapsed ? 'Pengaturan' : undefined}
+                title={sidebarCollapsed ? "Pengaturan" : undefined}
               >
                 <Settings className="h-4 w-4 flex-shrink-0" />
                 {!sidebarCollapsed && <span>Pengaturan</span>}
@@ -279,9 +340,9 @@ export function DashboardLayoutBase({
                 className={`
                   w-full flex items-center rounded-lg text-sm font-medium
                   text-gray-400 hover:text-white hover:bg-gray-900 transition-all duration-200
-                  ${sidebarCollapsed ? 'justify-center px-3 py-3' : 'gap-3 px-3 py-2.5'}
+                  ${sidebarCollapsed ? "justify-center px-3 py-3" : "gap-3 px-3 py-2.5"}
                 `}
-                title={sidebarCollapsed ? 'Keluar' : undefined}
+                title={sidebarCollapsed ? "Keluar" : undefined}
               >
                 <LogOut className="h-4 w-4 flex-shrink-0" />
                 {!sidebarCollapsed && <span>Keluar</span>}
@@ -291,10 +352,12 @@ export function DashboardLayoutBase({
         </aside>
 
         {/* Main Content */}
-        <main className={`
+        <main
+          className={`
           flex-1 w-full min-h-[calc(100vh-3.5rem)] bg-gray-50
           transition-all duration-300 ease-in-out
-        `}>
+        `}
+        >
           <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {children}
           </div>

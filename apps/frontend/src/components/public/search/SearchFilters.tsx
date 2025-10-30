@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Filter, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { Filter, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface SearchFiltersProps {
   filters: {
@@ -14,21 +14,25 @@ interface SearchFiltersProps {
 }
 
 const typeOptions = [
-  { value: 'all', label: 'Semua', count: 0 },
-  { value: 'flora', label: 'Flora', count: 0 },
-  { value: 'fauna', label: 'Fauna', count: 0 },
-  { value: 'taman', label: 'Taman', count: 0 },
-  { value: 'artikel', label: 'Artikel', count: 0 },
-  { value: 'galeri', label: 'Galeri', count: 0 },
+  { value: "all", label: "Semua", count: 0 },
+  { value: "flora", label: "Flora", count: 0 },
+  { value: "fauna", label: "Fauna", count: 0 },
+  { value: "taman", label: "Taman", count: 0 },
+  { value: "artikel", label: "Artikel", count: 0 },
+  { value: "galeri", label: "Galeri", count: 0 },
 ];
 
 const sortOptions = [
-  { value: 'relevance', label: 'Relevansi' },
-  { value: 'title', label: 'Judul A-Z' },
-  { value: 'newest', label: 'Terbaru' },
+  { value: "relevance", label: "Relevansi" },
+  { value: "title", label: "Judul A-Z" },
+  { value: "newest", label: "Terbaru" },
 ];
 
-export function SearchFilters({ filters, onFilterChange, totalResults }: SearchFiltersProps) {
+export function SearchFilters({
+  filters,
+  onFilterChange,
+  totalResults,
+}: SearchFiltersProps) {
   const [showFilters, setShowFilters] = useState(false);
 
   const handleTypeChange = (type: string) => {
@@ -40,10 +44,11 @@ export function SearchFilters({ filters, onFilterChange, totalResults }: SearchF
   };
 
   const clearFilters = () => {
-    onFilterChange({ type: 'all', sort: 'relevance' });
+    onFilterChange({ type: "all", sort: "relevance" });
   };
 
-  const hasActiveFilters = filters.type !== 'all' || filters.sort !== 'relevance';
+  const hasActiveFilters =
+    filters.type !== "all" || filters.sort !== "relevance";
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
@@ -53,7 +58,7 @@ export function SearchFilters({ filters, onFilterChange, totalResults }: SearchF
           <h3 className="font-medium text-gray-900">Filter & Urutkan</h3>
           <span className="text-sm text-gray-500">({totalResults} hasil)</span>
         </div>
-        
+
         <div className="flex items-center gap-2">
           {hasActiveFilters && (
             <Button
@@ -66,19 +71,19 @@ export function SearchFilters({ filters, onFilterChange, totalResults }: SearchF
               Reset
             </Button>
           )}
-          
+
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowFilters(!showFilters)}
             className="md:hidden"
           >
-            {showFilters ? 'Sembunyikan' : 'Filter'}
+            {showFilters ? "Sembunyikan" : "Filter"}
           </Button>
         </div>
       </div>
 
-      <div className={`space-y-4 ${showFilters ? 'block' : 'hidden md:block'}`}>
+      <div className={`space-y-4 ${showFilters ? "block" : "hidden md:block"}`}>
         {/* Type Filter */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -91,8 +96,8 @@ export function SearchFilters({ filters, onFilterChange, totalResults }: SearchF
                 onClick={() => handleTypeChange(option.value)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filters.type === option.value
-                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
                 }`}
               >
                 {option.label}
@@ -118,8 +123,8 @@ export function SearchFilters({ filters, onFilterChange, totalResults }: SearchF
                 onClick={() => handleSortChange(option.value)}
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   filters.sort === option.value
-                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
+                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200"
                 }`}
               >
                 {option.label}

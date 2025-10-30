@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { FaunaPublicSchema, PaginatedResponseSchema } from './public';
+import { z } from "zod";
+import { FaunaPublicSchema, PaginatedResponseSchema } from "./public";
 
 export const FaunaDetailSchema = FaunaPublicSchema.extend({
   ordo: z.string().optional(),
@@ -30,7 +30,7 @@ export const FaunaDetailSchema = FaunaPublicSchema.extend({
         nama_ilmiah: z.string(),
         nama_umum: z.string().optional(),
         gambar_utama: z.string().optional(),
-      })
+      }),
     )
     .optional(),
 });

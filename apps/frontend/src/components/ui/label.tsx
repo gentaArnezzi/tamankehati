@@ -5,10 +5,7 @@ import * as LabelPrimitive from "@radix-ui/react-label";
 
 import { cn } from "./utils";
 
-function Label({
-  className,
-  ...props
-}: any) {
+function Label({ className, ...props }: any) {
   return (
     <LabelPrimitive.Root
       data-slot="label"

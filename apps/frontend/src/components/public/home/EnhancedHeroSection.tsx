@@ -1,16 +1,18 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Search, MapPin, Leaf, Bird } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Search, MapPin, Leaf, Bird } from "lucide-react";
 
 export function EnhancedHeroSection() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'all' | 'flora' | 'fauna' | 'taman'>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchType, setSearchType] = useState<
+    "all" | "flora" | "fauna" | "taman"
+  >("all");
   const { scrollY } = useScroll();
-  
+
   // Parallax effects
   const y = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
@@ -19,7 +21,7 @@ export function EnhancedHeroSection() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      const baseUrl = searchType === 'all' ? '/search' : `/${searchType}`;
+      const baseUrl = searchType === "all" ? "/search" : `/${searchType}`;
       window.location.href = `${baseUrl}?q=${encodeURIComponent(searchQuery)}`;
     }
   };
@@ -27,10 +29,7 @@ export function EnhancedHeroSection() {
   return (
     <section className="relative isolate overflow-hidden min-h-screen w-full -mt-20 pt-20">
       {/* Background Image with Parallax */}
-      <motion.div 
-        style={{ scale }}
-        className="absolute inset-0"
-      >
+      <motion.div style={{ scale }} className="absolute inset-0">
         <Image
           src="/home/hero.jpg"
           alt="Taman Kehati Indonesia - Keanekaragaman Hayati"
@@ -66,7 +65,7 @@ export function EnhancedHeroSection() {
         ))}
       </div>
 
-      <motion.div 
+      <motion.div
         style={{ y, opacity }}
         className="relative flex min-h-screen w-full items-center"
       >
@@ -107,8 +106,9 @@ export function EnhancedHeroSection() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="text-xl md:text-2xl leading-relaxed text-white/90 max-w-4xl mx-auto"
             >
-              Database terpadu flora, fauna, dan taman konservasi Indonesia. 
-              Dukung riset, edukasi, dan aksi konservasi melalui data yang akurat dan terpercaya.
+              Database terpadu flora, fauna, dan taman konservasi Indonesia.
+              Dukung riset, edukasi, dan aksi konservasi melalui data yang
+              akurat dan terpercaya.
             </motion.p>
 
             {/* Advanced Search Bar */}
@@ -123,10 +123,10 @@ export function EnhancedHeroSection() {
                   {/* Search Type Tabs */}
                   <div className="flex gap-2 mb-4 justify-center">
                     {[
-                      { value: 'all', label: 'Semua', icon: Search },
-                      { value: 'flora', label: 'Flora', icon: Leaf },
-                      { value: 'fauna', label: 'Fauna', icon: Bird },
-                      { value: 'taman', label: 'Taman', icon: MapPin },
+                      { value: "all", label: "Semua", icon: Search },
+                      { value: "flora", label: "Flora", icon: Leaf },
+                      { value: "fauna", label: "Fauna", icon: Bird },
+                      { value: "taman", label: "Taman", icon: MapPin },
                     ].map((type) => (
                       <button
                         key={type.value}
@@ -134,8 +134,8 @@ export function EnhancedHeroSection() {
                         onClick={() => setSearchType(type.value as any)}
                         className={`px-6 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
                           searchType === type.value
-                            ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50'
-                            : 'bg-white/10 text-white/70 hover:bg-white/20 backdrop-blur-sm border border-white/20'
+                            ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/50"
+                            : "bg-white/10 text-white/70 hover:bg-white/20 backdrop-blur-sm border border-white/20"
                         }`}
                       >
                         <type.icon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export function EnhancedHeroSection() {
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder={`Cari ${searchType === 'all' ? 'flora, fauna, atau taman' : searchType}... (contoh: Rafflesia, Orangutan, Taman Nasional)`}
+                        placeholder={`Cari ${searchType === "all" ? "flora, fauna, atau taman" : searchType}... (contoh: Rafflesia, Orangutan, Taman Nasional)`}
                         className="flex-1 px-16 py-5 text-lg bg-transparent border-none focus:outline-none text-gray-900 placeholder:text-gray-400"
                       />
                       <button
@@ -168,7 +168,13 @@ export function EnhancedHeroSection() {
                   {/* Quick Search Suggestions */}
                   <div className="mt-4 flex flex-wrap gap-2 justify-center">
                     <span className="text-white/60 text-sm">Popular:</span>
-                    {['Rafflesia', 'Orangutan', 'Komodo', 'Anggrek Hitam', 'Jalak Bali'].map((term) => (
+                    {[
+                      "Rafflesia",
+                      "Orangutan",
+                      "Komodo",
+                      "Anggrek Hitam",
+                      "Jalak Bali",
+                    ].map((term) => (
                       <button
                         key={term}
                         type="button"
@@ -221,9 +227,9 @@ export function EnhancedHeroSection() {
               className="grid grid-cols-3 gap-8 pt-12 max-w-3xl mx-auto"
             >
               {[
-                { number: '500+', label: 'Spesies' },
-                { number: '50+', label: 'Taman Kehati' },
-                { number: '100+', label: 'Penelitian' },
+                { number: "500+", label: "Spesies" },
+                { number: "50+", label: "Taman Kehati" },
+                { number: "100+", label: "Penelitian" },
               ].map((stat, i) => (
                 <div key={i} className="text-center">
                   <div className="text-3xl md:text-4xl font-bold text-white mb-1">
@@ -261,4 +267,3 @@ export function EnhancedHeroSection() {
     </section>
   );
 }
-

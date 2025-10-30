@@ -1,32 +1,59 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Loader2, Plus, X, Info, FileText, MapPin, Target, Camera } from 'lucide-react';
-import { toast } from 'sonner';
-import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
-import { FileUpload } from '../ui/file-upload';
-import { MultipleFileUpload } from '../ui/multiple-file-upload';
-import dynamic from 'next/dynamic';
+import { useState, useEffect } from "react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import {
+  Loader2,
+  Plus,
+  X,
+  Info,
+  FileText,
+  MapPin,
+  Target,
+  Camera,
+} from "lucide-react";
+import { toast } from "sonner";
+import { IndonesiaRegionSelector } from "./IndonesiaRegionSelector";
+import { FileUpload } from "../ui/file-upload";
+import { MultipleFileUpload } from "../ui/multiple-file-upload";
+import dynamic from "next/dynamic";
 
-const InteractiveMap = dynamic(() => import('../ui/interactive-map-client').then(mod => ({ default: mod.InteractiveMap })), { 
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-96">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-sm text-gray-600">Memuat peta...</p>
+const InteractiveMap = dynamic(
+  () =>
+    import("../ui/interactive-map-client").then((mod) => ({
+      default: mod.InteractiveMap,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">Memuat peta...</p>
+        </div>
       </div>
-    </div>
-  )
-});
+    ),
+  },
+);
 
 interface ParkFormProps {
   onSuccess?: () => void;
@@ -39,27 +66,27 @@ interface ParkFormData {
   slug: string;
   sk_penetapan: string; // SK Penetapan/Penunjukan
   pengelola: string; // Instansi Pengelola
-  
+
   // Lokasi Administratif (matching database schema)
   provinsi: string; // Provinsi
   kota_kabupaten: string; // Kota/Kabupaten
   kecamatan: string; // Kecamatan
   desa_kelurahan: string; // Desa/Kelurahan
-  
+
   // Karakteristik Kawasan
   area_ha: number | null; // Luas Kawasan (ha)
   kondisi_fisik: string; // Kondisi Fisik Kawasan
   nilai_penting: string; // Nilai Penting Kawasan
   tipe_ekoregion: string; // Tipe Ekoregion
   status: string;
-  
+
   // Koordinat Geografis
   latitude: number | null; // Latitude koordinat
   longitude: number | null; // Longitude koordinat
-  
+
   // Gambar
   gambar_utama: string; // URL gambar utama
-  
+
   // Dokumen Taman
   description: string; // Deskripsi Umum
   sejarah: string; // Sejarah Taman
@@ -77,47 +104,49 @@ interface Region {
 export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
   const [formData, setFormData] = useState<ParkFormData>({
     // Profil Taman
-    name: '',
-    slug: '',
-    sk_penetapan: '',
-    pengelola: '',
-    
+    name: "",
+    slug: "",
+    sk_penetapan: "",
+    pengelola: "",
+
     // Lokasi Administratif
-    provinsi: '',
-    kota_kabupaten: '',
-    kecamatan: '',
-    desa_kelurahan: '',
-    
+    provinsi: "",
+    kota_kabupaten: "",
+    kecamatan: "",
+    desa_kelurahan: "",
+
     // Karakteristik Kawasan
     area_ha: null,
-    kondisi_fisik: '',
-    nilai_penting: '',
-    tipe_ekoregion: '',
-    status: 'draft',
-    
+    kondisi_fisik: "",
+    nilai_penting: "",
+    tipe_ekoregion: "",
+    status: "draft",
+
     // Koordinat Geografis
     latitude: null,
     longitude: null,
-    
+
     // Gambar
-    gambar_utama: '',
-    
+    gambar_utama: "",
+
     // Dokumen Taman
-    description: '',
-    sejarah: '',
-    visi: '',
-    misi: '',
-    nilai_dasar: '',
+    description: "",
+    sejarah: "",
+    visi: "",
+    misi: "",
+    nilai_dasar: "",
   });
   const [regions, setRegions] = useState<Region[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingRegions, setLoadingRegions] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  
+
   // Gallery upload states
-  const [selectedFiles, setSelectedFiles] = useState<Array<{file: File; preview: string; id: string}>>([]);
+  const [selectedFiles, setSelectedFiles] = useState<
+    Array<{ file: File; preview: string; id: string }>
+  >([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
 
   useEffect(() => {
@@ -126,53 +155,58 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
   const loadRegions = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/crud/regions/`);
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/crud/regions/`,
+      );
       if (!response.ok) {
-        throw new Error('Gagal memuat regions');
+        throw new Error("Gagal memuat regions");
       }
       const data = await response.json();
       setRegions(data);
     } catch (err) {
-      console.error('Failed to load regions:', err);
-      toast.error('Gagal memuat daftar region');
+      console.error("Failed to load regions:", err);
+      toast.error("Gagal memuat daftar region");
     } finally {
       setLoadingRegions(false);
     }
   };
 
   const handleCoordinatesChange = (lat: number, lng: number) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       latitude: lat,
-      longitude: lng
+      longitude: lng,
     }));
   };
 
   const uploadFile = async (file: File): Promise<string> => {
-    console.log('Uploading park image:', file.name, 'Size:', file.size);
-    
+    console.log("Uploading park image:", file.name, "Size:", file.size);
+
     try {
       const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
-      
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      formDataUpload.append("file", file);
+
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+          body: formDataUpload,
         },
-        body: formDataUpload,
-      });
-      
+      );
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Upload failed: ${response.status} - ${errorText}`);
       }
-      
+
       const result = await response.json();
-      console.log('Park image upload success:', result);
+      console.log("Park image upload success:", result);
       return result.url;
     } catch (error) {
-      console.error('Park image upload error:', error);
+      console.error("Park image upload error:", error);
       throw error;
     }
   };
@@ -183,11 +217,11 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
     try {
       const imageUrl = await uploadFile(file);
-      setFormData(prev => ({ ...prev, gambar_utama: imageUrl }));
-      toast.success('Gambar berhasil diupload');
+      setFormData((prev) => ({ ...prev, gambar_utama: imageUrl }));
+      toast.success("Gambar berhasil diupload");
     } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error('Gagal mengupload gambar');
+      console.error("Error uploading file:", error);
+      toast.error("Gagal mengupload gambar");
       setSelectedFile(null);
     } finally {
       setUploading(false);
@@ -196,13 +230,13 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
   const handleFileRemove = () => {
     setSelectedFile(null);
-    setFormData(prev => ({ ...prev, gambar_utama: '' }));
+    setFormData((prev) => ({ ...prev, gambar_utama: "" }));
   };
 
   // Multiple files upload for gallery
   const uploadMultipleFiles = async (files: File[]): Promise<string[]> => {
-    console.log('Uploading multiple park images:', files.length);
-    
+    console.log("Uploading multiple park images:", files.length);
+
     const uploadPromises = files.map(async (file) => {
       try {
         return await uploadFile(file);
@@ -222,7 +256,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
       preview: URL.createObjectURL(file),
       id: Math.random().toString(36).substring(7),
     }));
-    
+
     setSelectedFiles((prev) => [...prev, ...filesWithPreview]);
   };
 
@@ -245,66 +279,88 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
     };
   }, [selectedFiles]);
 
-  const submitGalleryImages = async (parkId: number, shouldSubmitForReview: boolean = false) => {
+  const submitGalleryImages = async (
+    parkId: number,
+    shouldSubmitForReview: boolean = false,
+  ) => {
     if (selectedFiles.length === 0) {
-      console.log('No gallery images to upload');
+      console.log("No gallery images to upload");
       return;
     }
 
     try {
       setUploadingGallery(true);
-      console.log(`Uploading ${selectedFiles.length} gallery images for park ${parkId}...`);
+      console.log(
+        `Uploading ${selectedFiles.length} gallery images for park ${parkId}...`,
+      );
 
       // Upload all files
-      const uploadedUrls = await uploadMultipleFiles(selectedFiles.map(f => f.file));
-      console.log('All gallery images uploaded:', uploadedUrls);
+      const uploadedUrls = await uploadMultipleFiles(
+        selectedFiles.map((f) => f.file),
+      );
+      console.log("All gallery images uploaded:", uploadedUrls);
 
       // Create gallery entries
       const galleryPromises = uploadedUrls.map(async (url, index) => {
         const galleryData = {
           title: `${formData.name} - Foto ${index + 1}`,
-          description: '',
+          description: "",
           image_url: url,
-          entity_type: 'park',
+          entity_type: "park",
           entity_id: parkId,
           park_id: parkId, // Also include park_id for reference
         };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+            },
+            body: JSON.stringify(galleryData),
           },
-          body: JSON.stringify(galleryData),
-        });
+        );
 
         if (!response.ok) {
           const errorText = await response.text();
-          console.error(`Failed to create gallery entry ${index + 1}:`, response.status, errorText);
+          console.error(
+            `Failed to create gallery entry ${index + 1}:`,
+            response.status,
+            errorText,
+          );
           throw new Error(`Failed to create gallery entry: ${response.status}`);
         }
 
         const result = await response.json();
-        
+
         // Submit for review if park is being submitted for review
         if (result.id && shouldSubmitForReview) {
           try {
-            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${result.id}/submit`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            const submitResponse = await fetch(
+              `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/${result.id}/submit`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+                },
               },
-            });
-            
+            );
+
             if (submitResponse.ok) {
-              console.log(`Gallery ${result.id} submitted for review successfully`);
+              console.log(
+                `Gallery ${result.id} submitted for review successfully`,
+              );
             } else {
               console.warn(`Failed to submit gallery ${result.id} for review`);
             }
           } catch (submitError) {
-            console.warn(`Error submitting gallery ${result.id} for review:`, submitError);
+            console.warn(
+              `Error submitting gallery ${result.id} for review:`,
+              submitError,
+            );
           }
         }
 
@@ -312,22 +368,22 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
       });
 
       await Promise.all(galleryPromises);
-      console.log('All gallery entries created successfully');
+      console.log("All gallery entries created successfully");
       toast.success(`${selectedFiles.length} foto galeri berhasil ditambahkan`);
     } catch (error) {
-      console.error('Error submitting gallery:', error);
-      toast.error('Gagal mengupload beberapa foto galeri');
+      console.error("Error submitting gallery:", error);
+      toast.error("Gagal mengupload beberapa foto galeri");
     } finally {
       setUploadingGallery(false);
     }
   };
 
-  const handleSubmit = async (submitStatus: 'draft' | 'in_review') => {
+  const handleSubmit = async (submitStatus: "draft" | "in_review") => {
     setLoading(true);
-    setError('');
+    setError("");
 
-    console.log('Park form submitting - status:', submitStatus);
-    console.log('Park form data:', formData);
+    console.log("Park form submitting - status:", submitStatus);
+    console.log("Park form data:", formData);
 
     try {
       // Map frontend field names to backend field names
@@ -358,51 +414,61 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         status: submitStatus, // Set status based on button clicked
       };
 
-      console.log('Park data to submit:', dataToSubmit);
+      console.log("Park data to submit:", dataToSubmit);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/parks/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/parks/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+          },
+          body: JSON.stringify(dataToSubmit),
         },
-        body: JSON.stringify(dataToSubmit),
-      });
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.detail || 'Gagal membuat park');
+        throw new Error(errorData.detail || "Gagal membuat park");
       }
 
       const result = await response.json();
-      console.log('Park create result:', result);
-      
+      console.log("Park create result:", result);
+
       // Submit gallery images if any
       if (result.id && selectedFiles.length > 0) {
-        await submitGalleryImages(parseInt(result.id), submitStatus === 'in_review');
+        await submitGalleryImages(
+          parseInt(result.id),
+          submitStatus === "in_review",
+        );
       }
-      
+
       toast.success(
-        submitStatus === 'draft' 
+        submitStatus === "draft"
           ? `Park "${result.name}" berhasil disimpan sebagai draft!`
-          : `Park "${result.name}" berhasil diajukan untuk review!`
+          : `Park "${result.name}" berhasil diajukan untuk review!`,
       );
-      
+
       if (onSuccess) {
         onSuccess();
       }
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Gagal membuat park';
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal membuat park";
       setError(errorMessage);
       toast.error(errorMessage);
-      console.error('Park submit error:', err);
+      console.error("Park submit error:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (field: keyof ParkFormData, value: string | number | null) => {
-    setFormData(prev => ({
+  const handleChange = (
+    field: keyof ParkFormData,
+    value: string | number | null,
+  ) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -414,32 +480,32 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
     kecamatan?: string;
     desa_kelurahan?: string;
   }) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      provinsi: region.provinsi || '',
-      kota_kabupaten: region.kota_kabupaten || '',
-      kecamatan: region.kecamatan || '',
-      desa_kelurahan: region.desa_kelurahan || '',
+      provinsi: region.provinsi || "",
+      kota_kabupaten: region.kota_kabupaten || "",
+      kecamatan: region.kecamatan || "",
+      desa_kelurahan: region.desa_kelurahan || "",
     }));
   };
 
   const generateSlug = (name: string) => {
     const baseSlug = name
       .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
       .trim();
-    
+
     // Add timestamp to ensure uniqueness
     const timestamp = Date.now().toString().slice(-6);
     return `${baseSlug}-${timestamp}`;
   };
 
   const handleNameChange = (name: string) => {
-    handleChange('name', name);
+    handleChange("name", name);
     if (!formData.slug || formData.slug === generateSlug(formData.name)) {
-      handleChange('slug', generateSlug(name));
+      handleChange("slug", generateSlug(name));
     }
   };
 
@@ -493,41 +559,53 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
               <div className="space-y-6">
                 {/* Informasi Dasar */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">📋 Informasi Dasar</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    📋 Informasi Dasar
+                  </h4>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+                    <div className="space-y-2">
                       <Label htmlFor="name" className="text-sm font-medium">
                         Nama Kawasan <span className="text-red-500">*</span>
                       </Label>
-            <Input
-              id="name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => handleNameChange(e.target.value)}
+                      <Input
+                        id="name"
+                        type="text"
+                        value={formData.name}
+                        onChange={(e) => handleNameChange(e.target.value)}
                         placeholder="Taman Kehati Cibinong"
                         className="h-10"
                         required
                       />
-                      <p className="text-xs text-gray-500">Nama resmi kawasan Taman Kehati</p>
+                      <p className="text-xs text-gray-500">
+                        Nama resmi kawasan Taman Kehati
+                      </p>
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="area_ha" className="text-sm font-medium">
-                        Luas Kawasan (hektar) <span className="text-red-500">*</span>
+                        Luas Kawasan (hektar){" "}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="area_ha"
                         type="number"
                         step="0.1"
                         min="0"
-                        value={formData.area_ha || ''}
-                        onChange={(e) => handleChange('area_ha', e.target.value ? parseFloat(e.target.value) : null)}
+                        value={formData.area_ha || ""}
+                        onChange={(e) =>
+                          handleChange(
+                            "area_ha",
+                            e.target.value ? parseFloat(e.target.value) : null,
+                          )
+                        }
                         placeholder="45.3"
                         className="h-10"
                         required
                       />
-                      <p className="text-xs text-gray-500">Luas dalam hektar (1-2 desimal)</p>
+                      <p className="text-xs text-gray-500">
+                        Luas dalam hektar (1-2 desimal)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -538,9 +616,12 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                     <Camera className="h-5 w-5" />
                     Foto Taman
                   </h4>
-                  
+
                   <div className="space-y-2">
-                    <Label htmlFor="gambar_utama" className="text-sm font-medium">
+                    <Label
+                      htmlFor="gambar_utama"
+                      className="text-sm font-medium"
+                    >
                       Foto Utama Taman
                     </Label>
                     {uploading && (
@@ -556,7 +637,9 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                       previewUrl={formData.gambar_utama}
                       maxSize={5}
                     />
-                    <p className="text-xs text-gray-500">Upload foto landscape taman (max 5MB)</p>
+                    <p className="text-xs text-gray-500">
+                      Upload foto landscape taman (max 5MB)
+                    </p>
                   </div>
 
                   {/* Gallery Upload */}
@@ -577,130 +660,237 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                       maxFiles={10}
                       maxSize={5}
                     />
-                    <p className="text-xs text-gray-500">Upload beberapa foto untuk galeri taman (max 10 foto, masing-masing 5MB)</p>
+                    <p className="text-xs text-gray-500">
+                      Upload beberapa foto untuk galeri taman (max 10 foto,
+                      masing-masing 5MB)
+                    </p>
                   </div>
                 </div>
 
                 {/* Dokumen Legal */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">📄 Dokumen Legal</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    📄 Dokumen Legal
+                  </h4>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="sk_penetapan" className="text-sm font-medium">
-                        SK Penetapan/Penunjukan <span className="text-red-500">*</span>
+                      <Label
+                        htmlFor="sk_penetapan"
+                        className="text-sm font-medium"
+                      >
+                        SK Penetapan/Penunjukan{" "}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="sk_penetapan"
                         type="text"
                         value={formData.sk_penetapan}
-                        onChange={(e) => handleChange('sk_penetapan', e.target.value)}
+                        onChange={(e) =>
+                          handleChange("sk_penetapan", e.target.value)
+                        }
                         placeholder="SK Bupati Bogor No. 123/2019"
                         className="h-10"
                         required
                       />
-                      <p className="text-xs text-gray-500">Nomor SK penetapan/penunjukan</p>
+                      <p className="text-xs text-gray-500">
+                        Nomor SK penetapan/penunjukan
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="pengelola" className="text-sm font-medium">
-                        Instansi Pengelola <span className="text-red-500">*</span>
+                      <Label
+                        htmlFor="pengelola"
+                        className="text-sm font-medium"
+                      >
+                        Instansi Pengelola{" "}
+                        <span className="text-red-500">*</span>
                       </Label>
                       <Input
                         id="pengelola"
                         type="text"
                         value={formData.pengelola}
-                        onChange={(e) => handleChange('pengelola', e.target.value)}
+                        onChange={(e) =>
+                          handleChange("pengelola", e.target.value)
+                        }
                         placeholder="DLH Kabupaten Bogor"
                         className="h-10"
                         required
                       />
-                      <p className="text-xs text-gray-500">Lembaga/instansi pengelola</p>
+                      <p className="text-xs text-gray-500">
+                        Lembaga/instansi pengelola
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Karakteristik Kawasan */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">🌿 Karakteristik Kawasan</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    🌿 Karakteristik Kawasan
+                  </h4>
+
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="kondisi_fisik" className="text-sm font-medium">Kondisi Fisik Kawasan</Label>
+                      <Label
+                        htmlFor="kondisi_fisik"
+                        className="text-sm font-medium"
+                      >
+                        Kondisi Fisik Kawasan
+                      </Label>
                       <Textarea
                         id="kondisi_fisik"
                         value={formData.kondisi_fisik}
-                        onChange={(e) => handleChange('kondisi_fisik', e.target.value)}
+                        onChange={(e) =>
+                          handleChange("kondisi_fisik", e.target.value)
+                        }
                         placeholder="Hutan kota dengan vegetasi campuran"
                         rows={3}
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500">Deskripsi kondisi umum kawasan</p>
+                      <p className="text-xs text-gray-500">
+                        Deskripsi kondisi umum kawasan
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="nilai_penting" className="text-sm font-medium">Nilai Penting Kawasan</Label>
+                      <Label
+                        htmlFor="nilai_penting"
+                        className="text-sm font-medium"
+                      >
+                        Nilai Penting Kawasan
+                      </Label>
                       <Textarea
                         id="nilai_penting"
                         value={formData.nilai_penting}
-                        onChange={(e) => handleChange('nilai_penting', e.target.value)}
+                        onChange={(e) =>
+                          handleChange("nilai_penting", e.target.value)
+                        }
                         placeholder="Habitat spesies endemik Jabodetabek"
                         rows={3}
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500">Nilai penting ekologi/keanekaragaman hayati</p>
+                      <p className="text-xs text-gray-500">
+                        Nilai penting ekologi/keanekaragaman hayati
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="tipe_ekoregion" className="text-sm font-medium">Tipe Ekoregion</Label>
+                      <Label
+                        htmlFor="tipe_ekoregion"
+                        className="text-sm font-medium"
+                      >
+                        Tipe Ekoregion
+                      </Label>
                       <Select
                         value={formData.tipe_ekoregion}
-                        onValueChange={(value) => handleChange('tipe_ekoregion', value)}
+                        onValueChange={(value) =>
+                          handleChange("tipe_ekoregion", value)
+                        }
                       >
                         <SelectTrigger className="h-10">
                           <SelectValue placeholder="Pilih tipe ekoregion" />
                         </SelectTrigger>
                         <SelectContent className="max-h-[400px]">
-                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">DARAT (Terrestrial)</div>
-                          <SelectItem value="Hutan Hujan Dataran Rendah">Hutan Hujan Dataran Rendah</SelectItem>
-                          <SelectItem value="Hutan Hujan Pegunungan">Hutan Hujan Pegunungan</SelectItem>
-                          <SelectItem value="Hutan Gambut">Hutan Gambut</SelectItem>
-                          <SelectItem value="Hutan Mangrove">Hutan Mangrove</SelectItem>
-                          <SelectItem value="Hutan Musim">Hutan Musim</SelectItem>
+                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+                            DARAT (Terrestrial)
+                          </div>
+                          <SelectItem value="Hutan Hujan Dataran Rendah">
+                            Hutan Hujan Dataran Rendah
+                          </SelectItem>
+                          <SelectItem value="Hutan Hujan Pegunungan">
+                            Hutan Hujan Pegunungan
+                          </SelectItem>
+                          <SelectItem value="Hutan Gambut">
+                            Hutan Gambut
+                          </SelectItem>
+                          <SelectItem value="Hutan Mangrove">
+                            Hutan Mangrove
+                          </SelectItem>
+                          <SelectItem value="Hutan Musim">
+                            Hutan Musim
+                          </SelectItem>
                           <SelectItem value="Savana">Savana</SelectItem>
                           <SelectItem value="Karst">Karst</SelectItem>
-                          
-                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">AIR TAWAR (Freshwater)</div>
-                          <SelectItem value="Sungai Kapuas">Sungai Kapuas</SelectItem>
-                          <SelectItem value="Sungai Mahakam">Sungai Mahakam</SelectItem>
-                          <SelectItem value="Sungai Barito">Sungai Barito</SelectItem>
-                          <SelectItem value="Sungai Musi">Sungai Musi</SelectItem>
-                          <SelectItem value="Sungai Batanghari">Sungai Batanghari</SelectItem>
+
+                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">
+                            AIR TAWAR (Freshwater)
+                          </div>
+                          <SelectItem value="Sungai Kapuas">
+                            Sungai Kapuas
+                          </SelectItem>
+                          <SelectItem value="Sungai Mahakam">
+                            Sungai Mahakam
+                          </SelectItem>
+                          <SelectItem value="Sungai Barito">
+                            Sungai Barito
+                          </SelectItem>
+                          <SelectItem value="Sungai Musi">
+                            Sungai Musi
+                          </SelectItem>
+                          <SelectItem value="Sungai Batanghari">
+                            Sungai Batanghari
+                          </SelectItem>
                           <SelectItem value="Danau Toba">Danau Toba</SelectItem>
                           <SelectItem value="Danau Poso">Danau Poso</SelectItem>
-                          <SelectItem value="Danau Sentani">Danau Sentani</SelectItem>
-                          <SelectItem value="Sistem Sungai Sumatera">Sistem Sungai Sumatera</SelectItem>
-                          <SelectItem value="Sistem Sungai Jawa">Sistem Sungai Jawa</SelectItem>
-                          <SelectItem value="Sistem Sungai Kalimantan">Sistem Sungai Kalimantan</SelectItem>
-                          <SelectItem value="Sistem Sungai Sulawesi">Sistem Sungai Sulawesi</SelectItem>
-                          <SelectItem value="Sistem Sungai Papua">Sistem Sungai Papua</SelectItem>
-                          
-                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">LAUT (Marine)</div>
+                          <SelectItem value="Danau Sentani">
+                            Danau Sentani
+                          </SelectItem>
+                          <SelectItem value="Sistem Sungai Sumatera">
+                            Sistem Sungai Sumatera
+                          </SelectItem>
+                          <SelectItem value="Sistem Sungai Jawa">
+                            Sistem Sungai Jawa
+                          </SelectItem>
+                          <SelectItem value="Sistem Sungai Kalimantan">
+                            Sistem Sungai Kalimantan
+                          </SelectItem>
+                          <SelectItem value="Sistem Sungai Sulawesi">
+                            Sistem Sungai Sulawesi
+                          </SelectItem>
+                          <SelectItem value="Sistem Sungai Papua">
+                            Sistem Sungai Papua
+                          </SelectItem>
+
+                          <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">
+                            LAUT (Marine)
+                          </div>
                           <SelectItem value="Papua">Papua</SelectItem>
                           <SelectItem value="Laut Banda">Laut Banda</SelectItem>
-                          <SelectItem value="Nusa Tenggara">Nusa Tenggara</SelectItem>
-                          <SelectItem value="Laut Sulawesi/Selat Makassar">Laut Sulawesi/Selat Makassar</SelectItem>
+                          <SelectItem value="Nusa Tenggara">
+                            Nusa Tenggara
+                          </SelectItem>
+                          <SelectItem value="Laut Sulawesi/Selat Makassar">
+                            Laut Sulawesi/Selat Makassar
+                          </SelectItem>
                           <SelectItem value="Halmahera">Halmahera</SelectItem>
-                          <SelectItem value="Palawan/Borneo Utara">Palawan/Borneo Utara</SelectItem>
-                          <SelectItem value="Sumatera Bagian Barat">Sumatera Bagian Barat</SelectItem>
-                          <SelectItem value="Timur Laut Sulawesi/Teluk Tomini">Timur Laut Sulawesi/Teluk Tomini</SelectItem>
-                          <SelectItem value="Dangkalan Sunda/Laut Jawa">Dangkalan Sunda/Laut Jawa</SelectItem>
-                          <SelectItem value="Laut Arafura">Laut Arafura</SelectItem>
-                          <SelectItem value="Jawa Bagian Selatan">Jawa Bagian Selatan</SelectItem>
-                          <SelectItem value="Selat Malaka">Selat Malaka</SelectItem>
+                          <SelectItem value="Palawan/Borneo Utara">
+                            Palawan/Borneo Utara
+                          </SelectItem>
+                          <SelectItem value="Sumatera Bagian Barat">
+                            Sumatera Bagian Barat
+                          </SelectItem>
+                          <SelectItem value="Timur Laut Sulawesi/Teluk Tomini">
+                            Timur Laut Sulawesi/Teluk Tomini
+                          </SelectItem>
+                          <SelectItem value="Dangkalan Sunda/Laut Jawa">
+                            Dangkalan Sunda/Laut Jawa
+                          </SelectItem>
+                          <SelectItem value="Laut Arafura">
+                            Laut Arafura
+                          </SelectItem>
+                          <SelectItem value="Jawa Bagian Selatan">
+                            Jawa Bagian Selatan
+                          </SelectItem>
+                          <SelectItem value="Selat Malaka">
+                            Selat Malaka
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-gray-500">Pilih kategori ekoregion sesuai karakteristik kawasan (darat, air tawar, atau laut)</p>
+                      <p className="text-xs text-gray-500">
+                        Pilih kategori ekoregion sesuai karakteristik kawasan
+                        (darat, air tawar, atau laut)
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -711,70 +901,97 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
               <div className="space-y-6">
                 {/* Sejarah Taman */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">📚 Sejarah Taman</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    📚 Sejarah Taman
+                  </h4>
+
                   <div className="space-y-2">
-                    <Label htmlFor="sejarah" className="text-sm font-medium">Riwayat Singkat</Label>
+                    <Label htmlFor="sejarah" className="text-sm font-medium">
+                      Riwayat Singkat
+                    </Label>
                     <Textarea
                       id="sejarah"
                       value={formData.sejarah}
-                      onChange={(e) => handleChange('sejarah', e.target.value)}
+                      onChange={(e) => handleChange("sejarah", e.target.value)}
                       placeholder="Diresmikan tahun 2019 sebagai kawasan edukasi konservasi"
                       rows={4}
                       className="resize-none"
                     />
-                    <p className="text-xs text-gray-500">Riwayat singkat berdiri/berkembang taman</p>
+                    <p className="text-xs text-gray-500">
+                      Riwayat singkat berdiri/berkembang taman
+                    </p>
                   </div>
                 </div>
 
                 {/* Visi dan Misi */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">🎯 Visi dan Misi</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    🎯 Visi dan Misi
+                  </h4>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="visi" className="text-sm font-medium">Visi</Label>
+                      <Label htmlFor="visi" className="text-sm font-medium">
+                        Visi
+                      </Label>
                       <Textarea
                         id="visi"
                         value={formData.visi}
-                        onChange={(e) => handleChange('visi', e.target.value)}
+                        onChange={(e) => handleChange("visi", e.target.value)}
                         placeholder="Menjadi taman konservasi berkelanjutan dan pusat pembelajaran biodiversitas"
                         rows={3}
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500">Arah pengelolaan taman</p>
+                      <p className="text-xs text-gray-500">
+                        Arah pengelolaan taman
+                      </p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="misi" className="text-sm font-medium">Misi</Label>
+                      <Label htmlFor="misi" className="text-sm font-medium">
+                        Misi
+                      </Label>
                       <Textarea
                         id="misi"
                         value={formData.misi}
-                        onChange={(e) => handleChange('misi', e.target.value)}
+                        onChange={(e) => handleChange("misi", e.target.value)}
                         placeholder="Misi pengelolaan taman konservasi"
                         rows={3}
                         className="resize-none"
                       />
-                      <p className="text-xs text-gray-500">Tujuan pengelolaan taman</p>
+                      <p className="text-xs text-gray-500">
+                        Tujuan pengelolaan taman
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 {/* Nilai Dasar */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">💎 Nilai-Nilai Dasar</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    💎 Nilai-Nilai Dasar
+                  </h4>
+
                   <div className="space-y-2">
-                    <Label htmlFor="nilai_dasar" className="text-sm font-medium">Prinsip Konservasi</Label>
+                    <Label
+                      htmlFor="nilai_dasar"
+                      className="text-sm font-medium"
+                    >
+                      Prinsip Konservasi
+                    </Label>
                     <Textarea
                       id="nilai_dasar"
                       value={formData.nilai_dasar}
-                      onChange={(e) => handleChange('nilai_dasar', e.target.value)}
+                      onChange={(e) =>
+                        handleChange("nilai_dasar", e.target.value)
+                      }
                       placeholder="Menjaga keanekaragaman hayati dan nilai ekologi kawasan"
                       rows={4}
                       className="resize-none"
                     />
-                    <p className="text-xs text-gray-500">Prinsip konservasi inti taman</p>
+                    <p className="text-xs text-gray-500">
+                      Prinsip konservasi inti taman
+                    </p>
                   </div>
                 </div>
               </div>
@@ -784,8 +1001,10 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
               <div className="space-y-6">
                 {/* Lokasi Detail */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">📍 Lokasi Detail</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    📍 Lokasi Detail
+                  </h4>
+
                   <IndonesiaRegionSelector
                     onRegionChange={handleRegionChange}
                     initialValues={{
@@ -799,14 +1018,18 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
 
                 {/* Status dan Pengelolaan */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">⚙️ Status dan Pengelolaan</h4>
-                  
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    ⚙️ Status dan Pengelolaan
+                  </h4>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="status" className="text-sm font-medium">Status Publikasi</Label>
+                      <Label htmlFor="status" className="text-sm font-medium">
+                        Status Publikasi
+                      </Label>
                       <Select
                         value={formData.status}
-                        onValueChange={(value) => handleChange('status', value)}
+                        onValueChange={(value) => handleChange("status", value)}
                       >
                         <SelectTrigger className="h-10">
                           <SelectValue placeholder="Pilih status" />
@@ -817,47 +1040,63 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                           <SelectItem value="archived">Archived</SelectItem>
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-gray-500">Status publikasi taman</p>
-          </div>
+                      <p className="text-xs text-gray-500">
+                        Status publikasi taman
+                      </p>
+                    </div>
 
-          {/* Region field removed - using user-based access control */}
+                    {/* Region field removed - using user-based access control */}
                   </div>
-          </div>
+                </div>
 
                 {/* Deskripsi Umum */}
                 <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">📝 Deskripsi Umum</h4>
+                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                    📝 Deskripsi Umum
+                  </h4>
 
-          <div className="space-y-2">
-                    <Label htmlFor="description" className="text-sm font-medium">Deskripsi Taman</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleChange('description', e.target.value)}
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="description"
+                      className="text-sm font-medium"
+                    >
+                      Deskripsi Taman
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) =>
+                        handleChange("description", e.target.value)
+                      }
                       placeholder="Deskripsi umum taman konservasi..."
                       rows={4}
                       className="resize-none"
-            />
-                    <p className="text-xs text-gray-500">Deskripsi singkat tentang taman</p>
+                    />
+                    <p className="text-xs text-gray-500">
+                      Deskripsi singkat tentang taman
+                    </p>
                   </div>
-          </div>
-          </div>
-
-                {/* Koordinat Geografis */}
-                <div className="space-y-4">
-                  <h4 className="text-md font-semibold text-gray-800 border-b pb-2">🗺️ Koordinat Geografis</h4>
-                  <p className="text-sm text-gray-600">
-                    Pilih koordinat taman konservasi menggunakan peta interaktif. 
-                    Anda dapat mengklik pada peta, mencari lokasi, atau menggunakan lokasi saat ini.
-                  </p>
-                  
-                  <InteractiveMap
-                    latitude={formData.latitude}
-                    longitude={formData.longitude}
-                    onCoordinatesChange={handleCoordinatesChange}
-                    height="400px"
-                  />
                 </div>
+              </div>
+
+              {/* Koordinat Geografis */}
+              <div className="space-y-4">
+                <h4 className="text-md font-semibold text-gray-800 border-b pb-2">
+                  🗺️ Koordinat Geografis
+                </h4>
+                <p className="text-sm text-gray-600">
+                  Pilih koordinat taman konservasi menggunakan peta interaktif.
+                  Anda dapat mengklik pada peta, mencari lokasi, atau
+                  menggunakan lokasi saat ini.
+                </p>
+
+                <InteractiveMap
+                  latitude={formData.latitude}
+                  longitude={formData.longitude}
+                  onCoordinatesChange={handleCoordinatesChange}
+                  height="400px"
+                />
+              </div>
             </TabsContent>
           </Tabs>
 
@@ -868,11 +1107,11 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                 Batal
               </Button>
             )}
-            <Button 
-              type="button" 
+            <Button
+              type="button"
               variant="secondary"
-              disabled={loading} 
-              onClick={() => handleSubmit('draft')}
+              disabled={loading}
+              onClick={() => handleSubmit("draft")}
               className="flex-1"
             >
               {loading ? (
@@ -881,13 +1120,13 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
                   Menyimpan...
                 </>
               ) : (
-                'Simpan sebagai Draft'
+                "Simpan sebagai Draft"
               )}
             </Button>
-            <Button 
+            <Button
               type="button"
-              disabled={loading} 
-              onClick={() => handleSubmit('in_review')}
+              disabled={loading}
+              onClick={() => handleSubmit("in_review")}
               className="flex-1"
             >
               {loading ? (

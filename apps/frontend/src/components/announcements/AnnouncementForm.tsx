@@ -1,36 +1,69 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Switch } from '../ui/switch';
-import { Calendar } from '../ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarIcon, Loader2 } from 'lucide-react';
-import { format } from 'date-fns';
-import { id } from 'date-fns/locale';
-import { cn } from '../../lib/utils';
-import { Announcement } from './AnnouncementsPage';
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "../ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { Switch } from "../ui/switch";
+import { Calendar } from "../ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { CalendarIcon, Loader2 } from "lucide-react";
+import { format } from "date-fns";
+import { id } from "date-fns/locale";
+import { cn } from "../../lib/utils";
+import { Announcement } from "./AnnouncementsPage";
 
 const announcementSchema = z.object({
-  title: z.string().min(1, 'Judul wajib diisi').max(255, 'Judul maksimal 255 karakter'),
-  content: z.string().min(1, 'Konten wajib diisi'),
-  summary: z.string().max(500, 'Ringkasan maksimal 500 karakter').optional(),
-  type: z.enum(['news', 'announcement', 'event', 'maintenance']),
+  title: z
+    .string()
+    .min(1, "Judul wajib diisi")
+    .max(255, "Judul maksimal 255 karakter"),
+  content: z.string().min(1, "Konten wajib diisi"),
+  summary: z.string().max(500, "Ringkasan maksimal 500 karakter").optional(),
+  type: z.enum(["news", "announcement", "event", "maintenance"]),
   priority: z.number().min(0).max(2),
   is_featured: z.boolean(),
   is_pinned: z.boolean(),
-  featured_image: z.string().url('URL gambar tidak valid').optional().or(z.literal('')),
+  featured_image: z
+    .string()
+    .url("URL gambar tidak valid")
+    .optional()
+    .or(z.literal("")),
   attachments: z.string().optional(),
-  tags: z.string().max(500, 'Tags maksimal 500 karakter').optional(),
+  tags: z.string().max(500, "Tags maksimal 500 karakter").optional(),
   expires_at: z.date().optional(),
 });
 
@@ -41,20 +74,20 @@ interface AnnouncementFormProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (data: Partial<Announcement>) => Promise<void>;
   initialData?: Announcement | null;
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
 }
 
 const ANNOUNCEMENT_TYPES = [
-  { value: 'news', label: 'Berita' },
-  { value: 'announcement', label: 'Pengumuman' },
-  { value: 'event', label: 'Acara' },
-  { value: 'maintenance', label: 'Pemeliharaan' },
+  { value: "news", label: "Berita" },
+  { value: "announcement", label: "Pengumuman" },
+  { value: "event", label: "Acara" },
+  { value: "maintenance", label: "Pemeliharaan" },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 0, label: 'Normal' },
-  { value: 1, label: 'Tinggi' },
-  { value: 2, label: 'Mendesak' },
+  { value: 0, label: "Normal" },
+  { value: 1, label: "Tinggi" },
+  { value: 2, label: "Mendesak" },
 ];
 
 export function AnnouncementForm({
@@ -70,48 +103,52 @@ export function AnnouncementForm({
   const form = useForm<AnnouncementFormData>({
     resolver: zodResolver(announcementSchema),
     defaultValues: {
-      title: '',
-      content: '',
-      summary: '',
-      type: 'news',
+      title: "",
+      content: "",
+      summary: "",
+      type: "news",
       priority: 0,
       is_featured: false,
       is_pinned: false,
-      featured_image: '',
-      attachments: '',
-      tags: '',
+      featured_image: "",
+      attachments: "",
+      tags: "",
       expires_at: undefined,
     },
   });
 
   useEffect(() => {
-    if (initialData && mode === 'edit') {
+    if (initialData && mode === "edit") {
       form.reset({
         title: initialData.title,
         content: initialData.content,
-        summary: initialData.summary || '',
+        summary: initialData.summary || "",
         type: initialData.type,
         priority: initialData.priority,
         is_featured: initialData.is_featured,
         is_pinned: initialData.is_pinned,
-        featured_image: initialData.featured_image || '',
-        attachments: initialData.attachments || '',
-        tags: initialData.tags || '',
-        expires_at: initialData.expires_at ? new Date(initialData.expires_at) : undefined,
+        featured_image: initialData.featured_image || "",
+        attachments: initialData.attachments || "",
+        tags: initialData.tags || "",
+        expires_at: initialData.expires_at
+          ? new Date(initialData.expires_at)
+          : undefined,
       });
-      setExpiresAt(initialData.expires_at ? new Date(initialData.expires_at) : undefined);
+      setExpiresAt(
+        initialData.expires_at ? new Date(initialData.expires_at) : undefined,
+      );
     } else {
       form.reset({
-        title: '',
-        content: '',
-        summary: '',
-        type: 'news',
+        title: "",
+        content: "",
+        summary: "",
+        type: "news",
         priority: 0,
         is_featured: false,
         is_pinned: false,
-        featured_image: '',
-        attachments: '',
-        tags: '',
+        featured_image: "",
+        attachments: "",
+        tags: "",
         expires_at: undefined,
       });
       setExpiresAt(undefined);
@@ -134,7 +171,7 @@ export function AnnouncementForm({
 
   const handleExpiresAtChange = (date: Date | undefined) => {
     setExpiresAt(date);
-    form.setValue('expires_at', date);
+    form.setValue("expires_at", date);
   };
 
   return (
@@ -142,23 +179,27 @@ export function AnnouncementForm({
       <DialogContent className="w-[98vw] max-w-7xl max-h-[95vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold break-words">
-            {mode === 'create' ? 'Buat Pengumuman Baru' : 'Edit Pengumuman'}
+            {mode === "create" ? "Buat Pengumuman Baru" : "Edit Pengumuman"}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground break-words">
-            {mode === 'create' 
-              ? 'Buat pengumuman atau berita baru untuk pengguna' 
-              : 'Edit pengumuman yang sudah ada'
-            }
+            {mode === "create"
+              ? "Buat pengumuman atau berita baru untuk pengguna"
+              : "Edit pengumuman yang sudah ada"}
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 sm:space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="space-y-4 sm:space-y-6"
+          >
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Basic Information */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base sm:text-lg break-words">Informasi Dasar</CardTitle>
+                  <CardTitle className="text-base sm:text-lg break-words">
+                    Informasi Dasar
+                  </CardTitle>
                   <CardDescription className="text-xs sm:text-sm break-words">
                     Informasi utama pengumuman
                   </CardDescription>
@@ -169,12 +210,14 @@ export function AnnouncementForm({
                     name="title"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Judul *</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Judul *
+                        </FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Masukkan judul pengumuman" 
+                          <Input
+                            placeholder="Masukkan judul pengumuman"
                             className="text-sm"
-                            {...field} 
+                            {...field}
                           />
                         </FormControl>
                         <FormMessage className="text-xs" />
@@ -187,9 +230,11 @@ export function AnnouncementForm({
                     name="summary"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Ringkasan</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Ringkasan
+                        </FormLabel>
                         <FormControl>
-                          <Textarea 
+                          <Textarea
                             placeholder="Ringkasan singkat pengumuman (opsional)"
                             className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
                             {...field}
@@ -208,8 +253,13 @@ export function AnnouncementForm({
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Tipe *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel className="text-sm font-medium">
+                          Tipe *
+                        </FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger className="text-sm">
                               <SelectValue placeholder="Pilih tipe pengumuman" />
@@ -217,7 +267,11 @@ export function AnnouncementForm({
                           </FormControl>
                           <SelectContent>
                             {ANNOUNCEMENT_TYPES.map((type) => (
-                              <SelectItem key={type.value} value={type.value} className="text-sm">
+                              <SelectItem
+                                key={type.value}
+                                value={type.value}
+                                className="text-sm"
+                              >
                                 {type.label}
                               </SelectItem>
                             ))}
@@ -233,9 +287,13 @@ export function AnnouncementForm({
                     name="priority"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-sm font-medium">Prioritas</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(parseInt(value))} 
+                        <FormLabel className="text-sm font-medium">
+                          Prioritas
+                        </FormLabel>
+                        <Select
+                          onValueChange={(value) =>
+                            field.onChange(parseInt(value))
+                          }
                           value={field.value.toString()}
                         >
                           <FormControl>
@@ -245,7 +303,11 @@ export function AnnouncementForm({
                           </FormControl>
                           <SelectContent>
                             {PRIORITY_OPTIONS.map((priority) => (
-                              <SelectItem key={priority.value} value={priority.value.toString()} className="text-sm">
+                              <SelectItem
+                                key={priority.value}
+                                value={priority.value.toString()}
+                                className="text-sm"
+                              >
                                 {priority.label}
                               </SelectItem>
                             ))}
@@ -261,7 +323,9 @@ export function AnnouncementForm({
               {/* Settings */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base sm:text-lg break-words">Pengaturan</CardTitle>
+                  <CardTitle className="text-base sm:text-lg break-words">
+                    Pengaturan
+                  </CardTitle>
                   <CardDescription className="text-xs sm:text-sm break-words">
                     Pengaturan tampilan dan perilaku
                   </CardDescription>
@@ -273,7 +337,9 @@ export function AnnouncementForm({
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4">
                         <div className="space-y-0.5 flex-1 pr-2">
-                          <FormLabel className="text-sm font-medium">Featured</FormLabel>
+                          <FormLabel className="text-sm font-medium">
+                            Featured
+                          </FormLabel>
                           <FormDescription className="text-xs break-words">
                             Tampilkan sebagai pengumuman unggulan
                           </FormDescription>
@@ -294,7 +360,9 @@ export function AnnouncementForm({
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 sm:p-4">
                         <div className="space-y-0.5 flex-1 pr-2">
-                          <FormLabel className="text-sm font-medium">Pin ke Atas</FormLabel>
+                          <FormLabel className="text-sm font-medium">
+                            Pin ke Atas
+                          </FormLabel>
                           <FormDescription className="text-xs break-words">
                             Pin pengumuman ke bagian atas daftar
                           </FormDescription>
@@ -314,7 +382,9 @@ export function AnnouncementForm({
                     name="expires_at"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel className="text-sm font-medium">Tanggal Kedaluwarsa</FormLabel>
+                        <FormLabel className="text-sm font-medium">
+                          Tanggal Kedaluwarsa
+                        </FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
@@ -322,13 +392,15 @@ export function AnnouncementForm({
                                 variant="outline"
                                 className={cn(
                                   "w-full pl-3 text-left font-normal text-sm",
-                                  !expiresAt && "text-muted-foreground"
+                                  !expiresAt && "text-muted-foreground",
                                 )}
                               >
                                 {expiresAt ? (
                                   format(expiresAt, "PPP", { locale: id })
                                 ) : (
-                                  <span className="truncate">Pilih tanggal kedaluwarsa (opsional)</span>
+                                  <span className="truncate">
+                                    Pilih tanggal kedaluwarsa (opsional)
+                                  </span>
                                 )}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50 flex-shrink-0" />
                               </Button>
@@ -345,7 +417,8 @@ export function AnnouncementForm({
                           </PopoverContent>
                         </Popover>
                         <FormDescription className="text-xs">
-                          Pengumuman akan otomatis diarsipkan setelah tanggal ini
+                          Pengumuman akan otomatis diarsipkan setelah tanggal
+                          ini
                         </FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
@@ -358,7 +431,9 @@ export function AnnouncementForm({
             {/* Content */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base sm:text-lg break-words">Konten</CardTitle>
+                <CardTitle className="text-base sm:text-lg break-words">
+                  Konten
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm break-words">
                   Isi pengumuman yang akan ditampilkan kepada pengguna
                 </CardDescription>
@@ -369,9 +444,11 @@ export function AnnouncementForm({
                   name="content"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Konten *</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Konten *
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Tulis konten pengumuman di sini..."
                           className="min-h-[150px] sm:min-h-[200px] text-sm resize-none"
                           {...field}
@@ -390,7 +467,9 @@ export function AnnouncementForm({
             {/* Media & Attachments */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base sm:text-lg break-words">Media & Lampiran</CardTitle>
+                <CardTitle className="text-base sm:text-lg break-words">
+                  Media & Lampiran
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm break-words">
                   Gambar dan file lampiran untuk pengumuman
                 </CardDescription>
@@ -401,9 +480,11 @@ export function AnnouncementForm({
                   name="featured_image"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Gambar Utama</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Gambar Utama
+                      </FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           placeholder="URL gambar utama (opsional)"
                           className="text-sm"
                           {...field}
@@ -422,9 +503,11 @@ export function AnnouncementForm({
                   name="attachments"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Lampiran</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Lampiran
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="JSON string URL lampiran (opsional)"
                           className="min-h-[60px] sm:min-h-[80px] text-sm resize-none"
                           {...field}
@@ -443,9 +526,11 @@ export function AnnouncementForm({
                   name="tags"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Tags</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Tags
+                      </FormLabel>
                       <FormControl>
-                        <Input 
+                        <Input
                           placeholder="Tag1, Tag2, Tag3 (pisahkan dengan koma)"
                           className="text-sm"
                           {...field}
@@ -472,10 +557,14 @@ export function AnnouncementForm({
               >
                 Batal
               </Button>
-              <Button type="submit" disabled={loading} className="w-full sm:w-auto text-sm">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full sm:w-auto text-sm"
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <span className="truncate">
-                  {mode === 'create' ? 'Buat Pengumuman' : 'Simpan Perubahan'}
+                  {mode === "create" ? "Buat Pengumuman" : "Simpan Perubahan"}
                 </span>
               </Button>
             </div>

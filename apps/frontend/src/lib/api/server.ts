@@ -1,8 +1,10 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 // Server-side API functions for Next.js App Router
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  "https://tamankehati-backend-pxnu.onrender.com";
 
 // Taman schemas
 const TamanPublicSchema = z.object({
@@ -32,21 +34,24 @@ export type ParkPublic = TamanPublic;
 export type ParkPaginated = TamanPaginated;
 
 // Server-side fetch function
-async function serverFetch<T>(url: string, params?: Record<string, any>): Promise<T> {
+async function serverFetch<T>(
+  url: string,
+  params?: Record<string, any>,
+): Promise<T> {
   const queryParams = new URLSearchParams();
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
-      if (value !== undefined && value !== null && value !== '') {
+      if (value !== undefined && value !== null && value !== "") {
         queryParams.set(key, String(value));
       }
     });
   }
-  
-  const fullUrl = `${API_BASE_URL}${url}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-  
+
+  const fullUrl = `${API_BASE_URL}${url}${queryParams.toString() ? `?${queryParams.toString()}` : ""}`;
+
   const response = await fetch(fullUrl, {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     next: {
       revalidate: 900, // 15 minutes
@@ -54,20 +59,24 @@ async function serverFetch<T>(url: string, params?: Record<string, any>): Promis
   });
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch from ${url}: ${response.status} ${response.statusText}`);
+    throw new Error(
+      `Failed to fetch from ${url}: ${response.status} ${response.statusText}`,
+    );
   }
 
   return response.json();
 }
 
 // Taman API functions
-export async function getTamanPage(params: {
-  search?: string;
-  region?: string;
-  tipe_ekoregion?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<TamanPaginated> {
+export async function getTamanPage(
+  params: {
+    search?: string;
+    region?: string;
+    tipe_ekoregion?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<TamanPaginated> {
   try {
     // Map frontend parameters to backend parameters
     const backendParams: Record<string, any> = {
@@ -91,12 +100,15 @@ export async function getTamanPage(params: {
     }
 
     // Backend returns paginated format directly
-    const response = await serverFetch<TamanPaginated>('/api/public/parks', backendParams);
-    
+    const response = await serverFetch<TamanPaginated>(
+      "/api/public/parks",
+      backendParams,
+    );
+
     // Parse and return the response
     return TamanPaginatedSchema.parse(response);
   } catch (error) {
-    console.error('Error fetching taman page:', error);
+    console.error("Error fetching taman page:", error);
     return {
       items: [],
       total: 0,
@@ -115,17 +127,19 @@ export const getParkPage = getTamanPage;
 export const getParkDetail = getTamanDetail;
 
 // Flora API functions
-export async function getFloraPage(params: {
-  search?: string;
-  famili?: string;
-  status_iucn?: string;
-  wilayah?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<any> {
+export async function getFloraPage(
+  params: {
+    search?: string;
+    famili?: string;
+    status_iucn?: string;
+    wilayah?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<any> {
   try {
-    const items = await serverFetch<any[]>('/api/public/flora', params);
-    
+    const items = await serverFetch<any[]>("/api/public/flora", params);
+
     return {
       items: items,
       total: items.length,
@@ -133,7 +147,7 @@ export async function getFloraPage(params: {
       offset: params.offset || 0,
     };
   } catch (error) {
-    console.error('Error fetching flora page:', error);
+    console.error("Error fetching flora page:", error);
     return {
       items: [],
       total: 0,
@@ -144,17 +158,19 @@ export async function getFloraPage(params: {
 }
 
 // Fauna API functions
-export async function getFaunaPage(params: {
-  search?: string;
-  famili?: string;
-  status_iucn?: string;
-  wilayah?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<any> {
+export async function getFaunaPage(
+  params: {
+    search?: string;
+    famili?: string;
+    status_iucn?: string;
+    wilayah?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<any> {
   try {
-    const items = await serverFetch<any[]>('/api/public/fauna', params);
-    
+    const items = await serverFetch<any[]>("/api/public/fauna", params);
+
     return {
       items: items,
       total: items.length,
@@ -162,7 +178,7 @@ export async function getFaunaPage(params: {
       offset: params.offset || 0,
     };
   } catch (error) {
-    console.error('Error fetching fauna page:', error);
+    console.error("Error fetching fauna page:", error);
     return {
       items: [],
       total: 0,
@@ -173,15 +189,17 @@ export async function getFaunaPage(params: {
 }
 
 // Artikel API functions
-export async function getArtikelPage(params: {
-  search?: string;
-  category?: string;
-  limit?: number;
-  offset?: number;
-} = {}): Promise<any> {
+export async function getArtikelPage(
+  params: {
+    search?: string;
+    category?: string;
+    limit?: number;
+    offset?: number;
+  } = {},
+): Promise<any> {
   try {
-    const items = await serverFetch<any[]>('/api/public/artikel', params);
-    
+    const items = await serverFetch<any[]>("/api/public/artikel", params);
+
     return {
       items: items,
       total: items.length,
@@ -189,7 +207,7 @@ export async function getArtikelPage(params: {
       offset: params.offset || 0,
     };
   } catch (error) {
-    console.error('Error fetching artikel page:', error);
+    console.error("Error fetching artikel page:", error);
     return {
       items: [],
       total: 0,

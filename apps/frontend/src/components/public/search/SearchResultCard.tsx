@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { 
-  Leaf, 
-  PawPrint, 
-  MapPin, 
-  FileText, 
+import Link from "next/link";
+import { motion } from "framer-motion";
+import {
+  Leaf,
+  PawPrint,
+  MapPin,
+  FileText,
   Image as ImageIcon,
   ExternalLink,
-  Star
-} from 'lucide-react';
+  Star,
+} from "lucide-react";
 
 interface SearchResult {
   id: string;
-  type: 'flora' | 'fauna' | 'taman' | 'artikel' | 'galeri';
+  type: "flora" | "fauna" | "taman" | "artikel" | "galeri";
   title: string;
   description: string;
   score: number;
@@ -28,39 +28,39 @@ interface SearchResultCardProps {
 const typeConfig = {
   flora: {
     icon: Leaf,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50',
-    borderColor: 'border-green-200',
-    label: 'Flora'
+    color: "text-green-600",
+    bgColor: "bg-green-50",
+    borderColor: "border-green-200",
+    label: "Flora",
   },
   fauna: {
     icon: PawPrint,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-50',
-    borderColor: 'border-orange-200',
-    label: 'Fauna'
+    color: "text-orange-600",
+    bgColor: "bg-orange-50",
+    borderColor: "border-orange-200",
+    label: "Fauna",
   },
   taman: {
     icon: MapPin,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50',
-    borderColor: 'border-blue-200',
-    label: 'Taman'
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    borderColor: "border-blue-200",
+    label: "Taman",
   },
   artikel: {
     icon: FileText,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50',
-    borderColor: 'border-purple-200',
-    label: 'Artikel'
+    color: "text-purple-600",
+    bgColor: "bg-purple-50",
+    borderColor: "border-purple-200",
+    label: "Artikel",
   },
   galeri: {
     icon: ImageIcon,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-50',
-    borderColor: 'border-pink-200',
-    label: 'Galeri'
-  }
+    color: "text-pink-600",
+    bgColor: "bg-pink-50",
+    borderColor: "border-pink-200",
+    label: "Galeri",
+  },
 };
 
 export function SearchResultCard({ result }: SearchResultCardProps) {
@@ -68,9 +68,9 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
   const Icon = config.icon;
 
   const getScoreColor = (score: number) => {
-    if (score >= 0.8) return 'text-green-600';
-    if (score >= 0.6) return 'text-yellow-600';
-    return 'text-gray-500';
+    if (score >= 0.8) return "text-green-600";
+    if (score >= 0.6) return "text-yellow-600";
+    return "text-gray-500";
   };
 
   const getScoreStars = (score: number) => {
@@ -79,7 +79,7 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
       <Star
         key={i}
         className={`w-3 h-3 ${
-          i < stars ? 'fill-current text-yellow-400' : 'text-gray-300'
+          i < stars ? "fill-current text-yellow-400" : "text-gray-300"
         }`}
       />
     ));
@@ -96,8 +96,13 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
         <div className="bg-white rounded-xl border border-gray-200 p-6 hover:border-emerald-300 hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
           <div className="flex items-start gap-4">
             {/* Type Icon */}
-            <div className={`flex-shrink-0 w-12 h-12 rounded-lg ${config.bgColor} ${config.borderColor} border flex items-center justify-center`}>
-              <Icon className={`w-6 h-6 ${config.color}`} data-testid={`${result.type}-icon`} />
+            <div
+              className={`flex-shrink-0 w-12 h-12 rounded-lg ${config.bgColor} ${config.borderColor} border flex items-center justify-center`}
+            >
+              <Icon
+                className={`w-6 h-6 ${config.color}`}
+                data-testid={`${result.type}-icon`}
+              />
             </div>
 
             {/* Content */}
@@ -106,16 +111,18 @@ export function SearchResultCard({ result }: SearchResultCardProps) {
                 <div className="flex-1 min-w-0">
                   {/* Type Badge */}
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.bgColor} ${config.color}`}
+                    >
                       {config.label}
                     </span>
-                    
+
                     {/* Relevance Score */}
                     <div className="flex items-center gap-1">
-                      <div className="flex">
-                        {getScoreStars(result.score)}
-                      </div>
-                      <span className={`text-xs font-medium ${getScoreColor(result.score)}`}>
+                      <div className="flex">{getScoreStars(result.score)}</div>
+                      <span
+                        className={`text-xs font-medium ${getScoreColor(result.score)}`}
+                      >
                         {Math.round(result.score * 100)}%
                       </span>
                     </div>

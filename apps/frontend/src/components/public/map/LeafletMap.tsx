@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState, useCallback } from 'react';
-import type { FeatureCollection } from 'geojson';
+import { useEffect, useMemo, useState, useCallback } from "react";
+import type { FeatureCollection } from "geojson";
 import {
   GeoJSON,
   MapContainer,
@@ -9,10 +9,10 @@ import {
   Popup,
   TileLayer,
   useMap,
-} from 'react-leaflet';
-import L, { type LatLngBoundsExpression } from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { cn } from '../../ui/utils';
+} from "react-leaflet";
+import L, { type LatLngBoundsExpression } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import { cn } from "../../ui/utils";
 
 type MarkerData = {
   id: string;
@@ -44,13 +44,18 @@ type ClusterGroup = {
 const INDONESIA_CENTER: [number, number] = [-2.5489, 118.0149];
 
 const markerIconAssets = {
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconRetinaUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+  iconUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 };
 
-if (typeof window !== 'undefined') {
-  const defaultIcon = L.Icon.Default.prototype as unknown as { _getIconUrl?: unknown };
+if (typeof window !== "undefined") {
+  const defaultIcon = L.Icon.Default.prototype as unknown as {
+    _getIconUrl?: unknown;
+  };
   if (defaultIcon._getIconUrl) {
     delete defaultIcon._getIconUrl;
   }
@@ -85,7 +90,7 @@ const createClusterIcon = (count: number) =>
       border:2px solid rgba(255,255,255,0.9);
       box-shadow:0 6px 14px rgba(15,23,42,0.2);
     ">${count}</div>`,
-    className: '',
+    className: "",
     iconSize: [40, 40],
   });
 
@@ -111,21 +116,33 @@ function ClusterMarker({ cluster }: { cluster: ClusterGroup }) {
       <Popup className="space-y-2">
         {isCluster ? (
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-slate-800">Taman terdekat</p>
+            <p className="text-sm font-semibold text-slate-800">
+              Taman terdekat
+            </p>
             <ul className="space-y-1 text-xs text-slate-600">
               {cluster.markers.map((marker) => (
                 <li key={marker.id}>
-                  <span className="font-medium text-slate-700">{marker.title}</span>
-                  {marker.description && <span className="block text-slate-500">{marker.description}</span>}
+                  <span className="font-medium text-slate-700">
+                    {marker.title}
+                  </span>
+                  {marker.description && (
+                    <span className="block text-slate-500">
+                      {marker.description}
+                    </span>
+                  )}
                 </li>
               ))}
             </ul>
           </div>
         ) : (
           <div className="space-y-1">
-            <p className="text-sm font-semibold text-slate-800">{cluster.markers[0]?.title}</p>
+            <p className="text-sm font-semibold text-slate-800">
+              {cluster.markers[0]?.title}
+            </p>
             {cluster.markers[0]?.description && (
-              <p className="text-xs text-slate-600">{cluster.markers[0]?.description}</p>
+              <p className="text-xs text-slate-600">
+                {cluster.markers[0]?.description}
+              </p>
             )}
             {cluster.markers[0]?.url && (
               <a
@@ -144,7 +161,7 @@ function ClusterMarker({ cluster }: { cluster: ClusterGroup }) {
 
 export function LeafletMap({
   className,
-  height = '420px',
+  height = "420px",
   center = INDONESIA_CENTER,
   zoom = 5,
   scrollWheelZoom = true,
@@ -152,9 +169,9 @@ export function LeafletMap({
   geojson,
   bounds,
   showControls = false,
-  ariaLabel = 'Peta interaktif',
+  ariaLabel = "Peta interaktif",
 }: LeafletMapProps) {
-  const [basemap, setBasemap] = useState<'default' | 'satellite'>('default');
+  const [basemap, setBasemap] = useState<"default" | "satellite">("default");
 
   const computedBounds = useMemo<LatLngBoundsExpression | undefined>(() => {
     if (bounds) return bounds;
@@ -175,8 +192,10 @@ export function LeafletMap({
       const existing = grouped.get(key);
       if (existing) {
         const count = existing.markers.length;
-        const avgLat = (existing.position[0] * count + marker.position[0]) / (count + 1);
-        const avgLng = (existing.position[1] * count + marker.position[1]) / (count + 1);
+        const avgLat =
+          (existing.position[0] * count + marker.position[0]) / (count + 1);
+        const avgLng =
+          (existing.position[1] * count + marker.position[1]) / (count + 1);
         existing.position = [avgLat, avgLng];
         existing.markers.push(marker);
       } else {
@@ -191,31 +210,33 @@ export function LeafletMap({
   }, [markers]);
 
   const toggleBasemap = useCallback(() => {
-    setBasemap((prev) => (prev === 'default' ? 'satellite' : 'default'));
+    setBasemap((prev) => (prev === "default" ? "satellite" : "default"));
   }, []);
 
   const tileConfig =
-    basemap === 'satellite'
+    basemap === "satellite"
       ? {
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics',
+          url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+          attribution:
+            '&copy; <a href="https://www.esri.com/">Esri</a>, Earthstar Geographics',
         }
       : {
-          url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         };
 
   // Memoize the MapContainer with a stable key based on essential props
   const mapContainer = useMemo(() => {
     // Create a stable key that only changes when essential map properties change
-    const mapKey = `map-${center.join(',')}-${zoom}-${basemap}-${clusters.length}`;
+    const mapKey = `map-${center.join(",")}-${zoom}-${basemap}-${clusters.length}`;
 
     return (
       <MapContainer
         center={center}
         zoom={zoom}
         scrollWheelZoom={scrollWheelZoom}
-        style={{ height, width: '100%' }}
+        style={{ height, width: "100%" }}
         aria-label={ariaLabel}
         key={mapKey} // Use stable key to prevent unnecessary remounts
       >
@@ -225,23 +246,53 @@ export function LeafletMap({
           url={tileConfig.url}
         />
         {computedBounds && <FitBounds bounds={computedBounds} />}
-        {geojson && <GeoJSON data={geojson} style={{ color: '#166534', weight: 2, fillOpacity: 0.1 }} />}
+        {geojson && (
+          <GeoJSON
+            data={geojson}
+            style={{ color: "#166534", weight: 2, fillOpacity: 0.1 }}
+          />
+        )}
         {clusters.map((cluster) => (
           <ClusterMarker key={cluster.id} cluster={cluster} />
         ))}
-        {showControls && <MapControls basemap={basemap} onToggleBasemap={toggleBasemap} />}
+        {showControls && (
+          <MapControls basemap={basemap} onToggleBasemap={toggleBasemap} />
+        )}
       </MapContainer>
     );
-  }, [center, zoom, scrollWheelZoom, basemap, tileConfig, computedBounds, geojson, clusters, showControls, ariaLabel, height]);
+  }, [
+    center,
+    zoom,
+    scrollWheelZoom,
+    basemap,
+    tileConfig,
+    computedBounds,
+    geojson,
+    clusters,
+    showControls,
+    ariaLabel,
+    height,
+  ]);
 
   return (
-    <div className={cn('overflow-hidden rounded-2xl border border-emerald-100 shadow-sm', className)}>
+    <div
+      className={cn(
+        "overflow-hidden rounded-2xl border border-emerald-100 shadow-sm",
+        className,
+      )}
+    >
       {mapContainer}
     </div>
   );
 }
 
-function MapControls({ basemap, onToggleBasemap }: { basemap: 'default' | 'satellite'; onToggleBasemap: () => void }) {
+function MapControls({
+  basemap,
+  onToggleBasemap,
+}: {
+  basemap: "default" | "satellite";
+  onToggleBasemap: () => void;
+}) {
   const map = useMap();
 
   const handleGeolocate = () => {
@@ -263,7 +314,7 @@ function MapControls({ basemap, onToggleBasemap }: { basemap: 'default' | 'satel
           className="rounded-full bg-white px-4 py-2 text-xs font-semibold text-slate-600 shadow hover:bg-emerald-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
           onClick={onToggleBasemap}
         >
-          Peta: {basemap === 'default' ? 'Standar' : 'Satelit'}
+          Peta: {basemap === "default" ? "Standar" : "Satelit"}
         </button>
       </div>
     </div>

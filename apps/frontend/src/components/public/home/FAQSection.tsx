@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import { useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
 interface FAQItem {
   question: string;
@@ -11,28 +11,34 @@ interface FAQItem {
 const faqData: FAQItem[] = [
   {
     question: "Apa itu Taman Kehati?",
-    answer: "Taman Kehati adalah kawasan konservasi yang berfungsi untuk melindungi dan melestarikan keanekaragaman hayati Indonesia. Taman ini menjadi tempat penelitian, edukasi, dan konservasi flora dan fauna endemik."
+    answer:
+      "Taman Kehati adalah kawasan konservasi yang berfungsi untuk melindungi dan melestarikan keanekaragaman hayati Indonesia. Taman ini menjadi tempat penelitian, edukasi, dan konservasi flora dan fauna endemik.",
   },
   {
     question: "Bagaimana cara mengakses data flora dan fauna?",
-    answer: "Anda dapat mengakses data flora dan fauna melalui menu pencarian di halaman utama. Gunakan filter untuk menyaring berdasarkan jenis, wilayah, atau status konservasi untuk menemukan informasi yang Anda butuhkan."
+    answer:
+      "Anda dapat mengakses data flora dan fauna melalui menu pencarian di halaman utama. Gunakan filter untuk menyaring berdasarkan jenis, wilayah, atau status konservasi untuk menemukan informasi yang Anda butuhkan.",
   },
   {
     question: "Apakah data yang tersedia dapat diunduh?",
-    answer: "Ya, sebagian data tersedia untuk diunduh dalam format yang dapat digunakan untuk penelitian dan edukasi. Silakan hubungi tim kami untuk informasi lebih lanjut tentang akses data."
+    answer:
+      "Ya, sebagian data tersedia untuk diunduh dalam format yang dapat digunakan untuk penelitian dan edukasi. Silakan hubungi tim kami untuk informasi lebih lanjut tentang akses data.",
   },
   {
     question: "Bagaimana cara melaporkan temuan flora/fauna baru?",
-    answer: "Anda dapat melaporkan temuan baru melalui formulir kontak yang tersedia di website. Tim ahli kami akan memverifikasi dan menambahkan data tersebut ke dalam sistem setelah konfirmasi."
+    answer:
+      "Anda dapat melaporkan temuan baru melalui formulir kontak yang tersedia di website. Tim ahli kami akan memverifikasi dan menambahkan data tersebut ke dalam sistem setelah konfirmasi.",
   },
   {
     question: "Apakah ada program edukasi yang tersedia?",
-    answer: "Ya, kami menyediakan berbagai program edukasi termasuk webinar, workshop, dan materi pembelajaran yang dapat diakses secara online maupun offline."
+    answer:
+      "Ya, kami menyediakan berbagai program edukasi termasuk webinar, workshop, dan materi pembelajaran yang dapat diakses secara online maupun offline.",
   },
   {
     question: "Bagaimana cara berkontribusi dalam konservasi?",
-    answer: "Anda dapat berkontribusi dengan melaporkan data, berpartisipasi dalam program edukasi, atau bergabung dengan komunitas konservasi yang terdaftar di platform kami."
-  }
+    answer:
+      "Anda dapat berkontribusi dengan melaporkan data, berpartisipasi dalam program edukasi, atau bergabung dengan komunitas konservasi yang terdaftar di platform kami.",
+  },
 ];
 
 export function FAQSection() {
@@ -48,7 +54,7 @@ export function FAQSection() {
     <section ref={ref} className="bg-white py-24">
       <div className="container mx-auto max-w-7xl px-6">
         <div className="mx-auto max-w-3xl text-center mb-20">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
@@ -58,17 +64,18 @@ export function FAQSection() {
           </motion.h2>
           <motion.div
             initial={{ width: 0 }}
-            animate={isInView ? { width: '6rem' } : {}}
+            animate={isInView ? { width: "6rem" } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="h-1 bg-emerald-500 mx-auto rounded-full mb-6"
           />
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="text-lg text-gray-500"
           >
-            Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan platform konservasi kami.
+            Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan
+            platform konservasi kami.
           </motion.p>
         </div>
 

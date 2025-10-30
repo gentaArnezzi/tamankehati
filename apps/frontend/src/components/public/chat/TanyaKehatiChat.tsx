@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { Button } from '../../ui/button';
-import { Input } from '../../ui/input';
-import { Card, CardContent } from '../../ui/card';
-import { 
-  MessageCircle, 
-  Send, 
-  X, 
-  Bot, 
+import { useState, useRef, useEffect } from "react";
+import { Button } from "../../ui/button";
+import { Input } from "../../ui/input";
+import { Card, CardContent } from "../../ui/card";
+import {
+  MessageCircle,
+  Send,
+  X,
+  Bot,
   User,
   Loader2,
-  Sparkles
-} from 'lucide-react';
+  Sparkles,
+} from "lucide-react";
 
 interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: "user" | "assistant";
   content: string;
   timestamp: Date;
 }
@@ -29,24 +29,31 @@ interface TanyaKehatiChatProps {
 export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
-      id: '1',
-      role: 'assistant',
-      content: 'Halo! Saya Tanya Kehati, asisten AI untuk keanekaragaman hayati Indonesia. Saya dapat membantu Anda menemukan informasi tentang flora, fauna, taman konservasi, dan kegiatan konservasi. Ada yang ingin Anda tanyakan?',
-      timestamp: new Date()
-    }
+      id: "1",
+      role: "assistant",
+      content:
+        "Halo! Saya Tanya Kehati, asisten AI untuk keanekaragaman hayati Indonesia. Saya dapat membantu Anda menemukan informasi tentang flora, fauna, taman konservasi, dan kegiatan konservasi. Ada yang ingin Anda tanyakan?",
+      timestamp: new Date(),
+    },
   ]);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   };
 
   // Only scroll when assistant responds, not when user sends message
   useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant') {
+    if (
+      messages.length > 0 &&
+      messages[messages.length - 1].role === "assistant"
+    ) {
       // Add a small delay to ensure the message is rendered before scrolling
       setTimeout(() => {
         scrollToBottom();
@@ -65,82 +72,94 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: inputValue.trim(),
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
-    setMessages(prev => [...prev, userMessage]);
-    setInputValue('');
+    setMessages((prev) => [...prev, userMessage]);
+    setInputValue("");
     setIsLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
+      const apiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://tamankehati-backend-pxnu.onrender.com";
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: userMessage.content
-        })
+          message: userMessage.content,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
 
       const data = await response.json();
-      console.log('API Response:', data); // Debug log
-      
+      console.log("API Response:", data); // Debug log
+
       // Handle different possible response structures
-      const aiResponse = data.reply || data.message || data.response || data.content || data.answer || JSON.stringify(data);
-      
+      const aiResponse =
+        data.reply ||
+        data.message ||
+        data.response ||
+        data.content ||
+        data.answer ||
+        JSON.stringify(data);
+
       // Check if we got a valid response
-      if (!aiResponse || aiResponse.trim() === '') {
-        throw new Error('Empty response from AI');
+      if (!aiResponse || aiResponse.trim() === "") {
+        throw new Error("Empty response from AI");
       }
-      
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
+        role: "assistant",
         content: aiResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
-      console.error('Error sending message:', error);
-      
+      console.error("Error sending message:", error);
+
       // Check if it's a network error or service unavailable
-      const isNetworkError = error instanceof TypeError && error.message.includes('fetch');
-      const isServiceUnavailable = error instanceof Error && error.message.includes('Failed to send message');
-      
+      const isNetworkError =
+        error instanceof TypeError && error.message.includes("fetch");
+      const isServiceUnavailable =
+        error instanceof Error &&
+        error.message.includes("Failed to send message");
+
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: isNetworkError || isServiceUnavailable 
-          ? '🤖 AI Tanya Kehati sedang tidak aktif saat ini. Silakan coba lagi nanti atau hubungi administrator untuk informasi lebih lanjut.'
-          : 'Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi.',
-        timestamp: new Date()
+        role: "assistant",
+        content:
+          isNetworkError || isServiceUnavailable
+            ? "🤖 AI Tanya Kehati sedang tidak aktif saat ini. Silakan coba lagi nanti atau hubungi administrator untuk informasi lebih lanjut."
+            : "Maaf, terjadi kesalahan dalam memproses pertanyaan Anda. Silakan coba lagi.",
+        timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('id-ID', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -149,11 +168,11 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
   return (
     <div className="fixed inset-0 z-[150] flex items-end justify-end p-4 sm:p-6">
       {/* Backdrop */}
-      <div 
+      <div
         className="absolute inset-0 bg-black/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      
+
       {/* Chat Window */}
       <Card className="relative w-full max-w-md h-[600px] bg-white shadow-2xl border border-slate-200 rounded-2xl overflow-hidden animate-scale-in">
         {/* Header */}
@@ -184,38 +203,42 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
               <div
                 key={message.id}
                 className={`flex gap-3 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                  message.role === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {message.role === 'assistant' && (
+                {message.role === "assistant" && (
                   <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
                     <Bot className="w-4 h-4 text-slate-600" />
                   </div>
                 )}
-                
+
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                    message.role === 'user'
-                      ? 'bg-slate-900 text-white'
-                      : 'bg-slate-100 text-slate-900'
+                    message.role === "user"
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-900"
                   }`}
                 >
                   <p className="text-sm leading-relaxed">{message.content}</p>
-                  <p className={`text-xs mt-1 ${
-                    message.role === 'user' ? 'text-slate-300' : 'text-slate-500'
-                  }`}>
+                  <p
+                    className={`text-xs mt-1 ${
+                      message.role === "user"
+                        ? "text-slate-300"
+                        : "text-slate-500"
+                    }`}
+                  >
                     {formatTime(message.timestamp)}
                   </p>
                 </div>
 
-                {message.role === 'user' && (
+                {message.role === "user" && (
                   <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center flex-shrink-0">
                     <User className="w-4 h-4 text-white" />
                   </div>
                 )}
               </div>
             ))}
-            
+
             {isLoading && (
               <div className="flex gap-3 justify-start">
                 <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -224,12 +247,14 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
                 <div className="bg-slate-100 text-slate-900 rounded-2xl px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span className="text-sm">Tanya Kehati sedang mengetik...</span>
+                    <span className="text-sm">
+                      Tanya Kehati sedang mengetik...
+                    </span>
                   </div>
                 </div>
               </div>
             )}
-            
+
             <div ref={messagesEndRef} />
           </div>
         </CardContent>
@@ -259,7 +284,8 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
             </Button>
           </div>
           <p className="text-xs text-slate-500 mt-2 text-center">
-            Tanya Kehati dapat membantu Anda dengan informasi flora, fauna, dan konservasi
+            Tanya Kehati dapat membantu Anda dengan informasi flora, fauna, dan
+            konservasi
           </p>
         </div>
       </Card>
@@ -279,19 +305,8 @@ export function TanyaKehatiButton() {
       >
         <MessageCircle className="w-6 h-6" />
       </Button>
-      
-      <TanyaKehatiChat 
-        isOpen={isOpen} 
-        onClose={() => setIsOpen(false)} 
-      />
+
+      <TanyaKehatiChat isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </>
   );
 }
-
-
-
-
-
-
-
-

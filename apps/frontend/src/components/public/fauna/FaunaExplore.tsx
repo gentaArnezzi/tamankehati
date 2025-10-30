@@ -1,55 +1,61 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'next/navigation';
-import { fetchFaunaPage } from '../../../lib/api/public-client';
-import { type FaunaPaginated } from '../../../types/fauna';
-import { EntityCard } from '../cards/EntityCard';
-import { FacetFilters } from '../filters/FacetFilters';
-import { Pagination } from '../../ui/pagination';
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "next/navigation";
+import { fetchFaunaPage } from "../../../lib/api/public-client";
+import { type FaunaPaginated } from "../../../types/fauna";
+import { EntityCard } from "../cards/EntityCard";
+import { FacetFilters } from "../filters/FacetFilters";
+import { Pagination } from "../../ui/pagination";
 
 const ITEMS_PER_PAGE = 12;
-const FAMILI_OPTIONS = ['Felidae', 'Cervidae', 'Psittacidae', 'Varanidae', 'Testudinidae'];
-const STATUS_IUCN_OPTIONS = ['CR', 'EN', 'VU', 'NT', 'LC'];
+const FAMILI_OPTIONS = [
+  "Felidae",
+  "Cervidae",
+  "Psittacidae",
+  "Varanidae",
+  "Testudinidae",
+];
+const STATUS_IUCN_OPTIONS = ["CR", "EN", "VU", "NT", "LC"];
 const PROVINSI_OPTIONS = [
-  'Aceh',
-  'Sumatera Utara',
-  'Sumatera Barat',
-  'Riau',
-  'Kepulauan Riau',
-  'Jambi',
-  'Sumatera Selatan',
-  'Bengkulu',
-  'Lampung',
-  'Kepulauan Bangka Belitung',
-  'Kalimantan Barat',
-  'Kalimantan Tengah',
-  'Kalimantan Selatan',
-  'Kalimantan Timur',
-  'Kalimantan Utara',
-  'Banten',
-  'Jawa Barat',
-  'Jawa Tengah',
-  'DI Yogyakarta',
-  'Jawa Timur',
-  'Bali',
-  'Nusa Tenggara Barat',
-  'Nusa Tenggara Timur',
-  'Sulawesi Utara',
-  'Sulawesi Tengah',
-  'Sulawesi Selatan',
-  'Sulawesi Tenggara',
-  'Gorontalo',
-  'Sulawesi Barat',
-  'Maluku',
-  'Maluku Utara',
-  'Papua',
-  'Papua Barat',
-  'Papua Tengah',
-  'Papua Pegunungan',
-  'Papua Selatan',
-  'Papua Barat Daya',
+  "Aceh",
+  "Sumatera Utara",
+  "Sumatera Barat",
+  "Riau",
+  "Kepulauan Riau",
+  "Jambi",
+  "Sumatera Selatan",
+  "Bengkulu",
+  "Lampung",
+  "Kepulauan Bangka Belitung",
+  "Kalimantan Barat",
+  "Kalimantan Tengah",
+  "Kalimantan Selatan",
+  "Kalimantan Timur",
+  "Kalimantan Utara",
+  "Banten",
+  "Jawa Barat",
+  "Jawa Tengah",
+  "DI Yogyakarta",
+  "Jawa Timur",
+  "Bali",
+  "Nusa Tenggara Barat",
+  "Nusa Tenggara Timur",
+  "Sulawesi Utara",
+  "Sulawesi Tengah",
+  "Sulawesi Selatan",
+  "Sulawesi Tenggara",
+  "Gorontalo",
+  "Sulawesi Barat",
+  "Maluku",
+  "Maluku Utara",
+  "Papua",
+  "Papua Barat",
+  "Papua Tengah",
+  "Papua Pegunungan",
+  "Papua Selatan",
+  "Papua Barat Daya",
 ];
 
 type FaunaExploreProps = {
@@ -57,9 +63,12 @@ type FaunaExploreProps = {
   initialParams: URLSearchParams;
 };
 
-export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) {
+export function FaunaExplore({
+  initialData,
+  initialParams,
+}: FaunaExploreProps) {
   const searchParams = useSearchParams();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Ensure initialParams is a proper URLSearchParams object
   const params = useMemo(() => {
@@ -82,7 +91,7 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
 
   const { data, status } = useQuery({
-    queryKey: ['fauna', paramObj],
+    queryKey: ["fauna", paramObj],
     queryFn: () =>
       fetchFaunaPage({
         ...paramObj,
@@ -103,10 +112,10 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
         <div className="mb-12">
           <FacetFilters
             defaultValues={{
-              search: params.get('search') ?? '',
-              famili: params.get('famili') ?? '',
-              status_iucn: params.get('status_iucn') ?? '',
-              wilayah: params.get('provinsi') ?? params.get('wilayah') ?? '',
+              search: params.get("search") ?? "",
+              famili: params.get("famili") ?? "",
+              status_iucn: params.get("status_iucn") ?? "",
+              wilayah: params.get("provinsi") ?? params.get("wilayah") ?? "",
             }}
             options={{
               famili: FAMILI_OPTIONS,
@@ -116,10 +125,10 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
             targetPath="/fauna"
             title="Filter Fauna"
             fieldLabels={{
-              famili: 'Famili / Ordo',
-              search: 'Kata kunci',
-              status_iucn: 'Status IUCN',
-              wilayah: 'Provinsi (Lokasi Taman)',
+              famili: "Famili / Ordo",
+              search: "Kata kunci",
+              status_iucn: "Status IUCN",
+              wilayah: "Provinsi (Lokasi Taman)",
             }}
           />
         </div>
@@ -140,21 +149,21 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
             {/* View Mode Toggle */}
             <div className="flex items-center gap-2 bg-slate-100 rounded-lg p-1">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'grid'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  viewMode === "grid"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Card
               </button>
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  viewMode === 'list'
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900'
+                  viewMode === "list"
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Row
@@ -163,38 +172,54 @@ export function FaunaExplore({ initialData, initialParams }: FaunaExploreProps) 
           </div>
 
           {/* Error State */}
-          {status === 'error' && (
+          {status === "error" && (
             <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-              <div className="text-red-600 font-medium mb-2">Terjadi Kesalahan</div>
-              <p className="text-red-500">Gagal memuat data fauna. Silakan coba lagi nanti.</p>
+              <div className="text-red-600 font-medium mb-2">
+                Terjadi Kesalahan
+              </div>
+              <p className="text-red-500">
+                Gagal memuat data fauna. Silakan coba lagi nanti.
+              </p>
             </div>
           )}
 
           {/* Empty State */}
-          {items.length === 0 && status !== 'error' && (
+          {items.length === 0 && status !== "error" && (
             <div className="rounded-xl border border-slate-200 bg-slate-50 p-12 text-center">
-              <div className="text-slate-600 font-medium mb-2">Tidak Ada Data</div>
-              <p className="text-slate-500">Coba ubah filter atau kata kunci pencarian.</p>
+              <div className="text-slate-600 font-medium mb-2">
+                Tidak Ada Data
+              </div>
+              <p className="text-slate-500">
+                Coba ubah filter atau kata kunci pencarian.
+              </p>
             </div>
           )}
 
           {/* Results Grid/List */}
           {items.length > 0 && (
-            <div className={
-              viewMode === 'grid' 
-                ? 'grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                : 'space-y-6'
-            }>
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                  : "space-y-6"
+              }
+            >
               {items.map((fauna, index) => (
-                <div key={fauna.id} className="animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
+                <div
+                  key={fauna.id}
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
                   <EntityCard
                     href={`/fauna/${fauna.id}`}
                     title={fauna.nama_ilmiah}
                     subtitle={fauna.nama_umum}
                     image={fauna.gambar_utama}
                     status={fauna.status_iucn}
-                    tags={[fauna.famili, fauna.wilayah].filter(Boolean) as string[]}
-                    variant={viewMode === 'list' ? 'horizontal' : 'vertical'}
+                    tags={
+                      [fauna.famili, fauna.wilayah].filter(Boolean) as string[]
+                    }
+                    variant={viewMode === "list" ? "horizontal" : "vertical"}
                   />
                 </div>
               ))}

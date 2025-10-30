@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { MapPin, Navigation, Search, Save, X } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { MapPin, Navigation, Search, Save, X } from "lucide-react";
+import "leaflet/dist/leaflet.css";
 
 interface InteractiveMapWrapperProps {
   latitude?: number | null;
@@ -24,17 +24,17 @@ export function InteractiveMapWrapper({
   latitude,
   longitude,
   onCoordinatesChange,
-  height = '400px',
+  height = "400px",
 }: InteractiveMapWrapperProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markerRef = useRef<any>(null);
   const [isClient, setIsClient] = useState(false);
-  
+
   // State for coordinate selection
   const [tempLat, setTempLat] = useState<number | null>(latitude || null);
   const [tempLng, setTempLng] = useState<number | null>(longitude || null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<NominatimResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
@@ -47,7 +47,12 @@ export function InteractiveMapWrapper({
 
   // Sync tempLat/tempLng with initial props
   useEffect(() => {
-    if (latitude != null && longitude != null && tempLat === null && tempLng === null) {
+    if (
+      latitude != null &&
+      longitude != null &&
+      tempLat === null &&
+      tempLng === null
+    ) {
       setTempLat(latitude);
       setTempLng(longitude);
     }
@@ -56,28 +61,30 @@ export function InteractiveMapWrapper({
   // Initialize Leaflet map
   useEffect(() => {
     if (!isClient || !mapContainerRef.current) return;
-    
+
     if (mapInstanceRef.current) {
-      console.log('⚠️ Map already initialized, skipping...');
+      console.log("⚠️ Map already initialized, skipping...");
       return;
     }
 
     const initializeMap = async () => {
       try {
-        const L = (await import('leaflet')).default;
+        const L = (await import("leaflet")).default;
 
         delete (L.Icon.Default.prototype as any)._getIconUrl;
         L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
         });
 
-        const defaultCenter: [number, number] = latitude && longitude 
-          ? [latitude, longitude] 
-          : [-6.200000, 106.816666];
+        const defaultCenter: [number, number] =
+          latitude && longitude ? [latitude, longitude] : [-6.2, 106.816666];
 
-        console.log('🗺️ Initializing Leaflet map at:', defaultCenter);
+        console.log("🗺️ Initializing Leaflet map at:", defaultCenter);
 
         const map = L.map(mapContainerRef.current!, {
           center: defaultCenter,
@@ -85,8 +92,9 @@ export function InteractiveMapWrapper({
           scrollWheelZoom: true,
         });
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
 
         if (latitude && longitude) {
@@ -94,45 +102,46 @@ export function InteractiveMapWrapper({
           markerRef.current = marker;
         }
 
-        map.on('click', (e: any) => {
+        map.on("click", (e: any) => {
           const { lat, lng } = e.latlng;
-          
+
           if (markerRef.current) {
             markerRef.current.remove();
           }
-          
+
           markerRef.current = L.marker([lat, lng]).addTo(map);
           setTempLat(lat);
           setTempLng(lng);
-          
-          toast.info(`Koordinat dipilih: ${lat.toFixed(6)}, ${lng.toFixed(6)}. Klik "Simpan Koordinat" untuk menyimpan.`);
+
+          toast.info(
+            `Koordinat dipilih: ${lat.toFixed(6)}, ${lng.toFixed(6)}. Klik "Simpan Koordinat" untuk menyimpan.`,
+          );
         });
 
         mapInstanceRef.current = map;
-        console.log('✅ Map initialized successfully');
-
+        console.log("✅ Map initialized successfully");
       } catch (error) {
-        console.error('❌ Failed to initialize map:', error);
+        console.error("❌ Failed to initialize map:", error);
       }
     };
 
     initializeMap();
 
     return () => {
-      console.log('🧹 Cleaning up Leaflet map...');
-      
+      console.log("🧹 Cleaning up Leaflet map...");
+
       if (markerRef.current) {
         markerRef.current.remove();
         markerRef.current = null;
       }
-      
+
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
-      
+
       if (mapContainerRef.current) {
-        mapContainerRef.current.innerHTML = '';
+        mapContainerRef.current.innerHTML = "";
       }
     };
   }, [isClient]);
@@ -141,16 +150,21 @@ export function InteractiveMapWrapper({
   useEffect(() => {
     if (!mapInstanceRef.current || !latitude || !longitude) return;
 
-    const L = require('leaflet');
-    
+    const L = require("leaflet");
+
     if (markerRef.current) {
       markerRef.current.remove();
     }
-    
-    markerRef.current = L.marker([latitude, longitude]).addTo(mapInstanceRef.current);
-    mapInstanceRef.current.setView([latitude, longitude], mapInstanceRef.current.getZoom());
-    
-    console.log('📍 Updated marker to:', latitude, longitude);
+
+    markerRef.current = L.marker([latitude, longitude]).addTo(
+      mapInstanceRef.current,
+    );
+    mapInstanceRef.current.setView(
+      [latitude, longitude],
+      mapInstanceRef.current.getZoom(),
+    );
+
+    console.log("📍 Updated marker to:", latitude, longitude);
   }, [latitude, longitude]);
 
   // Handle search input change with debounce using Nominatim
@@ -163,22 +177,22 @@ export function InteractiveMapWrapper({
 
     const timer = setTimeout(async () => {
       setIsSearching(true);
-      
+
       try {
         // Nominatim API - Free OpenStreetMap geocoding
         const response = await fetch(
           `https://nominatim.openstreetmap.org/search?` +
-          `q=${encodeURIComponent(searchQuery)}` +
-          `&format=json` +
-          `&addressdetails=1` +
-          `&limit=5` +
-          `&countrycodes=id` + // Restrict to Indonesia
-          `&accept-language=id`,
+            `q=${encodeURIComponent(searchQuery)}` +
+            `&format=json` +
+            `&addressdetails=1` +
+            `&limit=5` +
+            `&countrycodes=id` + // Restrict to Indonesia
+            `&accept-language=id`,
           {
             headers: {
-              'User-Agent': 'TamanKehati/1.0', // Required by Nominatim
+              "User-Agent": "TamanKehati/1.0", // Required by Nominatim
             },
-          }
+          },
         );
 
         if (response.ok) {
@@ -190,7 +204,7 @@ export function InteractiveMapWrapper({
           setShowResults(false);
         }
       } catch (error) {
-        console.error('❌ Nominatim search error:', error);
+        console.error("❌ Nominatim search error:", error);
         setSearchResults([]);
         setShowResults(false);
       } finally {
@@ -211,26 +225,26 @@ export function InteractiveMapWrapper({
 
     // Update map
     if (mapInstanceRef.current) {
-      const L = require('leaflet');
-      
+      const L = require("leaflet");
+
       if (markerRef.current) {
         markerRef.current.remove();
       }
-      
+
       markerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current);
       mapInstanceRef.current.setView([lat, lng], 15);
     }
 
     setTempLat(lat);
     setTempLng(lng);
-    
+
     toast.success(`Lokasi ditemukan: ${result.display_name}`);
   };
 
   // Get current location
   const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error('Browser Anda tidak mendukung geolocation');
+      toast.error("Browser Anda tidak mendukung geolocation");
       return;
     }
 
@@ -240,13 +254,15 @@ export function InteractiveMapWrapper({
         const { latitude: lat, longitude: lng } = position.coords;
 
         if (mapInstanceRef.current) {
-          const L = require('leaflet');
-          
+          const L = require("leaflet");
+
           if (markerRef.current) {
             markerRef.current.remove();
           }
-          
-          markerRef.current = L.marker([lat, lng]).addTo(mapInstanceRef.current);
+
+          markerRef.current = L.marker([lat, lng]).addTo(
+            mapInstanceRef.current,
+          );
           mapInstanceRef.current.setView([lat, lng], 15);
         }
 
@@ -257,37 +273,38 @@ export function InteractiveMapWrapper({
       },
       (error) => {
         setIsGettingLocation(false);
-        
-        let errorMessage = 'Gagal mendapatkan lokasi';
+
+        let errorMessage = "Gagal mendapatkan lokasi";
         if (error.code === 1) {
-          errorMessage = 'Izin lokasi ditolak. Aktifkan izin lokasi di browser Anda.';
+          errorMessage =
+            "Izin lokasi ditolak. Aktifkan izin lokasi di browser Anda.";
         } else if (error.code === 2) {
-          errorMessage = 'Lokasi tidak tersedia.';
+          errorMessage = "Lokasi tidak tersedia.";
         } else if (error.code === 3) {
-          errorMessage = 'Timeout mendapatkan lokasi.';
+          errorMessage = "Timeout mendapatkan lokasi.";
         }
-        
+
         toast.error(errorMessage);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
     );
   };
 
   // Save coordinates
   const handleSaveCoordinates = () => {
     if (tempLat === null || tempLng === null) {
-      toast.error('Pilih lokasi terlebih dahulu');
+      toast.error("Pilih lokasi terlebih dahulu");
       return;
     }
 
     onCoordinatesChange(tempLat, tempLng);
-    toast.success('✅ Koordinat berhasil disimpan!');
+    toast.success("✅ Koordinat berhasil disimpan!");
   };
 
   if (!isClient) {
     return (
-      <div 
-        style={{ height }} 
+      <div
+        style={{ height }}
         className="flex items-center justify-center bg-slate-100 rounded-lg border"
       >
         <p className="text-slate-500 text-sm">Memuat peta...</p>
@@ -315,7 +332,7 @@ export function InteractiveMapWrapper({
               {searchQuery && (
                 <button
                   onClick={() => {
-                    setSearchQuery('');
+                    setSearchQuery("");
                     setSearchResults([]);
                     setShowResults(false);
                   }}
@@ -342,7 +359,9 @@ export function InteractiveMapWrapper({
                   className="w-full px-4 py-2.5 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-0 flex items-start gap-3"
                 >
                   <MapPin className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-                  <span className="text-sm text-gray-700">{result.display_name}</span>
+                  <span className="text-sm text-gray-700">
+                    {result.display_name}
+                  </span>
                 </button>
               ))}
             </div>
@@ -368,7 +387,7 @@ export function InteractiveMapWrapper({
               </>
             )}
           </button>
-          
+
           <button
             onClick={handleSaveCoordinates}
             disabled={tempLat === null || tempLng === null}
@@ -389,15 +408,18 @@ export function InteractiveMapWrapper({
               </p>
               <div className="flex items-center gap-4 text-xs text-blue-700">
                 <span className="font-mono">
-                  <span className="font-semibold">Lat:</span> {tempLat.toFixed(6)}
+                  <span className="font-semibold">Lat:</span>{" "}
+                  {tempLat.toFixed(6)}
                 </span>
                 <span className="font-mono">
-                  <span className="font-semibold">Lng:</span> {tempLng.toFixed(6)}
+                  <span className="font-semibold">Lng:</span>{" "}
+                  {tempLng.toFixed(6)}
                 </span>
               </div>
               {latitude !== tempLat || longitude !== tempLng ? (
                 <p className="text-xs text-blue-600 mt-1.5 italic">
-                  ⚠️ Koordinat belum disimpan. Klik "Simpan Koordinat" untuk menyimpan.
+                  ⚠️ Koordinat belum disimpan. Klik "Simpan Koordinat" untuk
+                  menyimpan.
                 </p>
               ) : (
                 <p className="text-xs text-green-600 mt-1.5 font-medium">
@@ -415,9 +437,9 @@ export function InteractiveMapWrapper({
       </div>
 
       {/* Map */}
-      <div 
-        ref={mapContainerRef} 
-        style={{ height }} 
+      <div
+        ref={mapContainerRef}
+        style={{ height }}
         className="rounded-lg overflow-hidden border border-gray-300 shadow-sm"
       />
     </div>

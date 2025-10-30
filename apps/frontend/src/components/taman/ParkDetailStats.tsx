@@ -1,9 +1,23 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Progress } from '../ui/progress';
-import { Badge } from '../ui/badge';
-import { TreePine, Bird, MapPin, AlertCircle, CheckCircle, Leaf, Eye } from 'lucide-react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Progress } from "../ui/progress";
+import { Badge } from "../ui/badge";
+import {
+  TreePine,
+  Bird,
+  MapPin,
+  AlertCircle,
+  CheckCircle,
+  Leaf,
+  Eye,
+} from "lucide-react";
 
 interface ParkDetailStatsProps {
   park: {
@@ -29,10 +43,14 @@ export function ParkDetailStats({ park, zones }: ParkDetailStatsProps) {
 
   const getZoneBadgeVariant = (zoneType: string | null) => {
     switch (zoneType) {
-      case 'core': return 'default';
-      case 'buffer': return 'secondary';
-      case 'utilization': return 'outline';
-      default: return 'outline';
+      case "core":
+        return "default";
+      case "buffer":
+        return "secondary";
+      case "utilization":
+        return "outline";
+      default:
+        return "outline";
     }
   };
 
@@ -86,11 +104,11 @@ export function ParkDetailStats({ park, zones }: ParkDetailStatsProps) {
               <div className="flex items-center justify-between mb-2">
                 <h4 className="font-semibold">{zone.name}</h4>
                 <Badge variant={getZoneBadgeVariant(zone.zone_type)}>
-                  {zone.zone_type || 'Unknown'}
+                  {zone.zone_type || "Unknown"}
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground mb-1">
-                Luas: {zone.area_ha ? `${zone.area_ha} ha` : 'N/A'}
+                Luas: {zone.area_ha ? `${zone.area_ha} ha` : "N/A"}
               </p>
               <p className="text-sm text-muted-foreground">
                 ID: {zone.id} | Park ID: {zone.park_id}
@@ -104,10 +122,14 @@ export function ParkDetailStats({ park, zones }: ParkDetailStatsProps) {
       <Card>
         <CardHeader>
           <CardTitle>Aktivitas Terbaru di Taman</CardTitle>
-          <CardDescription>Log aktivitas observasi dan perubahan data</CardDescription>
+          <CardDescription>
+            Log aktivitas observasi dan perubahan data
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground text-sm">Belum ada aktivitas terbaru untuk taman ini.</p>
+          <p className="text-muted-foreground text-sm">
+            Belum ada aktivitas terbaru untuk taman ini.
+          </p>
           {/* This section would ideally fetch real activity data related to the specific park */}
         </CardContent>
       </Card>

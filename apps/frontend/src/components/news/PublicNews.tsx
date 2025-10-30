@@ -1,34 +1,40 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Skeleton } from '../ui/skeleton';
-import { Alert, AlertDescription } from '../ui/alert';
-import { 
-  Calendar, 
-  Eye, 
-  Pin, 
-  Star, 
-  Tag, 
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Skeleton } from "../ui/skeleton";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Calendar,
+  Eye,
+  Pin,
+  Star,
+  Tag,
   Clock,
   ChevronLeft,
   ChevronRight,
   Filter,
   Search,
   FileText,
-  BookOpen
-} from 'lucide-react';
-import { Input } from '../ui/input';
-import { 
+  BookOpen,
+} from "lucide-react";
+import { Input } from "../ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { PublicNewsDetail } from './PublicNewsDetail';
+} from "../ui/select";
+import { PublicNewsDetail } from "./PublicNewsDetail";
 
 // Types
 export interface PublicNews {
@@ -37,7 +43,13 @@ export interface PublicNews {
   content: string;
   summary?: string;
   slug?: string;
-  category: 'biodiversity' | 'conservation' | 'research' | 'education' | 'events' | 'general';
+  category:
+    | "biodiversity"
+    | "conservation"
+    | "research"
+    | "education"
+    | "events"
+    | "general";
   priority: number;
   is_featured: boolean;
   is_pinned: boolean;
@@ -60,12 +72,12 @@ interface PublicNewsListResponse {
 }
 
 const NEWS_CATEGORIES = [
-  { value: 'biodiversity', label: 'Keanekaragaman Hayati' },
-  { value: 'conservation', label: 'Konservasi' },
-  { value: 'research', label: 'Penelitian' },
-  { value: 'education', label: 'Pendidikan' },
-  { value: 'events', label: 'Acara' },
-  { value: 'general', label: 'Umum' },
+  { value: "biodiversity", label: "Keanekaragaman Hayati" },
+  { value: "conservation", label: "Konservasi" },
+  { value: "research", label: "Penelitian" },
+  { value: "education", label: "Pendidikan" },
+  { value: "events", label: "Acara" },
+  { value: "general", label: "Umum" },
 ];
 
 interface PublicNewsProps {
@@ -85,17 +97,19 @@ export function PublicNews({
 }: PublicNewsProps) {
   const [news, setNews] = useState<PublicNews[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(limit);
-  
+
   // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>(categoryFilter || 'all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>(
+    categoryFilter || "all",
+  );
   const [showFeaturedOnly, setShowFeaturedOnly] = useState(featuredOnly);
   const [showPinnedOnly, setShowPinnedOnly] = useState(pinnedOnly);
-  
+
   // Detail modal
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState<PublicNews | null>(null);
@@ -103,39 +117,39 @@ export function PublicNews({
   const loadData = async () => {
     try {
       setLoading(true);
-      setError('');
-      
+      setError("");
+
       const params = new URLSearchParams({
         limit: itemsPerPage.toString(),
         offset: ((currentPage - 1) * itemsPerPage).toString(),
       });
 
       if (searchQuery) {
-        params.append('q', searchQuery);
+        params.append("q", searchQuery);
       }
-      if (selectedCategoryFilter !== 'all') {
-        params.append('category_filter', selectedCategoryFilter);
+      if (selectedCategoryFilter !== "all") {
+        params.append("category_filter", selectedCategoryFilter);
       }
       if (showFeaturedOnly) {
-        params.append('featured_only', 'true');
+        params.append("featured_only", "true");
       }
       if (showPinnedOnly) {
-        params.append('pinned_only', 'true');
+        params.append("pinned_only", "true");
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/public?${params}`
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/public?${params}`,
       );
 
       if (!response.ok) {
-        throw new Error('Gagal memuat berita');
+        throw new Error("Gagal memuat berita");
       }
 
       const data: PublicNewsListResponse = await response.json();
       setNews(data.items);
       setTotalItems(data.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat berita');
+      setError(err instanceof Error ? err.message : "Gagal memuat berita");
     } finally {
       setLoading(false);
     }
@@ -143,7 +157,14 @@ export function PublicNews({
 
   useEffect(() => {
     loadData();
-  }, [currentPage, searchQuery, selectedCategoryFilter, showFeaturedOnly, showPinnedOnly, itemsPerPage]);
+  }, [
+    currentPage,
+    searchQuery,
+    selectedCategoryFilter,
+    showFeaturedOnly,
+    showPinnedOnly,
+    itemsPerPage,
+  ]);
 
   const handleView = (news: PublicNews) => {
     setSelectedNews(news);
@@ -152,25 +173,29 @@ export function PublicNews({
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      biodiversity: 'bg-green-100 text-green-800',
-      conservation: 'bg-blue-100 text-blue-800',
-      research: 'bg-purple-100 text-purple-800',
-      education: 'bg-yellow-100 text-yellow-800',
-      events: 'bg-pink-100 text-pink-800',
-      general: 'bg-gray-100 text-gray-800',
+      biodiversity: "bg-green-100 text-green-800",
+      conservation: "bg-blue-100 text-blue-800",
+      research: "bg-purple-100 text-purple-800",
+      education: "bg-yellow-100 text-yellow-800",
+      events: "bg-pink-100 text-pink-800",
+      general: "bg-gray-100 text-gray-800",
     };
 
     const labels = {
-      biodiversity: 'Keanekaragaman Hayati',
-      conservation: 'Konservasi',
-      research: 'Penelitian',
-      education: 'Pendidikan',
-      events: 'Acara',
-      general: 'Umum',
+      biodiversity: "Keanekaragaman Hayati",
+      conservation: "Konservasi",
+      research: "Penelitian",
+      education: "Pendidikan",
+      events: "Acara",
+      general: "Umum",
     };
 
     return (
-      <Badge className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
         {labels[category as keyof typeof labels] || category}
       </Badge>
     );
@@ -178,29 +203,33 @@ export function PublicNews({
 
   const getPriorityBadge = (priority: number) => {
     const colors = {
-      0: 'bg-gray-100 text-gray-800',
-      1: 'bg-yellow-100 text-yellow-800',
-      2: 'bg-red-100 text-red-800',
+      0: "bg-gray-100 text-gray-800",
+      1: "bg-yellow-100 text-yellow-800",
+      2: "bg-red-100 text-red-800",
     };
 
     const labels = {
-      0: 'Normal',
-      1: 'Tinggi',
-      2: 'Mendesak',
+      0: "Normal",
+      1: "Tinggi",
+      2: "Mendesak",
     };
 
     return (
-      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {labels[priority as keyof typeof labels] || 'Normal'}
+      <Badge
+        className={
+          colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {labels[priority as keyof typeof labels] || "Normal"}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -226,7 +255,9 @@ export function PublicNews({
           <CardContent className="p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <label className="text-sm font-medium mb-2 block">Pencarian</label>
+                <label className="text-sm font-medium mb-2 block">
+                  Pencarian
+                </label>
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -237,10 +268,15 @@ export function PublicNews({
                   />
                 </div>
               </div>
-              
+
               <div>
-                <label className="text-sm font-medium mb-2 block">Kategori</label>
-                <Select value={selectedCategoryFilter} onValueChange={setSelectedCategoryFilter}>
+                <label className="text-sm font-medium mb-2 block">
+                  Kategori
+                </label>
+                <Select
+                  value={selectedCategoryFilter}
+                  onValueChange={setSelectedCategoryFilter}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Semua kategori" />
                   </SelectTrigger>
@@ -300,7 +336,10 @@ export function PublicNews({
       {/* News List */}
       <div className="grid gap-4">
         {news.map((item) => (
-          <Card key={item.id} className="hover:shadow-md transition-shadow cursor-pointer">
+          <Card
+            key={item.id}
+            className="hover:shadow-md transition-shadow cursor-pointer"
+          >
             <CardContent className="p-6" onClick={() => handleView(item)}>
               <div className="flex justify-between items-start">
                 <div className="flex-1 space-y-3">
@@ -315,13 +354,13 @@ export function PublicNews({
                       {item.title}
                     </h3>
                   </div>
-                  
+
                   {item.summary && (
                     <p className="text-muted-foreground line-clamp-2">
                       {item.summary}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center gap-2 flex-wrap">
                     {getCategoryBadge(item.category)}
                     {getPriorityBadge(item.priority)}
@@ -329,20 +368,19 @@ export function PublicNews({
                       <div className="flex items-center gap-1">
                         <Tag className="h-3 w-3" />
                         <span className="text-xs text-muted-foreground">
-                          {item.tags.split(',').length} tag
+                          {item.tags.split(",").length} tag
                         </span>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Calendar className="h-3 w-3" />
                       <span>
-                        {item.published_at 
+                        {item.published_at
                           ? formatDate(item.published_at)
-                          : formatDate(item.created_at)
-                        }
+                          : formatDate(item.created_at)}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -356,14 +394,12 @@ export function PublicNews({
                     {item.expires_at && (
                       <div className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        <span>
-                          Kedaluwarsa: {formatDate(item.expires_at)}
-                        </span>
+                        <span>Kedaluwarsa: {formatDate(item.expires_at)}</span>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 {item.featured_image && (
                   <div className="ml-4">
                     <img
@@ -371,7 +407,7 @@ export function PublicNews({
                       alt={item.title}
                       className="w-20 h-20 object-cover rounded-lg"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).style.display = "none";
                       }}
                     />
                   </div>
@@ -402,7 +438,7 @@ export function PublicNews({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -414,7 +450,9 @@ export function PublicNews({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
             >
               Next

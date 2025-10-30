@@ -1,50 +1,62 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { CollapsibleDashboardLayout } from '@/components/CollapsibleDashboardLayout';
-import { useRouter, usePathname } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect, Suspense } from "react";
+import { CollapsibleDashboardLayout } from "@/components/CollapsibleDashboardLayout";
+import { useRouter, usePathname } from "next/navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
   ResponsiveContainer,
-  Legend
-} from 'recharts';
-import { useAuth } from '@/lib/useAuth';
-import { useSearchParams } from 'next/navigation';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  TreePine, 
+  Legend,
+} from "recharts";
+import { useAuth } from "@/lib/useAuth";
+import { useSearchParams } from "next/navigation";
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  TreePine,
   Activity,
   Calendar,
   MapPin,
   Shield,
   CheckCircle,
   Clock,
-  AlertCircle
-} from 'lucide-react';
-import SimpleBiodiversityCharts from '@/components/dashboard/SimpleBiodiversityCharts';
+  AlertCircle,
+} from "lucide-react";
+import SimpleBiodiversityCharts from "@/components/dashboard/SimpleBiodiversityCharts";
 
 // Mark this page as dynamic to prevent static generation
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 interface DashboardData {
   user_role: string;
@@ -94,8 +106,10 @@ const ComprehensiveDashboardPage: React.FC = () => {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [timeRange, setTimeRange] = useState(searchParams.get('time_range') || 'yearly');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [timeRange, setTimeRange] = useState(
+    searchParams.get("time_range") || "yearly",
+  );
+  const [activeTab, setActiveTab] = useState("overview");
 
   const handleNavigate = (path: string) => {
     router.push(path);
@@ -103,13 +117,13 @@ const ComprehensiveDashboardPage: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push("/login");
   };
 
   // Redirect to login if not authenticated (must be in useEffect, not during render)
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [authLoading, user, router]);
 
@@ -123,27 +137,30 @@ const ComprehensiveDashboardPage: React.FC = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
       // Use the simple comprehensive dashboard API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (!response.ok) {
         if (response.status === 401) {
           // Token expired, redirect to login
           logout();
-          router.push('/login');
+          router.push("/login");
           return;
         }
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -152,20 +169,20 @@ const ComprehensiveDashboardPage: React.FC = () => {
       const result = await response.json();
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-      console.error('Dashboard fetch error:', err);
+      setError(err instanceof Error ? err.message : "An error occurred");
+      console.error("Dashboard fetch error:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const timeRangeOptions = [
-    { value: 'daily', label: 'Daily' },
-    { value: 'weekly', label: 'Weekly' },
-    { value: 'monthly', label: 'Monthly' },
-    { value: 'quarterly', label: 'Quarterly' },
-    { value: 'yearly', label: 'Yearly' },
-    { value: 'five_years', label: '5 Years' }
+    { value: "daily", label: "Daily" },
+    { value: "weekly", label: "Weekly" },
+    { value: "monthly", label: "Monthly" },
+    { value: "quarterly", label: "Quarterly" },
+    { value: "yearly", label: "Yearly" },
+    { value: "five_years", label: "5 Years" },
   ];
 
   // Show loading spinner while checking auth
@@ -208,7 +225,9 @@ const ComprehensiveDashboardPage: React.FC = () => {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold mb-2">Error Loading Dashboard</h2>
+          <h2 className="text-xl font-semibold mb-2">
+            Error Loading Dashboard
+          </h2>
           <p className="text-muted-foreground mb-4">{error}</p>
           <Button onClick={fetchDashboardData}>Try Again</Button>
         </div>
@@ -256,7 +275,11 @@ const ComprehensiveDashboardPage: React.FC = () => {
 
       {/* Main Content */}
       <div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6"
+        >
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="biodiversity">Biodiversity</TabsTrigger>
@@ -270,50 +293,80 @@ const ComprehensiveDashboardPage: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Species</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Total Species
+                  </CardTitle>
                   <TreePine className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{data.analytics.biodiversity.summary.total_species}</div>
-                  <p className="text-xs text-muted-foreground">
-                    Flora + Fauna
-                  </p>
+                  <div className="text-2xl font-bold">
+                    {data.analytics.biodiversity.summary.total_species}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Flora + Fauna</p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Endemic Species</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Endemic Species
+                  </CardTitle>
                   <Shield className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{data.analytics.biodiversity.summary.total_endemic}</div>
+                  <div className="text-2xl font-bold">
+                    {data.analytics.biodiversity.summary.total_endemic}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    {((data.analytics.biodiversity.summary.total_endemic / Math.max(data.analytics.biodiversity.summary.total_species, 1)) * 100).toFixed(1)}% of total
+                    {(
+                      (data.analytics.biodiversity.summary.total_endemic /
+                        Math.max(
+                          data.analytics.biodiversity.summary.total_species,
+                          1,
+                        )) *
+                      100
+                    ).toFixed(1)}
+                    % of total
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Approved Species</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Approved Species
+                  </CardTitle>
                   <CheckCircle className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{data.analytics.biodiversity.summary.total_approved}</div>
+                  <div className="text-2xl font-bold">
+                    {data.analytics.biodiversity.summary.total_approved}
+                  </div>
                   <p className="text-xs text-muted-foreground">
-                    {((data.analytics.biodiversity.summary.total_approved / Math.max(data.analytics.biodiversity.summary.total_species, 1)) * 100).toFixed(1)}% approved
+                    {(
+                      (data.analytics.biodiversity.summary.total_approved /
+                        Math.max(
+                          data.analytics.biodiversity.summary.total_species,
+                          1,
+                        )) *
+                      100
+                    ).toFixed(1)}
+                    % approved
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Activities</CardTitle>
+                  <CardTitle className="text-sm font-medium">
+                    Activities
+                  </CardTitle>
                   <Activity className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{data.analytics.activities.total}</div>
+                  <div className="text-2xl font-bold">
+                    {data.analytics.activities.total}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Total activities
                   </p>
@@ -370,7 +423,9 @@ const ComprehensiveDashboardPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Activities Overview</CardTitle>
-                <CardDescription>Conservation and Research Activities</CardDescription>
+                <CardDescription>
+                  Conservation and Research Activities
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="text-center">
@@ -386,8 +441,12 @@ const ComprehensiveDashboardPage: React.FC = () => {
 
         {/* Footer Info */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Data generated at: {new Date(data.generated_at).toLocaleString()}</p>
-          <p>Time range: {data.date_range.start} to {data.date_range.end}</p>
+          <p>
+            Data generated at: {new Date(data.generated_at).toLocaleString()}
+          </p>
+          <p>
+            Time range: {data.date_range.start} to {data.date_range.end}
+          </p>
         </div>
       </div>
     </CollapsibleDashboardLayout>

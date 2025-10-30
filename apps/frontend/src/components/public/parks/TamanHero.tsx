@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { MapPin } from 'lucide-react';
-import Image from 'next/image';
+import { MapPin } from "lucide-react";
+import Image from "next/image";
 
 export function TamanHero() {
   return (
@@ -19,7 +19,7 @@ export function TamanHero() {
 
       {/* Dark black overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      
+
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
@@ -43,26 +43,37 @@ export function TamanHero() {
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight animate-slide-up">
               <span className="block">Taman</span>
-              <span className="block font-normal text-amber-50">Konservasi</span>
+              <span className="block font-normal text-amber-50">
+                Konservasi
+              </span>
             </h1>
 
             <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-              Jelajahi taman-taman keanekaragaman hayati Indonesia yang menakjubkan. 
-              Dari hutan tropis hingga ekosistem unik, temukan kekayaan alam yang menjadi kebanggaan Nusantara.
+              Jelajahi taman-taman keanekaragaman hayati Indonesia yang
+              menakjubkan. Dari hutan tropis hingga ekosistem unik, temukan
+              kekayaan alam yang menjadi kebanggaan Nusantara.
             </p>
 
             <div className="flex flex-wrap justify-center gap-8 text-amber-100 animate-fade-in delay-500">
               <div className="text-center">
                 <div className="text-lg font-medium text-white mb-1">8+</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Taman Terdata</div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Taman Terdata
+                </div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-medium text-white mb-1">5+</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Provinsi</div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Provinsi
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">Konservasi</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Alam</div>
+                <div className="text-lg font-medium text-white mb-1">
+                  Konservasi
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Alam
+                </div>
               </div>
             </div>
           </div>

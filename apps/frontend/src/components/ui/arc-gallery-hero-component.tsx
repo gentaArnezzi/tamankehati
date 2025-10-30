@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from "react";
 
 // --- The ArcGalleryHero Component ---
 type ArcGalleryHeroProps = {
@@ -29,7 +29,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   cardSizeLg = 120,
   cardSizeMd = 100,
   cardSizeSm = 80,
-  className = '',
+  className = "",
 }) => {
   const [dimensions, setDimensions] = useState({
     radius: radiusLg,
@@ -52,8 +52,8 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
     };
 
     handleResize(); // Set initial size
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [radiusLg, radiusMd, radiusSm, cardSizeLg, cardSizeMd, cardSizeSm]);
 
   // Intersection Observer to trigger animation when section is visible
@@ -66,8 +66,8 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
       },
       {
         threshold: 0.1, // Trigger when 10% of section is visible
-        rootMargin: '0px 0px -100px 0px', // Start slightly before fully in view
-      }
+        rootMargin: "0px 0px -100px 0px", // Start slightly before fully in view
+      },
     );
 
     const currentRef = sectionRef.current;
@@ -87,12 +87,15 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   const step = (endAngle - startAngle) / (count - 1);
 
   return (
-    <section ref={sectionRef} className={`relative overflow-hidden bg-transparent min-h-screen flex flex-col ${className}`}>
+    <section
+      ref={sectionRef}
+      className={`relative overflow-hidden bg-transparent min-h-screen flex flex-col ${className}`}
+    >
       {/* Background ring container that controls geometry */}
       <div
         className="relative mx-auto"
         style={{
-          width: '100%',
+          width: "100%",
           // Give it a bit more height to prevent clipping
           height: dimensions.radius * 1.5,
         }}
@@ -103,61 +106,63 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
           {images.map((src, i) => {
             const angle = startAngle + step * i; // degrees
             const angleRad = (angle * Math.PI) / 180;
-            
+
             // Calculate x and y positions on the arc
             const x = Math.cos(angleRad) * dimensions.radius;
             const y = Math.sin(angleRad) * dimensions.radius;
-            
+
             return (
               <div
                 key={i}
-                className={`absolute ${isVisible ? 'animate-slide-in-from-left' : ''}`}
+                className={`absolute ${isVisible ? "animate-slide-in-from-left" : ""}`}
                 style={{
                   width: dimensions.cardSize,
                   height: dimensions.cardSize,
                   left: `calc(50% + ${x}px)`,
                   bottom: `${y}px`,
-                  animationDelay: isVisible ? `${i * 200}ms` : '0ms',
+                  animationDelay: isVisible ? `${i * 200}ms` : "0ms",
                   opacity: isVisible ? undefined : 0,
-                  transform: isVisible ? undefined : 'translate(calc(-50% - 100px), 50%) scale(0.8)',
+                  transform: isVisible
+                    ? undefined
+                    : "translate(calc(-50% - 100px), 50%) scale(0.8)",
                   zIndex: count - i,
                 }}
               >
-                <div 
+                <div
                   className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-[15] cursor-pointer group"
-                  style={{ 
+                  style={{
                     transform: `rotate(${angle / 6}deg)`,
-                    width: '100%',
-                    height: '100%',
+                    width: "100%",
+                    height: "100%",
                   }}
                 >
                   <img
                     src={src}
                     alt={`Forest ${i + 1}`}
                     className="block w-full h-full object-cover transition-all duration-300 group-hover:scale-110 group-hover:brightness-110"
-                    style={{ 
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
                     }}
                     draggable={false}
                     // Add a fallback in case an image fails to load
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://placehold.co/400x400/334155/e2e8f0?text=Forest`;
+                      (e.target as HTMLImageElement).src =
+                        `https://placehold.co/400x400/334155/e2e8f0?text=Forest`;
                     }}
                   />
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   {/* Hover text */}
-                  <div className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
-                  </div>
+                  <div className="absolute bottom-2 left-2 right-2 text-white text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0"></div>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
-      
+
       {/* CSS for animations */}
       <style>{`
         @keyframes slide-in-from-left {

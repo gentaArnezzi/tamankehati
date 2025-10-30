@@ -1,5 +1,5 @@
 // Force dynamic rendering for all dashboard pages
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,
@@ -8,4 +8,3 @@ export default function DashboardLayout({
 }) {
   return <>{children}</>;
 }
-

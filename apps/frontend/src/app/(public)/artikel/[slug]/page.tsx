@@ -1,14 +1,16 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { ArtikelDetailView } from '@/components/public/artikel/ArtikelDetailView';
-import { JsonLd } from '@/components/public/seo/JsonLd';
-import { getArtikelDetail, getArtikelPage } from '@/lib/api/public';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ArtikelDetailView } from "@/components/public/artikel/ArtikelDetailView";
+import { JsonLd } from "@/components/public/seo/JsonLd";
+import { getArtikelDetail, getArtikelPage } from "@/lib/api/public";
 
 type ArtikelDetailPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export async function generateMetadata({ params }: ArtikelDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: ArtikelDetailPageProps): Promise<Metadata> {
   try {
     const { slug } = await params;
     const artikel = await getArtikelDetail(slug);
@@ -18,18 +20,22 @@ export async function generateMetadata({ params }: ArtikelDetailPageProps): Prom
       openGraph: {
         title: artikel.judul,
         description: artikel.excerpt,
-        images: artikel.gambar_cover ? [{ url: artikel.gambar_cover }] : undefined,
+        images: artikel.gambar_cover
+          ? [{ url: artikel.gambar_cover }]
+          : undefined,
       },
     };
   } catch {
     return {
-      title: 'Artikel Taman Kehati',
-      description: 'Artikel keanekaragaman hayati dari Taman Kehati.',
+      title: "Artikel Taman Kehati",
+      description: "Artikel keanekaragaman hayati dari Taman Kehati.",
     };
   }
 }
 
-export default async function ArtikelDetailPage({ params }: ArtikelDetailPageProps) {
+export default async function ArtikelDetailPage({
+  params,
+}: ArtikelDetailPageProps) {
   try {
     const { slug } = await params;
     const artikel = await getArtikelDetail(slug);
@@ -40,14 +46,17 @@ export default async function ArtikelDetailPage({ params }: ArtikelDetailPagePro
       offset: 0,
     }).catch(() => null);
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tamankehati.id';
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://tamankehati.id";
     const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'Article',
+      "@context": "https://schema.org",
+      "@type": "Article",
       headline: artikel.judul,
       description: artikel.excerpt,
       datePublished: artikel.tanggal_publish,
-      author: artikel.penulis ? { '@type': 'Person', name: artikel.penulis } : undefined,
+      author: artikel.penulis
+        ? { "@type": "Person", name: artikel.penulis }
+        : undefined,
       image: artikel.gambar_cover,
       articleSection: artikel.kategori,
       url: `${siteUrl}/artikel/${artikel.slug}`,
@@ -62,7 +71,7 @@ export default async function ArtikelDetailPage({ params }: ArtikelDetailPagePro
       </section>
     );
   } catch (error) {
-    console.error('Artikel detail not found', error);
+    console.error("Artikel detail not found", error);
     notFound();
   }
 }

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ReactNode } from "react";
+import { ArrowLeft } from "lucide-react";
 
 interface PageLayoutProps {
   children: ReactNode;
@@ -12,16 +12,16 @@ interface PageLayoutProps {
     label: string;
     onClick: () => void;
   };
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'full';
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
 const maxWidthClasses = {
-  sm: 'max-w-3xl',
-  md: 'max-w-4xl',
-  lg: 'max-w-5xl',
-  xl: 'max-w-6xl',
-  '2xl': 'max-w-7xl',
-  full: 'max-w-full',
+  sm: "max-w-3xl",
+  md: "max-w-4xl",
+  lg: "max-w-5xl",
+  xl: "max-w-6xl",
+  "2xl": "max-w-7xl",
+  full: "max-w-full",
 };
 
 export function PageLayout({
@@ -30,7 +30,7 @@ export function PageLayout({
   subtitle,
   action,
   backButton,
-  maxWidth = '2xl',
+  maxWidth = "2xl",
 }: PageLayoutProps) {
   return (
     <div className="w-full">
@@ -54,16 +54,10 @@ export function PageLayout({
               {title}
             </h1>
             {subtitle && (
-              <p className="mt-1 text-sm text-gray-600">
-                {subtitle}
-              </p>
+              <p className="mt-1 text-sm text-gray-600">{subtitle}</p>
             )}
           </div>
-          {action && (
-            <div className="flex-shrink-0">
-              {action}
-            </div>
-          )}
+          {action && <div className="flex-shrink-0">{action}</div>}
         </div>
       </div>
 
@@ -89,37 +83,29 @@ export function PageSection({
   title,
   description,
   action,
-  className = '',
+  className = "",
   noPadding = false,
 }: PageSectionProps) {
   return (
-    <div className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${className}`}>
+    <div
+      className={`bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden ${className}`}
+    >
       {(title || description || action) && (
         <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-white">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               {title && (
-                <h2 className="text-base font-semibold text-black">
-                  {title}
-                </h2>
+                <h2 className="text-base font-semibold text-black">{title}</h2>
               )}
               {description && (
-                <p className="mt-1 text-sm text-gray-600">
-                  {description}
-                </p>
+                <p className="mt-1 text-sm text-gray-600">{description}</p>
               )}
             </div>
-            {action && (
-              <div className="flex-shrink-0">
-                {action}
-              </div>
-            )}
+            {action && <div className="flex-shrink-0">{action}</div>}
           </div>
         </div>
       )}
-      <div className={noPadding ? '' : 'p-4 sm:p-6'}>
-        {children}
-      </div>
+      <div className={noPadding ? "" : "p-4 sm:p-6"}>{children}</div>
     </div>
   );
 }
@@ -132,22 +118,20 @@ interface PageGridProps {
 
 export function PageGrid({ children, cols = 3, gap = 6 }: PageGridProps) {
   const colsClass = {
-    1: 'grid-cols-1',
-    2: 'sm:grid-cols-2',
-    3: 'sm:grid-cols-2 lg:grid-cols-3',
-    4: 'sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
+    1: "grid-cols-1",
+    2: "sm:grid-cols-2",
+    3: "sm:grid-cols-2 lg:grid-cols-3",
+    4: "sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
   };
 
   const gapClass = {
-    4: 'gap-4',
-    6: 'gap-4 sm:gap-6',
-    8: 'gap-4 sm:gap-6 lg:gap-8',
+    4: "gap-4",
+    6: "gap-4 sm:gap-6",
+    8: "gap-4 sm:gap-6 lg:gap-8",
   };
 
   return (
-    <div className={`grid ${colsClass[cols]} ${gapClass[gap]}`}>
-      {children}
-    </div>
+    <div className={`grid ${colsClass[cols]} ${gapClass[gap]}`}>{children}</div>
   );
 }
 
@@ -162,7 +146,13 @@ interface StatCardProps {
   };
 }
 
-export function StatCard({ title, value, description, icon, trend }: StatCardProps) {
+export function StatCard({
+  title,
+  value,
+  description,
+  icon,
+  trend,
+}: StatCardProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 p-4 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex items-start justify-between">
@@ -171,8 +161,11 @@ export function StatCard({ title, value, description, icon, trend }: StatCardPro
           <div className="mt-2 flex items-baseline gap-2">
             <p className="text-2xl sm:text-3xl font-bold text-black">{value}</p>
             {trend && (
-              <span className={`text-sm font-medium ${trend.isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                {trend.isPositive ? '+' : ''}{trend.value}%
+              <span
+                className={`text-sm font-medium ${trend.isPositive ? "text-green-600" : "text-red-600"}`}
+              >
+                {trend.isPositive ? "+" : ""}
+                {trend.value}%
               </span>
             )}
           </div>
@@ -197,7 +190,12 @@ interface EmptyStateProps {
   action?: ReactNode;
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   return (
     <div className="text-center py-12 sm:py-16">
       {icon && (
@@ -206,10 +204,10 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
         </div>
       )}
       <h3 className="text-lg font-semibold text-black mb-2">{title}</h3>
-      <p className="text-sm text-gray-600 max-w-md mx-auto mb-6">{description}</p>
+      <p className="text-sm text-gray-600 max-w-md mx-auto mb-6">
+        {description}
+      </p>
       {action && <div>{action}</div>}
     </div>
   );
 }
-
-

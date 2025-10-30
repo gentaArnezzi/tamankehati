@@ -1,6 +1,8 @@
-'use client';
+"use client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-pxnu.onrender.com';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://tamankehati-backend-pxnu.onrender.com";
 
 export interface StatsData {
   total_flora: number;
@@ -15,18 +17,17 @@ export async function fetchStats(): Promise<StatsData> {
     if (!response.ok) {
       throw new Error(`Failed to fetch stats: ${response.statusText}`);
     }
-    
+
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('Error fetching stats:', error);
+    console.error("Error fetching stats:", error);
     // Return fallback data if API fails
     return {
       total_flora: 320,
       total_fauna: 180,
       total_taman: 52,
-      total_artikel: 0
+      total_artikel: 0,
     };
   }
 }
-

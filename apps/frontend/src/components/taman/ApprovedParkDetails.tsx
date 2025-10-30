@@ -1,18 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Park, parksApi } from '../../lib/api-client';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Separator } from '../ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useState, useEffect } from "react";
+import { Park, parksApi } from "../../lib/api-client";
+import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Separator } from "../ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 import {
   MapPin,
   FileText,
@@ -33,35 +45,47 @@ import {
   X,
   Clock,
   Camera,
-} from 'lucide-react';
-import dynamic from 'next/dynamic';
-import { IndonesiaRegionSelector } from './IndonesiaRegionSelector';
-import { FileUpload } from '../ui/file-upload';
-import { MultipleFileUpload } from '../ui/multiple-file-upload';
+} from "lucide-react";
+import dynamic from "next/dynamic";
+import { IndonesiaRegionSelector } from "./IndonesiaRegionSelector";
+import { FileUpload } from "../ui/file-upload";
+import { MultipleFileUpload } from "../ui/multiple-file-upload";
 
-const InteractiveMapDisplay = dynamic(() => import('../ui/interactive-map-display').then(mod => ({ default: mod.InteractiveMapDisplay })), { 
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-sm text-gray-600">Memuat peta...</p>
+const InteractiveMapDisplay = dynamic(
+  () =>
+    import("../ui/interactive-map-display").then((mod) => ({
+      default: mod.InteractiveMapDisplay,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">Memuat peta...</p>
+        </div>
       </div>
-    </div>
-  )
-});
+    ),
+  },
+);
 
-const InteractiveMapWrapper = dynamic(() => import('../ui/interactive-map-wrapper').then(mod => ({ default: mod.InteractiveMapWrapper })), { 
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-        <p className="text-sm text-gray-600">Memuat peta...</p>
+const InteractiveMapWrapper = dynamic(
+  () =>
+    import("../ui/interactive-map-wrapper").then((mod) => ({
+      default: mod.InteractiveMapWrapper,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center h-96 bg-gray-50 rounded-lg">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-sm text-gray-600">Memuat peta...</p>
+        </div>
       </div>
-    </div>
-  )
-});
+    ),
+  },
+);
 
 interface Gallery {
   id: number;
@@ -81,39 +105,44 @@ interface ApprovedParkDetailsProps {
   onParkUpdate?: (updatedPark: Park) => void;
 }
 
-export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsProps) {
+export function ApprovedParkDetails({
+  park,
+  onParkUpdate,
+}: ApprovedParkDetailsProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateStatus, setUpdateStatus] = useState<string | null>(null);
   const [galleries, setGalleries] = useState<Gallery[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(false);
-  
+
   // Main image upload states
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [mainImageUrl, setMainImageUrl] = useState<string>(park.gambar_utama || '');
+  const [mainImageUrl, setMainImageUrl] = useState<string>(
+    park.gambar_utama || "",
+  );
   const [mainImageRemoved, setMainImageRemoved] = useState(false);
-  
+
   // Gallery upload states
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  
+
   const [editData, setEditData] = useState({
     name: park.name,
     area_ha: park.area_ha || 0,
-    description: park.description || '',
-    provinsi: park.provinsi || '',
-    kota_kabupaten: park.kota_kabupaten || '',
-    kecamatan: park.kecamatan || '',
-    desa_kelurahan: park.desa_kelurahan || '',
-    pengelola: park.pengelola || '',
-    sk_penetapan: park.sk_penetapan || '',
-    sejarah: park.sejarah || '',
-    visi: park.visi || '',
-    misi: park.misi || '',
-    nilai_dasar: park.nilai_dasar || '',
-    tipe_ekoregion: park.tipe_ekoregion || '',
-    kondisi_fisik: park.kondisi_fisik || '',
-    nilai_penting: park.nilai_penting || '',
+    description: park.description || "",
+    provinsi: park.provinsi || "",
+    kota_kabupaten: park.kota_kabupaten || "",
+    kecamatan: park.kecamatan || "",
+    desa_kelurahan: park.desa_kelurahan || "",
+    pengelola: park.pengelola || "",
+    sk_penetapan: park.sk_penetapan || "",
+    sejarah: park.sejarah || "",
+    visi: park.visi || "",
+    misi: park.misi || "",
+    nilai_dasar: park.nilai_dasar || "",
+    tipe_ekoregion: park.tipe_ekoregion || "",
+    kondisi_fisik: park.kondisi_fisik || "",
+    nilai_penting: park.nilai_penting || "",
     latitude: park.latitude || null,
     longitude: park.longitude || null,
   });
@@ -121,41 +150,45 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
   // Load galleries when component mounts or park changes
   useEffect(() => {
     loadGalleries();
-    setMainImageUrl(park.gambar_utama || '');
+    setMainImageUrl(park.gambar_utama || "");
   }, [park.id, park.gambar_utama]);
 
   const loadGalleries = async () => {
     if (!park.id) return;
-    
+
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/park/${park.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/entity/park/${park.id}`,
         {
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
-      
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Gallery response:', result);
+        console.log("Gallery response:", result);
         setGalleries(result.data || result.items || []);
       } else {
-        console.error('Gallery load failed:', response.status, response.statusText);
+        console.error(
+          "Gallery load failed:",
+          response.status,
+          response.statusText,
+        );
       }
     } catch (error) {
-      console.error('Failed to load galleries:', error);
+      console.error("Failed to load galleries:", error);
     } finally {
       setLoadingGallery(false);
     }
   };
 
   const getImageUrl = (url?: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
   };
 
   // Main image upload handlers
@@ -167,7 +200,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
   const handleFileRemove = () => {
     setSelectedFile(null);
-    setMainImageUrl('');
+    setMainImageUrl("");
     setMainImageRemoved(true); // Mark as explicitly removed
   };
 
@@ -175,56 +208,59 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     try {
       setUploading(true);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append("file", file);
 
-      console.log('Uploading file:', {
+      console.log("Uploading file:", {
         name: file.name,
         size: file.size,
         type: file.type,
-        url: `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`
+        url: `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
       });
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
           body: formData,
-        }
+        },
       );
 
-      console.log('Upload response:', {
+      console.log("Upload response:", {
         ok: response.ok,
         status: response.status,
         statusText: response.statusText,
-        headers: Object.fromEntries(response.headers.entries())
+        headers: Object.fromEntries(response.headers.entries()),
       });
 
       if (!response.ok) {
         const responseText = await response.text();
-        console.error('Upload error response text:', responseText);
-        
+        console.error("Upload error response text:", responseText);
+
         let errorData;
         try {
           errorData = JSON.parse(responseText);
         } catch {
           errorData = { detail: responseText || response.statusText };
         }
-        
-        const errorMessage = errorData?.detail || `Upload failed: ${response.status} ${response.statusText}`;
-        console.error('Upload error data:', errorData);
+
+        const errorMessage =
+          errorData?.detail ||
+          `Upload failed: ${response.status} ${response.statusText}`;
+        console.error("Upload error data:", errorData);
         throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      console.log('Upload success:', result);
+      console.log("Upload success:", result);
       setMainImageUrl(result.url);
-      toast.success('Foto utama berhasil diupload');
+      toast.success("Foto utama berhasil diupload");
     } catch (error) {
-      console.error('Upload error:', error);
-      const message = error instanceof Error ? error.message : 'Gagal upload foto';
+      console.error("Upload error:", error);
+      const message =
+        error instanceof Error ? error.message : "Gagal upload foto";
       toast.error(message);
     } finally {
       setUploading(false);
@@ -233,21 +269,21 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
   // Gallery upload handlers
   const handleGalleryFilesSelect = (files: File[]) => {
-    const newFiles: FileWithPreview[] = files.map(file => ({
+    const newFiles: FileWithPreview[] = files.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
-      id: `${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`
+      id: `${Date.now()}-${file.name}-${Math.random().toString(36).substr(2, 9)}`,
     }));
-    setSelectedFiles(prev => [...prev, ...newFiles]);
+    setSelectedFiles((prev) => [...prev, ...newFiles]);
   };
 
   const handleGalleryFileRemove = (fileId: string) => {
-    setSelectedFiles(prev => {
-      const fileToRemove = prev.find(f => f.id === fileId);
+    setSelectedFiles((prev) => {
+      const fileToRemove = prev.find((f) => f.id === fileId);
       if (fileToRemove) {
         URL.revokeObjectURL(fileToRemove.preview);
       }
-      return prev.filter(f => f.id !== fileId);
+      return prev.filter((f) => f.id !== fileId);
     });
   };
 
@@ -255,7 +291,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
   useEffect(() => {
     const currentFiles = selectedFiles;
     return () => {
-      currentFiles.forEach(fileWithPreview => {
+      currentFiles.forEach((fileWithPreview) => {
         URL.revokeObjectURL(fileWithPreview.preview);
       });
     };
@@ -263,47 +299,52 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
   const uploadMultipleFiles = async (files: File[]) => {
     const uploadedUrls: string[] = [];
-    
+
     for (const file of files) {
       try {
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append("file", file);
 
         console.log(`Uploading gallery file ${file.name}:`, {
           name: file.name,
           size: file.size,
-          type: file.type
+          type: file.type,
         });
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
+          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
             },
             body: formData,
-          }
+          },
         );
 
         console.log(`Upload response for ${file.name}:`, {
           ok: response.ok,
           status: response.status,
-          statusText: response.statusText
+          statusText: response.statusText,
         });
 
         if (!response.ok) {
           const responseText = await response.text();
-          console.error(`Upload error response text for ${file.name}:`, responseText);
-          
+          console.error(
+            `Upload error response text for ${file.name}:`,
+            responseText,
+          );
+
           let errorData;
           try {
             errorData = JSON.parse(responseText);
           } catch {
             errorData = { detail: responseText || response.statusText };
           }
-          
-          const errorMessage = errorData?.detail || `Failed to upload ${file.name}: ${response.status} ${response.statusText}`;
+
+          const errorMessage =
+            errorData?.detail ||
+            `Failed to upload ${file.name}: ${response.status} ${response.statusText}`;
           console.error(`Upload error data for ${file.name}:`, errorData);
           throw new Error(errorMessage);
         }
@@ -313,7 +354,8 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         uploadedUrls.push(result.url);
       } catch (error) {
         console.error(`Error uploading ${file.name}:`, error);
-        const message = error instanceof Error ? error.message : `Gagal upload ${file.name}`;
+        const message =
+          error instanceof Error ? error.message : `Gagal upload ${file.name}`;
         toast.error(message);
         // Continue with other files even if one fails
       }
@@ -327,167 +369,169 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
     try {
       setUploadingGallery(true);
-      
+
       // Extract File objects from FileWithPreview
-      const files = selectedFiles.map(f => f.file);
+      const files = selectedFiles.map((f) => f.file);
       const uploadedUrls = await uploadMultipleFiles(files);
 
       // Create gallery entries for each uploaded image
       for (const imageUrl of uploadedUrls) {
         const galleryData = {
-          entity_type: 'park',
+          entity_type: "park",
           entity_id: park.id,
           title: `${park.name} - Gallery`,
           image_url: imageUrl,
-          description: '',
-          status: 'approved', // Auto-approve for regional admin edits
+          description: "",
+          status: "approved", // Auto-approve for regional admin edits
         };
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/`,
+          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/`,
           {
-            method: 'POST',
+            method: "POST",
             headers: {
-              'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
+              "Content-Type": "application/json",
             },
             body: JSON.stringify(galleryData),
-          }
+          },
         );
 
         if (!response.ok) {
-          console.error('Failed to create gallery entry');
+          console.error("Failed to create gallery entry");
         }
       }
 
-      toast.success(`${uploadedUrls.length} foto berhasil ditambahkan ke galeri`);
-      
+      toast.success(
+        `${uploadedUrls.length} foto berhasil ditambahkan ke galeri`,
+      );
+
       // Cleanup previews
-      selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+      selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview));
       setSelectedFiles([]);
-      
+
       await loadGalleries(); // Reload galleries
     } catch (error) {
-      console.error('Error submitting gallery:', error);
-      toast.error('Gagal menyimpan galeri');
+      console.error("Error submitting gallery:", error);
+      toast.error("Gagal menyimpan galeri");
     } finally {
       setUploadingGallery(false);
     }
   };
 
   const handleDeleteGallery = async (galleryId: number) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus foto ini dari galeri?')) {
+    if (!confirm("Apakah Anda yakin ingin menghapus foto ini dari galeri?")) {
       return;
     }
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${galleryId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/${galleryId}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
         throw new Error(`Failed to delete gallery: ${response.status}`);
       }
 
-      toast.success('Foto berhasil dihapus dari galeri');
+      toast.success("Foto berhasil dihapus dari galeri");
       await loadGalleries(); // Reload galleries
     } catch (error) {
-      console.error('Failed to delete gallery:', error);
-      toast.error('Gagal menghapus foto dari galeri');
+      console.error("Failed to delete gallery:", error);
+      toast.error("Gagal menghapus foto dari galeri");
     }
   };
 
   // Test upload endpoint
   const testUploadEndpoint = async () => {
     try {
-      const testBlob = new Blob(['test'], { type: 'image/jpeg' });
-      const testFile = new File([testBlob], 'test.jpg', { type: 'image/jpeg' });
-      
+      const testBlob = new Blob(["test"], { type: "image/jpeg" });
+      const testFile = new File([testBlob], "test.jpg", { type: "image/jpeg" });
+
       const formData = new FormData();
-      formData.append('file', testFile);
-      
-      console.log('Testing upload endpoint...');
-      console.log('Auth token:', localStorage.getItem('auth_token'));
-      
+      formData.append("file", testFile);
+
+      console.log("Testing upload endpoint...");
+      console.log("Auth token:", localStorage.getItem("auth_token"));
+
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
           body: formData,
-        }
+        },
       );
-      
+
       const responseText = await response.text();
-      console.log('Test upload response status:', response.status);
-      console.log('Test upload response text:', responseText);
-      
+      console.log("Test upload response status:", response.status);
+      console.log("Test upload response text:", responseText);
+
       if (response.ok) {
-        toast.success('Upload endpoint test: SUCCESS');
+        toast.success("Upload endpoint test: SUCCESS");
       } else {
         toast.error(`Upload endpoint test: FAILED (${response.status})`);
       }
     } catch (error) {
-      console.error('Test upload error:', error);
-      toast.error('Upload endpoint test: ERROR');
+      console.error("Test upload error:", error);
+      toast.error("Upload endpoint test: ERROR");
     }
   };
 
   const handleEdit = () => {
     setIsEditing(true);
     // Scroll to top for better UX
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleCancel = () => {
     setIsEditing(false);
-    
+
     // Reset image states
     setSelectedFile(null);
-    setMainImageUrl(park.gambar_utama || '');
+    setMainImageUrl(park.gambar_utama || "");
     setMainImageRemoved(false);
-    
+
     // Cleanup gallery previews
-    selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview));
     setSelectedFiles([]);
-    
+
     setEditData({
       name: park.name,
       area_ha: park.area_ha || 0,
-      description: park.description || '',
-      provinsi: park.provinsi || '',
-      kota_kabupaten: park.kota_kabupaten || '',
-      kecamatan: park.kecamatan || '',
-      desa_kelurahan: park.desa_kelurahan || '',
-      pengelola: park.pengelola || '',
-      sk_penetapan: park.sk_penetapan || '',
-      sejarah: park.sejarah || '',
-      visi: park.visi || '',
-      misi: park.misi || '',
-      nilai_dasar: park.nilai_dasar || '',
-      tipe_ekoregion: park.tipe_ekoregion || '',
-      kondisi_fisik: park.kondisi_fisik || '',
-      nilai_penting: park.nilai_penting || '',
+      description: park.description || "",
+      provinsi: park.provinsi || "",
+      kota_kabupaten: park.kota_kabupaten || "",
+      kecamatan: park.kecamatan || "",
+      desa_kelurahan: park.desa_kelurahan || "",
+      pengelola: park.pengelola || "",
+      sk_penetapan: park.sk_penetapan || "",
+      sejarah: park.sejarah || "",
+      visi: park.visi || "",
+      misi: park.misi || "",
+      nilai_dasar: park.nilai_dasar || "",
+      tipe_ekoregion: park.tipe_ekoregion || "",
+      kondisi_fisik: park.kondisi_fisik || "",
+      nilai_penting: park.nilai_penting || "",
       latitude: park.latitude || null,
       longitude: park.longitude || null,
     });
-    
+
     // Reset image states
     setSelectedFile(null);
-    
+
     // Cleanup gallery previews
-    selectedFiles.forEach(f => URL.revokeObjectURL(f.preview));
+    selectedFiles.forEach((f) => URL.revokeObjectURL(f.preview));
     setSelectedFiles([]);
-    
-    setMainImageUrl(park.gambar_utama || '');
+
+    setMainImageUrl(park.gambar_utama || "");
   };
 
   const handleSave = async () => {
@@ -497,30 +541,34 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
         ...editData,
         gambar_utama: mainImageUrl,
       };
-      
+
       const updatedPark = await parksApi.update(park.id, dataToSave);
-      
+
       // Upload gallery images if any
       if (selectedFiles.length > 0) {
         await submitGalleryImages();
       }
-      
+
       // Set update status based on park status
-      if (updatedPark.status === 'in_review') {
-        setUpdateStatus('in_review');
-        toast.success('Perubahan taman berhasil disimpan dan menunggu approval dari super admin');
-      } else if (updatedPark.status === 'approved') {
-        setUpdateStatus('approved');
-        toast.success('Perubahan taman berhasil disimpan dan langsung disetujui');
+      if (updatedPark.status === "in_review") {
+        setUpdateStatus("in_review");
+        toast.success(
+          "Perubahan taman berhasil disimpan dan menunggu approval dari super admin",
+        );
+      } else if (updatedPark.status === "approved") {
+        setUpdateStatus("approved");
+        toast.success(
+          "Perubahan taman berhasil disimpan dan langsung disetujui",
+        );
       } else {
-        toast.success('Perubahan taman berhasil disimpan');
+        toast.success("Perubahan taman berhasil disimpan");
       }
-      
+
       setIsEditing(false);
       onParkUpdate?.(updatedPark);
     } catch (error) {
-      console.error('Error saving park changes:', error);
-      toast.error('Gagal menyimpan perubahan taman');
+      console.error("Error saving park changes:", error);
+      toast.error("Gagal menyimpan perubahan taman");
     }
   };
 
@@ -530,17 +578,17 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     kecamatan: string;
     desa_kelurahan: string;
   }) => {
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
-      provinsi: region.provinsi || '',
-      kota_kabupaten: region.kota_kabupaten || '',
-      kecamatan: region.kecamatan || '',
-      desa_kelurahan: region.desa_kelurahan || '',
+      provinsi: region.provinsi || "",
+      kota_kabupaten: region.kota_kabupaten || "",
+      kecamatan: region.kecamatan || "",
+      desa_kelurahan: region.desa_kelurahan || "",
     }));
   };
 
   const handleCoordinatesChange = (lat: number, lng: number) => {
-    setEditData(prev => ({
+    setEditData((prev) => ({
       ...prev,
       latitude: lat,
       longitude: lng,
@@ -557,15 +605,23 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
               <div>
                 <CardTitle className="text-2xl">Edit Taman</CardTitle>
                 <CardDescription>
-                  Perubahan akan masuk status review dan memerlukan persetujuan super admin
+                  Perubahan akan masuk status review dan memerlukan persetujuan
+                  super admin
                 </CardDescription>
               </div>
               <div className="flex gap-2">
-                <Button onClick={handleSave} className="flex items-center gap-2">
+                <Button
+                  onClick={handleSave}
+                  className="flex items-center gap-2"
+                >
                   <Save className="w-4 h-4" />
                   Simpan Perubahan
                 </Button>
-                <Button onClick={handleCancel} variant="outline" className="flex items-center gap-2">
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  className="flex items-center gap-2"
+                >
                   <X className="w-4 h-4" />
                   Batal
                 </Button>
@@ -589,17 +645,26 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Input
                       id="name"
                       value={editData.name}
-                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, name: e.target.value })
+                      }
                       placeholder="Nama resmi kawasan konservasi"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="sk_penetapan">SK Penetapan/Penunjukan</Label>
+                    <Label htmlFor="sk_penetapan">
+                      SK Penetapan/Penunjukan
+                    </Label>
                     <Input
                       id="sk_penetapan"
                       value={editData.sk_penetapan}
-                      onChange={(e) => setEditData({ ...editData, sk_penetapan: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          sk_penetapan: e.target.value,
+                        })
+                      }
                       placeholder="Nomor SK penetapan"
                     />
                   </div>
@@ -609,7 +674,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Input
                       id="pengelola"
                       value={editData.pengelola}
-                      onChange={(e) => setEditData({ ...editData, pengelola: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, pengelola: e.target.value })
+                      }
                       placeholder="Nama instansi pengelola"
                     />
                   </div>
@@ -619,7 +686,12 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="description"
                       value={editData.description}
-                      onChange={(e) => setEditData({ ...editData, description: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          description: e.target.value,
+                        })
+                      }
                       placeholder="Deskripsi umum tentang taman"
                       rows={4}
                     />
@@ -630,7 +702,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="sejarah"
                       value={editData.sejarah}
-                      onChange={(e) => setEditData({ ...editData, sejarah: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, sejarah: e.target.value })
+                      }
                       placeholder="Sejarah pembentukan dan pengembangan taman"
                       rows={4}
                     />
@@ -643,7 +717,14 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                       onFileSelect={handleFileSelect}
                       onFileRemove={handleFileRemove}
                       selectedFile={selectedFile}
-                      previewUrl={mainImageRemoved ? undefined : (mainImageUrl || (park.gambar_utama ? getImageUrl(park.gambar_utama) : undefined))}
+                      previewUrl={
+                        mainImageRemoved
+                          ? undefined
+                          : mainImageUrl ||
+                            (park.gambar_utama
+                              ? getImageUrl(park.gambar_utama)
+                              : undefined)
+                      }
                       maxSize={5}
                     />
                     <p className="text-xs text-muted-foreground mt-1">
@@ -660,7 +741,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                           <div key={gallery.id} className="relative group">
                             <img
                               src={getImageUrl(gallery.image_url)}
-                              alt={gallery.title || 'Gallery'}
+                              alt={gallery.title || "Gallery"}
                               className="w-full h-32 object-cover rounded-lg border"
                             />
                             <button
@@ -672,7 +753,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                               <X className="w-4 h-4" />
                             </button>
                             {gallery.title && (
-                              <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                              <p className="text-xs text-gray-600 mt-1 truncate">
+                                {gallery.title}
+                              </p>
                             )}
                           </div>
                         ))}
@@ -718,8 +801,15 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Input
                       id="area_ha"
                       type="number"
-                      value={editData.area_ha || ''}
-                      onChange={(e) => setEditData({ ...editData, area_ha: e.target.value ? parseFloat(e.target.value) : null })}
+                      value={editData.area_ha || ""}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          area_ha: e.target.value
+                            ? parseFloat(e.target.value)
+                            : null,
+                        })
+                      }
                       placeholder="Luas kawasan dalam hektar"
                     />
                   </div>
@@ -728,24 +818,42 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Label>Koordinat Geografis</Label>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        <Label htmlFor="latitude" className="text-sm">Latitude</Label>
+                        <Label htmlFor="latitude" className="text-sm">
+                          Latitude
+                        </Label>
                         <Input
                           id="latitude"
                           type="number"
                           step="0.000001"
-                          value={editData.latitude || ''}
-                          onChange={(e) => setEditData({ ...editData, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                          value={editData.latitude || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              latitude: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
                           placeholder="-7.376688"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="longitude" className="text-sm">Longitude</Label>
+                        <Label htmlFor="longitude" className="text-sm">
+                          Longitude
+                        </Label>
                         <Input
                           id="longitude"
                           type="number"
                           step="0.000001"
-                          value={editData.longitude || ''}
-                          onChange={(e) => setEditData({ ...editData, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                          value={editData.longitude || ""}
+                          onChange={(e) =>
+                            setEditData({
+                              ...editData,
+                              longitude: e.target.value
+                                ? parseFloat(e.target.value)
+                                : null,
+                            })
+                          }
                           placeholder="108.556031"
                         />
                       </div>
@@ -767,49 +875,103 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Label htmlFor="tipe_ekoregion">Tipe Ekoregion</Label>
                     <Select
                       value={editData.tipe_ekoregion}
-                      onValueChange={(value) => setEditData({ ...editData, tipe_ekoregion: value })}
+                      onValueChange={(value) =>
+                        setEditData({ ...editData, tipe_ekoregion: value })
+                      }
                     >
                       <SelectTrigger id="tipe_ekoregion">
                         <SelectValue placeholder="Pilih tipe ekoregion" />
                       </SelectTrigger>
                       <SelectContent className="max-h-[400px]">
-                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">DARAT (Terrestrial)</div>
-                        <SelectItem value="Hutan Hujan Dataran Rendah">Hutan Hujan Dataran Rendah</SelectItem>
-                        <SelectItem value="Hutan Hujan Pegunungan">Hutan Hujan Pegunungan</SelectItem>
-                        <SelectItem value="Hutan Gambut">Hutan Gambut</SelectItem>
-                        <SelectItem value="Hutan Mangrove">Hutan Mangrove</SelectItem>
+                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50">
+                          DARAT (Terrestrial)
+                        </div>
+                        <SelectItem value="Hutan Hujan Dataran Rendah">
+                          Hutan Hujan Dataran Rendah
+                        </SelectItem>
+                        <SelectItem value="Hutan Hujan Pegunungan">
+                          Hutan Hujan Pegunungan
+                        </SelectItem>
+                        <SelectItem value="Hutan Gambut">
+                          Hutan Gambut
+                        </SelectItem>
+                        <SelectItem value="Hutan Mangrove">
+                          Hutan Mangrove
+                        </SelectItem>
                         <SelectItem value="Hutan Musim">Hutan Musim</SelectItem>
                         <SelectItem value="Savana">Savana</SelectItem>
                         <SelectItem value="Karst">Karst</SelectItem>
-                        
-                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">AIR TAWAR (Freshwater)</div>
-                        <SelectItem value="Sungai Kapuas">Sungai Kapuas</SelectItem>
-                        <SelectItem value="Sungai Mahakam">Sungai Mahakam</SelectItem>
-                        <SelectItem value="Sungai Barito">Sungai Barito</SelectItem>
+
+                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">
+                          AIR TAWAR (Freshwater)
+                        </div>
+                        <SelectItem value="Sungai Kapuas">
+                          Sungai Kapuas
+                        </SelectItem>
+                        <SelectItem value="Sungai Mahakam">
+                          Sungai Mahakam
+                        </SelectItem>
+                        <SelectItem value="Sungai Barito">
+                          Sungai Barito
+                        </SelectItem>
                         <SelectItem value="Sungai Musi">Sungai Musi</SelectItem>
-                        <SelectItem value="Sungai Batanghari">Sungai Batanghari</SelectItem>
+                        <SelectItem value="Sungai Batanghari">
+                          Sungai Batanghari
+                        </SelectItem>
                         <SelectItem value="Danau Toba">Danau Toba</SelectItem>
                         <SelectItem value="Danau Poso">Danau Poso</SelectItem>
-                        <SelectItem value="Danau Sentani">Danau Sentani</SelectItem>
-                        <SelectItem value="Sistem Sungai Sumatera">Sistem Sungai Sumatera</SelectItem>
-                        <SelectItem value="Sistem Sungai Jawa">Sistem Sungai Jawa</SelectItem>
-                        <SelectItem value="Sistem Sungai Kalimantan">Sistem Sungai Kalimantan</SelectItem>
-                        <SelectItem value="Sistem Sungai Sulawesi">Sistem Sungai Sulawesi</SelectItem>
-                        <SelectItem value="Sistem Sungai Papua">Sistem Sungai Papua</SelectItem>
-                        
-                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">LAUT (Marine)</div>
+                        <SelectItem value="Danau Sentani">
+                          Danau Sentani
+                        </SelectItem>
+                        <SelectItem value="Sistem Sungai Sumatera">
+                          Sistem Sungai Sumatera
+                        </SelectItem>
+                        <SelectItem value="Sistem Sungai Jawa">
+                          Sistem Sungai Jawa
+                        </SelectItem>
+                        <SelectItem value="Sistem Sungai Kalimantan">
+                          Sistem Sungai Kalimantan
+                        </SelectItem>
+                        <SelectItem value="Sistem Sungai Sulawesi">
+                          Sistem Sungai Sulawesi
+                        </SelectItem>
+                        <SelectItem value="Sistem Sungai Papua">
+                          Sistem Sungai Papua
+                        </SelectItem>
+
+                        <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 bg-gray-50 mt-2">
+                          LAUT (Marine)
+                        </div>
                         <SelectItem value="Papua">Papua</SelectItem>
                         <SelectItem value="Laut Banda">Laut Banda</SelectItem>
-                        <SelectItem value="Nusa Tenggara">Nusa Tenggara</SelectItem>
-                        <SelectItem value="Laut Sulawesi/Selat Makassar">Laut Sulawesi/Selat Makassar</SelectItem>
+                        <SelectItem value="Nusa Tenggara">
+                          Nusa Tenggara
+                        </SelectItem>
+                        <SelectItem value="Laut Sulawesi/Selat Makassar">
+                          Laut Sulawesi/Selat Makassar
+                        </SelectItem>
                         <SelectItem value="Halmahera">Halmahera</SelectItem>
-                        <SelectItem value="Palawan/Borneo Utara">Palawan/Borneo Utara</SelectItem>
-                        <SelectItem value="Sumatera Bagian Barat">Sumatera Bagian Barat</SelectItem>
-                        <SelectItem value="Timur Laut Sulawesi/Teluk Tomini">Timur Laut Sulawesi/Teluk Tomini</SelectItem>
-                        <SelectItem value="Dangkalan Sunda/Laut Jawa">Dangkalan Sunda/Laut Jawa</SelectItem>
-                        <SelectItem value="Laut Arafura">Laut Arafura</SelectItem>
-                        <SelectItem value="Jawa Bagian Selatan">Jawa Bagian Selatan</SelectItem>
-                        <SelectItem value="Selat Malaka">Selat Malaka</SelectItem>
+                        <SelectItem value="Palawan/Borneo Utara">
+                          Palawan/Borneo Utara
+                        </SelectItem>
+                        <SelectItem value="Sumatera Bagian Barat">
+                          Sumatera Bagian Barat
+                        </SelectItem>
+                        <SelectItem value="Timur Laut Sulawesi/Teluk Tomini">
+                          Timur Laut Sulawesi/Teluk Tomini
+                        </SelectItem>
+                        <SelectItem value="Dangkalan Sunda/Laut Jawa">
+                          Dangkalan Sunda/Laut Jawa
+                        </SelectItem>
+                        <SelectItem value="Laut Arafura">
+                          Laut Arafura
+                        </SelectItem>
+                        <SelectItem value="Jawa Bagian Selatan">
+                          Jawa Bagian Selatan
+                        </SelectItem>
+                        <SelectItem value="Selat Malaka">
+                          Selat Malaka
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -819,7 +981,12 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="kondisi_fisik"
                       value={editData.kondisi_fisik}
-                      onChange={(e) => setEditData({ ...editData, kondisi_fisik: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          kondisi_fisik: e.target.value,
+                        })
+                      }
                       placeholder="Deskripsi kondisi fisik kawasan"
                       rows={3}
                     />
@@ -830,7 +997,12 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="nilai_penting"
                       value={editData.nilai_penting}
-                      onChange={(e) => setEditData({ ...editData, nilai_penting: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          nilai_penting: e.target.value,
+                        })
+                      }
                       placeholder="Deskripsi nilai penting kawasan"
                       rows={3}
                     />
@@ -841,7 +1013,12 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="nilai_dasar"
                       value={editData.nilai_dasar}
-                      onChange={(e) => setEditData({ ...editData, nilai_dasar: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({
+                          ...editData,
+                          nilai_dasar: e.target.value,
+                        })
+                      }
                       placeholder="Deskripsi nilai dasar kawasan"
                       rows={3}
                     />
@@ -857,7 +1034,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="visi"
                       value={editData.visi}
-                      onChange={(e) => setEditData({ ...editData, visi: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, visi: e.target.value })
+                      }
                       placeholder="Visi taman"
                       rows={4}
                     />
@@ -868,7 +1047,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                     <Textarea
                       id="misi"
                       value={editData.misi}
-                      onChange={(e) => setEditData({ ...editData, misi: e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, misi: e.target.value })
+                      }
                       placeholder="Misi taman"
                       rows={4}
                     />
@@ -892,14 +1073,19 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
             <TreePine className="w-8 h-8 text-green-600" />
             {park.name}
           </h1>
-          <p className="text-muted-foreground mt-2">Detail lengkap taman yang Anda kelola</p>
+          <p className="text-muted-foreground mt-2">
+            Detail lengkap taman yang Anda kelola
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Button onClick={handleEdit} className="flex items-center gap-2">
             <Edit className="w-4 h-4" />
             Edit Detail
           </Button>
-          <Badge variant="default" className="flex items-center gap-1 px-4 py-2">
+          <Badge
+            variant="default"
+            className="flex items-center gap-1 px-4 py-2"
+          >
             <CheckCircle className="w-4 h-4" />
             Approved
           </Badge>
@@ -908,18 +1094,33 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
 
       {/* Update Status Alert */}
       {updateStatus && (
-        <Alert className={updateStatus === 'in_review' ? 'bg-yellow-50 border-yellow-200' : 'bg-green-50 border-green-200'}>
+        <Alert
+          className={
+            updateStatus === "in_review"
+              ? "bg-yellow-50 border-yellow-200"
+              : "bg-green-50 border-green-200"
+          }
+        >
           <div className="flex items-start justify-between">
-            <AlertDescription className={updateStatus === 'in_review' ? 'text-yellow-800' : 'text-green-800'}>
-              {updateStatus === 'in_review' ? (
+            <AlertDescription
+              className={
+                updateStatus === "in_review"
+                  ? "text-yellow-800"
+                  : "text-green-800"
+              }
+            >
+              {updateStatus === "in_review" ? (
                 <>
                   <Clock className="w-4 h-4 inline mr-2" />
-                  <strong>Perubahan menunggu approval:</strong> Perubahan yang Anda buat sedang menunggu persetujuan dari super admin. Status akan diperbarui setelah disetujui.
+                  <strong>Perubahan menunggu approval:</strong> Perubahan yang
+                  Anda buat sedang menunggu persetujuan dari super admin. Status
+                  akan diperbarui setelah disetujui.
                 </>
               ) : (
                 <>
                   <CheckCircle className="w-4 h-4 inline mr-2" />
-                  <strong>Perubahan telah disetujui:</strong> Perubahan yang Anda buat telah langsung disetujui dan diterapkan.
+                  <strong>Perubahan telah disetujui:</strong> Perubahan yang
+                  Anda buat telah langsung disetujui dan diterapkan.
                 </>
               )}
             </AlertDescription>
@@ -947,7 +1148,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
             <div className="flex items-center gap-2">
               <Ruler className="w-5 h-5 text-blue-600" />
               <span className="text-2xl font-bold">
-                {park.area_ha ? `${park.area_ha.toLocaleString('id-ID')} ha` : 'N/A'}
+                {park.area_ha
+                  ? `${park.area_ha.toLocaleString("id-ID")} ha`
+                  : "N/A"}
               </span>
             </div>
           </CardContent>
@@ -963,7 +1166,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
             <div className="flex items-center gap-2">
               <MapPin className="w-5 h-5 text-red-600" />
               <span className="text-lg font-semibold">
-                {park.kota_kabupaten || 'N/A'}
+                {park.kota_kabupaten || "N/A"}
               </span>
             </div>
           </CardContent>
@@ -979,7 +1182,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
             <div className="flex items-center gap-2">
               <Building2 className="w-5 h-5 text-purple-600" />
               <span className="text-lg font-semibold line-clamp-1">
-                {park.pengelola || 'N/A'}
+                {park.pengelola || "N/A"}
               </span>
             </div>
           </CardContent>
@@ -1012,8 +1215,11 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   alt={park.name}
                   className="w-full h-96 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                   onError={(e) => {
-                    console.error('Failed to load main image:', park.gambar_utama);
-                    (e.target as HTMLImageElement).style.display = 'none';
+                    console.error(
+                      "Failed to load main image:",
+                      park.gambar_utama,
+                    );
+                    (e.target as HTMLImageElement).style.display = "none";
                   }}
                 />
               </CardContent>
@@ -1038,12 +1244,17 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                         alt={gallery.title}
                         className="w-full h-48 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
                         onError={(e) => {
-                          console.error('Failed to load gallery image:', gallery.image_url);
-                          (e.target as HTMLImageElement).style.display = 'none';
+                          console.error(
+                            "Failed to load gallery image:",
+                            gallery.image_url,
+                          );
+                          (e.target as HTMLImageElement).style.display = "none";
                         }}
                       />
                       {gallery.title && (
-                        <p className="text-xs text-gray-600 mt-1 truncate">{gallery.title}</p>
+                        <p className="text-xs text-gray-600 mt-1 truncate">
+                          {gallery.title}
+                        </p>
                       )}
                     </div>
                   ))}
@@ -1073,7 +1284,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   SK Penetapan/Penunjukan
                 </h4>
-                <p className="text-base">{park.sk_penetapan || '-'}</p>
+                <p className="text-base">{park.sk_penetapan || "-"}</p>
               </div>
 
               <Separator />
@@ -1082,7 +1293,7 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Instansi Pengelola
                 </h4>
-                <p className="text-base">{park.pengelola || '-'}</p>
+                <p className="text-base">{park.pengelola || "-"}</p>
               </div>
 
               <Separator />
@@ -1091,7 +1302,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Deskripsi
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.description || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.description || "-"}
+                </p>
               </div>
 
               <Separator />
@@ -1100,7 +1313,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   <BookOpen className="w-4 h-4 inline mr-1" />
                   Sejarah
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.sejarah || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.sejarah || "-"}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -1121,28 +1336,28 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                     Provinsi
                   </h4>
-                  <p className="text-base">{park.provinsi || '-'}</p>
+                  <p className="text-base">{park.provinsi || "-"}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                     Kabupaten/Kota
                   </h4>
-                  <p className="text-base">{park.kota_kabupaten || '-'}</p>
+                  <p className="text-base">{park.kota_kabupaten || "-"}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                     Kecamatan
                   </h4>
-                  <p className="text-base">{park.kecamatan || '-'}</p>
+                  <p className="text-base">{park.kecamatan || "-"}</p>
                 </div>
 
                 <div>
                   <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                     Desa/Kelurahan
                   </h4>
-                  <p className="text-base">{park.desa_kelurahan || '-'}</p>
+                  <p className="text-base">{park.desa_kelurahan || "-"}</p>
                 </div>
               </div>
 
@@ -1154,7 +1369,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   Luas Kawasan
                 </h4>
                 <p className="text-base">
-                  {park.area_ha ? `${park.area_ha.toLocaleString('id-ID')} hektar (ha)` : '-'}
+                  {park.area_ha
+                    ? `${park.area_ha.toLocaleString("id-ID")} hektar (ha)`
+                    : "-"}
                 </p>
               </div>
             </CardContent>
@@ -1175,7 +1392,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <div className="text-center text-muted-foreground">
                   <MapPin className="w-12 h-12 mx-auto mb-3 opacity-30" />
                   <p className="text-sm">Koordinat lokasi belum ditambahkan</p>
-                  <p className="text-xs mt-1">Koordinat dapat ditambahkan saat membuat atau mengedit taman</p>
+                  <p className="text-xs mt-1">
+                    Koordinat dapat ditambahkan saat membuat atau mengedit taman
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -1196,7 +1415,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Tipe Ekoregion
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.tipe_ekoregion || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.tipe_ekoregion || "-"}
+                </p>
               </div>
 
               <Separator />
@@ -1205,7 +1426,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Kondisi Fisik Kawasan
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.kondisi_fisik || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.kondisi_fisik || "-"}
+                </p>
               </div>
 
               <Separator />
@@ -1215,7 +1438,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                   <Heart className="w-4 h-4 inline mr-1" />
                   Nilai Penting Kawasan
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.nilai_penting || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.nilai_penting || "-"}
+                </p>
               </div>
 
               <Separator />
@@ -1224,7 +1449,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 <h4 className="font-semibold text-sm text-muted-foreground mb-1">
                   Nilai Dasar
                 </h4>
-                <p className="text-base whitespace-pre-wrap">{park.nilai_dasar || '-'}</p>
+                <p className="text-base whitespace-pre-wrap">
+                  {park.nilai_dasar || "-"}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -1248,12 +1475,16 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 {isEditing ? (
                   <textarea
                     value={editData.visi}
-                    onChange={(e) => setEditData({ ...editData, visi: e.target.value })}
+                    onChange={(e) =>
+                      setEditData({ ...editData, visi: e.target.value })
+                    }
                     className="w-full px-3 py-2 border rounded text-base min-h-[100px]"
                     placeholder="Visi taman"
                   />
                 ) : (
-                  <p className="text-base whitespace-pre-wrap">{park.visi || '-'}</p>
+                  <p className="text-base whitespace-pre-wrap">
+                    {park.visi || "-"}
+                  </p>
                 )}
               </div>
 
@@ -1267,12 +1498,16 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
                 {isEditing ? (
                   <textarea
                     value={editData.misi}
-                    onChange={(e) => setEditData({ ...editData, misi: e.target.value })}
+                    onChange={(e) =>
+                      setEditData({ ...editData, misi: e.target.value })
+                    }
                     className="w-full px-3 py-2 border rounded text-base min-h-[100px]"
                     placeholder="Misi taman"
                   />
                 ) : (
-                  <p className="text-base whitespace-pre-wrap">{park.misi || '-'}</p>
+                  <p className="text-base whitespace-pre-wrap">
+                    {park.misi || "-"}
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -1297,7 +1532,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
               <Leaf className="w-8 h-8 text-green-600" />
               <div>
                 <h4 className="font-semibold">Flora</h4>
-                <p className="text-sm text-muted-foreground">Kelola data flora</p>
+                <p className="text-sm text-muted-foreground">
+                  Kelola data flora
+                </p>
               </div>
             </a>
 
@@ -1308,7 +1545,9 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
               <Bird className="w-8 h-8 text-blue-600" />
               <div>
                 <h4 className="font-semibold">Fauna</h4>
-                <p className="text-sm text-muted-foreground">Kelola data fauna</p>
+                <p className="text-sm text-muted-foreground">
+                  Kelola data fauna
+                </p>
               </div>
             </a>
 
@@ -1328,4 +1567,3 @@ export function ApprovedParkDetails({ park, onParkUpdate }: ApprovedParkDetailsP
     </div>
   );
 }
-

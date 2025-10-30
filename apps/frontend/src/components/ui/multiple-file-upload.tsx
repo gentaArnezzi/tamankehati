@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Button } from './button';
-import { Upload, X, Image as ImageIcon, Plus } from 'lucide-react';
-import { cn } from './utils';
+import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "./button";
+import { Upload, X, Image as ImageIcon, Plus } from "lucide-react";
+import { cn } from "./utils";
 
 interface FileWithPreview {
   file: File;
@@ -27,27 +27,32 @@ export function MultipleFileUpload({
   className,
   maxSize = 10,
   maxFiles = 10,
-  acceptedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  acceptedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"],
 }: MultipleFileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      // Check if adding these files would exceed maxFiles
-      const totalFiles = selectedFiles.length + acceptedFiles.length;
-      if (totalFiles > maxFiles) {
-        alert(`Maksimal ${maxFiles} file. Anda sudah memilih ${selectedFiles.length} file.`);
-        return;
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        // Check if adding these files would exceed maxFiles
+        const totalFiles = selectedFiles.length + acceptedFiles.length;
+        if (totalFiles > maxFiles) {
+          alert(
+            `Maksimal ${maxFiles} file. Anda sudah memilih ${selectedFiles.length} file.`,
+          );
+          return;
+        }
+
+        onFilesSelect(acceptedFiles);
       }
-      
-      onFilesSelect(acceptedFiles);
-    }
-  }, [onFilesSelect, selectedFiles.length, maxFiles]);
+    },
+    [onFilesSelect, selectedFiles.length, maxFiles],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': acceptedTypes
+      "image/*": acceptedTypes,
     },
     maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
     multiple: true,
@@ -60,16 +65,18 @@ export function MultipleFileUpload({
   };
 
   const handleAddMore = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = acceptedTypes.join(',');
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = acceptedTypes.join(",");
     input.multiple = true;
     input.onchange = (e) => {
       const files = Array.from((e.target as HTMLInputElement).files || []);
       if (files.length > 0) {
         const totalFiles = selectedFiles.length + files.length;
         if (totalFiles > maxFiles) {
-          alert(`Maksimal ${maxFiles} file. Anda sudah memilih ${selectedFiles.length} file.`);
+          alert(
+            `Maksimal ${maxFiles} file. Anda sudah memilih ${selectedFiles.length} file.`,
+          );
           return;
         }
         onFilesSelect(files);
@@ -88,7 +95,7 @@ export function MultipleFileUpload({
             "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
             isDragActive || dragActive
               ? "border-emerald-500 bg-emerald-50"
-              : "border-gray-300 hover:border-gray-400"
+              : "border-gray-300 hover:border-gray-400",
           )}
         >
           <input {...getInputProps()} />
@@ -103,7 +110,8 @@ export function MultipleFileUpload({
             Pilih File
           </Button>
           <p className="text-xs text-gray-400 mt-2">
-            Maksimal {maxFiles} file, {maxSize}MB per file. Format: JPG, PNG, GIF, WebP
+            Maksimal {maxFiles} file, {maxSize}MB per file. Format: JPG, PNG,
+            GIF, WebP
           </p>
         </div>
       ) : (
@@ -130,7 +138,10 @@ export function MultipleFileUpload({
                     </Button>
                   </div>
                   <div className="mt-2">
-                    <p className="text-xs font-medium text-gray-900 truncate" title={fileWithPreview.file.name}>
+                    <p
+                      className="text-xs font-medium text-gray-900 truncate"
+                      title={fileWithPreview.file.name}
+                    >
                       {fileWithPreview.file.name}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -165,7 +176,7 @@ export function MultipleFileUpload({
               "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
               isDragActive || dragActive
                 ? "border-emerald-500 bg-emerald-50"
-                : "border-gray-300 hover:border-gray-400"
+                : "border-gray-300 hover:border-gray-400",
             )}
           >
             <input {...getInputProps()} />

@@ -70,9 +70,7 @@ const Hero45 = ({
                   className="mx-6 hidden h-auto w-[2px] bg-gradient-to-b from-muted via-transparent to-muted md:block"
                 />
               )}
-              <div
-                className="flex grow basis-0 flex-col rounded-md bg-background p-4"
-              >
+              <div className="flex grow basis-0 flex-col rounded-md bg-background p-4">
                 <div className="mb-6 flex size-10 items-center justify-center rounded-full bg-background drop-shadow-lg">
                   {feature.icon}
                 </div>

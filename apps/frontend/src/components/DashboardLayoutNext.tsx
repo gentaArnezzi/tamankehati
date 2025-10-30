@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { ReactNode, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '../lib/useAuth';
-import { DashboardLayoutBase } from './DashboardLayoutBase';
+import { ReactNode, useCallback } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useAuth } from "../lib/useAuth";
+import { DashboardLayoutBase } from "./DashboardLayoutBase";
 
 interface DashboardLayoutNextProps {
   children: ReactNode;
@@ -12,21 +12,24 @@ interface DashboardLayoutNextProps {
 export function DashboardLayoutNext({ children }: DashboardLayoutNextProps) {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
-  const pathname = usePathname() ?? '/dashboard';
+  const pathname = usePathname() ?? "/dashboard";
 
   // ✅ Optimized navigation with minimal logging
-  const handleNavigate = useCallback((path: string) => {
-    try {
-      router.push(path);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      window.location.href = path;
-    }
-  }, [router]);
+  const handleNavigate = useCallback(
+    (path: string) => {
+      try {
+        router.push(path);
+      } catch (error) {
+        console.error("Navigation error:", error);
+        window.location.href = path;
+      }
+    },
+    [router],
+  );
 
   const handleLogout = useCallback(() => {
     logout();
-    router.push('/login');
+    router.push("/login");
   }, [logout, router]);
 
   // ✅ FIX: Wait for user data to load before rendering dashboard

@@ -1,19 +1,40 @@
-'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { toast } from 'sonner';
-import { Upload, Search, Info, Loader2, ShieldCheck, Clock, Ban } from 'lucide-react';
+import { useMemo, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
+import {
+  Upload,
+  Search,
+  Info,
+  Loader2,
+  ShieldCheck,
+  Clock,
+  Ban,
+} from "lucide-react";
 
-import { useAuth } from '../../lib/useAuth';
-import { Taman, tamanApi, ZoneUploadResponse } from '../../lib/api-client';
-import { cn } from '../../lib/utils';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-import { Badge } from '../ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+import { useAuth } from "../../lib/useAuth";
+import { Taman, tamanApi, ZoneUploadResponse } from "../../lib/api-client";
+import { cn } from "../../lib/utils";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription, AlertTitle } from "../ui/alert";
+import { Badge } from "../ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 type UploadVariables = {
   file: File;
@@ -23,25 +44,25 @@ type UploadVariables = {
 
 export function TamanPage() {
   const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [regionCode, setRegionCode] = useState('');
-  const [nameField, setNameField] = useState('name');
-  const [tolerance, setTolerance] = useState('');
+  const [regionCode, setRegionCode] = useState("");
+  const [nameField, setNameField] = useState("name");
+  const [tolerance, setTolerance] = useState("");
   const [lastUpload, setLastUpload] = useState<ZoneUploadResponse | null>(null);
   const [recentZoneIds, setRecentZoneIds] = useState<Set<string>>(new Set());
   const [fileInputKey, setFileInputKey] = useState(0);
 
   const zonesQuery = useQuery({
-    queryKey: ['zones', user?.role === 'regional_admin' ? user?.id : 'all'],
+    queryKey: ["zones", user?.role === "regional_admin" ? user?.id : "all"],
     queryFn: async () => {
       const params: any = { page: 1, size: 200 };
-      
+
       // Regional admin should only see their own submitted zones
-      if (user?.role === 'regional_admin') {
+      if (user?.role === "regional_admin") {
         params.submitted_by = user.id;
       }
-      
+
       const data = await tamanApi.list(params);
       return data;
     },
@@ -53,17 +74,19 @@ export function TamanPage() {
     },
     onSuccess: (response) => {
       setLastUpload(response);
-      setRecentZoneIds(new Set(response.zones.map((zone: any) => String(zone.id))));
+      setRecentZoneIds(
+        new Set(response.zones.map((zone: any) => String(zone.id))),
+      );
       if (response.summary.created > 0) {
         toast.success(
-          'Shapefile berhasil diproses. Status awal: Menunggu Persetujuan.'
+          "Shapefile berhasil diproses. Status awal: Menunggu Persetujuan.",
         );
       } else {
-        toast.info('Tidak ada fitur baru yang dihasilkan dari berkas ini.');
+        toast.info("Tidak ada fitur baru yang dihasilkan dari berkas ini.");
       }
       if (response.errors.length) {
         toast.warning(
-          `Beberapa fitur gagal diproses (${response.errors.length}). Silakan tinjau daftar kesalahan.`
+          `Beberapa fitur gagal diproses (${response.errors.length}). Silakan tinjau daftar kesalahan.`,
         );
       }
       setSelectedFile(null);
@@ -71,22 +94,22 @@ export function TamanPage() {
       zonesQuery.refetch();
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Gagal mengunggah shapefile');
+      toast.error(error.message || "Gagal mengunggah shapefile");
     },
   });
 
-  const statusToLabel = (status?: Taman['status']) => {
+  const statusToLabel = (status?: Taman["status"]) => {
     switch (status) {
-      case 'draft':
-        return 'Draft';
-      case 'in_review':
-        return 'Menunggu Persetujuan';
-      case 'approved':
-        return 'Disetujui';
-      case 'rejected':
-        return 'Ditolak';
+      case "draft":
+        return "Draft";
+      case "in_review":
+        return "Menunggu Persetujuan";
+      case "approved":
+        return "Disetujui";
+      case "rejected":
+        return "Ditolak";
       default:
-        return 'Tidak diketahui';
+        return "Tidak diketahui";
     }
   };
 
@@ -107,17 +130,19 @@ export function TamanPage() {
     event.preventDefault();
 
     if (!selectedFile) {
-      toast.error('Pilih berkas shapefile (format .zip) terlebih dahulu.');
+      toast.error("Pilih berkas shapefile (format .zip) terlebih dahulu.");
       return;
     }
 
     // Region code validation removed - using user-based access control
 
     let parsedTolerance: number | undefined;
-    if (tolerance.trim() !== '') {
+    if (tolerance.trim() !== "") {
       const numeric = Number(tolerance);
       if (Number.isNaN(numeric) || numeric < 0) {
-        toast.error('Toleransi simplifikasi harus berupa angka nol atau positif.');
+        toast.error(
+          "Toleransi simplifikasi harus berupa angka nol atau positif.",
+        );
         return;
       }
       parsedTolerance = numeric;
@@ -138,9 +163,10 @@ export function TamanPage() {
           Pengelolaan Taman dan Zona Konservasi
         </h1>
         <p className="mt-2 text-sm text-slate-600">
-          Regional Admin dapat mengunggah data batas zona dalam format shapefile.
-          Setiap unggahan baru otomatis berstatus <strong>“Menunggu Persetujuan”</strong>{' '}
-          dan hanya akan tampil untuk publik setelah disetujui oleh Super Admin.
+          Regional Admin dapat mengunggah data batas zona dalam format
+          shapefile. Setiap unggahan baru otomatis berstatus{" "}
+          <strong>“Menunggu Persetujuan”</strong> dan hanya akan tampil untuk
+          publik setelah disetujui oleh Super Admin.
         </p>
       </div>
 
@@ -148,9 +174,9 @@ export function TamanPage() {
         <Info className="h-4 w-4" aria-hidden />
         <AlertTitle>Panduan Unggah</AlertTitle>
         <AlertDescription>
-          Kompres berkas <code>.shp</code>, <code>.shx</code>, <code>.dbf</code>, dan{' '}
-          <code>.prj</code> ke dalam satu <code>.zip</code>. Pastikan sistem koordinat
-          terdefinisi pada berkas <code>.prj</code>.
+          Kompres berkas <code>.shp</code>, <code>.shx</code>, <code>.dbf</code>
+          , dan <code>.prj</code> ke dalam satu <code>.zip</code>. Pastikan
+          sistem koordinat terdefinisi pada berkas <code>.prj</code>.
         </AlertDescription>
       </Alert>
 
@@ -158,8 +184,8 @@ export function TamanPage() {
         <CardHeader>
           <CardTitle>Unggah Shapefile Zona</CardTitle>
           <CardDescription>
-            Sistem akan memvalidasi geometri, melakukan reproyeksi ke EPSG:4326, dan
-            menyederhanakan batas sesuai toleransi.
+            Sistem akan memvalidasi geometri, melakukan reproyeksi ke EPSG:4326,
+            dan menyederhanakan batas sesuai toleransi.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -176,7 +202,8 @@ export function TamanPage() {
                   disabled={false}
                 />
                 <p className="text-xs text-slate-500">
-                  Gunakan kode region resmi. Nilai ini digunakan sebagai batas akses konten.
+                  Gunakan kode region resmi. Nilai ini digunakan sebagai batas
+                  akses konten.
                 </p>
               </div>
 
@@ -209,7 +236,8 @@ export function TamanPage() {
                 />
                 {selectedFile && (
                   <p className="text-xs text-slate-500">
-                    {selectedFile.name} • {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                    {selectedFile.name} •{" "}
+                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
                   </p>
                 )}
               </div>
@@ -224,7 +252,8 @@ export function TamanPage() {
                   onChange={(event) => setTolerance(event.target.value)}
                 />
                 <p className="text-xs text-slate-500">
-                  Opsional. Kosongkan untuk menggunakan nilai bawaan dari konfigurasi.
+                  Opsional. Kosongkan untuk menggunakan nilai bawaan dari
+                  konfigurasi.
                 </p>
               </div>
             </div>
@@ -248,7 +277,8 @@ export function TamanPage() {
                 )}
               </Button>
               <p className="text-sm text-slate-500">
-                Unggahan baru menunggu verifikasi. Anda dapat meninjau status di tabel.
+                Unggahan baru menunggu verifikasi. Anda dapat meninjau status di
+                tabel.
               </p>
             </div>
           </form>
@@ -257,17 +287,22 @@ export function TamanPage() {
             <div className="mt-6 space-y-3">
               <Card className="border-slate-200">
                 <CardHeader className="px-4 py-3">
-                  <CardTitle className="text-base">Ringkasan Unggahan Terakhir</CardTitle>
+                  <CardTitle className="text-base">
+                    Ringkasan Unggahan Terakhir
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2 px-4 py-3">
                   <p className="text-sm text-slate-600">
-                    Zona berhasil dibuat: <strong>{lastUpload.summary.created}</strong>
+                    Zona berhasil dibuat:{" "}
+                    <strong>{lastUpload.summary.created}</strong>
                   </p>
                   <p className="text-sm text-slate-600">
-                    Fitur dengan kendala: <strong>{lastUpload.errors.length}</strong>
+                    Fitur dengan kendala:{" "}
+                    <strong>{lastUpload.errors.length}</strong>
                   </p>
                   <p className="text-sm text-slate-600">
-                    Toleransi simplifikasi: <strong>{lastUpload.summary.simplify_tolerance}</strong>
+                    Toleransi simplifikasi:{" "}
+                    <strong>{lastUpload.summary.simplify_tolerance}</strong>
                   </p>
                   {lastUpload.zones.length > 0 && (
                     <div className="pt-2">
@@ -277,9 +312,13 @@ export function TamanPage() {
                       <ul className="mt-1 space-y-1 text-xs text-slate-600">
                         {lastUpload.zones.map((zone) => (
                           <li key={`uploaded-zone-${zone.id}`}>
-                            <span className="font-medium text-slate-700">{zone.name}</span>
+                            <span className="font-medium text-slate-700">
+                              {zone.name}
+                            </span>
                             <span className="mx-2 text-slate-400">•</span>
-                            <span className="capitalize">{statusToLabel(zone.status)}</span>
+                            <span className="capitalize">
+                              {statusToLabel(zone.status)}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -310,7 +349,8 @@ export function TamanPage() {
           <div>
             <CardTitle>Daftar Zona</CardTitle>
             <CardDescription>
-              Data berikut bersumber dari hasil unggahan yang telah melewati proses validasi.
+              Data berikut bersumber dari hasil unggahan yang telah melewati
+              proses validasi.
             </CardDescription>
           </div>
           <div className="relative w-full sm:w-72">
@@ -344,27 +384,37 @@ export function TamanPage() {
                 )}
                 {zonesQuery.isError && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-sm text-red-600">
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-sm text-red-600"
+                    >
                       {(zonesQuery.error as Error)?.message ||
-                        'Gagal memuat data zona. Coba lagi nanti.'}
+                        "Gagal memuat data zona. Coba lagi nanti."}
                     </TableCell>
                   </TableRow>
                 )}
                 {!zonesQuery.isLoading && filteredZones.length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center text-sm text-slate-500">
-                      Data belum tersedia. Silakan ubah filter atau unggah shapefile baru.
+                    <TableCell
+                      colSpan={4}
+                      className="text-center text-sm text-slate-500"
+                    >
+                      Data belum tersedia. Silakan ubah filter atau unggah
+                      shapefile baru.
                     </TableCell>
                   </TableRow>
                 )}
                 {filteredZones.map((zone) => {
                   const isNewlyUploaded = recentZoneIds.has(zone.id);
-                  const isPending = zone.status === 'in_review' || zone.status === 'draft';
+                  const isPending =
+                    zone.status === "in_review" || zone.status === "draft";
                   const statusLabel = statusToLabel(zone.status);
                   return (
                     <TableRow
                       key={zone.id}
-                      className={cn((isPending || isNewlyUploaded) && 'bg-amber-50/60')}
+                      className={cn(
+                        (isPending || isNewlyUploaded) && "bg-amber-50/60",
+                      )}
                     >
                       <TableCell className="font-medium text-slate-700">
                         {zone.id}
@@ -372,18 +422,24 @@ export function TamanPage() {
                       <TableCell>{zone.nama}</TableCell>
                       <TableCell>{zone.wilayah}</TableCell>
                       <TableCell>
-                        {zone.status === 'approved' ? (
+                        {zone.status === "approved" ? (
                           <span className="inline-flex items-center gap-1 text-sm text-emerald-700">
                             <ShieldCheck className="h-4 w-4" />
                             {statusLabel}
                           </span>
-                        ) : zone.status === 'rejected' ? (
-                          <Badge variant="destructive" className="inline-flex items-center gap-1 text-xs">
+                        ) : zone.status === "rejected" ? (
+                          <Badge
+                            variant="destructive"
+                            className="inline-flex items-center gap-1 text-xs"
+                          >
                             <Ban className="h-3 w-3" />
                             {statusLabel}
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="inline-flex items-center gap-1 border-amber-400 text-amber-700 text-xs">
+                          <Badge
+                            variant="outline"
+                            className="inline-flex items-center gap-1 border-amber-400 text-amber-700 text-xs"
+                          >
                             <Clock className="h-3 w-3" />
                             {statusLabel}
                           </Badge>

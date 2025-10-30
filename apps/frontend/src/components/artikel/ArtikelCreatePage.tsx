@@ -1,39 +1,63 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '../ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '../ui/form';
-import { Input } from '../ui/input';
-import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { ArrowLeft, Save, Eye, AlertCircle, FileText } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '../../lib/useAuth';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "../ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "../ui/form";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
+import { ArrowLeft, Save, Eye, AlertCircle, FileText } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "../../lib/useAuth";
 
 const artikelSchema = z.object({
-  judul: z.string().min(1, 'Judul wajib diisi'),
-  kategori: z.string().min(1, 'Kategori wajib dipilih'),
-  excerpt: z.string().min(1, 'Ringkasan wajib diisi'),
-  konten: z.string().min(1, 'Konten wajib diisi'),
-  gambar_cover: z.string().url('URL gambar tidak valid').optional().or(z.literal('')),
-  status: z.enum(['draft', 'published']),
+  judul: z.string().min(1, "Judul wajib diisi"),
+  kategori: z.string().min(1, "Kategori wajib dipilih"),
+  excerpt: z.string().min(1, "Ringkasan wajib diisi"),
+  konten: z.string().min(1, "Konten wajib diisi"),
+  gambar_cover: z
+    .string()
+    .url("URL gambar tidak valid")
+    .optional()
+    .or(z.literal("")),
+  status: z.enum(["draft", "published"]),
 });
 
 type ArtikelFormData = z.infer<typeof artikelSchema>;
 
 const KATEGORI_OPTIONS = [
-  'Konservasi',
-  'Penelitian',
-  'Edukasi',
-  'Berita',
-  'Laporan Lapangan',
-  'Kebijakan',
+  "Konservasi",
+  "Penelitian",
+  "Edukasi",
+  "Berita",
+  "Laporan Lapangan",
+  "Kebijakan",
 ];
 
 export function ArtikelCreatePage() {
@@ -45,58 +69,61 @@ export function ArtikelCreatePage() {
   const form = useForm<ArtikelFormData>({
     resolver: zodResolver(artikelSchema),
     defaultValues: {
-      judul: '',
-      kategori: '',
-      excerpt: '',
-      konten: '',
-      gambar_cover: '',
-      status: 'draft',
+      judul: "",
+      kategori: "",
+      excerpt: "",
+      konten: "",
+      gambar_cover: "",
+      status: "draft",
     },
   });
 
   const onSubmit = async (data: ArtikelFormData) => {
     try {
       setSubmitting(true);
-      
+
       // Generate slug from title
       const slug = data.judul
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
         .trim();
 
       // Create article via API
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/articles/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: data.judul,
+            content: data.konten,
+            summary: data.excerpt,
+            category: data.kategori,
+            featured_image: data.gambar_cover || null,
+            status: data.status,
+          }),
         },
-        body: JSON.stringify({
-          title: data.judul,
-          content: data.konten,
-          summary: data.excerpt,
-          category: data.kategori,
-          featured_image: data.gambar_cover || null,
-          status: data.status,
-        }),
-      });
+      );
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.detail || 'Gagal membuat artikel');
+        throw new Error(error.detail || "Gagal membuat artikel");
       }
 
       const artikel = await response.json();
-      console.log('Article created:', artikel);
-      
-      toast.success('Artikel berhasil dibuat!');
-      router.push('/dashboard/taman/berita');
+      console.log("Article created:", artikel);
+
+      toast.success("Artikel berhasil dibuat!");
+      router.push("/dashboard/taman/berita");
     } catch (error) {
-      console.error('Error creating article:', error);
-      toast.error('Gagal membuat artikel');
+      console.error("Error creating article:", error);
+      toast.error("Gagal membuat artikel");
     } finally {
       setSubmitting(false);
     }
@@ -131,7 +158,7 @@ export function ArtikelCreatePage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handlePreview}>
             <Eye className="h-4 w-4 mr-2" />
-            {previewMode ? 'Edit' : 'Preview'}
+            {previewMode ? "Edit" : "Preview"}
           </Button>
         </div>
       </div>
@@ -140,31 +167,38 @@ export function ArtikelCreatePage() {
         /* Preview Mode */
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">{formData.judul || 'Judul Artikel'}</CardTitle>
+            <CardTitle className="text-2xl">
+              {formData.judul || "Judul Artikel"}
+            </CardTitle>
             <CardDescription>
-              {formData.excerpt || 'Ringkasan artikel akan muncul di sini'}
+              {formData.excerpt || "Ringkasan artikel akan muncul di sini"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {formData.gambar_cover && (
               <div className="mb-6">
-                <img 
-                  src={formData.gambar_cover} 
+                <img
+                  src={formData.gambar_cover}
                   alt={formData.judul}
                   className="w-full h-64 object-cover rounded-lg"
                 />
               </div>
             )}
             <div className="prose max-w-none">
-              <div dangerouslySetInnerHTML={{ 
-                __html: formData.konten.replace(/\n/g, '<br>') 
-              }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: formData.konten.replace(/\n/g, "<br>"),
+                }}
+              />
             </div>
             <div className="mt-6 pt-4 border-t">
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <span>Kategori: {formData.kategori || 'Belum dipilih'}</span>
-                <span>Status: {formData.status === 'published' ? 'Diterbitkan' : 'Draft'}</span>
-                <span>Penulis: {user?.nama || 'Admin'}</span>
+                <span>Kategori: {formData.kategori || "Belum dipilih"}</span>
+                <span>
+                  Status:{" "}
+                  {formData.status === "published" ? "Diterbitkan" : "Draft"}
+                </span>
+                <span>Penulis: {user?.nama || "Admin"}</span>
               </div>
             </div>
           </CardContent>
@@ -194,13 +228,14 @@ export function ArtikelCreatePage() {
                         <FormItem>
                           <FormLabel>Judul Artikel *</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="Masukkan judul artikel yang menarik" 
-                              {...field} 
+                            <Input
+                              placeholder="Masukkan judul artikel yang menarik"
+                              {...field}
                             />
                           </FormControl>
                           <FormDescription>
-                            Judul yang menarik akan meningkatkan engagement pembaca
+                            Judul yang menarik akan meningkatkan engagement
+                            pembaca
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -214,7 +249,10 @@ export function ArtikelCreatePage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Kategori *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Pilih kategori" />
@@ -239,7 +277,10 @@ export function ArtikelCreatePage() {
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Status</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
+                            <Select
+                              onValueChange={field.onChange}
+                              value={field.value}
+                            >
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue />
@@ -247,11 +288,14 @@ export function ArtikelCreatePage() {
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="published">Diterbitkan</SelectItem>
+                                <SelectItem value="published">
+                                  Diterbitkan
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormDescription>
-                              Draft: Simpan untuk diedit nanti. Diterbitkan: Langsung publikasikan.
+                              Draft: Simpan untuk diedit nanti. Diterbitkan:
+                              Langsung publikasikan.
                             </FormDescription>
                             <FormMessage />
                           </FormItem>
@@ -274,7 +318,8 @@ export function ArtikelCreatePage() {
                             />
                           </FormControl>
                           <FormDescription>
-                            Ringkasan yang baik akan menarik pembaca untuk membaca artikel lengkap
+                            Ringkasan yang baik akan menarik pembaca untuk
+                            membaca artikel lengkap
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -288,9 +333,9 @@ export function ArtikelCreatePage() {
                         <FormItem>
                           <FormLabel>Gambar Cover</FormLabel>
                           <FormControl>
-                            <Input 
-                              placeholder="https://example.com/image.jpg" 
-                              {...field} 
+                            <Input
+                              placeholder="https://example.com/image.jpg"
+                              {...field}
                             />
                           </FormControl>
                           <FormDescription>
@@ -325,7 +370,8 @@ export function ArtikelCreatePage() {
                             />
                           </FormControl>
                           <FormDescription>
-                            Gunakan format markdown untuk styling yang lebih baik
+                            Gunakan format markdown untuk styling yang lebih
+                            baik
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
@@ -369,11 +415,15 @@ export function ArtikelCreatePage() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                        <span className="text-sm">Draft: Artikel tersimpan tapi belum dipublikasikan</span>
+                        <span className="text-sm">
+                          Draft: Artikel tersimpan tapi belum dipublikasikan
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm">Diterbitkan: Artikel langsung muncul di website</span>
+                        <span className="text-sm">
+                          Diterbitkan: Artikel langsung muncul di website
+                        </span>
                       </div>
                     </div>
                   </CardContent>
@@ -388,7 +438,7 @@ export function ArtikelCreatePage() {
               </Button>
               <Button type="submit" disabled={submitting}>
                 <Save className="h-4 w-4 mr-2" />
-                {submitting ? 'Menyimpan...' : 'Simpan Artikel'}
+                {submitting ? "Menyimpan..." : "Simpan Artikel"}
               </Button>
             </div>
           </form>

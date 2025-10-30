@@ -1,18 +1,24 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  Users, 
-  Eye, 
-  MessageSquare, 
-  Heart, 
-  CheckCircle, 
+import {
+  Users,
+  Eye,
+  MessageSquare,
+  Heart,
+  CheckCircle,
   TrendingUp,
   Download,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -46,22 +52,26 @@ interface EnhancedAnnouncementAnalyticsProps {
 }
 
 export default function EnhancedAnnouncementAnalytics({
-  onBack
+  onBack,
 }: EnhancedAnnouncementAnalyticsProps) {
   const [overviewData, setOverviewData] = useState<AnalyticsData | null>(null);
-  const [announcementAnalytics, setAnnouncementAnalytics] = useState<AnnouncementAnalytics[]>([]);
+  const [announcementAnalytics, setAnnouncementAnalytics] = useState<
+    AnnouncementAnalytics[]
+  >([]);
   const [loading, setLoading] = useState(true);
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<number | null>(null);
+  const [selectedAnnouncement, setSelectedAnnouncement] = useState<
+    number | null
+  >(null);
 
   // Fetch overview analytics
   const fetchOverviewAnalytics = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/v1/enhanced/analytics/overview', {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("/api/v1/enhanced/analytics/overview", {
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (response.ok) {
@@ -69,27 +79,30 @@ export default function EnhancedAnnouncementAnalytics({
         setOverviewData(data);
       }
     } catch (error) {
-      console.error('Error fetching overview analytics:', error);
+      console.error("Error fetching overview analytics:", error);
     }
   };
 
   // Fetch announcement-specific analytics
   const fetchAnnouncementAnalytics = async (announcementId: number) => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/v1/enhanced/announcements/${announcementId}/analytics`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `/api/v1/enhanced/announcements/${announcementId}/analytics`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setAnnouncementAnalytics(prev => [...prev, data]);
+        setAnnouncementAnalytics((prev) => [...prev, data]);
       }
     } catch (error) {
-      console.error('Error fetching announcement analytics:', error);
+      console.error("Error fetching announcement analytics:", error);
     }
   };
 
@@ -100,14 +113,16 @@ export default function EnhancedAnnouncementAnalytics({
     const data = {
       overview: overviewData,
       announcements: announcementAnalytics,
-      exported_at: new Date().toISOString()
+      exported_at: new Date().toISOString(),
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `announcement-analytics-${format(new Date(), 'yyyy-MM-dd')}.json`;
+    a.download = `announcement-analytics-${format(new Date(), "yyyy-MM-dd")}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -124,12 +139,12 @@ export default function EnhancedAnnouncementAnalytics({
     loadData();
   }, []);
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
+  const StatCard = ({
+    title,
+    value,
+    icon: Icon,
     color = "text-blue-600",
-    bgColor = "bg-blue-50"
+    bgColor = "bg-blue-50",
   }: {
     title: string;
     value: number | string;
@@ -176,7 +191,9 @@ export default function EnhancedAnnouncementAnalytics({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Analytics Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Analytics Dashboard
+          </h1>
           <p className="text-gray-600 mt-1">Insights dan metrik pengumuman</p>
         </div>
         <div className="flex items-center gap-3">
@@ -246,7 +263,8 @@ export default function EnhancedAnnouncementAnalytics({
                 {(overviewData.acknowledgment_rate * 100).toFixed(1)}%
               </div>
               <div className="mt-2 text-sm text-gray-600">
-                {overviewData.total_acknowledgments} dari {overviewData.total_reads} reads
+                {overviewData.total_acknowledgments} dari{" "}
+                {overviewData.total_reads} reads
               </div>
             </CardContent>
           </Card>
@@ -266,7 +284,8 @@ export default function EnhancedAnnouncementAnalytics({
                 {(overviewData.engagement_rate * 100).toFixed(1)}%
               </div>
               <div className="mt-2 text-sm text-gray-600">
-                {overviewData.total_comments + overviewData.total_reactions} total interactions
+                {overviewData.total_comments + overviewData.total_reactions}{" "}
+                total interactions
               </div>
             </CardContent>
           </Card>
@@ -277,19 +296,19 @@ export default function EnhancedAnnouncementAnalytics({
       <Card>
         <CardHeader>
           <CardTitle>Detailed Analytics</CardTitle>
-          <CardDescription>
-            Analytics per pengumuman
-          </CardDescription>
+          <CardDescription>Analytics per pengumuman</CardDescription>
         </CardHeader>
         <CardContent>
           {announcementAnalytics.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">Pilih pengumuman untuk melihat analytics detail</p>
-              <Button 
-                variant="outline" 
+              <p className="text-gray-500 mb-4">
+                Pilih pengumuman untuk melihat analytics detail
+              </p>
+              <Button
+                variant="outline"
                 onClick={() => {
                   // This would typically open a modal or navigate to announcement selection
-                  console.log('Open announcement selection');
+                  console.log("Open announcement selection");
                 }}
               >
                 Pilih Pengumuman
@@ -298,14 +317,17 @@ export default function EnhancedAnnouncementAnalytics({
           ) : (
             <div className="space-y-4">
               {announcementAnalytics.map((analytics) => (
-                <div key={analytics.announcement_id} className="border rounded-lg p-4">
+                <div
+                  key={analytics.announcement_id}
+                  className="border rounded-lg p-4"
+                >
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-lg">{analytics.title}</h3>
                     <Badge variant="outline">
                       ID: {analytics.announcement_id}
                     </Badge>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="text-center">
                       <div className="text-2xl font-bold text-blue-600">
@@ -335,12 +357,16 @@ export default function EnhancedAnnouncementAnalytics({
 
                   <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-2">Acknowledgment Rate</h4>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">
+                        Acknowledgment Rate
+                      </h4>
                       <div className="flex items-center gap-2">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${analytics.acknowledgment_rate * 100}%` }}
+                          <div
+                            className="bg-green-500 h-2 rounded-full"
+                            style={{
+                              width: `${analytics.acknowledgment_rate * 100}%`,
+                            }}
                           />
                         </div>
                         <span className="text-sm font-medium">
@@ -349,12 +375,16 @@ export default function EnhancedAnnouncementAnalytics({
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-sm text-gray-700 mb-2">Engagement Rate</h4>
+                      <h4 className="font-medium text-sm text-gray-700 mb-2">
+                        Engagement Rate
+                      </h4>
                       <div className="flex items-center gap-2">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-500 h-2 rounded-full" 
-                            style={{ width: `${analytics.engagement_rate * 100}%` }}
+                          <div
+                            className="bg-blue-500 h-2 rounded-full"
+                            style={{
+                              width: `${analytics.engagement_rate * 100}%`,
+                            }}
                           />
                         </div>
                         <span className="text-sm font-medium">

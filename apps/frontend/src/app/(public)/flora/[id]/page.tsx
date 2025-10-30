@@ -1,21 +1,25 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import { FloraDetailView } from '../../../../components/public/flora/FloraDetailView';
-import { JsonLd } from '../../../../components/public/seo/JsonLd';
-import { getFloraDetail, getFloraList } from '../../../../lib/api/public';
-import type { FloraDetail } from '../../../../types/flora';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { FloraDetailView } from "../../../../components/public/flora/FloraDetailView";
+import { JsonLd } from "../../../../components/public/seo/JsonLd";
+import { getFloraDetail, getFloraList } from "../../../../lib/api/public";
+import type { FloraDetail } from "../../../../types/flora";
 
 type FloraDetailPageProps = {
   params: Promise<{ id: string }>;
 };
 
-export async function generateMetadata({ params }: FloraDetailPageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: FloraDetailPageProps): Promise<Metadata> {
   try {
     const { id } = await params;
     const flora = await getFloraDetail(id);
     return {
       title: `${flora.nama_ilmiah} | Flora Indonesia`,
-      description: flora.deskripsi?.slice(0, 150) ?? 'Detail flora dari portal Taman Kehati.',
+      description:
+        flora.deskripsi?.slice(0, 150) ??
+        "Detail flora dari portal Taman Kehati.",
       openGraph: {
         title: flora.nama_ilmiah,
         description: flora.deskripsi?.slice(0, 150),
@@ -24,17 +28,23 @@ export async function generateMetadata({ params }: FloraDetailPageProps): Promis
     };
   } catch {
     return {
-      title: 'Flora Taman Kehati',
-      description: 'Detail flora dari portal Taman Kehati.',
+      title: "Flora Taman Kehati",
+      description: "Detail flora dari portal Taman Kehati.",
     };
   }
 }
 
-export default async function FloraDetailPage({ params }: FloraDetailPageProps) {
+export default async function FloraDetailPage({
+  params,
+}: FloraDetailPageProps) {
   try {
     const { id } = await params;
     const flora = await getFloraDetail(id);
-    const related = await getFloraList({ famili: flora.famili, limit: 6, offset: 0 }).catch(() => null);
+    const related = await getFloraList({
+      famili: flora.famili,
+      limit: 6,
+      offset: 0,
+    }).catch(() => null);
 
     const enrichedFlora: FloraDetail = {
       ...flora,
@@ -51,17 +61,18 @@ export default async function FloraDetailPage({ params }: FloraDetailPageProps) 
           })),
     };
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://tamankehati.id';
+    const siteUrl =
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://tamankehati.id";
     const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'Taxon',
+      "@context": "https://schema.org",
+      "@type": "Taxon",
       name: enrichedFlora.nama_ilmiah,
       description: enrichedFlora.deskripsi,
-      taxonRank: 'species',
+      taxonRank: "species",
       parentTaxon: enrichedFlora.famili,
       image: enrichedFlora.gambar_utama,
       url: `${siteUrl}/flora/${enrichedFlora.id}`,
-      additionalType: 'https://www.wikidata.org/entity/Q7275',
+      additionalType: "https://www.wikidata.org/entity/Q7275",
     };
 
     return (
@@ -71,7 +82,7 @@ export default async function FloraDetailPage({ params }: FloraDetailPageProps) 
       </div>
     );
   } catch (error) {
-    console.error('Flora detail not found', error);
+    console.error("Flora detail not found", error);
     notFound();
   }
 }

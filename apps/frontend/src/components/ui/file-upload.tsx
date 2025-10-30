@@ -1,8 +1,8 @@
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
-import { Button } from './button';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
-import { cn } from './utils';
+import React, { useCallback, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { Button } from "./button";
+import { Upload, X, Image as ImageIcon } from "lucide-react";
+import { cn } from "./utils";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
@@ -21,24 +21,32 @@ export function FileUpload({
   previewUrl,
   className,
   maxSize = 10,
-  acceptedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+  acceptedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"],
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    if (acceptedFiles.length > 0) {
-      onFileSelect(acceptedFiles[0]);
-    }
-  }, [onFileSelect]);
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      if (acceptedFiles.length > 0) {
+        onFileSelect(acceptedFiles[0]);
+      }
+    },
+    [onFileSelect],
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': acceptedTypes.filter(type => type.startsWith('image/')),
-      ...acceptedTypes.filter(type => type.startsWith('.')).reduce((acc, ext) => {
-        acc[ext] = [];
-        return acc;
-      }, {} as Record<string, string[]>)
+      "image/*": acceptedTypes.filter((type) => type.startsWith("image/")),
+      ...acceptedTypes
+        .filter((type) => type.startsWith("."))
+        .reduce(
+          (acc, ext) => {
+            acc[ext] = [];
+            return acc;
+          },
+          {} as Record<string, string[]>,
+        ),
     },
     maxSize: maxSize * 1024 * 1024, // Convert MB to bytes
     multiple: false,
@@ -59,7 +67,7 @@ export function FileUpload({
             "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
             isDragActive || dragActive
               ? "border-emerald-500 bg-emerald-50"
-              : "border-gray-300 hover:border-gray-400"
+              : "border-gray-300 hover:border-gray-400",
           )}
         >
           <input {...getInputProps()} />
@@ -102,10 +110,12 @@ export function FileUpload({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {selectedFile?.name || 'Gambar terpilih'}
+                  {selectedFile?.name || "Gambar terpilih"}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {selectedFile ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB` : 'File dari server'}
+                  {selectedFile
+                    ? `${(selectedFile.size / 1024 / 1024).toFixed(2)} MB`
+                    : "File dari server"}
                 </p>
               </div>
               <Button
@@ -125,9 +135,11 @@ export function FileUpload({
               variant="default"
               size="sm"
               onClick={() => {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = acceptedTypes.filter(type => type.startsWith('image/')).join(',');
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = acceptedTypes
+                  .filter((type) => type.startsWith("image/"))
+                  .join(",");
                 input.onchange = (e) => {
                   const file = (e.target as HTMLInputElement).files?.[0];
                   if (file) onFileSelect(file);

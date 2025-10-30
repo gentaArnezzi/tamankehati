@@ -1,10 +1,10 @@
 "use client";
 
-import React from 'react';
-import { useAuth } from '@/lib/useAuth';
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import ModernDashboard from '@/components/dashboard/ModernDashboard';
+import React from "react";
+import { useAuth } from "@/lib/useAuth";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import ModernDashboard from "@/components/dashboard/ModernDashboard";
 
 const ModernDashboardPage: React.FC = () => {
   const { user, loading: authLoading } = useAuth();
@@ -12,7 +12,7 @@ const ModernDashboardPage: React.FC = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [user, authLoading, router]);
 

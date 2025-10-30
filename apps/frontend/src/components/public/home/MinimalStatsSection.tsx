@@ -1,25 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { fetchStats, StatsData } from '../../../lib/api/stats';
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { fetchStats, StatsData } from "../../../lib/api/stats";
 
 export function MinimalStatsSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
-  
+
   const [counts, setCounts] = useState({
     flora: 0,
     fauna: 0,
     parks: 0,
   });
-  
+
   const [targets, setTargets] = useState({
     flora: 320,
     fauna: 180,
     parks: 52,
   });
-  
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -36,8 +36,8 @@ export function MinimalStatsSection() {
           parks: statsData.total_taman,
         });
       } catch (err) {
-        console.error('Error loading stats:', err);
-        setError('Gagal memuat data statistik');
+        console.error("Error loading stats:", err);
+        setError("Gagal memuat data statistik");
         // Keep default targets if API fails
       } finally {
         setLoading(false);
@@ -63,7 +63,7 @@ export function MinimalStatsSection() {
             current = target;
             clearInterval(timer);
           }
-          setCounts(prev => ({ ...prev, [key]: Math.floor(current) }));
+          setCounts((prev) => ({ ...prev, [key]: Math.floor(current) }));
         }, duration / steps);
       });
     }
@@ -72,19 +72,19 @@ export function MinimalStatsSection() {
   const stats = [
     {
       value: counts.flora,
-      label: 'Spesies Flora',
-      description: 'Terdokumentasi',
+      label: "Spesies Flora",
+      description: "Terdokumentasi",
     },
     {
       value: counts.fauna,
-      label: 'Spesies Fauna',
-      description: 'Teridentifikasi',
+      label: "Spesies Fauna",
+      description: "Teridentifikasi",
     },
     {
       value: counts.parks,
-      label: 'Taman Konservasi',
-      description: 'Seluruh Indonesia',
-    }
+      label: "Taman Konservasi",
+      description: "Seluruh Indonesia",
+    },
   ];
 
   return (
@@ -102,7 +102,8 @@ export function MinimalStatsSection() {
           </h2>
           <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-6"></div>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Transparansi penuh untuk mendukung riset dan konservasi berkelanjutan
+            Transparansi penuh untuk mendukung riset dan konservasi
+            berkelanjutan
           </p>
         </motion.div>
 
@@ -158,9 +159,7 @@ export function MinimalStatsSection() {
                 <div className="text-base font-medium text-slate-700 mb-1">
                   {stat.label}
                 </div>
-                <div className="text-sm text-gray-500">
-                  {stat.description}
-                </div>
+                <div className="text-sm text-gray-500">{stat.description}</div>
               </motion.div>
             ))}
           </div>
@@ -177,4 +176,3 @@ export function MinimalStatsSection() {
     </section>
   );
 }
-

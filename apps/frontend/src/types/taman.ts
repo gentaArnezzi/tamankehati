@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { PaginatedResponseSchema, TamanPublicSchema } from './public';
+import { z } from "zod";
+import { PaginatedResponseSchema, TamanPublicSchema } from "./public";
 
 const CoordinateSchema = z
   .object({
@@ -21,7 +21,7 @@ const GeoJsonFeatureSchema = z
 
 const GeoJsonSchema = z
   .object({
-    type: z.literal('FeatureCollection'),
+    type: z.literal("FeatureCollection"),
     features: z.array(GeoJsonFeatureSchema),
   })
   .passthrough();
@@ -50,7 +50,7 @@ export const TamanDetailSchema = TamanPublicSchema.extend({
         url: z.string().url().nullish(),
         thumbnail: z.string().nullish(),
         kredit: z.string().nullish(),
-      })
+      }),
     )
     .optional(),
   artikel_terkait: z
@@ -60,7 +60,7 @@ export const TamanDetailSchema = TamanPublicSchema.extend({
         judul: z.string(),
         slug: z.string(),
         tanggal_publish: z.string().nullish(),
-      })
+      }),
     )
     .optional(),
   geojson: GeoJsonSchema.nullish(),

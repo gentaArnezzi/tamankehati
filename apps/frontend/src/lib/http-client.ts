@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 type HttpClientOptions = {
   /**
@@ -16,7 +16,7 @@ export class HttpClient {
   private readonly options: HttpClientOptions;
 
   constructor(baseUrl: string, options: HttpClientOptions = {}) {
-    this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.baseUrl = baseUrl.replace(/\/$/, "");
     this.options = options;
   }
 
@@ -24,16 +24,23 @@ export class HttpClient {
     const url = `${this.baseUrl}${path}`;
     const headers = new Headers(init.headers || {});
 
-    if (!headers.has('Content-Type') && init.body !== undefined && !(init.body instanceof FormData)) {
-      headers.set('Content-Type', 'application/json');
+    if (
+      !headers.has("Content-Type") &&
+      init.body !== undefined &&
+      !(init.body instanceof FormData)
+    ) {
+      headers.set("Content-Type", "application/json");
     }
 
-    if (typeof window !== 'undefined' && this.options.getAuthToken) {
+    if (typeof window !== "undefined" && this.options.getAuthToken) {
       const token = this.options.getAuthToken();
-      console.log('HttpClient - getAuthToken result:', token ? token.substring(0, 20) + '...' : 'null');
-      if (token && !headers.has('Authorization')) {
-        headers.set('Authorization', `Bearer ${token}`);
-        console.log('HttpClient - Authorization header set');
+      console.log(
+        "HttpClient - getAuthToken result:",
+        token ? token.substring(0, 20) + "..." : "null",
+      );
+      if (token && !headers.has("Authorization")) {
+        headers.set("Authorization", `Bearer ${token}`);
+        console.log("HttpClient - Authorization header set");
       }
     }
 
@@ -46,8 +53,12 @@ export class HttpClient {
       });
     }
 
-    console.log('HttpClient request:', { url, method: init.method || 'GET', headers: Object.fromEntries(headers.entries()) });
-    
+    console.log("HttpClient request:", {
+      url,
+      method: init.method || "GET",
+      headers: Object.fromEntries(headers.entries()),
+    });
+
     let response: Response;
     try {
       response = await fetch(url, {
@@ -56,53 +67,68 @@ export class HttpClient {
       });
     } catch (networkError) {
       // Check if this is a gallery endpoint - if so, fail silently
-      const isGalleryEndpoint = url.includes('/api/v1/galleries');
-      if (isGalleryEndpoint && process.env.NODE_ENV === 'development') {
-        console.debug('Gallery endpoint not available (this is expected if backend is not running)');
+      const isGalleryEndpoint = url.includes("/api/v1/galleries");
+      if (isGalleryEndpoint && process.env.NODE_ENV === "development") {
+        console.debug(
+          "Gallery endpoint not available (this is expected if backend is not running)",
+        );
       } else {
-        console.error('Network error in HttpClient:', networkError);
+        console.error("Network error in HttpClient:", networkError);
       }
-      const error = new Error(`Network error: ${networkError instanceof Error ? networkError.message : 'Failed to fetch'}`);
+      const error = new Error(
+        `Network error: ${networkError instanceof Error ? networkError.message : "Failed to fetch"}`,
+      );
       (error as Error & { status?: number }).status = 0; // Network error
       throw error;
     }
-    
-    console.log('HttpClient response:', { status: response.status, statusText: response.statusText, url: response.url });
+
+    console.log("HttpClient response:", {
+      status: response.status,
+      statusText: response.statusText,
+      url: response.url,
+    });
 
     if (!response.ok) {
       let message = response.statusText;
       try {
         const errorData = await response.json();
-        
+
         // Handle different error response formats
-        if (typeof errorData === 'string') {
+        if (typeof errorData === "string") {
           message = errorData;
         } else if (errorData?.message) {
           message = errorData.message;
         } else if (errorData?.detail) {
           // FastAPI validation errors
-          if (typeof errorData.detail === 'string') {
+          if (typeof errorData.detail === "string") {
             message = errorData.detail;
           } else if (Array.isArray(errorData.detail)) {
             // Pydantic validation errors array
-            message = errorData.detail.map((err: any) => {
-              const loc = err.loc ? err.loc.join(' -> ') : '';
-              return `${loc}: ${err.msg}`;
-            }).join('; ');
+            message = errorData.detail
+              .map((err: any) => {
+                const loc = err.loc ? err.loc.join(" -> ") : "";
+                return `${loc}: ${err.msg}`;
+              })
+              .join("; ");
           } else {
             message = JSON.stringify(errorData.detail);
           }
         } else if (errorData?.error) {
-          message = typeof errorData.error === 'string' ? errorData.error : JSON.stringify(errorData.error);
+          message =
+            typeof errorData.error === "string"
+              ? errorData.error
+              : JSON.stringify(errorData.error);
         } else {
           message = JSON.stringify(errorData);
         }
       } catch (parseError) {
         // ignore JSON parsing error and keep statusText
-        console.warn('Failed to parse error response:', parseError);
+        console.warn("Failed to parse error response:", parseError);
       }
 
-      const error = new Error(message || `Request failed with status ${response.status}`);
+      const error = new Error(
+        message || `Request failed with status ${response.status}`,
+      );
       (error as Error & { status?: number }).status = response.status;
       throw error;
     }
@@ -122,39 +148,54 @@ export class HttpClient {
   get<T>(path: string, params?: Record<string, unknown>) {
     const query = this.buildQuery(params);
     const url = query ? `${path}?${query}` : path;
-    return this.request<T>(url, { method: 'GET' });
+    return this.request<T>(url, { method: "GET" });
   }
 
   post<T>(path: string, body?: unknown) {
     return this.request<T>(path, {
-      method: 'POST',
-      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+      method: "POST",
+      body:
+        body instanceof FormData
+          ? body
+          : body !== undefined
+            ? JSON.stringify(body)
+            : undefined,
     });
   }
 
   put<T>(path: string, body?: unknown) {
     return this.request<T>(path, {
-      method: 'PUT',
-      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+      method: "PUT",
+      body:
+        body instanceof FormData
+          ? body
+          : body !== undefined
+            ? JSON.stringify(body)
+            : undefined,
     });
   }
 
   patch<T>(path: string, body?: unknown) {
     return this.request<T>(path, {
-      method: 'PATCH',
-      body: body instanceof FormData ? body : body !== undefined ? JSON.stringify(body) : undefined,
+      method: "PATCH",
+      body:
+        body instanceof FormData
+          ? body
+          : body !== undefined
+            ? JSON.stringify(body)
+            : undefined,
     });
   }
 
   delete<T>(path: string) {
-    return this.request<T>(path, { method: 'DELETE' });
+    return this.request<T>(path, { method: "DELETE" });
   }
 
   private buildQuery(params?: Record<string, unknown>) {
-    if (!params) return '';
+    if (!params) return "";
     const searchParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
-      if (value === undefined || value === null || value === '') return;
+      if (value === undefined || value === null || value === "") return;
       if (Array.isArray(value)) {
         value.forEach((item) => searchParams.append(key, String(item)));
       } else {

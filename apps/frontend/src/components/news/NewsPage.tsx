@@ -1,42 +1,48 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../lib/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Skeleton } from '../ui/skeleton';
-import { Alert, AlertDescription } from '../ui/alert';
-import { Input } from '../ui/input';
-import { 
+import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "../../lib/useAuth";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { Alert, AlertDescription } from "../ui/alert";
+import { Input } from "../ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { 
+} from "../ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
+} from "../ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Edit, 
-  Trash2, 
-  Eye, 
+} from "../ui/dropdown-menu";
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreVertical,
+  Edit,
+  Trash2,
+  Eye,
   Send,
   Archive,
   Star,
@@ -46,11 +52,11 @@ import {
   User,
   Clock,
   FileText,
-  BookOpen
-} from 'lucide-react';
-import { NewsForm } from './NewsForm';
-import { NewsDetail } from './NewsDetail';
-import { toast } from 'sonner';
+  BookOpen,
+} from "lucide-react";
+import { NewsForm } from "./NewsForm";
+import { NewsDetail } from "./NewsDetail";
+import { toast } from "sonner";
 
 // Types
 export interface News {
@@ -59,8 +65,14 @@ export interface News {
   content: string;
   summary?: string;
   slug?: string;
-  category: 'biodiversity' | 'conservation' | 'research' | 'education' | 'events' | 'general';
-  status: 'draft' | 'published' | 'archived';
+  category:
+    | "biodiversity"
+    | "conservation"
+    | "research"
+    | "education"
+    | "events"
+    | "general";
+  status: "draft" | "published" | "archived";
   priority: number;
   is_featured: boolean;
   is_pinned: boolean;
@@ -93,93 +105,100 @@ interface NewsListResponse {
 }
 
 const NEWS_CATEGORIES = [
-  { value: 'biodiversity', label: 'Keanekaragaman Hayati' },
-  { value: 'conservation', label: 'Konservasi' },
-  { value: 'research', label: 'Penelitian' },
-  { value: 'education', label: 'Pendidikan' },
-  { value: 'events', label: 'Acara' },
-  { value: 'general', label: 'Umum' },
+  { value: "biodiversity", label: "Keanekaragaman Hayati" },
+  { value: "conservation", label: "Konservasi" },
+  { value: "research", label: "Penelitian" },
+  { value: "education", label: "Pendidikan" },
+  { value: "events", label: "Acara" },
+  { value: "general", label: "Umum" },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'draft', label: 'Draft' },
-  { value: 'published', label: 'Dipublikasi' },
-  { value: 'archived', label: 'Diarsipkan' },
+  { value: "draft", label: "Draft" },
+  { value: "published", label: "Dipublikasi" },
+  { value: "archived", label: "Diarsipkan" },
 ];
 
 const PRIORITY_OPTIONS = [
-  { value: 0, label: 'Normal' },
-  { value: 1, label: 'Tinggi' },
-  { value: 2, label: 'Mendesak' },
+  { value: 0, label: "Normal" },
+  { value: 1, label: "Tinggi" },
+  { value: 2, label: "Mendesak" },
 ];
 
 export function NewsPage() {
   const { user } = useAuth();
   const [news, setNews] = useState<News[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
-  
+
   // Filters
-  const [searchQuery, setSearchQuery] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string>('all');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [featuredFilter, setFeaturedFilter] = useState<boolean | null>(null);
-  
+
   // Form states
   const [formOpen, setFormOpen] = useState(false);
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
-  const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
+  const [formMode, setFormMode] = useState<"create" | "edit">("create");
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
-      
+      setError("");
+
       const params = new URLSearchParams({
         limit: itemsPerPage.toString(),
         offset: ((currentPage - 1) * itemsPerPage).toString(),
       });
 
       if (searchQuery) {
-        params.append('q', searchQuery);
+        params.append("q", searchQuery);
       }
-      if (categoryFilter !== 'all') {
-        params.append('category_filter', categoryFilter);
+      if (categoryFilter !== "all") {
+        params.append("category_filter", categoryFilter);
       }
-      if (statusFilter !== 'all') {
-        params.append('status_filter', statusFilter);
+      if (statusFilter !== "all") {
+        params.append("status_filter", statusFilter);
       }
       if (featuredFilter !== null) {
-        params.append('featured_only', featuredFilter.toString());
+        params.append("featured_only", featuredFilter.toString());
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/?${params}`,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Gagal memuat data berita');
+        throw new Error("Gagal memuat data berita");
       }
 
       const data: NewsListResponse = await response.json();
       setNews(data.items);
       setTotalItems(data.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Gagal memuat data');
+      setError(err instanceof Error ? err.message : "Gagal memuat data");
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, categoryFilter, statusFilter, featuredFilter, itemsPerPage]);
+  }, [
+    currentPage,
+    searchQuery,
+    categoryFilter,
+    statusFilter,
+    featuredFilter,
+    itemsPerPage,
+  ]);
 
   useEffect(() => {
     loadData();
@@ -187,13 +206,13 @@ export function NewsPage() {
 
   const handleCreate = () => {
     setSelectedNews(null);
-    setFormMode('create');
+    setFormMode("create");
     setFormOpen(true);
   };
 
   const handleEdit = (news: News) => {
     setSelectedNews(news);
-    setFormMode('edit');
+    setFormMode("edit");
     setFormOpen(true);
   };
 
@@ -204,35 +223,37 @@ export function NewsPage() {
 
   const handleSubmit = async (formData: Partial<News>) => {
     try {
-      const url = formMode === 'create' 
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${formData.id}`;
-      
-      const method = formMode === 'create' ? 'POST' : 'PUT';
-      
+      const url =
+        formMode === "create"
+          ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/`
+          : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${formData.id}`;
+
+      const method = formMode === "create" ? "POST" : "PUT";
+
       const response = await fetch(url, {
         method,
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Gagal menyimpan berita');
+        throw new Error("Gagal menyimpan berita");
       }
 
       toast.success(
-        formMode === 'create' 
-          ? 'Berita berhasil dibuat' 
-          : 'Berita berhasil diperbarui'
+        formMode === "create"
+          ? "Berita berhasil dibuat"
+          : "Berita berhasil diperbarui",
       );
-      
+
       setFormOpen(false);
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menyimpan berita';
+      const message =
+        err instanceof Error ? err.message : "Gagal menyimpan berita";
       toast.error(message);
       throw err;
     }
@@ -241,23 +262,24 @@ export function NewsPage() {
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}`,
         {
-          method: 'DELETE',
+          method: "DELETE",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Gagal menghapus berita');
+        throw new Error("Gagal menghapus berita");
       }
 
-      toast.success('Berita berhasil dihapus');
+      toast.success("Berita berhasil dihapus");
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menghapus berita';
+      const message =
+        err instanceof Error ? err.message : "Gagal menghapus berita";
       toast.error(message);
     }
   };
@@ -265,23 +287,24 @@ export function NewsPage() {
   const handlePublish = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}/publish`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}/publish`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Gagal mempublikasi berita');
+        throw new Error("Gagal mempublikasi berita");
       }
 
-      toast.success('Berita berhasil dipublikasi');
+      toast.success("Berita berhasil dipublikasi");
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal mempublikasi berita';
+      const message =
+        err instanceof Error ? err.message : "Gagal mempublikasi berita";
       toast.error(message);
     }
   };
@@ -289,42 +312,43 @@ export function NewsPage() {
   const handleArchive = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}/archive`,
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}/archive`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
           },
-        }
+        },
       );
 
       if (!response.ok) {
-        throw new Error('Gagal mengarsipkan berita');
+        throw new Error("Gagal mengarsipkan berita");
       }
 
-      toast.success('Berita berhasil diarsipkan');
+      toast.success("Berita berhasil diarsipkan");
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal mengarsipkan berita';
+      const message =
+        err instanceof Error ? err.message : "Gagal mengarsipkan berita";
       toast.error(message);
     }
   };
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      draft: 'secondary',
-      published: 'default',
-      archived: 'outline',
+      draft: "secondary",
+      published: "default",
+      archived: "outline",
     } as const;
-    
+
     const labels = {
-      draft: 'Draft',
-      published: 'Dipublikasi',
-      archived: 'Diarsipkan',
+      draft: "Draft",
+      published: "Dipublikasi",
+      archived: "Diarsipkan",
     };
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>
+      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     );
@@ -332,25 +356,29 @@ export function NewsPage() {
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      biodiversity: 'bg-green-100 text-green-800',
-      conservation: 'bg-blue-100 text-blue-800',
-      research: 'bg-purple-100 text-purple-800',
-      education: 'bg-yellow-100 text-yellow-800',
-      events: 'bg-pink-100 text-pink-800',
-      general: 'bg-gray-100 text-gray-800',
+      biodiversity: "bg-green-100 text-green-800",
+      conservation: "bg-blue-100 text-blue-800",
+      research: "bg-purple-100 text-purple-800",
+      education: "bg-yellow-100 text-yellow-800",
+      events: "bg-pink-100 text-pink-800",
+      general: "bg-gray-100 text-gray-800",
     };
 
     const labels = {
-      biodiversity: 'Keanekaragaman Hayati',
-      conservation: 'Konservasi',
-      research: 'Penelitian',
-      education: 'Pendidikan',
-      events: 'Acara',
-      general: 'Umum',
+      biodiversity: "Keanekaragaman Hayati",
+      conservation: "Konservasi",
+      research: "Penelitian",
+      education: "Pendidikan",
+      events: "Acara",
+      general: "Umum",
     };
 
     return (
-      <Badge className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
         {labels[category as keyof typeof labels] || category}
       </Badge>
     );
@@ -358,20 +386,24 @@ export function NewsPage() {
 
   const getPriorityBadge = (priority: number) => {
     const colors = {
-      0: 'bg-gray-100 text-gray-800',
-      1: 'bg-yellow-100 text-yellow-800',
-      2: 'bg-red-100 text-red-800',
+      0: "bg-gray-100 text-gray-800",
+      1: "bg-yellow-100 text-yellow-800",
+      2: "bg-red-100 text-red-800",
     };
 
     const labels = {
-      0: 'Normal',
-      1: 'Tinggi',
-      2: 'Mendesak',
+      0: "Normal",
+      1: "Tinggi",
+      2: "Mendesak",
     };
 
     return (
-      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {labels[priority as keyof typeof labels] || 'Normal'}
+      <Badge
+        className={
+          colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {labels[priority as keyof typeof labels] || "Normal"}
       </Badge>
     );
   };
@@ -400,7 +432,7 @@ export function NewsPage() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-3xl mb-2 flex items-center gap-2">
-            <BookOpen className="h-8 w-8" style={{ color: '#356447' }} />
+            <BookOpen className="h-8 w-8" style={{ color: "#356447" }} />
             Manajemen Berita
           </h1>
           <p className="text-muted-foreground">
@@ -408,7 +440,7 @@ export function NewsPage() {
             {/* wilayah field removed from User type */}
           </p>
         </div>
-        <Button onClick={handleCreate} style={{ backgroundColor: '#233c2b' }}>
+        <Button onClick={handleCreate} style={{ backgroundColor: "#233c2b" }}>
           <Plus className="mr-2 h-4 w-4" />
           Tambah Berita
         </Button>
@@ -434,7 +466,7 @@ export function NewsPage() {
                 </Button>
               </div>
             </div>
-            
+
             <div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                 <SelectTrigger>
@@ -495,13 +527,13 @@ export function NewsPage() {
                       {item.title}
                     </h3>
                   </div>
-                  
+
                   {item.summary && (
                     <p className="text-muted-foreground line-clamp-2">
                       {item.summary}
                     </p>
                   )}
-                  
+
                   <div className="flex items-center gap-2 flex-wrap">
                     {getCategoryBadge(item.category)}
                     {getStatusBadge(item.status)}
@@ -510,21 +542,21 @@ export function NewsPage() {
                       <div className="flex items-center gap-1">
                         <Tag className="h-3 w-3" />
                         <span className="text-xs text-muted-foreground">
-                          {item.tags.split(',').length} tag
+                          {item.tags.split(",").length} tag
                         </span>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <User className="h-3 w-3" />
-                      <span>Author ID: {item.author_id || 'N/A'}</span>
+                      <span>Author ID: {item.author_id || "N/A"}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       <span>
-                        {new Date(item.created_at).toLocaleDateString('id-ID')}
+                        {new Date(item.created_at).toLocaleDateString("id-ID")}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
@@ -539,13 +571,16 @@ export function NewsPage() {
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         <span>
-                          Published: {new Date(item.published_at).toLocaleDateString('id-ID')}
+                          Published:{" "}
+                          {new Date(item.published_at).toLocaleDateString(
+                            "id-ID",
+                          )}
                         </span>
                       </div>
                     )}
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-2 ml-4">
                   <Button
                     variant="outline"
@@ -554,7 +589,7 @@ export function NewsPage() {
                   >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  
+
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" size="sm">
@@ -566,19 +601,23 @@ export function NewsPage() {
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </DropdownMenuItem>
-                      {item.status === 'draft' && (
-                        <DropdownMenuItem onClick={() => handlePublish(item.id)}>
+                      {item.status === "draft" && (
+                        <DropdownMenuItem
+                          onClick={() => handlePublish(item.id)}
+                        >
                           <Send className="h-4 w-4 mr-2" />
                           Publish
                         </DropdownMenuItem>
                       )}
-                      {item.status === 'published' && (
-                        <DropdownMenuItem onClick={() => handleArchive(item.id)}>
+                      {item.status === "published" && (
+                        <DropdownMenuItem
+                          onClick={() => handleArchive(item.id)}
+                        >
                           <Archive className="h-4 w-4 mr-2" />
                           Archive
                         </DropdownMenuItem>
                       )}
-                      <DropdownMenuItem 
+                      <DropdownMenuItem
                         onClick={() => handleDelete(item.id)}
                         className="text-red-600"
                       >
@@ -601,7 +640,7 @@ export function NewsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
               Previous
@@ -612,7 +651,9 @@ export function NewsPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+              }
               disabled={currentPage === totalPages}
             >
               Next

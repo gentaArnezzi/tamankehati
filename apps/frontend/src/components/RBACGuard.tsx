@@ -1,7 +1,7 @@
-import { ReactNode } from 'react';
-import { useAuth } from '../lib/useAuth';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { ReactNode } from "react";
+import { useAuth } from "../lib/useAuth";
+import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface RBACGuardProps {
   children: ReactNode;
@@ -10,11 +10,11 @@ interface RBACGuardProps {
   fallback?: ReactNode;
 }
 
-export function RBACGuard({ 
-  children, 
-  allowedRoles, 
+export function RBACGuard({
+  children,
+  allowedRoles,
   requireParkId,
-  fallback 
+  fallback,
 }: RBACGuardProps) {
   const { user, loading, isAuthenticated } = useAuth();
 
@@ -64,7 +64,8 @@ export function RBACGuard({
 
   // Check park access
   if (requireParkId && user) {
-    const canAccess = user.role === 'super_admin' || user.park_id === requireParkId;
+    const canAccess =
+      user.role === "super_admin" || user.park_id === requireParkId;
     if (!canAccess) {
       if (fallback) return <>{fallback}</>;
       return (

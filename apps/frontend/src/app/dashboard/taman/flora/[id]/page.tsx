@@ -1,19 +1,24 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { floraApi, Flora } from '../../../../../lib/api-client';
-import { Card, CardContent, CardHeader, CardTitle } from '../../../../../components/ui/card';
-import { Badge } from '../../../../../components/ui/badge';
-import { Button } from '../../../../../components/ui/button';
-import { ArrowLeft, Leaf } from 'lucide-react';
-import { toast } from 'sonner';
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { floraApi, Flora } from "../../../../../lib/api-client";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../../../../components/ui/card";
+import { Badge } from "../../../../../components/ui/badge";
+import { Button } from "../../../../../components/ui/button";
+import { ArrowLeft, Leaf } from "lucide-react";
+import { toast } from "sonner";
 
 export default function FloraDetailPage() {
   const params = useParams();
   const router = useRouter();
   const id = params.id as string;
-  
+
   const [flora, setFlora] = useState<Flora | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -27,8 +32,8 @@ export default function FloraDetailPage() {
       const data = await floraApi.getById(id);
       setFlora(data);
     } catch (error) {
-      console.error('Failed to load flora detail:', error);
-      toast.error('Gagal memuat detail flora');
+      console.error("Failed to load flora detail:", error);
+      toast.error("Gagal memuat detail flora");
     } finally {
       setLoading(false);
     }
@@ -36,13 +41,20 @@ export default function FloraDetailPage() {
 
   const getStatusBadge = (status?: string) => {
     const statusMap = {
-      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-800' },
-      in_review: { label: 'Menunggu Persetujuan', className: 'bg-yellow-100 text-yellow-800' },
-      approved: { label: 'Disetujui', className: 'bg-green-100 text-green-800' },
-      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800' },
+      draft: { label: "Draft", className: "bg-gray-100 text-gray-800" },
+      in_review: {
+        label: "Menunggu Persetujuan",
+        className: "bg-yellow-100 text-yellow-800",
+      },
+      approved: {
+        label: "Disetujui",
+        className: "bg-green-100 text-green-800",
+      },
+      rejected: { label: "Ditolak", className: "bg-red-100 text-red-800" },
     };
-    
-    const config = statusMap[status as keyof typeof statusMap] || statusMap.draft;
+
+    const config =
+      statusMap[status as keyof typeof statusMap] || statusMap.draft;
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
@@ -63,7 +75,7 @@ export default function FloraDetailPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">Data flora tidak ditemukan</p>
-            <Button onClick={() => router.push('/dashboard')} className="mt-4">
+            <Button onClick={() => router.push("/dashboard")} className="mt-4">
               Kembali
             </Button>
           </CardContent>
@@ -73,18 +85,14 @@ export default function FloraDetailPage() {
   }
 
   const handleBack = () => {
-    router.push('/dashboard');
+    router.push("/dashboard");
   };
 
   return (
     <div className="container max-w-5xl mx-auto py-8 space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <Button
-          variant="ghost"
-          onClick={handleBack}
-          className="gap-2"
-        >
+        <Button variant="ghost" onClick={handleBack} className="gap-2">
           <ArrowLeft className="h-4 w-4" />
           Kembali
         </Button>
@@ -102,9 +110,7 @@ export default function FloraDetailPage() {
               <CardTitle className="text-3xl mb-2">
                 <i>{flora.nama_ilmiah}</i>
               </CardTitle>
-              <p className="text-xl text-muted-foreground">
-                {flora.nama_umum}
-              </p>
+              <p className="text-xl text-muted-foreground">{flora.nama_umum}</p>
             </div>
           </div>
         </CardHeader>
@@ -115,7 +121,7 @@ export default function FloraDetailPage() {
             <div className="rounded-lg overflow-hidden border">
               <img
                 src={flora.gambar_utama}
-                alt={flora.nama_umum || 'Flora'}
+                alt={flora.nama_umum || "Flora"}
                 className="w-full h-96 object-cover"
               />
             </div>
@@ -124,23 +130,27 @@ export default function FloraDetailPage() {
           {/* Information Grid */}
           <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-semibold mb-3 text-lg">Informasi Taksonomi</h3>
+              <h3 className="font-semibold mb-3 text-lg">
+                Informasi Taksonomi
+              </h3>
               <dl className="space-y-3">
                 <div>
                   <dt className="text-sm text-muted-foreground">Nama Ilmiah</dt>
-                  <dd className="font-medium italic">{flora.nama_ilmiah || '-'}</dd>
+                  <dd className="font-medium italic">
+                    {flora.nama_ilmiah || "-"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Nama Umum</dt>
-                  <dd className="font-medium">{flora.nama_umum || '-'}</dd>
+                  <dd className="font-medium">{flora.nama_umum || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Famili</dt>
-                  <dd className="font-medium">{flora.famili || '-'}</dd>
+                  <dd className="font-medium">{flora.famili || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Genus</dt>
-                  <dd className="font-medium">{flora.genus || '-'}</dd>
+                  <dd className="font-medium">{flora.genus || "-"}</dd>
                 </div>
               </dl>
             </div>
@@ -150,15 +160,21 @@ export default function FloraDetailPage() {
               <dl className="space-y-3">
                 <div>
                   <dt className="text-sm text-muted-foreground">Status IUCN</dt>
-                  <dd className="font-medium">{flora.status_iucn || '-'}</dd>
+                  <dd className="font-medium">{flora.status_iucn || "-"}</dd>
                 </div>
                 <div>
-                  <dt className="text-sm text-muted-foreground">Endemik Indonesia</dt>
-                  <dd className="font-medium">{flora.is_endemic ? 'Ya' : 'Tidak'}</dd>
+                  <dt className="text-sm text-muted-foreground">
+                    Endemik Indonesia
+                  </dt>
+                  <dd className="font-medium">
+                    {flora.is_endemic ? "Ya" : "Tidak"}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Habitat</dt>
-                  <dd className="font-medium whitespace-pre-wrap">{flora.habitat || '-'}</dd>
+                  <dd className="font-medium whitespace-pre-wrap">
+                    {flora.habitat || "-"}
+                  </dd>
                 </div>
               </dl>
             </div>
@@ -194,7 +210,9 @@ export default function FloraDetailPage() {
 
           {/* Metadata */}
           <div className="pt-6 border-t">
-            <h3 className="font-semibold mb-3 text-sm text-muted-foreground">Metadata</h3>
+            <h3 className="font-semibold mb-3 text-sm text-muted-foreground">
+              Metadata
+            </h3>
             <dl className="grid md:grid-cols-3 gap-4 text-sm">
               <div>
                 <dt className="text-muted-foreground">ID</dt>
@@ -202,7 +220,7 @@ export default function FloraDetailPage() {
               </div>
               <div>
                 <dt className="text-muted-foreground">Submitted By</dt>
-                <dd className="font-medium">{flora.submitted_by || '-'}</dd>
+                <dd className="font-medium">{flora.submitted_by || "-"}</dd>
               </div>
               <div>
                 <dt className="text-muted-foreground">Status</dt>
@@ -215,4 +233,3 @@ export default function FloraDetailPage() {
     </div>
   );
 }
-

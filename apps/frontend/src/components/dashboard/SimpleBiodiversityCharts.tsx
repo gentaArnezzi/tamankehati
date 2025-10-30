@@ -1,14 +1,33 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
 
 interface SimpleBiodiversityChartsProps {
   data: any;
 }
 
-const SimpleBiodiversityCharts: React.FC<SimpleBiodiversityChartsProps> = ({ data }) => {
+const SimpleBiodiversityCharts: React.FC<SimpleBiodiversityChartsProps> = ({
+  data,
+}) => {
   if (!data?.analytics?.biodiversity) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -28,16 +47,34 @@ const SimpleBiodiversityCharts: React.FC<SimpleBiodiversityChartsProps> = ({ dat
   }
 
   const biodiversity = data.analytics.biodiversity;
-  
+
   // Prepare chart data
   const speciesData = [
-    { name: 'Flora', total: biodiversity.flora?.total || 0, endemic: biodiversity.flora?.endemic || 0 },
-    { name: 'Fauna', total: biodiversity.fauna?.total || 0, endemic: biodiversity.fauna?.endemic || 0 }
+    {
+      name: "Flora",
+      total: biodiversity.flora?.total || 0,
+      endemic: biodiversity.flora?.endemic || 0,
+    },
+    {
+      name: "Fauna",
+      total: biodiversity.fauna?.total || 0,
+      endemic: biodiversity.fauna?.endemic || 0,
+    },
   ];
 
   const endemicData = [
-    { name: 'Endemic', value: biodiversity.summary?.total_endemic || 0, color: '#10b981' },
-    { name: 'Non-Endemic', value: (biodiversity.summary?.total_species || 0) - (biodiversity.summary?.total_endemic || 0), color: '#6b7280' }
+    {
+      name: "Endemic",
+      value: biodiversity.summary?.total_endemic || 0,
+      color: "#10b981",
+    },
+    {
+      name: "Non-Endemic",
+      value:
+        (biodiversity.summary?.total_species || 0) -
+        (biodiversity.summary?.total_endemic || 0),
+      color: "#6b7280",
+    },
   ];
 
   return (
@@ -112,7 +149,9 @@ const SimpleBiodiversityCharts: React.FC<SimpleBiodiversityChartsProps> = ({ dat
               <div className="text-2xl font-bold text-emerald-600">
                 {biodiversity.summary?.total_endemic || 0}
               </div>
-              <div className="text-sm text-muted-foreground">Endemic Species</div>
+              <div className="text-sm text-muted-foreground">
+                Endemic Species
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-blue-600">
@@ -122,7 +161,12 @@ const SimpleBiodiversityCharts: React.FC<SimpleBiodiversityChartsProps> = ({ dat
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-orange-600">
-                {((biodiversity.summary?.total_endemic || 0) / Math.max(biodiversity.summary?.total_species || 1, 1) * 100).toFixed(1)}%
+                {(
+                  ((biodiversity.summary?.total_endemic || 0) /
+                    Math.max(biodiversity.summary?.total_species || 1, 1)) *
+                  100
+                ).toFixed(1)}
+                %
               </div>
               <div className="text-sm text-muted-foreground">Endemic Rate</div>
             </div>

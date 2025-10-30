@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
+} from "../ui/select";
 import {
   Dialog,
   DialogContent,
@@ -21,7 +21,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '../ui/dialog';
+} from "../ui/dialog";
 import {
   Form,
   FormControl,
@@ -29,18 +29,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form';
-import { Switch } from '../ui/switch';
-import { userApi, User } from '../../lib/api-client';
-import { toast } from 'sonner';
-import { Loader2, UserPlus } from 'lucide-react';
-
+} from "../ui/form";
+import { Switch } from "../ui/switch";
+import { userApi, User } from "../../lib/api-client";
+import { toast } from "sonner";
+import { Loader2, UserPlus } from "lucide-react";
 
 const formSchema = z.object({
-  nama: z.string().min(1, 'Nama lengkap harus diisi'),
-  email: z.string().email('Format email tidak valid'),
-  password: z.string().min(6, 'Password minimal 6 karakter'),
-  role: z.enum(['super_admin', 'regional_admin']),
+  nama: z.string().min(1, "Nama lengkap harus diisi"),
+  email: z.string().email("Format email tidak valid"),
+  password: z.string().min(6, "Password minimal 6 karakter"),
+  role: z.enum(["super_admin", "regional_admin"]),
   is_active: z.boolean(),
 });
 
@@ -52,25 +51,28 @@ interface AddUserFormProps {
   onSuccess: () => void;
 }
 
-export function AddUserForm({ open, onOpenChange, onSuccess }: AddUserFormProps) {
+export function AddUserForm({
+  open,
+  onOpenChange,
+  onSuccess,
+}: AddUserFormProps) {
   const [loading, setLoading] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      nama: '',
-      email: '',
-      password: '',
-      role: 'regional_admin',
+      nama: "",
+      email: "",
+      password: "",
+      role: "regional_admin",
       is_active: true,
     },
   });
 
-
   const onSubmit = async (data: FormData) => {
     try {
       setLoading(true);
-      
+
       const userData = {
         nama: data.nama,
         email: data.email,
@@ -80,17 +82,15 @@ export function AddUserForm({ open, onOpenChange, onSuccess }: AddUserFormProps)
       };
 
       await userApi.create(userData);
-      
-      toast.success('User berhasil ditambahkan');
+
+      toast.success("User berhasil ditambahkan");
       form.reset();
       onOpenChange(false);
       onSuccess();
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error("Error creating user:", error);
       toast.error(
-        error instanceof Error 
-          ? error.message 
-          : 'Gagal menambahkan user'
+        error instanceof Error ? error.message : "Gagal menambahkan user",
       );
     } finally {
       setLoading(false);
@@ -195,7 +195,9 @@ export function AddUserForm({ open, onOpenChange, onSuccess }: AddUserFormProps)
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="regional_admin">Regional Admin</SelectItem>
+                        <SelectItem value="regional_admin">
+                          Regional Admin
+                        </SelectItem>
                         <SelectItem value="super_admin">Super Admin</SelectItem>
                       </SelectContent>
                     </Select>
@@ -203,7 +205,6 @@ export function AddUserForm({ open, onOpenChange, onSuccess }: AddUserFormProps)
                   </FormItem>
                 )}
               />
-
             </div>
 
             <FormField
@@ -239,7 +240,7 @@ export function AddUserForm({ open, onOpenChange, onSuccess }: AddUserFormProps)
               </Button>
               <Button type="submit" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading ? 'Menyimpan...' : 'Tambah User'}
+                {loading ? "Menyimpan..." : "Tambah User"}
               </Button>
             </DialogFooter>
           </form>

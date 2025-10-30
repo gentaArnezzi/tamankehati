@@ -1,20 +1,40 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
-import { Button } from './button';
-import { Input } from './input';
-import { Label } from './label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
-import { MapPin, Navigation, Search } from 'lucide-react';
-import { toast } from 'sonner';
+import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
+import { Button } from "./button";
+import { Input } from "./input";
+import { Label } from "./label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
+import { MapPin, Navigation, Search } from "lucide-react";
+import { toast } from "sonner";
 
 // Dynamic import untuk menghindari SSR issues - hanya import saat client-side
-const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false });
-const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false });
-const Marker = dynamic(() => import('react-leaflet').then(mod => mod.Marker), { ssr: false });
-const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false });
-const useMapEvents = dynamic(() => import('react-leaflet').then(mod => mod.useMapEvents), { ssr: false });
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false },
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false },
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false },
+);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
+const useMapEvents = dynamic(
+  () => import("react-leaflet").then((mod) => mod.useMapEvents),
+  { ssr: false },
+);
 
 interface InteractiveMapProps {
   latitude?: number | null;
@@ -31,37 +51,46 @@ interface MapClickHandlerProps {
 }
 
 // Dynamic MapClickHandler component
-const MapClickHandler = dynamic(() => {
-  return Promise.resolve(function MapClickHandlerComponent({ onMapClick, initialLat, initialLng }: MapClickHandlerProps) {
-    const [position, setPosition] = useState<[number, number] | null>(
-      initialLat && initialLng ? [initialLat, initialLng] : null
-    );
+const MapClickHandler = dynamic(
+  () => {
+    return Promise.resolve(function MapClickHandlerComponent({
+      onMapClick,
+      initialLat,
+      initialLng,
+    }: MapClickHandlerProps) {
+      const [position, setPosition] = useState<[number, number] | null>(
+        initialLat && initialLng ? [initialLat, initialLng] : null,
+      );
 
-    // Dynamic import untuk react-leaflet hooks
-    const useMapEvents = require('react-leaflet').useMapEvents;
-    const Marker = require('react-leaflet').Marker;
+      // Dynamic import untuk react-leaflet hooks
+      const useMapEvents = require("react-leaflet").useMapEvents;
+      const Marker = require("react-leaflet").Marker;
 
-    useMapEvents({
-      click: (e: any) => {
-        const { lat, lng } = e.latlng;
-        setPosition([lat, lng]);
-        onMapClick(lat, lng);
-      },
+      useMapEvents({
+        click: (e: any) => {
+          const { lat, lng } = e.latlng;
+          setPosition([lat, lng]);
+          onMapClick(lat, lng);
+        },
+      });
+
+      return position ? <Marker position={position} /> : null;
     });
-
-    return position ? <Marker position={position} /> : null;
-  });
-}, { ssr: false });
+  },
+  { ssr: false },
+);
 
 export function InteractiveMap({
   latitude,
   longitude,
   onCoordinatesChange,
-  height = '400px',
-  className = '',
+  height = "400px",
+  className = "",
 }: InteractiveMapProps) {
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-6.200000, 106.816666]); // Default to Jakarta
-  const [searchQuery, setSearchQuery] = useState('');
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    -6.2, 106.816666,
+  ]); // Default to Jakarta
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const mapRef = useRef<any>(null);
@@ -90,7 +119,7 @@ export function InteractiveMap({
     try {
       // Use Nominatim (OpenStreetMap) geocoding service
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=id`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=id`,
       );
       const data = await response.json();
 
@@ -98,21 +127,23 @@ export function InteractiveMap({
         const { lat, lon } = data[0];
         const newLat = parseFloat(lat);
         const newLng = parseFloat(lon);
-        
+
         setMapCenter([newLat, newLng]);
         onCoordinatesChange(newLat, newLng);
-        
+
         if (mapRef.current) {
           mapRef.current.setView([newLat, newLng], 15);
         }
-        
+
         toast.success(`Lokasi ditemukan: ${data[0].display_name}`);
       } else {
-        toast.error('Lokasi tidak ditemukan. Coba dengan kata kunci yang berbeda.');
+        toast.error(
+          "Lokasi tidak ditemukan. Coba dengan kata kunci yang berbeda.",
+        );
       }
     } catch (error) {
-      console.error('Search error:', error);
-      toast.error('Gagal mencari lokasi. Silakan coba lagi.');
+      console.error("Search error:", error);
+      toast.error("Gagal mencari lokasi. Silakan coba lagi.");
     } finally {
       setIsSearching(false);
     }
@@ -120,7 +151,7 @@ export function InteractiveMap({
 
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error('Geolokasi tidak didukung oleh browser ini.');
+      toast.error("Geolokasi tidak didukung oleh browser ini.");
       return;
     }
 
@@ -129,17 +160,19 @@ export function InteractiveMap({
         const { latitude: lat, longitude: lng } = position.coords;
         setMapCenter([lat, lng]);
         onCoordinatesChange(lat, lng);
-        
+
         if (mapRef.current) {
           mapRef.current.setView([lat, lng], 15);
         }
-        
-        toast.success('Lokasi saat ini ditemukan!');
+
+        toast.success("Lokasi saat ini ditemukan!");
       },
       (error) => {
-        console.error('Geolocation error:', error);
-        toast.error('Gagal mendapatkan lokasi saat ini. Pastikan izin geolokasi diaktifkan.');
-      }
+        console.error("Geolocation error:", error);
+        toast.error(
+          "Gagal mendapatkan lokasi saat ini. Pastikan izin geolokasi diaktifkan.",
+        );
+      },
     );
   };
 
@@ -152,9 +185,7 @@ export function InteractiveMap({
             <MapPin className="h-5 w-5" />
             Pilih Koordinat Taman
           </CardTitle>
-          <CardDescription>
-            Memuat peta interaktif...
-          </CardDescription>
+          <CardDescription>Memuat peta interaktif...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-center" style={{ height }}>
@@ -176,7 +207,8 @@ export function InteractiveMap({
           Pilih Koordinat Taman
         </CardTitle>
         <CardDescription>
-          Klik pada peta atau gunakan pencarian untuk memilih koordinat taman konservasi
+          Klik pada peta atau gunakan pencarian untuk memilih koordinat taman
+          konservasi
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -191,7 +223,7 @@ export function InteractiveMap({
               placeholder="Cari lokasi (contoh: Jakarta, Bandung, Taman Nasional...)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
           <Button
@@ -213,11 +245,12 @@ export function InteractiveMap({
         </div>
 
         {/* Current Coordinates Display */}
-        {(latitude && longitude) && (
+        {latitude && longitude && (
           <div className="bg-muted p-3 rounded-lg">
             <p className="text-sm font-medium">Koordinat Terpilih:</p>
             <p className="text-sm text-muted-foreground">
-              Latitude: {latitude.toFixed(6)} | Longitude: {longitude.toFixed(6)}
+              Latitude: {latitude.toFixed(6)} | Longitude:{" "}
+              {longitude.toFixed(6)}
             </p>
           </div>
         )}
@@ -227,7 +260,7 @@ export function InteractiveMap({
           <MapContainer
             center={mapCenter}
             zoom={13}
-            style={{ height: '100%', width: '100%' }}
+            style={{ height: "100%", width: "100%" }}
             ref={mapRef}
           >
             <TileLayer

@@ -1,22 +1,34 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { 
-  Calendar, 
-  User, 
-  Eye, 
-  Clock, 
-  Tag, 
-  Pin, 
-  Star, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import {
+  Calendar,
+  User,
+  Eye,
+  Clock,
+  Tag,
+  Pin,
+  Star,
   FileText,
   Image as ImageIcon,
-  Paperclip
-} from 'lucide-react';
-import { Announcement } from './AnnouncementsPage';
+  Paperclip,
+} from "lucide-react";
+import { Announcement } from "./AnnouncementsPage";
 
 interface AnnouncementDetailProps {
   open: boolean;
@@ -33,19 +45,19 @@ export function AnnouncementDetail({
 
   const getStatusBadge = (status: string) => {
     const variants = {
-      draft: 'secondary',
-      published: 'default',
-      archived: 'outline',
+      draft: "secondary",
+      published: "default",
+      archived: "outline",
     } as const;
-    
+
     const labels = {
-      draft: 'Draft',
-      published: 'Dipublikasi',
-      archived: 'Diarsipkan',
+      draft: "Draft",
+      published: "Dipublikasi",
+      archived: "Diarsipkan",
     };
 
     return (
-      <Badge variant={variants[status as keyof typeof variants] || 'secondary'}>
+      <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
         {labels[status as keyof typeof labels] || status}
       </Badge>
     );
@@ -53,21 +65,25 @@ export function AnnouncementDetail({
 
   const getTypeBadge = (type: string) => {
     const colors = {
-      news: 'bg-blue-100 text-blue-800',
-      announcement: 'bg-green-100 text-green-800',
-      event: 'bg-purple-100 text-purple-800',
-      maintenance: 'bg-orange-100 text-orange-800',
+      news: "bg-blue-100 text-blue-800",
+      announcement: "bg-green-100 text-green-800",
+      event: "bg-purple-100 text-purple-800",
+      maintenance: "bg-orange-100 text-orange-800",
     };
 
     const labels = {
-      news: 'Berita',
-      announcement: 'Pengumuman',
-      event: 'Acara',
-      maintenance: 'Pemeliharaan',
+      news: "Berita",
+      announcement: "Pengumuman",
+      event: "Acara",
+      maintenance: "Pemeliharaan",
     };
 
     return (
-      <Badge className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          colors[type as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
         {labels[type as keyof typeof labels] || type}
       </Badge>
     );
@@ -75,31 +91,35 @@ export function AnnouncementDetail({
 
   const getPriorityBadge = (priority: number) => {
     const colors = {
-      0: 'bg-gray-100 text-gray-800',
-      1: 'bg-yellow-100 text-yellow-800',
-      2: 'bg-red-100 text-red-800',
+      0: "bg-gray-100 text-gray-800",
+      1: "bg-yellow-100 text-yellow-800",
+      2: "bg-red-100 text-red-800",
     };
 
     const labels = {
-      0: 'Normal',
-      1: 'Tinggi',
-      2: 'Mendesak',
+      0: "Normal",
+      1: "Tinggi",
+      2: "Mendesak",
     };
 
     return (
-      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {labels[priority as keyof typeof labels] || 'Normal'}
+      <Badge
+        className={
+          colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {labels[priority as keyof typeof labels] || "Normal"}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -119,8 +139,12 @@ export function AnnouncementDetail({
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto bg-white">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {announcement.is_pinned && <Pin className="h-5 w-5 text-blue-600" />}
-            {announcement.is_featured && <Star className="h-5 w-5 text-yellow-600" />}
+            {announcement.is_pinned && (
+              <Pin className="h-5 w-5 text-blue-600" />
+            )}
+            {announcement.is_featured && (
+              <Star className="h-5 w-5 text-yellow-600" />
+            )}
             {announcement.title}
           </DialogTitle>
           <DialogDescription>
@@ -137,11 +161,11 @@ export function AnnouncementDetail({
                 {getStatusBadge(announcement.status)}
                 {getPriorityBadge(announcement.priority)}
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  <span>Author ID: {announcement.author_id || 'N/A'}</span>
+                  <span>Author ID: {announcement.author_id || "N/A"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
@@ -154,19 +178,25 @@ export function AnnouncementDetail({
                 {announcement.published_at && (
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
-                    <span>Dipublikasi: {formatDate(announcement.published_at)}</span>
+                    <span>
+                      Dipublikasi: {formatDate(announcement.published_at)}
+                    </span>
                   </div>
                 )}
                 {announcement.expires_at && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    <span>Kedaluwarsa: {formatDate(announcement.expires_at)}</span>
+                    <span>
+                      Kedaluwarsa: {formatDate(announcement.expires_at)}
+                    </span>
                   </div>
                 )}
                 {announcement.updated_at && (
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4" />
-                    <span>Diperbarui: {formatDate(announcement.updated_at)}</span>
+                    <span>
+                      Diperbarui: {formatDate(announcement.updated_at)}
+                    </span>
                   </div>
                 )}
               </div>
@@ -194,7 +224,7 @@ export function AnnouncementDetail({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div 
+              <div
                 className="prose prose-slate max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
                 dangerouslySetInnerHTML={{ __html: announcement.content }}
               />
@@ -217,7 +247,7 @@ export function AnnouncementDetail({
                     alt="Featured image"
                     className="max-w-full h-auto rounded-lg shadow-md"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 </div>
@@ -236,7 +266,7 @@ export function AnnouncementDetail({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {announcement.tags.split(',').map((tag, index) => (
+                  {announcement.tags.split(",").map((tag, index) => (
                     <Badge key={index} variant="outline">
                       {tag.trim()}
                     </Badge>
@@ -276,19 +306,21 @@ export function AnnouncementDetail({
           )}
 
           {/* Workflow Info */}
-          {(announcement.submitted_at || announcement.approved_at || announcement.rejected_at) && (
+          {(announcement.submitted_at ||
+            announcement.approved_at ||
+            announcement.rejected_at) && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Workflow</CardTitle>
-                <CardDescription>
-                  Informasi proses persetujuan
-                </CardDescription>
+                <CardDescription>Informasi proses persetujuan</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {announcement.submitted_at && (
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-blue-600" />
-                    <span>Diajukan: {formatDate(announcement.submitted_at)}</span>
+                    <span>
+                      Diajukan: {formatDate(announcement.submitted_at)}
+                    </span>
                     {announcement.submitted_by && (
                       <span className="text-muted-foreground">
                         (oleh user ID: {announcement.submitted_by})
@@ -296,11 +328,13 @@ export function AnnouncementDetail({
                     )}
                   </div>
                 )}
-                
+
                 {announcement.approved_at && (
                   <div className="flex items-center gap-2 text-sm">
                     <Calendar className="h-4 w-4 text-green-600" />
-                    <span>Disetujui: {formatDate(announcement.approved_at)}</span>
+                    <span>
+                      Disetujui: {formatDate(announcement.approved_at)}
+                    </span>
                     {announcement.approved_by && (
                       <span className="text-muted-foreground">
                         (oleh user ID: {announcement.approved_by})
@@ -308,7 +342,7 @@ export function AnnouncementDetail({
                     )}
                   </div>
                 )}
-                
+
                 {announcement.rejected_at && (
                   <div className="flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-red-600" />

@@ -1,6 +1,6 @@
 import { HandHelping, Users, Zap } from "lucide-react";
 
-import { Hero45 } from "@/components/blocks/shadcnblocks-com-hero45"
+import { Hero45 } from "@/components/blocks/shadcnblocks-com-hero45";
 
 const demoData = {
   badge: "shadcnblocks.com",

@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { MapPin, ChevronRight, TreePine, Waves, Mountain } from 'lucide-react';
-import Link from 'next/link';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { MapPin, ChevronRight, TreePine, Waves, Mountain } from "lucide-react";
+import Link from "next/link";
 
 interface Park {
   id: number;
   name: string;
   location: string;
-  type: 'forest' | 'marine' | 'mountain';
+  type: "forest" | "marine" | "mountain";
   species_count: number;
   lat?: number;
   lng?: number;
@@ -26,10 +26,10 @@ export function InteractiveMapSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const element = document.getElementById('map-section');
+    const element = document.getElementById("map-section");
     if (element) {
       observer.observe(element);
     }
@@ -43,38 +43,83 @@ export function InteractiveMapSection() {
 
   // Mock data - replace with real data
   const parks: Park[] = [
-    { id: 1, name: 'Taman Nasional Gunung Leuser', location: 'Sumatera', type: 'forest', species_count: 380 },
-    { id: 2, name: 'Taman Nasional Komodo', location: 'Nusa Tenggara', type: 'marine', species_count: 254 },
-    { id: 3, name: 'Taman Nasional Bromo Tengger', location: 'Jawa', type: 'mountain', species_count: 137 },
-    { id: 4, name: 'Taman Nasional Bunaken', location: 'Sulawesi', type: 'marine', species_count: 390 },
-    { id: 5, name: 'Taman Nasional Lorentz', location: 'Papua', type: 'mountain', species_count: 630 },
-    { id: 6, name: 'Taman Nasional Tanjung Puting', location: 'Kalimantan', type: 'forest', species_count: 230 },
+    {
+      id: 1,
+      name: "Taman Nasional Gunung Leuser",
+      location: "Sumatera",
+      type: "forest",
+      species_count: 380,
+    },
+    {
+      id: 2,
+      name: "Taman Nasional Komodo",
+      location: "Nusa Tenggara",
+      type: "marine",
+      species_count: 254,
+    },
+    {
+      id: 3,
+      name: "Taman Nasional Bromo Tengger",
+      location: "Jawa",
+      type: "mountain",
+      species_count: 137,
+    },
+    {
+      id: 4,
+      name: "Taman Nasional Bunaken",
+      location: "Sulawesi",
+      type: "marine",
+      species_count: 390,
+    },
+    {
+      id: 5,
+      name: "Taman Nasional Lorentz",
+      location: "Papua",
+      type: "mountain",
+      species_count: 630,
+    },
+    {
+      id: 6,
+      name: "Taman Nasional Tanjung Puting",
+      location: "Kalimantan",
+      type: "forest",
+      species_count: 230,
+    },
   ];
 
   const regions = [
-    { name: 'Sumatera', count: 15, color: 'emerald' },
-    { name: 'Jawa', count: 12, color: 'green' },
-    { name: 'Kalimantan', count: 18, color: 'teal' },
-    { name: 'Sulawesi', count: 9, color: 'cyan' },
-    { name: 'Nusa Tenggara', count: 7, color: 'lime' },
-    { name: 'Papua', count: 11, color: 'emerald' },
+    { name: "Sumatera", count: 15, color: "emerald" },
+    { name: "Jawa", count: 12, color: "green" },
+    { name: "Kalimantan", count: 18, color: "teal" },
+    { name: "Sulawesi", count: 9, color: "cyan" },
+    { name: "Nusa Tenggara", count: 7, color: "lime" },
+    { name: "Papua", count: 11, color: "emerald" },
   ];
 
-  const getTypeIcon = (type: Park['type']) => {
+  const getTypeIcon = (type: Park["type"]) => {
     switch (type) {
-      case 'forest': return TreePine;
-      case 'marine': return Waves;
-      case 'mountain': return Mountain;
+      case "forest":
+        return TreePine;
+      case "marine":
+        return Waves;
+      case "mountain":
+        return Mountain;
     }
   };
 
   return (
-    <section id="map-section" className="py-32 bg-gradient-to-b from-white via-emerald-50/30 to-white relative overflow-hidden">
+    <section
+      id="map-section"
+      className="py-32 bg-gradient-to-b from-white via-emerald-50/30 to-white relative overflow-hidden"
+    >
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23059669' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="container mx-auto max-w-7xl px-6 relative">
@@ -96,7 +141,7 @@ export function InteractiveMapSection() {
             </span>
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Lebih dari 70+ taman konservasi tersebar di seluruh Indonesia, 
+            Lebih dari 70+ taman konservasi tersebar di seluruh Indonesia,
             masing-masing menjaga kekayaan hayati yang unik dan berharga
           </p>
         </motion.div>
@@ -138,7 +183,7 @@ export function InteractiveMapSection() {
                           cy={positions[index].y}
                           r={selectedRegion === region.name ? 50 : 40}
                           className={`fill-${region.color}-500 opacity-70 hover:opacity-100 transition-all`}
-                          fill={`rgb(${region.color === 'emerald' ? '16, 185, 129' : region.color === 'green' ? '34, 197, 94' : region.color === 'teal' ? '20, 184, 166' : region.color === 'cyan' ? '6, 182, 212' : '132, 204, 22'})`}
+                          fill={`rgb(${region.color === "emerald" ? "16, 185, 129" : region.color === "green" ? "34, 197, 94" : region.color === "teal" ? "20, 184, 166" : region.color === "cyan" ? "6, 182, 212" : "132, 204, 22"})`}
                           whileHover={{ scale: 1.2 }}
                         />
                         <text
@@ -190,8 +235,8 @@ export function InteractiveMapSection() {
                     onMouseLeave={() => setSelectedRegion(null)}
                     className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
                       selectedRegion === region.name
-                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/50'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100'
+                        ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/50"
+                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <div className="font-bold">{region.count}</div>
@@ -209,9 +254,12 @@ export function InteractiveMapSection() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="absolute top-4 right-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-emerald-200 max-w-xs"
               >
-                <h4 className="font-bold text-lg text-gray-900 mb-2">{selectedRegion}</h4>
+                <h4 className="font-bold text-lg text-gray-900 mb-2">
+                  {selectedRegion}
+                </h4>
                 <p className="text-sm text-gray-600">
-                  {regions.find(r => r.name === selectedRegion)?.count} Taman Konservasi
+                  {regions.find((r) => r.name === selectedRegion)?.count} Taman
+                  Konservasi
                 </p>
               </motion.div>
             )}
@@ -224,8 +272,10 @@ export function InteractiveMapSection() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="space-y-4"
           >
-            <h3 className="text-2xl font-bold text-gray-900 mb-6">Taman Unggulan</h3>
-            
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+              Taman Unggulan
+            </h3>
+
             {parks.map((park, index) => {
               const Icon = getTypeIcon(park.type);
               return (
@@ -237,13 +287,16 @@ export function InteractiveMapSection() {
                   whileHover={{ scale: 1.02, x: 10 }}
                   className="group bg-white rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all border border-gray-100 cursor-pointer"
                 >
-                  <Link href={`/taman/${park.id}`} className="flex items-center gap-4">
+                  <Link
+                    href={`/taman/${park.id}`}
+                    className="flex items-center gap-4"
+                  >
                     <div className="flex-shrink-0">
                       <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/50">
                         <Icon className="w-7 h-7" />
                       </div>
                     </div>
-                    
+
                     <div className="flex-1 min-w-0">
                       <h4 className="font-bold text-gray-900 mb-1 group-hover:text-emerald-600 transition-colors">
                         {park.name}
@@ -284,4 +337,3 @@ export function InteractiveMapSection() {
     </section>
   );
 }
-

@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { FileText } from 'lucide-react';
-import Image from 'next/image';
+import { FileText } from "lucide-react";
+import Image from "next/image";
 
 export function ArtikelHero() {
   return (
@@ -19,7 +19,7 @@ export function ArtikelHero() {
 
       {/* Dark black overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      
+
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
@@ -47,22 +47,35 @@ export function ArtikelHero() {
             </h1>
 
             <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-              Kurasi kisah konservasi, pembelajaran lapangan, dan penelitian terbaru dari jejaring Taman Kehati.
-              Temukan wawasan mendalam tentang keanekaragaman hayati Indonesia.
+              Kurasi kisah konservasi, pembelajaran lapangan, dan penelitian
+              terbaru dari jejaring Taman Kehati. Temukan wawasan mendalam
+              tentang keanekaragaman hayati Indonesia.
             </p>
 
             <div className="flex flex-wrap justify-center gap-8 text-amber-100 animate-fade-in delay-500">
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">Edukasi</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">& Riset</div>
+                <div className="text-lg font-medium text-white mb-1">
+                  Edukasi
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  & Riset
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">Konservasi</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Alam</div>
+                <div className="text-lg font-medium text-white mb-1">
+                  Konservasi
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Alam
+                </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">Cerita</div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Lapangan</div>
+                <div className="text-lg font-medium text-white mb-1">
+                  Cerita
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Lapangan
+                </div>
               </div>
             </div>
           </div>

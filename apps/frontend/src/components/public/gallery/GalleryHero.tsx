@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function GalleryHero() {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <section className="relative h-[70vh] min-h-[500px] overflow-hidden">
       {/* Parallax Background */}
-      <div 
+      <div
         className="absolute inset-0 w-full h-[120%]"
         style={{
           transform: `translateY(${scrollY * 0.5}px)`,
@@ -32,7 +32,7 @@ export function GalleryHero() {
 
       {/* Dark black overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      
+
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
@@ -52,8 +52,9 @@ export function GalleryHero() {
 
             {/* Description */}
             <p className="text-xl leading-relaxed text-amber-50 mb-8 max-w-2xl">
-              Jelajahi koleksi foto keanekaragaman hayati Indonesia yang menakjubkan. 
-              Dari flora endemik hingga fauna langka, saksikan keindahan alam yang menjadi kebanggaan Nusantara.
+              Jelajahi koleksi foto keanekaragaman hayati Indonesia yang
+              menakjubkan. Dari flora endemik hingga fauna langka, saksikan
+              keindahan alam yang menjadi kebanggaan Nusantara.
             </p>
 
             {/* Stats */}

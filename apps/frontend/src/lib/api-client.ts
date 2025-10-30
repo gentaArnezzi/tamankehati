@@ -1,26 +1,28 @@
-'use client';
+"use client";
 
-import { HttpClient, PaginatedResponse } from './http-client';
+import { HttpClient, PaginatedResponse } from "./http-client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-pxnu.onrender.com';
-console.log('API_BASE_URL:', API_BASE_URL);
-const AUTH_TOKEN_KEY = 'auth_token';
-const AUTH_USER_KEY = 'auth_user';
-const AUTH_EMAIL_KEY = 'auth_email';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://tamankehati-backend-pxnu.onrender.com";
+console.log("API_BASE_URL:", API_BASE_URL);
+const AUTH_TOKEN_KEY = "auth_token";
+const AUTH_USER_KEY = "auth_user";
+const AUTH_EMAIL_KEY = "auth_email";
 
 const privateClient = new HttpClient(API_BASE_URL, {
   getAuthToken: () => {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return window.localStorage.getItem(AUTH_TOKEN_KEY);
   },
   getExtraHeaders: () => {
-    if (typeof window === 'undefined') return {};
+    if (typeof window === "undefined") return {};
     const rawUser = window.localStorage.getItem(AUTH_USER_KEY);
     if (!rawUser) return {};
     try {
       const user = JSON.parse(rawUser) as User | null;
-      if (user?.role === 'regional_admin' && user.park_id) {
-        return { 'X-Park-Scope': String(user.park_id) };
+      if (user?.role === "regional_admin" && user.park_id) {
+        return { "X-Park-Scope": String(user.park_id) };
       }
     } catch {
       // ignore JSON parse error
@@ -29,7 +31,7 @@ const privateClient = new HttpClient(API_BASE_URL, {
   },
 });
 
-type WorkflowStatus = 'draft' | 'in_review' | 'approved' | 'rejected';
+type WorkflowStatus = "draft" | "in_review" | "approved" | "rejected";
 
 type TokenResponse = {
   access_token: string;
@@ -47,7 +49,7 @@ type UserResponse = {
   id: number;
   email: string;
   display_name?: string | null;
-  role: 'super_admin' | 'regional_admin';
+  role: "super_admin" | "regional_admin";
   park_id?: number | null;
   profile_picture_url?: string | null;
   is_active: boolean;
@@ -90,7 +92,7 @@ type UserDetailResponse = {
   email: string;
   display_name?: string | null;
   full_name?: string | null;
-  role: 'super_admin' | 'regional_admin';
+  role: "super_admin" | "regional_admin";
   park_id?: number | null;
   profile_picture_url?: string | null;
   is_active: boolean;
@@ -213,7 +215,7 @@ type ArticleAdminResponse = {
   category?: string | null;
   author_id: number;
   // region_code?: string | null;  // Removed - using user-based access control
-  status: WorkflowStatus | 'published';
+  status: WorkflowStatus | "published";
   featured_image?: string | null;
   submitted_by?: number | null;
   submitted_at?: string | null;
@@ -233,7 +235,7 @@ type GalleryAdminResponse = {
   image_url: string;
   author_id: number;
   // region_code?: string | null;  // Removed - using user-based access control
-  status: WorkflowStatus | 'published';
+  status: WorkflowStatus | "published";
   submitted_by?: number | null;
   submitted_at?: string | null;
   approved_by?: number | null;
@@ -249,7 +251,7 @@ type ZoneResponse = {
   id: number;
   name: string;
   // region_code: string;  // Removed - using user-based access control
-  status: 'draft' | 'in_review' | 'approved' | 'rejected';
+  status: "draft" | "in_review" | "approved" | "rejected";
   submitted_by?: number | null;
   approved_by?: number | null;
   rejected_by?: number | null;
@@ -261,7 +263,13 @@ type ZoneResponse = {
   updated_at?: string | null;
 };
 
-type ApprovalEntityType = 'flora' | 'fauna' | 'artikel' | 'galeri' | 'taman' | 'kegiatan';
+type ApprovalEntityType =
+  | "flora"
+  | "fauna"
+  | "artikel"
+  | "galeri"
+  | "taman"
+  | "kegiatan";
 
 type ApprovalItemResponse = {
   entity_type: ApprovalEntityType;
@@ -306,7 +314,7 @@ export interface User {
   email: string;
   nama?: string;
   display_name?: string | null;
-  role: 'super_admin' | 'regional_admin';
+  role: "super_admin" | "regional_admin";
   park_id?: number;
   profile_picture_url?: string | null;
   // region_code?: string | null;  // Removed - using user-based access control
@@ -349,20 +357,20 @@ export interface UserDetail extends User {
 
 export interface Flora {
   id: string;
-  nama_ilmiah: string;      // Frontend Indonesian, maps to scientific_name in backend
-  nama_umum?: string;       // Frontend Indonesian, maps to local_name in backend
-  famili?: string;          // Frontend Indonesian, maps to family in backend
+  nama_ilmiah: string; // Frontend Indonesian, maps to scientific_name in backend
+  nama_umum?: string; // Frontend Indonesian, maps to local_name in backend
+  famili?: string; // Frontend Indonesian, maps to family in backend
   genus?: string;
-  sinonim?: string;         // Frontend Indonesian, maps to synonym in backend
-  status_iucn?: string;     // Frontend Indonesian, maps to iucn_status in backend
-  deskripsi?: string;       // Frontend Indonesian, maps to description in backend
+  sinonim?: string; // Frontend Indonesian, maps to synonym in backend
+  status_iucn?: string; // Frontend Indonesian, maps to iucn_status in backend
+  deskripsi?: string; // Frontend Indonesian, maps to description in backend
   habitat?: string;
-  morfologi?: string;       // Frontend Indonesian, maps to morphology in backend
-  waktu_berbunga?: string;  // Frontend Indonesian, maps to flowering_time in backend
-  penyebaran?: string;      // Frontend Indonesian, maps to distribution in backend
-  metode_perbanyakan?: string;  // Frontend Indonesian, maps to propagation_method in backend
-  manfaat?: string;         // Frontend Indonesian, maps to benefits in backend
-  referensi?: string;       // Frontend Indonesian, maps to reference in backend
+  morfologi?: string; // Frontend Indonesian, maps to morphology in backend
+  waktu_berbunga?: string; // Frontend Indonesian, maps to flowering_time in backend
+  penyebaran?: string; // Frontend Indonesian, maps to distribution in backend
+  metode_perbanyakan?: string; // Frontend Indonesian, maps to propagation_method in backend
+  manfaat?: string; // Frontend Indonesian, maps to benefits in backend
+  referensi?: string; // Frontend Indonesian, maps to reference in backend
   is_endemic?: boolean;
   park_id?: number;
   park?: {
@@ -382,28 +390,28 @@ export interface Flora {
   updated_at?: string;
   rejection_reason?: string | null;
   gambar_utama?: string;
-  gambar_daun?: string;     // Frontend Indonesian, maps to leaf_image_url in backend
-  gambar_batang?: string;   // Frontend Indonesian, maps to stem_image_url in backend
-  gambar_bunga?: string;    // Frontend Indonesian, maps to flower_image_url in backend
-  gambar_buah?: string;     // Frontend Indonesian, maps to fruit_image_url in backend
+  gambar_daun?: string; // Frontend Indonesian, maps to leaf_image_url in backend
+  gambar_batang?: string; // Frontend Indonesian, maps to stem_image_url in backend
+  gambar_bunga?: string; // Frontend Indonesian, maps to flower_image_url in backend
+  gambar_buah?: string; // Frontend Indonesian, maps to fruit_image_url in backend
 }
 
 export interface Fauna {
   id: string;
-  nama_ilmiah: string;      // Frontend Indonesian, maps to scientific_name in backend
-  nama_umum?: string;       // Frontend Indonesian, maps to local_name in backend
-  family?: string;          // Frontend Indonesian, maps to family in backend
-  genus?: string;          // Frontend Indonesian, maps to genus in backend
-  species?: string;        // Frontend Indonesian, maps to species in backend
+  nama_ilmiah: string; // Frontend Indonesian, maps to scientific_name in backend
+  nama_umum?: string; // Frontend Indonesian, maps to local_name in backend
+  family?: string; // Frontend Indonesian, maps to family in backend
+  genus?: string; // Frontend Indonesian, maps to genus in backend
+  species?: string; // Frontend Indonesian, maps to species in backend
   ordo?: string;
-  status_iucn?: string;     // Frontend Indonesian, maps to iucn_status in backend
-  deskripsi?: string;       // Frontend Indonesian, maps to description in backend
-  habitat?: string;         // Frontend Indonesian, maps to habitat in backend
-  diet?: string;           // Frontend Indonesian, maps to diet in backend
-  behavior?: string;       // Frontend Indonesian, maps to behavior in backend
-  morphology?: string;     // Frontend Indonesian, maps to morphology in backend
-  local_id?: string;       // Frontend Indonesian, maps to local_id in backend
-  image_url?: string;      // Frontend Indonesian, maps to image_url in backend
+  status_iucn?: string; // Frontend Indonesian, maps to iucn_status in backend
+  deskripsi?: string; // Frontend Indonesian, maps to description in backend
+  habitat?: string; // Frontend Indonesian, maps to habitat in backend
+  diet?: string; // Frontend Indonesian, maps to diet in backend
+  behavior?: string; // Frontend Indonesian, maps to behavior in backend
+  morphology?: string; // Frontend Indonesian, maps to morphology in backend
+  local_id?: string; // Frontend Indonesian, maps to local_id in backend
+  image_url?: string; // Frontend Indonesian, maps to image_url in backend
   habitat_sumber_makanan?: string;
   status_hama?: string;
   tingkat_hama?: string;
@@ -419,7 +427,7 @@ export interface Fauna {
   status: WorkflowStatus;
   submitted_by?: number;
   approved_by?: number;
-  rejected_by?: number;    // Frontend Indonesian, maps to rejected_by in backend
+  rejected_by?: number; // Frontend Indonesian, maps to rejected_by in backend
   submitted_at?: string;
   approved_at?: string;
   rejected_at?: string;
@@ -453,14 +461,13 @@ export interface Activity {
   rejection_reason?: string | null;
 }
 
-
 export interface Observasi {
   id: string;
-  jenis: 'flora' | 'fauna';
+  jenis: "flora" | "fauna";
   nama_spesies: string;
   nama_ilmiah?: string;
   lokasi: {
-    type: 'Point';
+    type: "Point";
     coordinates: [number, number];
   };
   deskripsi?: string;
@@ -486,7 +493,7 @@ export interface Taman {
   deskripsi?: string;
   created_at?: string;
   updated_at?: string;
-  status?: 'draft' | 'in_review' | 'approved' | 'rejected';
+  status?: "draft" | "in_review" | "approved" | "rejected";
   submitted_at?: string | null;
   approved_at?: string | null;
   rejected_at?: string | null;
@@ -506,7 +513,7 @@ export type ZoneUploadResponse = {
     id: number;
     name: string;
     // region_code: string;  // Removed - using user-based access control
-    status: 'draft' | 'in_review' | 'approved' | 'rejected';
+    status: "draft" | "in_review" | "approved" | "rejected";
   }>;
   errors: string[];
 };
@@ -575,39 +582,43 @@ const mapUserDetail = (user: UserDetailResponse): UserDetail => ({
   is_active: user.is_active,
   created_at: user.created_at,
   updated_at: user.updated_at,
-  park: user.park ? {
-    id: user.park.id,
-    name: user.park.name,
-    slug: user.park.slug,
-    status: user.park.status,
-    area_ha: user.park.area_ha,
-    description: user.park.description,
-    sk_penetapan: user.park.sk_penetapan,
-    pengelola: user.park.pengelola,
-    tipe_ekoregion: user.park.tipe_ekoregion,
-    kondisi_fisik: user.park.kondisi_fisik,
-    nilai_penting: user.park.nilai_penting,
-    sejarah: user.park.sejarah,
-    visi: user.park.visi,
-    misi: user.park.misi,
-    nilai_dasar: user.park.nilai_dasar,
-    created_at: user.park.created_at,
-    updated_at: user.park.updated_at,
-  } : undefined,
-  region: user.region ? {
-    id: user.region.id,
-    name: user.region.name,
-    code: user.region.code,
-    timezone: user.region.timezone,
-    is_active: user.region.is_active,
-    created_at: user.region.created_at,
-    updated_at: user.region.updated_at,
-  } : undefined,
+  park: user.park
+    ? {
+        id: user.park.id,
+        name: user.park.name,
+        slug: user.park.slug,
+        status: user.park.status,
+        area_ha: user.park.area_ha,
+        description: user.park.description,
+        sk_penetapan: user.park.sk_penetapan,
+        pengelola: user.park.pengelola,
+        tipe_ekoregion: user.park.tipe_ekoregion,
+        kondisi_fisik: user.park.kondisi_fisik,
+        nilai_penting: user.park.nilai_penting,
+        sejarah: user.park.sejarah,
+        visi: user.park.visi,
+        misi: user.park.misi,
+        nilai_dasar: user.park.nilai_dasar,
+        created_at: user.park.created_at,
+        updated_at: user.park.updated_at,
+      }
+    : undefined,
+  region: user.region
+    ? {
+        id: user.region.id,
+        name: user.region.name,
+        code: user.region.code,
+        timezone: user.region.timezone,
+        is_active: user.region.is_active,
+        created_at: user.region.created_at,
+        updated_at: user.region.updated_at,
+      }
+    : undefined,
 });
 
 const mapFlora = (flora: FloraAdminResponse): Flora => ({
   id: String(flora.id),
-  nama_ilmiah: flora.scientific_name ?? 'Tidak diketahui',
+  nama_ilmiah: flora.scientific_name ?? "Tidak diketahui",
   nama_umum: flora.local_name ?? undefined,
   famili: flora.family ?? undefined,
   genus: flora.genus ?? undefined,
@@ -624,16 +635,19 @@ const mapFlora = (flora: FloraAdminResponse): Flora => ({
   is_endemic: flora.is_endemic ?? false,
   wilayah: flora.wilayah ?? undefined,
   park_id: flora.park_id,
-  park: flora.park ? {
-    id: flora.park.id,
-    name: flora.park.name,
-    region_id: 0  // Legacy field, not used anymore
-  } : undefined,
+  park: flora.park
+    ? {
+        id: flora.park.id,
+        name: flora.park.name,
+        region_id: 0, // Legacy field, not used anymore
+      }
+    : undefined,
   status: flora.status,
   submitted_by: flora.submitted_by ?? undefined,
   approved_by: flora.approved_by ?? undefined,
   created_at: flora.created_at ?? flora.submitted_at ?? undefined,
-  updated_at: flora.updated_at ?? flora.approved_at ?? flora.submitted_at ?? undefined,
+  updated_at:
+    flora.updated_at ?? flora.approved_at ?? flora.submitted_at ?? undefined,
   rejection_reason: flora.rejection_reason ?? undefined,
   gambar_utama: flora.gambar_utama ?? undefined,
   gambar_daun: flora.leaf_image_url ?? undefined,
@@ -644,7 +658,7 @@ const mapFlora = (flora: FloraAdminResponse): Flora => ({
 
 const mapFauna = (fauna: FaunaAdminResponse): Fauna => ({
   id: String(fauna.id),
-  nama_ilmiah: fauna.scientific_name ?? 'Tidak diketahui',
+  nama_ilmiah: fauna.scientific_name ?? "Tidak diketahui",
   nama_umum: fauna.local_name ?? undefined,
   family: fauna.family ?? undefined,
   genus: fauna.genus ?? undefined,
@@ -674,7 +688,8 @@ const mapFauna = (fauna: FaunaAdminResponse): Fauna => ({
   approved_at: fauna.approved_at ?? undefined,
   rejected_at: fauna.rejected_at ?? undefined,
   created_at: fauna.created_at ?? fauna.submitted_at ?? undefined,
-  updated_at: fauna.updated_at ?? fauna.approved_at ?? fauna.submitted_at ?? undefined,
+  updated_at:
+    fauna.updated_at ?? fauna.approved_at ?? fauna.submitted_at ?? undefined,
   rejection_reason: fauna.rejection_reason ?? undefined,
   gambar_utama: fauna.gambar_utama ?? undefined,
 });
@@ -686,11 +701,13 @@ const mapActivity = (activity: ActivityAdminResponse): Activity => ({
   activity_date: activity.activity_date,
   location: activity.location ?? undefined,
   park_id: activity.park_id,
-  park: activity.park ? {
-    id: activity.park.id,
-    name: activity.park.name,
-    // region_id: activity.park.region_id,  // Removed - using user-based access control
-  } : undefined,
+  park: activity.park
+    ? {
+        id: activity.park.id,
+        name: activity.park.name,
+        // region_id: activity.park.region_id,  // Removed - using user-based access control
+      }
+    : undefined,
   status: activity.status,
   images: activity.images ?? undefined,
   created_by: activity.created_by ? String(activity.created_by) : undefined,
@@ -703,11 +720,10 @@ const mapActivity = (activity: ActivityAdminResponse): Activity => ({
   rejection_reason: activity.rejection_reason ?? undefined,
 });
 
-
 const mapZoneToTaman = (zone: ZoneResponse): Taman => ({
   id: String(zone.id),
   nama: zone.name,
-  wilayah: '', // region_code removed - using user-based access control
+  wilayah: "", // region_code removed - using user-based access control
   status: zone.status,
   created_at: zone.created_at ?? undefined,
   updated_at: zone.updated_at ?? undefined,
@@ -724,7 +740,7 @@ export interface Zone {
   id: string;
   name: string;
   // region_code: string;  // Removed - using user-based access control
-  status: ZoneResponse['status'];
+  status: ZoneResponse["status"];
 }
 
 const mapZone = (zone: ZoneResponse): Zone => ({
@@ -748,19 +764,25 @@ const toPaginated = <T, R>(
 
 export const authApi = {
   login: (email: string, password: string) =>
-    privateClient.post<TokenResponse>('/api/v1/auth/login', { email, password }),
+    privateClient.post<TokenResponse>("/api/v1/auth/login", {
+      email,
+      password,
+    }),
 
-  logout: () => privateClient.post<void>('/api/v1/auth/logout'),
+  logout: () => privateClient.post<void>("/api/v1/auth/logout"),
 
   getProfile: async () => {
     try {
-      const response = await privateClient.get<UserResponse>('/api/v1/users/me');
+      const response =
+        await privateClient.get<UserResponse>("/api/v1/users/me");
       return mapUser(response);
     } catch (error) {
       // Fallback jika /me gagal, coba /users/{id} dengan uid dari token
-      console.warn('Fallback to /users/{id} for getProfile:', error);
+      console.warn("Fallback to /users/{id} for getProfile:", error);
       const userId = 2; // Ambil dari token atau state, sementara hardcode
-      const response = await privateClient.get<UserResponse>(`/api/v1/users/${userId}`);
+      const response = await privateClient.get<UserResponse>(
+        `/api/v1/users/${userId}`,
+      );
       return mapUser(response);
     }
   },
@@ -776,34 +798,49 @@ type UserListParams = {
 
 export const userApi = {
   list: async (params?: UserListParams) => {
-    const response = await privateClient.get<UserResponse[]>('/api/v1/users/', params);
+    const response = await privateClient.get<UserResponse[]>(
+      "/api/v1/users/",
+      params,
+    );
     return response.map(mapUser);
   },
 
   findByEmail: async (email: string) => {
-    const response = await privateClient.get<UserResponse[]>('/api/v1/users/', {
+    const response = await privateClient.get<UserResponse[]>("/api/v1/users/", {
       q: email,
       limit: 10,
       offset: 0,
     });
 
-    const matched = response.find((item) => item.email?.toLowerCase() === email.toLowerCase());
+    const matched = response.find(
+      (item) => item.email?.toLowerCase() === email.toLowerCase(),
+    );
     return matched ? mapUser(matched) : null;
   },
 
   getById: async (id: string | number) => {
-    const response = await privateClient.get<UserResponse>(`/api/v1/users/${id}`);
+    const response = await privateClient.get<UserResponse>(
+      `/api/v1/users/${id}`,
+    );
     return mapUser(response);
   },
 
   getDetail: async (id: string | number, include?: string) => {
     const params = include ? { include } : {};
-    const response = await privateClient.get<UserDetailResponse>(`/api/v1/users/${id}`, params);
+    const response = await privateClient.get<UserDetailResponse>(
+      `/api/v1/users/${id}`,
+      params,
+    );
     return mapUserDetail(response);
   },
 
-  create: async (payload: { email: string; password: string; nama?: string; role: User['role'] }) => {
-    const response = await privateClient.post<UserResponse>('/api/v1/users/', {
+  create: async (payload: {
+    email: string;
+    password: string;
+    nama?: string;
+    role: User["role"];
+  }) => {
+    const response = await privateClient.post<UserResponse>("/api/v1/users/", {
       email: payload.email,
       password: payload.password,
       display_name: payload.nama,
@@ -814,29 +851,43 @@ export const userApi = {
 
   update: async (
     id: string | number,
-    payload: Partial<{ nama: string; password: string }>
+    payload: Partial<{ nama: string; password: string }>,
   ) => {
-    const response = await privateClient.put<UserResponse>(`/api/v1/users/${id}`, {
-      display_name: payload.nama,
-      password: payload.password,
-    });
+    const response = await privateClient.put<UserResponse>(
+      `/api/v1/users/${id}`,
+      {
+        display_name: payload.nama,
+        password: payload.password,
+      },
+    );
     return mapUser(response);
   },
 
-  updateRole: async (id: string | number, role: User['role']) => {
-    const response = await privateClient.put<UserResponse>(`/api/v1/users/${id}/role`, { role });
+  updateRole: async (id: string | number, role: User["role"]) => {
+    const response = await privateClient.put<UserResponse>(
+      `/api/v1/users/${id}/role`,
+      { role },
+    );
     return mapUser(response);
   },
 
-  activate: (id: string | number) => privateClient.put<void>(`/api/v1/users/${id}/activate`),
-  deactivate: (id: string | number) => privateClient.put<void>(`/api/v1/users/${id}/deactivate`),
-  delete: (id: string | number) => privateClient.delete<void>(`/api/v1/users/${id}`),
+  activate: (id: string | number) =>
+    privateClient.put<void>(`/api/v1/users/${id}/activate`),
+  deactivate: (id: string | number) =>
+    privateClient.put<void>(`/api/v1/users/${id}/deactivate`),
+  delete: (id: string | number) =>
+    privateClient.delete<void>(`/api/v1/users/${id}`),
 };
 
 // Zone API removed - zones functionality removed
 
 export const floraApi = {
-  list: async (params?: { search?: string; status?: WorkflowStatus; limit?: number; offset?: number }) => {
+  list: async (params?: {
+    search?: string;
+    status?: WorkflowStatus;
+    limit?: number;
+    offset?: number;
+  }) => {
     const query: Record<string, unknown> = { ...params };
     if (params?.status) {
       query.status_filter = params.status;
@@ -846,68 +897,78 @@ export const floraApi = {
       query.q = params.search;
       delete query.search;
     }
-    const response = await privateClient.get<PaginatedResponse<FloraAdminResponse>>('/api/v1/flora/', query);
+    const response = await privateClient.get<
+      PaginatedResponse<FloraAdminResponse>
+    >("/api/v1/flora/", query);
     return toPaginated(response, mapFlora);
   },
 
   getById: async (id: string | number) => {
-    const response = await privateClient.get<FloraAdminResponse>(`/api/v1/flora/${id}`);
+    const response = await privateClient.get<FloraAdminResponse>(
+      `/api/v1/flora/${id}`,
+    );
     return mapFlora(response);
   },
 
   create: async (payload: Partial<Flora>) => {
-    const response = await privateClient.post<FloraAdminResponse>('/api/v1/flora/', {
-      park_id: payload.park_id || 1, // Default to park 1 if not specified
-      scientific_name: payload.nama_ilmiah,
-      local_name: payload.nama_umum,
-      family: payload.famili,
-      genus: payload.genus,
-      synonym: payload.sinonim,
-      description: payload.deskripsi,
-      habitat: payload.habitat,
-      morphology: payload.morfologi,
-      benefits: payload.manfaat,
-      flowering_time: payload.waktu_berbunga,
-      distribution: payload.penyebaran,
-      propagation_method: payload.metode_perbanyakan,
-      reference: payload.referensi,
-      is_endemic: payload.is_endemic || false,
-      iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
-      gambar_utama: payload.gambar_utama,
-      leaf_image_url: payload.gambar_daun,
-      stem_image_url: payload.gambar_batang,
-      flower_image_url: payload.gambar_bunga,
-      fruit_image_url: payload.gambar_buah,
-      status: payload.status, // Add status field
-    });
+    const response = await privateClient.post<FloraAdminResponse>(
+      "/api/v1/flora/",
+      {
+        park_id: payload.park_id || 1, // Default to park 1 if not specified
+        scientific_name: payload.nama_ilmiah,
+        local_name: payload.nama_umum,
+        family: payload.famili,
+        genus: payload.genus,
+        synonym: payload.sinonim,
+        description: payload.deskripsi,
+        habitat: payload.habitat,
+        morphology: payload.morfologi,
+        benefits: payload.manfaat,
+        flowering_time: payload.waktu_berbunga,
+        distribution: payload.penyebaran,
+        propagation_method: payload.metode_perbanyakan,
+        reference: payload.referensi,
+        is_endemic: payload.is_endemic || false,
+        iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
+        gambar_utama: payload.gambar_utama,
+        leaf_image_url: payload.gambar_daun,
+        stem_image_url: payload.gambar_batang,
+        flower_image_url: payload.gambar_bunga,
+        fruit_image_url: payload.gambar_buah,
+        status: payload.status, // Add status field
+      },
+    );
     return mapFlora(response);
   },
 
   update: async (id: string | number, payload: Partial<Flora>) => {
-    const response = await privateClient.put<FloraAdminResponse>(`/api/v1/flora/${id}`, {
-      park_id: payload.park_id,
-      scientific_name: payload.nama_ilmiah,
-      local_name: payload.nama_umum,
-      family: payload.famili,
-      genus: payload.genus,
-      synonym: payload.sinonim,
-      description: payload.deskripsi,
-      habitat: payload.habitat,
-      morphology: payload.morfologi,
-      benefits: payload.manfaat,
-      flowering_time: payload.waktu_berbunga,
-      distribution: payload.penyebaran,
-      propagation_method: payload.metode_perbanyakan,
-      reference: payload.referensi,
-      is_endemic: payload.is_endemic,
-      iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
-      gambar_utama: payload.gambar_utama,
-      leaf_image_url: payload.gambar_daun,
-      stem_image_url: payload.gambar_batang,
-      flower_image_url: payload.gambar_bunga,
-      fruit_image_url: payload.gambar_buah,
-      status: payload.status, // Add status field
-    });
+    const response = await privateClient.put<FloraAdminResponse>(
+      `/api/v1/flora/${id}`,
+      {
+        park_id: payload.park_id,
+        scientific_name: payload.nama_ilmiah,
+        local_name: payload.nama_umum,
+        family: payload.famili,
+        genus: payload.genus,
+        synonym: payload.sinonim,
+        description: payload.deskripsi,
+        habitat: payload.habitat,
+        morphology: payload.morfologi,
+        benefits: payload.manfaat,
+        flowering_time: payload.waktu_berbunga,
+        distribution: payload.penyebaran,
+        propagation_method: payload.metode_perbanyakan,
+        reference: payload.referensi,
+        is_endemic: payload.is_endemic,
+        iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
+        gambar_utama: payload.gambar_utama,
+        leaf_image_url: payload.gambar_daun,
+        stem_image_url: payload.gambar_batang,
+        flower_image_url: payload.gambar_bunga,
+        fruit_image_url: payload.gambar_buah,
+        status: payload.status, // Add status field
+      },
+    );
     return mapFlora(response);
   },
 
@@ -915,25 +976,37 @@ export const floraApi = {
     await privateClient.delete(`/api/v1/flora/${id}`);
     return true;
   },
-  
+
   submit: async (id: string | number) => {
-    const response = await privateClient.post<FloraAdminResponse>(`/api/v1/flora/${id}/submit`);
+    const response = await privateClient.post<FloraAdminResponse>(
+      `/api/v1/flora/${id}/submit`,
+    );
     return mapFlora(response);
   },
-  
+
   approve: async (id: string | number) => {
-    const response = await privateClient.post<FloraAdminResponse>(`/api/v1/flora/${id}/approve`);
+    const response = await privateClient.post<FloraAdminResponse>(
+      `/api/v1/flora/${id}/approve`,
+    );
     return mapFlora(response);
   },
-  
+
   reject: async (id: string | number, reason: string) => {
-    const response = await privateClient.post<FloraAdminResponse>(`/api/v1/flora/${id}/reject`, { reason });
+    const response = await privateClient.post<FloraAdminResponse>(
+      `/api/v1/flora/${id}/reject`,
+      { reason },
+    );
     return mapFlora(response);
-  }
+  },
 };
 
 export const faunaApi = {
-  list: async (params?: { search?: string; status?: WorkflowStatus; limit?: number; offset?: number }) => {
+  list: async (params?: {
+    search?: string;
+    status?: WorkflowStatus;
+    limit?: number;
+    offset?: number;
+  }) => {
     const query: Record<string, unknown> = { ...params };
     if (params?.status) {
       query.status_filter = params.status;
@@ -943,15 +1016,19 @@ export const faunaApi = {
       query.q = params.search;
       delete query.search;
     }
-    const response = await privateClient.get<PaginatedResponse<FaunaAdminResponse>>('/api/v1/fauna/', query);
-    console.log('faunaApi.list response:', response);
+    const response = await privateClient.get<
+      PaginatedResponse<FaunaAdminResponse>
+    >("/api/v1/fauna/", query);
+    console.log("faunaApi.list response:", response);
     const result = toPaginated(response, mapFauna);
-    console.log('faunaApi.list mapped result:', result);
+    console.log("faunaApi.list mapped result:", result);
     return result;
   },
 
   getById: async (id: string | number) => {
-    const response = await privateClient.get<FaunaAdminResponse>(`/api/v1/fauna/${id}`);
+    const response = await privateClient.get<FaunaAdminResponse>(
+      `/api/v1/fauna/${id}`,
+    );
     return mapFauna(response);
   },
 
@@ -970,32 +1047,40 @@ export const faunaApi = {
       gambar_utama: payload.gambar_utama,
       status: payload.status, // Add status field
     };
-    console.log('Fauna create payload.is_endemic:', payload.is_endemic);
-    console.log('Fauna create requestBody.is_endemic:', requestBody.is_endemic);
-    const response = await privateClient.post<FaunaAdminResponse>('/api/v1/fauna/', requestBody);
+    console.log("Fauna create payload.is_endemic:", payload.is_endemic);
+    console.log("Fauna create requestBody.is_endemic:", requestBody.is_endemic);
+    const response = await privateClient.post<FaunaAdminResponse>(
+      "/api/v1/fauna/",
+      requestBody,
+    );
     return mapFauna(response);
   },
 
   update: async (id: string | number, payload: Partial<Fauna>) => {
-    const response = await privateClient.put<FaunaAdminResponse>(`/api/v1/fauna/${id}`, {
-      park_id: payload.park_id,
-      scientific_name: payload.nama_ilmiah,
-      local_name: payload.nama_umum,
-      ordo: payload.ordo,
-      description: payload.deskripsi,
-      habitat_sumber_makanan: payload.habitat_sumber_makanan,
-      status_hama: payload.status_hama,
-      tingkat_hama: payload.tingkat_hama,
-      is_endemic: payload.is_endemic,
-      iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
-      gambar_utama: payload.gambar_utama,
-      status: payload.status, // Add status field
-    });
+    const response = await privateClient.put<FaunaAdminResponse>(
+      `/api/v1/fauna/${id}`,
+      {
+        park_id: payload.park_id,
+        scientific_name: payload.nama_ilmiah,
+        local_name: payload.nama_umum,
+        ordo: payload.ordo,
+        description: payload.deskripsi,
+        habitat_sumber_makanan: payload.habitat_sumber_makanan,
+        status_hama: payload.status_hama,
+        tingkat_hama: payload.tingkat_hama,
+        is_endemic: payload.is_endemic,
+        iucn_status: payload.status_iucn ? payload.status_iucn : undefined,
+        gambar_utama: payload.gambar_utama,
+        status: payload.status, // Add status field
+      },
+    );
     return mapFauna(response);
   },
 
-  remove: (id: string | number) => privateClient.delete<void>(`/api/v1/fauna/${id}`),
-  submit: (id: string | number) => privateClient.post<void>(`/api/v1/fauna/${id}/submit`),
+  remove: (id: string | number) =>
+    privateClient.delete<void>(`/api/v1/fauna/${id}`),
+  submit: (id: string | number) =>
+    privateClient.post<void>(`/api/v1/fauna/${id}/submit`),
   approve: (id: string | number) =>
     privateClient.post<void>(`/api/v1/fauna/${id}/approve`),
   reject: (id: string | number, reason: string) =>
@@ -1004,11 +1089,14 @@ export const faunaApi = {
 
 // Taman API removed - zones functionality removed
 
-
 export const galleryApi = {
   list: (params?: { limit?: number; offset?: number }) =>
-    privateClient.get<PaginatedResponse<GalleryAdminResponse>>('/api/v1/galleries/', params),
-  getById: (id: string | number) => privateClient.get<GalleryAdminResponse>(`/api/v1/galleries/${id}`),
+    privateClient.get<PaginatedResponse<GalleryAdminResponse>>(
+      "/api/v1/galleries/",
+      params,
+    ),
+  getById: (id: string | number) =>
+    privateClient.get<GalleryAdminResponse>(`/api/v1/galleries/${id}`),
   getByEntity: async (entityType: string, entityId: string | number) => {
     const response = await privateClient.get<{
       success: boolean;
@@ -1030,44 +1118,72 @@ export const galleryApi = {
     return response;
   },
   create: (payload: Partial<GalleryAdminResponse>) =>
-    privateClient.post<GalleryAdminResponse>('/api/v1/galleries/', payload),
+    privateClient.post<GalleryAdminResponse>("/api/v1/galleries/", payload),
   update: (id: string | number, payload: Partial<GalleryAdminResponse>) =>
     privateClient.put<GalleryAdminResponse>(`/api/v1/galleries/${id}`, payload),
-  remove: (id: string | number) => privateClient.delete<void>(`/api/v1/galleries/${id}`),
-  submit: (id: string | number) => privateClient.post<void>(`/api/v1/galleries/${id}/submit`),
+  remove: (id: string | number) =>
+    privateClient.delete<void>(`/api/v1/galleries/${id}`),
+  submit: (id: string | number) =>
+    privateClient.post<void>(`/api/v1/galleries/${id}/submit`),
   approve: (id: string | number, notes?: string) =>
-    privateClient.post<void>(`/api/v1/galleries/${id}/approve`, notes ? { notes } : undefined),
+    privateClient.post<void>(
+      `/api/v1/galleries/${id}/approve`,
+      notes ? { notes } : undefined,
+    ),
   reject: (id: string | number, reason: string) =>
-    privateClient.post<void>(`/api/v1/galleries/${id}/reject`, { notes: reason }),
+    privateClient.post<void>(`/api/v1/galleries/${id}/reject`, {
+      notes: reason,
+    }),
   uploadImage: (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
-    return privateClient.post<{ success: boolean; filename: string; url: string; size: number; message: string }>('/api/v1/upload/gallery-image', formData);
+    formData.append("file", file);
+    return privateClient.post<{
+      success: boolean;
+      filename: string;
+      url: string;
+      size: number;
+      message: string;
+    }>("/api/v1/upload/gallery-image", formData);
   },
 };
 
 export const articleApi = {
-  list: (params?: { limit?: number; offset?: number; status?: WorkflowStatus }) =>
-    privateClient.get<PaginatedResponse<ArticleAdminResponse>>('/api/v1/articles/', params),
-  getById: (id: string | number) => privateClient.get<ArticleAdminResponse>(`/api/v1/articles/${id}`),
+  list: (params?: {
+    limit?: number;
+    offset?: number;
+    status?: WorkflowStatus;
+  }) =>
+    privateClient.get<PaginatedResponse<ArticleAdminResponse>>(
+      "/api/v1/articles/",
+      params,
+    ),
+  getById: (id: string | number) =>
+    privateClient.get<ArticleAdminResponse>(`/api/v1/articles/${id}`),
   create: (payload: Partial<ArticleAdminResponse>) =>
-    privateClient.post<ArticleAdminResponse>('/api/v1/articles/', payload),
+    privateClient.post<ArticleAdminResponse>("/api/v1/articles/", payload),
   update: (id: string | number, payload: Partial<ArticleAdminResponse>) =>
     privateClient.put<ArticleAdminResponse>(`/api/v1/articles/${id}`, payload),
-  remove: (id: string | number) => privateClient.delete<void>(`/api/v1/articles/${id}`),
-  submit: (id: string | number) => privateClient.post<void>(`/api/v1/articles/${id}/submit`),
+  remove: (id: string | number) =>
+    privateClient.delete<void>(`/api/v1/articles/${id}`),
+  submit: (id: string | number) =>
+    privateClient.post<void>(`/api/v1/articles/${id}/submit`),
   approve: (id: string | number, notes?: string) =>
-    privateClient.post<void>(`/api/v1/articles/${id}/approve`, notes ? { notes } : undefined),
+    privateClient.post<void>(
+      `/api/v1/articles/${id}/approve`,
+      notes ? { notes } : undefined,
+    ),
   reject: (id: string | number, reason: string) =>
-    privateClient.post<void>(`/api/v1/articles/${id}/reject`, { notes: reason }),
+    privateClient.post<void>(`/api/v1/articles/${id}/reject`, {
+      notes: reason,
+    }),
 };
 
 export const dashboardApi = {
   getStats: async () => {
-    const response = await privateClient.get<any>('/api/v1/dashboard/');
-    
+    const response = await privateClient.get<any>("/api/v1/dashboard/");
+
     // Prioritize direct/flat format if pending_approvals exists
-    if ('pending_approvals' in response) {
+    if ("pending_approvals" in response) {
       return {
         total_flora: response.total_flora ?? response.stats?.flora?.total ?? 0,
         total_fauna: response.total_fauna ?? response.stats?.fauna?.total ?? 0,
@@ -1076,7 +1192,8 @@ export const dashboardApi = {
         total_observasi: response.total_observasi ?? 0,
         total_taman: response.total_taman ?? response.stats?.parks?.total ?? 0,
         pending_approvals: response.pending_approvals ?? 0,
-        pending_approval: response.pending_approval ?? response.pending_approvals ?? 0,
+        pending_approval:
+          response.pending_approval ?? response.pending_approvals ?? 0,
         regional_breakdown: response.regional_breakdown ?? [],
         total_announcements: response.total_announcements ?? 0,
       } satisfies DashboardStats;
@@ -1090,8 +1207,16 @@ export const dashboardApi = {
         total_users: stats.users?.total ?? 0,
         total_observasi: 0,
         total_taman: stats.parks?.total ?? 0,
-        pending_approvals: (stats.flora?.in_review ?? 0) + (stats.fauna?.in_review ?? 0) + (stats.articles?.in_review ?? 0) + (stats.galleries?.in_review ?? 0),
-        pending_approval: (stats.flora?.in_review ?? 0) + (stats.fauna?.in_review ?? 0) + (stats.articles?.in_review ?? 0) + (stats.galleries?.in_review ?? 0),
+        pending_approvals:
+          (stats.flora?.in_review ?? 0) +
+          (stats.fauna?.in_review ?? 0) +
+          (stats.articles?.in_review ?? 0) +
+          (stats.galleries?.in_review ?? 0),
+        pending_approval:
+          (stats.flora?.in_review ?? 0) +
+          (stats.fauna?.in_review ?? 0) +
+          (stats.articles?.in_review ?? 0) +
+          (stats.galleries?.in_review ?? 0),
         regional_breakdown: [],
         total_announcements: stats.galleries?.total ?? 0,
       } satisfies DashboardStats;
@@ -1156,7 +1281,12 @@ export interface ParkListResponse {
 }
 
 export const parksApi = {
-  list: async (params?: { search?: string; region?: string; limit?: number; offset?: number }) => {
+  list: async (params?: {
+    search?: string;
+    region?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     // Map frontend params to backend params
     const backendParams: any = {};
     if (params?.region) {
@@ -1168,18 +1298,28 @@ export const parksApi = {
     if (params?.offset) {
       backendParams.skip = params.offset;
     }
-    
-    const response = await privateClient.get<Park[]>('/api/v1/parks/', backendParams);
-    return { items: response, total: response.length, limit: params?.limit || 100, offset: 0, has_next: false, has_prev: false };
+
+    const response = await privateClient.get<Park[]>(
+      "/api/v1/parks/",
+      backendParams,
+    );
+    return {
+      items: response,
+      total: response.length,
+      limit: params?.limit || 100,
+      offset: 0,
+      has_next: false,
+      has_prev: false,
+    };
   },
-  
+
   getById: async (id: string | number) => {
     const response = await privateClient.get<Park>(`/api/public/parks/${id}`);
     return response;
   },
 
-  create: async (data: { 
-    name: string; 
+  create: async (data: {
+    name: string;
     slug: string;
     sk_penetapan?: string;
     pengelola?: string;
@@ -1187,7 +1327,7 @@ export const parksApi = {
     kondisi_fisik?: string;
     nilai_penting?: string;
     tipe_ekoregion?: string;
-    description: string; 
+    description: string;
     sejarah?: string;
     visi?: string;
     misi?: string;
@@ -1198,51 +1338,65 @@ export const parksApi = {
     desa_kelurahan?: string;
     latitude?: number | null;
     longitude?: number | null;
-    status: string 
+    status: string;
   }) => {
-    const response = await privateClient.post<Park>('/api/v1/parks/', data);
+    const response = await privateClient.post<Park>("/api/v1/parks/", data);
     return response;
   },
 
-  update: async (id: string | number, data: {
-    name?: string;
-    slug?: string;
-    sk_penetapan?: string;
-    pengelola?: string;
-    area_ha?: number | null;
-    kondisi_fisik?: string;
-    nilai_penting?: string;
-    tipe_ekoregion?: string;
-    description?: string;
-    sejarah?: string;
-    visi?: string;
-    misi?: string;
-    nilai_dasar?: string;
-    provinsi?: string;
-    kota_kabupaten?: string;
-    kecamatan?: string;
-    desa_kelurahan?: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    status?: string; // Add status field
-  }) => {
+  update: async (
+    id: string | number,
+    data: {
+      name?: string;
+      slug?: string;
+      sk_penetapan?: string;
+      pengelola?: string;
+      area_ha?: number | null;
+      kondisi_fisik?: string;
+      nilai_penting?: string;
+      tipe_ekoregion?: string;
+      description?: string;
+      sejarah?: string;
+      visi?: string;
+      misi?: string;
+      nilai_dasar?: string;
+      provinsi?: string;
+      kota_kabupaten?: string;
+      kecamatan?: string;
+      desa_kelurahan?: string;
+      latitude?: number | null;
+      longitude?: number | null;
+      status?: string; // Add status field
+    },
+  ) => {
     const response = await privateClient.put<Park>(`/api/v1/parks/${id}`, data);
     return response;
   },
-  
+
   getStats: async (id: string | number) => {
-    const response = await privateClient.get<any>(`/api/public/parks/${id}/stats`);
+    const response = await privateClient.get<any>(
+      `/api/public/parks/${id}/stats`,
+    );
     return response;
   },
-  
-  uploadShapefile: async (variables: { file: File; name_field?: string; simplify_tolerance?: number }) => {
+
+  uploadShapefile: async (variables: {
+    file: File;
+    name_field?: string;
+    simplify_tolerance?: number;
+  }) => {
     const formData = new FormData();
-    formData.append('file', variables.file);
-    if (variables.name_field) formData.append('name_field', variables.name_field);
-    if (variables.simplify_tolerance !== undefined) formData.append('simplify_tolerance', String(variables.simplify_tolerance));
+    formData.append("file", variables.file);
+    if (variables.name_field)
+      formData.append("name_field", variables.name_field);
+    if (variables.simplify_tolerance !== undefined)
+      formData.append(
+        "simplify_tolerance",
+        String(variables.simplify_tolerance),
+      );
     const response = await privateClient.post<any>(
       `/api/v1/parks/upload-shapefile`,
-      formData
+      formData,
     );
     return response;
   },
@@ -1263,7 +1417,13 @@ export interface Region {
 // Regions API removed - using park-based scoping instead
 
 export const activitiesApi = {
-  list: async (params?: { search?: string; park_id?: number; status?: WorkflowStatus; limit?: number; offset?: number }) => {
+  list: async (params?: {
+    search?: string;
+    park_id?: number;
+    status?: WorkflowStatus;
+    limit?: number;
+    offset?: number;
+  }) => {
     const query: Record<string, unknown> = { ...params };
     if (params?.status) {
       query.status_filter = params.status;
@@ -1273,24 +1433,31 @@ export const activitiesApi = {
       query.q = params.search;
       delete query.search;
     }
-    const response = await privateClient.get<PaginatedResponse<ActivityAdminResponse>>('/api/v1/activities/', query);
+    const response = await privateClient.get<
+      PaginatedResponse<ActivityAdminResponse>
+    >("/api/v1/activities/", query);
     return toPaginated(response, mapActivity);
   },
 
   getById: async (id: string | number) => {
-    const response = await privateClient.get<ActivityAdminResponse>(`/api/v1/activities/${id}`);
+    const response = await privateClient.get<ActivityAdminResponse>(
+      `/api/v1/activities/${id}`,
+    );
     return mapActivity(response);
   },
 
   create: async (payload: Partial<Activity>) => {
-    const response = await privateClient.post<ActivityAdminResponse>('/api/v1/activities/', {
-      park_id: payload.park_id,
-      title: payload.title,
-      description: payload.description,
-      activity_date: payload.activity_date,
-      location: payload.location,
-      images: payload.images,
-    });
+    const response = await privateClient.post<ActivityAdminResponse>(
+      "/api/v1/activities/",
+      {
+        park_id: payload.park_id,
+        title: payload.title,
+        description: payload.description,
+        activity_date: payload.activity_date,
+        location: payload.location,
+        images: payload.images,
+      },
+    );
     return mapActivity(response);
   },
 
@@ -1303,70 +1470,90 @@ export const activitiesApi = {
     images: File[];
   }) => {
     const formData = new FormData();
-    formData.append('title', payload.title);
-    if (payload.description) formData.append('description', payload.description);
-    formData.append('activity_date', payload.activity_date);
-    if (payload.location) formData.append('location', payload.location);
-    formData.append('park_id', payload.park_id.toString());
-    
+    formData.append("title", payload.title);
+    if (payload.description)
+      formData.append("description", payload.description);
+    formData.append("activity_date", payload.activity_date);
+    if (payload.location) formData.append("location", payload.location);
+    formData.append("park_id", payload.park_id.toString());
+
     // Add images
     payload.images.forEach((file) => {
-      formData.append('images', file);
+      formData.append("images", file);
     });
 
-    const response = await privateClient.post<ActivityAdminResponse>('/api/v1/activities/with-images', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    const response = await privateClient.post<ActivityAdminResponse>(
+      "/api/v1/activities/with-images",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    });
+    );
     return mapActivity(response);
   },
 
   update: async (id: string | number, payload: Partial<Activity>) => {
-    const response = await privateClient.put<ActivityAdminResponse>(`/api/v1/activities/${id}`, {
-      park_id: payload.park_id,
-      title: payload.title,
-      description: payload.description,
-      activity_date: payload.activity_date,
-      location: payload.location,
-      images: payload.images,
-    });
+    const response = await privateClient.put<ActivityAdminResponse>(
+      `/api/v1/activities/${id}`,
+      {
+        park_id: payload.park_id,
+        title: payload.title,
+        description: payload.description,
+        activity_date: payload.activity_date,
+        location: payload.location,
+        images: payload.images,
+      },
+    );
     return mapActivity(response);
   },
 
-  updateWithImages: async (id: string | number, payload: {
-    title?: string;
-    description?: string;
-    activity_date?: string;
-    location?: string;
-    park_id?: number;
-    images?: File[];
-    existing_images?: string[];
-  }) => {
+  updateWithImages: async (
+    id: string | number,
+    payload: {
+      title?: string;
+      description?: string;
+      activity_date?: string;
+      location?: string;
+      park_id?: number;
+      images?: File[];
+      existing_images?: string[];
+    },
+  ) => {
     const formData = new FormData();
-    if (payload.title) formData.append('title', payload.title);
-    if (payload.description) formData.append('description', payload.description);
-    if (payload.activity_date) formData.append('activity_date', payload.activity_date);
-    if (payload.location) formData.append('location', payload.location);
-    if (payload.park_id) formData.append('park_id', payload.park_id.toString());
-    
+    if (payload.title) formData.append("title", payload.title);
+    if (payload.description)
+      formData.append("description", payload.description);
+    if (payload.activity_date)
+      formData.append("activity_date", payload.activity_date);
+    if (payload.location) formData.append("location", payload.location);
+    if (payload.park_id) formData.append("park_id", payload.park_id.toString());
+
     // Add existing images if provided
     if (payload.existing_images && payload.existing_images.length > 0) {
-      formData.append('existing_images', JSON.stringify(payload.existing_images));
+      formData.append(
+        "existing_images",
+        JSON.stringify(payload.existing_images),
+      );
     }
-    
+
     // Add new images if provided
     if (payload.images && payload.images.length > 0) {
       payload.images.forEach((file) => {
-        formData.append('images', file);
+        formData.append("images", file);
       });
     }
 
-    const response = await privateClient.put<ActivityAdminResponse>(`/api/v1/activities/${id}/with-images`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
+    const response = await privateClient.put<ActivityAdminResponse>(
+      `/api/v1/activities/${id}/with-images`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       },
-    });
+    );
     return mapActivity(response);
   },
 
@@ -1374,25 +1561,32 @@ export const activitiesApi = {
     await privateClient.delete(`/api/v1/activities/${id}`);
     return true;
   },
-  
+
   submit: async (id: string | number) => {
-    const response = await privateClient.post<ActivityAdminResponse>(`/api/v1/activities/${id}/submit`);
+    const response = await privateClient.post<ActivityAdminResponse>(
+      `/api/v1/activities/${id}/submit`,
+    );
     return mapActivity(response);
   },
-  
+
   approve: async (id: string | number) => {
-    const response = await privateClient.post<ActivityAdminResponse>(`/api/v1/activities/${id}/approve`);
+    const response = await privateClient.post<ActivityAdminResponse>(
+      `/api/v1/activities/${id}/approve`,
+    );
     return mapActivity(response);
   },
-  
+
   reject: async (id: string | number, reason: string) => {
-    const response = await privateClient.post<ActivityAdminResponse>(`/api/v1/activities/${id}/reject`, { reason });
+    const response = await privateClient.post<ActivityAdminResponse>(
+      `/api/v1/activities/${id}/reject`,
+      { reason },
+    );
     return mapActivity(response);
-  }
+  },
 };
 
 export interface ParkGroupItem {
-  entityType: 'flora' | 'fauna' | 'artikel' | 'galeri' | 'kegiatan';
+  entityType: "flora" | "fauna" | "artikel" | "galeri" | "kegiatan";
   entityId: number;
   title: string;
   status: string;
@@ -1420,8 +1614,14 @@ export interface GroupedApprovalsResponse {
 }
 
 export const approvalsApi = {
-  list: async (params?: { entity_type?: ApprovalEntityType; limit?: number }) => {
-    const response = await privateClient.get<ApprovalListResponse>('/api/v1/approvals/', params);
+  list: async (params?: {
+    entity_type?: ApprovalEntityType;
+    limit?: number;
+  }) => {
+    const response = await privateClient.get<ApprovalListResponse>(
+      "/api/v1/approvals/",
+      params,
+    );
     return {
       items: response.items.map((item) => ({
         entityType: item.entity_type,
@@ -1440,7 +1640,7 @@ export const approvalsApi = {
       hasNext: response.has_next,
     };
   },
-  
+
   // Get approvals grouped by park
   listGrouped: async (): Promise<GroupedApprovalsResponse> => {
     const response = await privateClient.get<{
@@ -1465,13 +1665,13 @@ export const approvalsApi = {
       }>;
       total_parks: number;
       total_items: number;
-    }>('/api/v1/approvals/grouped');
-    
+    }>("/api/v1/approvals/grouped");
+
     return {
-      groups: response.groups.map(g => ({
+      groups: response.groups.map((g) => ({
         parkId: g.park_id,
         parkName: g.park_name,
-        items: g.items.map(item => ({
+        items: g.items.map((item) => ({
           entityType: item.entity_type as any,
           entityId: item.entity_id,
           title: item.title,
@@ -1491,18 +1691,21 @@ export const approvalsApi = {
       totalItems: response.total_items,
     };
   },
-  
+
   // Bulk approve all items from a park
-  bulkApprove: async (parkId: number, entityTypes?: Array<'flora' | 'fauna' | 'kegiatan'>) => {
+  bulkApprove: async (
+    parkId: number,
+    entityTypes?: Array<"flora" | "fauna" | "kegiatan">,
+  ) => {
     const response = await privateClient.post<{
       approved_count: number;
       failed_count: number;
       details: Record<string, number>;
-    }>('/api/v1/approvals/bulk-approve', {
+    }>("/api/v1/approvals/bulk-approve", {
       park_id: parkId,
       entity_types: entityTypes ?? null,
     });
-    
+
     return {
       approvedCount: response.approved_count,
       failedCount: response.failed_count,
@@ -1513,35 +1716,35 @@ export const approvalsApi = {
 
 export const authStorage = {
   saveToken(token: string) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(AUTH_TOKEN_KEY, token);
   },
   clearToken() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.removeItem(AUTH_TOKEN_KEY);
   },
   saveEmail(email: string) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(AUTH_EMAIL_KEY, email);
   },
   clearEmail() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.removeItem(AUTH_EMAIL_KEY);
   },
   readEmail(): string | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     return window.localStorage.getItem(AUTH_EMAIL_KEY);
   },
   saveUser(user: User) {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user));
   },
   clearUser() {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     window.localStorage.removeItem(AUTH_USER_KEY);
   },
   readUser(): User | null {
-    if (typeof window === 'undefined') return null;
+    if (typeof window === "undefined") return null;
     const raw = window.localStorage.getItem(AUTH_USER_KEY);
     if (!raw) return null;
     try {
@@ -1554,18 +1757,34 @@ export const authStorage = {
 
 export const parksApprovalApi = {
   listPending: async () => {
-    const response = await privateClient.get<Park[]>('/api/v1/parks/pending-approval');
+    const response = await privateClient.get<Park[]>(
+      "/api/v1/parks/pending-approval",
+    );
     return response;
   },
-  
+
   approve: async (parkId: number) => {
-    const response = await privateClient.post<{ message: string; id: number; name: string; status: string; approved_by: number; approved_at: string }>(`/api/v1/parks/${parkId}/approve`);
+    const response = await privateClient.post<{
+      message: string;
+      id: number;
+      name: string;
+      status: string;
+      approved_by: number;
+      approved_at: string;
+    }>(`/api/v1/parks/${parkId}/approve`);
     return response;
   },
 
   reject: async (parkId: number, reason?: string) => {
-    const response = await privateClient.post<{ message: string; id: number; name: string; status: string; rejected_by: number; rejected_at: string }>(`/api/v1/parks/${parkId}/reject`, {
-      rejection_reason: reason
+    const response = await privateClient.post<{
+      message: string;
+      id: number;
+      name: string;
+      status: string;
+      rejected_by: number;
+      rejected_at: string;
+    }>(`/api/v1/parks/${parkId}/reject`, {
+      rejection_reason: reason,
     });
     return response;
   },
@@ -1594,21 +1813,25 @@ export interface NotificationListResponse {
 }
 
 export const notificationsApi = {
-  list: async (params?: { limit?: number; offset?: number; unread_only?: boolean }) => {
+  list: async (params?: {
+    limit?: number;
+    offset?: number;
+    unread_only?: boolean;
+  }) => {
     const queryParams = new URLSearchParams();
-    if (params?.limit) queryParams.set('limit', params.limit.toString());
-    if (params?.offset) queryParams.set('offset', params.offset.toString());
-    if (params?.unread_only) queryParams.set('unread_only', 'true');
-    
+    if (params?.limit) queryParams.set("limit", params.limit.toString());
+    if (params?.offset) queryParams.set("offset", params.offset.toString());
+    if (params?.unread_only) queryParams.set("unread_only", "true");
+
     const response = await privateClient.get<NotificationListResponse>(
-      `/api/v1/notifications/?${queryParams.toString()}`
+      `/api/v1/notifications/?${queryParams.toString()}`,
     );
     return response;
   },
 
   get: async (notificationId: number) => {
     const response = await privateClient.get<Notification>(
-      `/api/v1/notifications/${notificationId}`
+      `/api/v1/notifications/${notificationId}`,
     );
     return response;
   },
@@ -1618,12 +1841,12 @@ export const notificationsApi = {
   },
 
   markAllAsRead: async () => {
-    await privateClient.post('/api/v1/notifications/mark-all-read');
+    await privateClient.post("/api/v1/notifications/mark-all-read");
   },
 
   getUnreadCount: async () => {
     const response = await privateClient.get<{ count: number }>(
-      '/api/v1/notifications/unread-count'
+      "/api/v1/notifications/unread-count",
     );
     return response;
   },

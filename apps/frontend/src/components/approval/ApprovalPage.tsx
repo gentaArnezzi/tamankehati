@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { CheckCircle } from 'lucide-react';
-import { toast } from 'sonner';
-import { useAuth } from '../../lib/useAuth';
-import { GroupedApprovalView } from './GroupedApprovalView';
+import { useState, useEffect } from "react";
+import { CheckCircle } from "lucide-react";
+import { toast } from "sonner";
+import { useAuth } from "../../lib/useAuth";
+import { GroupedApprovalView } from "./GroupedApprovalView";
 
 export function ApprovalPage() {
   const { user } = useAuth();
@@ -15,14 +15,16 @@ export function ApprovalPage() {
       setLoading(false);
       return;
     }
-    
+
     // Check if user has admin privileges
-    if (user.role !== 'super_admin' && user.role !== 'regional_admin') {
-      toast.error('Akses ditolak: Hanya admin yang dapat mengakses halaman persetujuan');
+    if (user.role !== "super_admin" && user.role !== "regional_admin") {
+      toast.error(
+        "Akses ditolak: Hanya admin yang dapat mengakses halaman persetujuan",
+      );
       setLoading(false);
       return;
     }
-    
+
     setLoading(false);
   }, [user?.id]);
 
@@ -41,11 +43,13 @@ export function ApprovalPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl mb-2 flex items-center gap-2">
-          <CheckCircle className="h-8 w-8" style={{ color: '#356447' }} />
+          <CheckCircle className="h-8 w-8" style={{ color: "#356447" }} />
           Persetujuan Data
         </h1>
         <p className="text-muted-foreground">
-          Tinjau dan proses konten yang menunggu persetujuan sebelum dipublikasikan. Data dikelompokkan berdasarkan taman untuk memudahkan bulk approval.
+          Tinjau dan proses konten yang menunggu persetujuan sebelum
+          dipublikasikan. Data dikelompokkan berdasarkan taman untuk memudahkan
+          bulk approval.
         </p>
       </div>
 

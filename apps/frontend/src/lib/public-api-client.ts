@@ -1,8 +1,10 @@
-'use client';
+"use client";
 
-import { HttpClient, PaginatedResponse } from './http-client';
+import { HttpClient, PaginatedResponse } from "./http-client";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-pxnu.onrender.com';
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  "https://tamankehati-backend-pxnu.onrender.com";
 
 const client = new HttpClient(API_BASE_URL);
 
@@ -74,9 +76,7 @@ type PublicListResult<T> = PaginatedResponse<T> & {
   total: number;
 };
 
-const withPaginationMeta = <T,>(
-  response: PaginatedResponse<T>,
-) => ({
+const withPaginationMeta = <T>(response: PaginatedResponse<T>) => ({
   items: response.items,
   total: response.total,
   limit: response.limit,
@@ -161,7 +161,7 @@ export const publicApi = {
     offset?: number;
   }) => {
     const response = await client.get<PublicListResult<FloraPublicResponse>>(
-      '/api/public/flora/',
+      "/api/public/flora/",
       params,
     );
     return {
@@ -171,7 +171,9 @@ export const publicApi = {
   },
 
   getFloraById: async (id: string) => {
-    const response = await client.get<FloraPublicResponse>(`/api/public/flora/${id}`);
+    const response = await client.get<FloraPublicResponse>(
+      `/api/public/flora/${id}`,
+    );
     return mapFlora(response);
   },
 
@@ -183,7 +185,7 @@ export const publicApi = {
     offset?: number;
   }) => {
     const response = await client.get<PublicListResult<FaunaPublicResponse>>(
-      '/api/public/fauna/',
+      "/api/public/fauna/",
       params,
     );
     return {
@@ -193,13 +195,20 @@ export const publicApi = {
   },
 
   getFaunaById: async (id: string) => {
-    const response = await client.get<FaunaPublicResponse>(`/api/public/fauna/${id}`);
+    const response = await client.get<FaunaPublicResponse>(
+      `/api/public/fauna/${id}`,
+    );
     return mapFauna(response);
   },
 
-  getTaman: async (params?: { search?: string; wilayah?: string; limit?: number; offset?: number }) => {
+  getTaman: async (params?: {
+    search?: string;
+    wilayah?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     const response = await client.get<PublicListResult<TamanPublicResponse>>(
-      '/api/public/parks/',
+      "/api/public/parks/",
       params,
     );
     return {
@@ -209,13 +218,19 @@ export const publicApi = {
   },
 
   getTamanById: async (id: string) => {
-    const response = await client.get<TamanPublicResponse>(`/api/public/parks/${id}`);
+    const response = await client.get<TamanPublicResponse>(
+      `/api/public/parks/${id}`,
+    );
     return mapTaman(response);
   },
 
-  getArticles: async (params?: { category?: string; limit?: number; offset?: number }) => {
+  getArticles: async (params?: {
+    category?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     const response = await client.get<PublicListResult<ArtikelPublicResponse>>(
-      '/api/public/artikel/',
+      "/api/public/artikel/",
       params,
     );
     return {
@@ -225,13 +240,20 @@ export const publicApi = {
   },
 
   getArticleBySlug: async (slug: string) => {
-    const response = await client.get<ArtikelPublicResponse>(`/api/public/artikel/${slug}`);
+    const response = await client.get<ArtikelPublicResponse>(
+      `/api/public/artikel/${slug}`,
+    );
     return mapArtikel(response);
   },
 
-  getGallery: async (params?: { jenis?: string; wilayah?: string; limit?: number; offset?: number }) => {
+  getGallery: async (params?: {
+    jenis?: string;
+    wilayah?: string;
+    limit?: number;
+    offset?: number;
+  }) => {
     const response = await client.get<PublicListResult<GaleriPublicResponse>>(
-      '/api/public/galeri/',
+      "/api/public/galeri/",
       params,
     );
     return {
@@ -240,10 +262,13 @@ export const publicApi = {
     };
   },
 
-  getStats: () => client.get<Record<string, unknown>>('/api/public/stats/'),
+  getStats: () => client.get<Record<string, unknown>>("/api/public/stats/"),
 
   sendChat: (payload: { message: string; session_id?: string }) =>
-    client.post<{ session_id: string; response: string }>('/api/public/chat/', payload),
+    client.post<{ session_id: string; response: string }>(
+      "/api/public/chat/",
+      payload,
+    ),
 
   getActivities: async (params?: {
     search?: string;
@@ -252,7 +277,7 @@ export const publicApi = {
     offset?: number;
   }) => {
     const response = await client.get<PublicListResult<ActivityPublicResponse>>(
-      '/api/public/activities/',
+      "/api/public/activities/",
       params,
     );
     return {
@@ -261,11 +286,14 @@ export const publicApi = {
     };
   },
 
-  getActivitiesByPark: async (parkId: number, params?: {
-    search?: string;
-    limit?: number;
-    offset?: number;
-  }) => {
+  getActivitiesByPark: async (
+    parkId: number,
+    params?: {
+      search?: string;
+      limit?: number;
+      offset?: number;
+    },
+  ) => {
     const response = await client.get<PublicListResult<ActivityPublicResponse>>(
       `/api/public/activities/park/${parkId}`,
       params,
@@ -277,7 +305,9 @@ export const publicApi = {
   },
 
   getActivityById: async (id: string) => {
-    const response = await client.get<ActivityPublicResponse>(`/api/public/activities/${id}`);
+    const response = await client.get<ActivityPublicResponse>(
+      `/api/public/activities/${id}`,
+    );
     return mapActivity(response);
   },
 };

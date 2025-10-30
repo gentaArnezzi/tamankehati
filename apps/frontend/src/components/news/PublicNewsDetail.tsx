@@ -1,22 +1,34 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Badge } from '../ui/badge';
-import { Button } from '../ui/button';
-import { 
-  Calendar, 
-  Eye, 
-  Pin, 
-  Star, 
-  Tag, 
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
+import {
+  Calendar,
+  Eye,
+  Pin,
+  Star,
+  Tag,
   Clock,
   FileText,
   Image as ImageIcon,
   Paperclip,
-  BookOpen
-} from 'lucide-react';
-import { PublicNews } from './PublicNews';
+  BookOpen,
+} from "lucide-react";
+import { PublicNews } from "./PublicNews";
 
 interface PublicNewsDetailProps {
   open: boolean;
@@ -33,25 +45,29 @@ export function PublicNewsDetail({
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      biodiversity: 'bg-green-100 text-green-800',
-      conservation: 'bg-blue-100 text-blue-800',
-      research: 'bg-purple-100 text-purple-800',
-      education: 'bg-yellow-100 text-yellow-800',
-      events: 'bg-pink-100 text-pink-800',
-      general: 'bg-gray-100 text-gray-800',
+      biodiversity: "bg-green-100 text-green-800",
+      conservation: "bg-blue-100 text-blue-800",
+      research: "bg-purple-100 text-purple-800",
+      education: "bg-yellow-100 text-yellow-800",
+      events: "bg-pink-100 text-pink-800",
+      general: "bg-gray-100 text-gray-800",
     };
 
     const labels = {
-      biodiversity: 'Keanekaragaman Hayati',
-      conservation: 'Konservasi',
-      research: 'Penelitian',
-      education: 'Pendidikan',
-      events: 'Acara',
-      general: 'Umum',
+      biodiversity: "Keanekaragaman Hayati",
+      conservation: "Konservasi",
+      research: "Penelitian",
+      education: "Pendidikan",
+      events: "Acara",
+      general: "Umum",
     };
 
     return (
-      <Badge className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          colors[category as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
         {labels[category as keyof typeof labels] || category}
       </Badge>
     );
@@ -59,29 +75,33 @@ export function PublicNewsDetail({
 
   const getPriorityBadge = (priority: number) => {
     const colors = {
-      0: 'bg-gray-100 text-gray-800',
-      1: 'bg-yellow-100 text-yellow-800',
-      2: 'bg-red-100 text-red-800',
+      0: "bg-gray-100 text-gray-800",
+      1: "bg-yellow-100 text-yellow-800",
+      2: "bg-red-100 text-red-800",
     };
 
     const labels = {
-      0: 'Normal',
-      1: 'Tinggi',
-      2: 'Mendesak',
+      0: "Normal",
+      1: "Tinggi",
+      2: "Mendesak",
     };
 
     return (
-      <Badge className={colors[priority as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {labels[priority as keyof typeof labels] || 'Normal'}
+      <Badge
+        className={
+          colors[priority as keyof typeof colors] || "bg-gray-100 text-gray-800"
+        }
+      >
+        {labels[priority as keyof typeof labels] || "Normal"}
       </Badge>
     );
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('id-ID', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("id-ID", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -107,7 +127,7 @@ export function PublicNewsDetail({
                 {getCategoryBadge(news.category)}
                 {getPriorityBadge(news.priority)}
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Eye className="h-4 w-4" />
@@ -186,7 +206,7 @@ export function PublicNewsDetail({
                     alt="Featured image"
                     className="max-w-full h-auto rounded-lg shadow-md"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 </div>
@@ -205,7 +225,7 @@ export function PublicNewsDetail({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {news.tags.split(',').map((tag, index) => (
+                  {news.tags.split(",").map((tag, index) => (
                     <Badge key={index} variant="outline">
                       {tag.trim()}
                     </Badge>

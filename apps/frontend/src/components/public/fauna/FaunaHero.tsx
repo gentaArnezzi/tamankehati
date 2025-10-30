@@ -1,22 +1,22 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { Bird, MapPin, PawPrint } from 'lucide-react';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Bird, MapPin, PawPrint } from "lucide-react";
 
 export function FaunaHero() {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <section className="relative h-[80vh] min-h-[600px] overflow-hidden">
       {/* Parallax Background */}
-      <div 
+      <div
         className="absolute inset-0 w-full h-[120%]"
         style={{
           transform: `translateY(${scrollY * 0.3}px)`,
@@ -33,7 +33,7 @@ export function FaunaHero() {
 
       {/* Dark black overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      
+
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
@@ -64,8 +64,9 @@ export function FaunaHero() {
 
             {/* Description */}
             <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-              Temukan keanekaragaman fauna Indonesia yang menakjubkan. Dari burung endemik hingga mamalia langka, 
-              jelajahi kekayaan satwa liar yang menjadi kebanggaan Nusantara.
+              Temukan keanekaragaman fauna Indonesia yang menakjubkan. Dari
+              burung endemik hingga mamalia langka, jelajahi kekayaan satwa liar
+              yang menjadi kebanggaan Nusantara.
             </p>
 
             {/* Stats */}
@@ -74,21 +75,27 @@ export function FaunaHero() {
                 <div className="text-3xl md:text-4xl font-light text-white mb-2">
                   300+
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Spesies Terdata</div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Spesies Terdata
+                </div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2">
                   50+
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Famili Hewan</div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Famili Hewan
+                </div>
               </div>
-              
+
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2">
                   <MapPin className="w-8 h-8 mx-auto" />
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">Seluruh Nusantara</div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Seluruh Nusantara
+                </div>
               </div>
             </div>
           </div>

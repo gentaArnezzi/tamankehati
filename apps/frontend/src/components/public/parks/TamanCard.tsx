@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import Image from 'next/image';
-import { Badge } from '../../ui/badge';
-import { Card, CardContent, CardFooter, CardHeader } from '../../ui/card';
-import { Button } from '../../ui/button';
-import { MapPin, Calendar, ArrowRight, Leaf } from 'lucide-react';
-import { formatDate } from '../../../lib/utils';
-import type { TamanPublic } from '../../../types/public';
+import Link from "next/link";
+import Image from "next/image";
+import { Badge } from "../../ui/badge";
+import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
+import { Button } from "../../ui/button";
+import { MapPin, Calendar, ArrowRight, Leaf } from "lucide-react";
+import { formatDate } from "../../../lib/utils";
+import type { TamanPublic } from "../../../types/public";
 
 interface TamanCardProps {
   taman: TamanPublic;
@@ -24,16 +24,16 @@ export function TamanCard({ taman }: TamanCardProps) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute top-3 right-3">
-          <Badge 
-            variant={taman.status === 'approved' ? 'default' : 'secondary'}
+          <Badge
+            variant={taman.status === "approved" ? "default" : "secondary"}
             className="bg-white/90 text-gray-700 hover:bg-white/90"
           >
-            {taman.status === 'approved' ? 'Aktif' : 'Draft'}
+            {taman.status === "approved" ? "Aktif" : "Draft"}
           </Badge>
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
       </div>
-      
+
       <CardHeader className="pb-3">
         <div className="space-y-2">
           <h3 className="font-semibold text-lg leading-tight text-gray-900 group-hover:text-emerald-700 transition-colors">
@@ -46,32 +46,34 @@ export function TamanCard({ taman }: TamanCardProps) {
           )}
         </div>
       </CardHeader>
-      
+
       <CardContent className="pt-0">
         <div className="space-y-3">
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <MapPin className="h-4 w-4" />
             <span>Indonesia</span>
           </div>
-          
+
           {taman.area_ha && (
             <div className="flex items-center gap-2 text-sm text-gray-500">
               <Leaf className="h-4 w-4" />
               <span>{taman.area_ha} hektar</span>
             </div>
           )}
-          
+
           <div className="flex items-center gap-2 text-sm text-gray-500">
             <Calendar className="h-4 w-4" />
-            <span>{taman.created_at ? formatDate(taman.created_at) : 'N/A'}</span>
+            <span>
+              {taman.created_at ? formatDate(taman.created_at) : "N/A"}
+            </span>
           </div>
         </div>
       </CardContent>
-      
+
       <CardFooter className="pt-0">
-        <Button 
-          asChild 
-          variant="outline" 
+        <Button
+          asChild
+          variant="outline"
           className="w-full group-hover:bg-emerald-50 group-hover:border-emerald-200 group-hover:text-emerald-700 transition-all duration-200"
         >
           <Link href={`/taman/${taman.id}`} className="flex items-center gap-2">

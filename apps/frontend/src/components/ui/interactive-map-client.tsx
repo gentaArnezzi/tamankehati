@@ -1,23 +1,32 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { Icon } from 'leaflet';
-import { Button } from './button';
-import { Input } from './input';
-import { Label } from './label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
-import { MapPin, Navigation, Search } from 'lucide-react';
-import { toast } from 'sonner';
-import 'leaflet/dist/leaflet.css';
+import { useState, useEffect, useRef, useCallback } from "react";
+import { MapContainer, TileLayer, Marker, useMapEvents } from "react-leaflet";
+import { Icon } from "leaflet";
+import { Button } from "./button";
+import { Input } from "./input";
+import { Label } from "./label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
+import { MapPin, Navigation, Search } from "lucide-react";
+import { toast } from "sonner";
+import "leaflet/dist/leaflet.css";
 
 // Fix for default markers in react-leaflet
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   delete (Icon.Default.prototype as any)._getIconUrl;
   Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+    iconRetinaUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+    iconUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+    shadowUrl:
+      "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
   });
 }
 
@@ -35,9 +44,13 @@ interface MapClickHandlerProps {
   initialLng?: number;
 }
 
-function MapClickHandler({ onMapClick, initialLat, initialLng }: MapClickHandlerProps) {
+function MapClickHandler({
+  onMapClick,
+  initialLat,
+  initialLng,
+}: MapClickHandlerProps) {
   const [position, setPosition] = useState<[number, number] | null>(
-    initialLat && initialLng ? [initialLat, initialLng] : null
+    initialLat && initialLng ? [initialLat, initialLng] : null,
   );
 
   const map = useMapEvents({
@@ -63,15 +76,17 @@ export function InteractiveMap({
   latitude,
   longitude,
   onCoordinatesChange,
-  height = '400px',
-  className = '',
+  height = "400px",
+  className = "",
 }: InteractiveMapProps) {
-  const [mapCenter, setMapCenter] = useState<[number, number]>([-6.200000, 106.816666]); // Default to Jakarta
-  const [searchQuery, setSearchQuery] = useState('');
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    -6.2, 106.816666,
+  ]); // Default to Jakarta
+  const [searchQuery, setSearchQuery] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [isMapMounted, setIsMapMounted] = useState(false);
-  const [mapKey, setMapKey] = useState(''); // Dynamic key to force re-mount
+  const [mapKey, setMapKey] = useState(""); // Dynamic key to force re-mount
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const containerIdRef = useRef(`map-${Date.now()}-${Math.random()}`); // Unique ID per instance
 
@@ -80,12 +95,12 @@ export function InteractiveMap({
     setIsClient(true);
     // Generate unique key for this mount
     setMapKey(`map-instance-${Date.now()}-${Math.random()}`);
-    
+
     // Small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       setIsMapMounted(true);
     }, 150);
-    
+
     return () => {
       clearTimeout(timer);
       setIsMapMounted(false);
@@ -102,41 +117,47 @@ export function InteractiveMap({
   // Cleanup map on unmount
   useEffect(() => {
     return () => {
-      console.log('🧹 Cleaning up map:', containerIdRef.current);
-      
+      console.log("🧹 Cleaning up map:", containerIdRef.current);
+
       // Cleanup any existing map instances
       if (mapContainerRef.current) {
         const mapContainer = mapContainerRef.current;
-        
+
         // Find and destroy Leaflet map instance
-        const leafletContainer = mapContainer.querySelector('.leaflet-container');
+        const leafletContainer =
+          mapContainer.querySelector(".leaflet-container");
         if (leafletContainer) {
           try {
             // Remove Leaflet's internal reference
             delete (leafletContainer as any)._leaflet_id;
           } catch (e) {
-            console.warn('Error removing leaflet ID:', e);
+            console.warn("Error removing leaflet ID:", e);
           }
           leafletContainer.remove();
         }
-        
+
         // Clear the entire container
-        mapContainer.innerHTML = '';
-        
+        mapContainer.innerHTML = "";
+
         // Remove all Leaflet classes from container
         if (mapContainer.className) {
-          mapContainer.className = mapContainer.className.replace(/leaflet-\S+/g, '').trim();
+          mapContainer.className = mapContainer.className
+            .replace(/leaflet-\S+/g, "")
+            .trim();
         }
       }
-      
+
       // No need to reset tracker - component is unmounting
     };
   }, []);
 
-  const handleMapClick = useCallback((lat: number, lng: number) => {
-    onCoordinatesChange(lat, lng);
-    toast.success(`Koordinat dipilih: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-  }, [onCoordinatesChange]);
+  const handleMapClick = useCallback(
+    (lat: number, lng: number) => {
+      onCoordinatesChange(lat, lng);
+      toast.success(`Koordinat dipilih: ${lat.toFixed(6)}, ${lng.toFixed(6)}`);
+    },
+    [onCoordinatesChange],
+  );
 
   const handleSearch = async () => {
     if (!searchQuery.trim()) return;
@@ -145,7 +166,7 @@ export function InteractiveMap({
     try {
       // Use Nominatim (OpenStreetMap) geocoding service
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=id`
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1&countrycodes=id`,
       );
       const data = await response.json();
 
@@ -153,17 +174,19 @@ export function InteractiveMap({
         const { lat, lon } = data[0];
         const newLat = parseFloat(lat);
         const newLng = parseFloat(lon);
-        
+
         setMapCenter([newLat, newLng]);
         onCoordinatesChange(newLat, newLng);
-        
+
         toast.success(`Lokasi ditemukan: ${data[0].display_name}`);
       } else {
-        toast.error('Lokasi tidak ditemukan. Coba dengan kata kunci yang berbeda.');
+        toast.error(
+          "Lokasi tidak ditemukan. Coba dengan kata kunci yang berbeda.",
+        );
       }
     } catch (error) {
-      console.error('Search error:', error);
-      toast.error('Gagal mencari lokasi. Silakan coba lagi.');
+      console.error("Search error:", error);
+      toast.error("Gagal mencari lokasi. Silakan coba lagi.");
     } finally {
       setIsSearching(false);
     }
@@ -171,7 +194,7 @@ export function InteractiveMap({
 
   const handleCurrentLocation = () => {
     if (!navigator.geolocation) {
-      toast.error('Geolokasi tidak didukung oleh browser ini.');
+      toast.error("Geolokasi tidak didukung oleh browser ini.");
       return;
     }
 
@@ -180,13 +203,15 @@ export function InteractiveMap({
         const { latitude: lat, longitude: lng } = position.coords;
         setMapCenter([lat, lng]);
         onCoordinatesChange(lat, lng);
-        
-        toast.success('Lokasi saat ini ditemukan!');
+
+        toast.success("Lokasi saat ini ditemukan!");
       },
       (error) => {
-        console.error('Geolocation error:', error);
-        toast.error('Gagal mendapatkan lokasi saat ini. Pastikan izin geolokasi diaktifkan.');
-      }
+        console.error("Geolocation error:", error);
+        toast.error(
+          "Gagal mendapatkan lokasi saat ini. Pastikan izin geolokasi diaktifkan.",
+        );
+      },
     );
   };
 
@@ -199,9 +224,7 @@ export function InteractiveMap({
             <MapPin className="h-5 w-5" />
             Pilih Koordinat Taman
           </CardTitle>
-          <CardDescription>
-            Memuat peta interaktif...
-          </CardDescription>
+          <CardDescription>Memuat peta interaktif...</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-center" style={{ height }}>
@@ -223,7 +246,8 @@ export function InteractiveMap({
           Pilih Koordinat Taman
         </CardTitle>
         <CardDescription>
-          Klik pada peta atau gunakan pencarian untuk memilih koordinat taman konservasi
+          Klik pada peta atau gunakan pencarian untuk memilih koordinat taman
+          konservasi
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -238,7 +262,7 @@ export function InteractiveMap({
               placeholder="Cari lokasi (contoh: Jakarta, Bandung, Taman Nasional...)"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
             />
           </div>
           <Button
@@ -260,20 +284,21 @@ export function InteractiveMap({
         </div>
 
         {/* Current Coordinates Display */}
-        {(latitude && longitude) && (
+        {latitude && longitude && (
           <div className="bg-muted p-3 rounded-lg">
             <p className="text-sm font-medium">Koordinat Terpilih:</p>
             <p className="text-sm text-muted-foreground">
-              Latitude: {latitude.toFixed(6)} | Longitude: {longitude.toFixed(6)}
+              Latitude: {latitude.toFixed(6)} | Longitude:{" "}
+              {longitude.toFixed(6)}
             </p>
           </div>
         )}
 
         {/* Map Container */}
-        <div 
-          ref={mapContainerRef} 
+        <div
+          ref={mapContainerRef}
           id={containerIdRef.current}
-          style={{ height }} 
+          style={{ height }}
           className="rounded-lg overflow-hidden border"
         >
           {isClient && isMapMounted && mapKey ? (
@@ -281,10 +306,10 @@ export function InteractiveMap({
               key={mapKey}
               center={mapCenter}
               zoom={13}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: "100%", width: "100%" }}
               scrollWheelZoom={true}
               whenReady={() => {
-                console.log('✅ Map initialized:', containerIdRef.current);
+                console.log("✅ Map initialized:", containerIdRef.current);
               }}
             >
               <TileLayer

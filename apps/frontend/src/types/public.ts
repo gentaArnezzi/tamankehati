@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from "zod";
 
 export const PaginationMetaSchema = z.object({
   total: z.number(),
@@ -104,12 +104,14 @@ export const TamanPublicSchema = z.object({
   gambar_utama: z.string().nullable().optional(),
   created_at: z.string().optional(),
   updated_at: z.string().optional(),
-  statistik: z.object({
-    flora: z.number().default(0),
-    fauna: z.number().default(0),
-    artikel: z.number().default(0),
-    galeri: z.number().default(0),
-  }).optional(),
+  statistik: z
+    .object({
+      flora: z.number().default(0),
+      fauna: z.number().default(0),
+      artikel: z.number().default(0),
+      galeri: z.number().default(0),
+    })
+    .optional(),
 });
 
 // Keep ParkPublicSchema for backward compatibility
@@ -140,7 +142,9 @@ export const PublicStatsSchema = z.object({
   total_artikel: z.number().default(0),
 });
 
-export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
+export const PaginatedResponseSchema = <T extends z.ZodTypeAny>(
+  itemSchema: T,
+) =>
   z.object({
     items: z.array(itemSchema),
     ...PaginationMetaSchema.shape,

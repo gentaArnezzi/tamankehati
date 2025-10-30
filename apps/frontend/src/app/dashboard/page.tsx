@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { CollapsibleDashboardLayout } from '../../components/CollapsibleDashboardLayout';
-import { DashboardWithAnalytics } from '../../components/DashboardWithAnalytics';
-import { useAuth } from '../../lib/useAuth';
-import { useRouter, usePathname } from 'next/navigation';
+import React, { useEffect, useState } from "react";
+import { CollapsibleDashboardLayout } from "../../components/CollapsibleDashboardLayout";
+import { DashboardWithAnalytics } from "../../components/DashboardWithAnalytics";
+import { useAuth } from "../../lib/useAuth";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function DashboardPage() {
   const { user, logout, loading } = useAuth();
@@ -17,20 +17,20 @@ export default function DashboardPage() {
     // Wait for auth to finish loading
     if (!loading) {
       setHasCheckedAuth(true);
-      
+
       // Only redirect if we're sure there's no user after loading is complete
       if (!user) {
         // Small delay to ensure localStorage is fully read
         const timer = setTimeout(() => {
           // Double check localStorage directly as fallback
-          const storedUser = localStorage.getItem('auth_user');
-          const storedToken = localStorage.getItem('auth_token');
-          
+          const storedUser = localStorage.getItem("auth_user");
+          const storedToken = localStorage.getItem("auth_token");
+
           if (!storedUser || !storedToken) {
-            router.push('/login');
+            router.push("/login");
           }
         }, 100);
-        
+
         return () => clearTimeout(timer);
       }
     }
@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
   const handleLogout = () => {
     logout();
-    router.push('/login');
+    router.push("/login");
   };
 
   // Show loading spinner while checking auth

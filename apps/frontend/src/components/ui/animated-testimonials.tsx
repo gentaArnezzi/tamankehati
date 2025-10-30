@@ -50,10 +50,13 @@ export const AnimatedTestimonials = ({
   };
 
   return (
-    <div ref={containerRef} className={cn("w-full py-16 px-8 relative z-0", className)}>
+    <div
+      ref={containerRef}
+      className={cn("w-full py-16 px-8 relative z-0", className)}
+    >
       <div className="relative flex flex-row gap-0 items-center z-0">
         {/* Left: Stacked Images - Slide from left */}
-        <motion.div 
+        <motion.div
           className="w-1/2 pl-6"
           initial={{ opacity: 0, x: -100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -105,9 +108,9 @@ export const AnimatedTestimonials = ({
             </AnimatePresence>
           </div>
         </motion.div>
-        
+
         {/* Right: Content - Slide from right */}
-        <motion.div 
+        <motion.div
           className="w-1/2 flex justify-between flex-col py-4 pl-12 pr-6"
           initial={{ opacity: 0, x: 100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
@@ -183,4 +186,3 @@ export const AnimatedTestimonials = ({
     </div>
   );
 };
-

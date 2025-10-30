@@ -1,9 +1,15 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './card';
-import { MapPin } from 'lucide-react';
-import 'leaflet/dist/leaflet.css';
+import { useEffect, useRef, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "./card";
+import { MapPin } from "lucide-react";
+import "leaflet/dist/leaflet.css";
 
 interface InteractiveMapDisplayProps {
   latitude: number;
@@ -19,8 +25,8 @@ interface InteractiveMapDisplayProps {
 export function InteractiveMapDisplay({
   latitude,
   longitude,
-  height = '450px',
-  className = '',
+  height = "450px",
+  className = "",
 }: InteractiveMapDisplayProps) {
   const [isClient, setIsClient] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +43,7 @@ export function InteractiveMapDisplay({
 
     // Prevent re-initialization if map already exists
     if (mapInstanceRef.current) {
-      console.log('⚠️ Map already exists, skipping initialization');
+      console.log("⚠️ Map already exists, skipping initialization");
       return;
     }
 
@@ -48,14 +54,17 @@ export function InteractiveMapDisplay({
     const initMap = async () => {
       try {
         // Dynamic import to avoid SSR issues
-        L = (await import('leaflet')).default;
+        L = (await import("leaflet")).default;
 
         // Fix for default marker icon
         delete (L.Icon.Default.prototype as any)._getIconUrl;
         L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-          iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          iconRetinaUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png",
+          iconUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png",
+          shadowUrl:
+            "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
         });
 
         if (!mapContainerRef.current) return;
@@ -63,9 +72,9 @@ export function InteractiveMapDisplay({
         // Check if container already has a map
         const existingMap = (mapContainerRef.current as any)._leaflet_id;
         if (existingMap) {
-          console.log('⚠️ Container already has a map, cleaning up first');
+          console.log("⚠️ Container already has a map, cleaning up first");
           delete (mapContainerRef.current as any)._leaflet_id;
-          mapContainerRef.current.innerHTML = '';
+          mapContainerRef.current.innerHTML = "";
         }
 
         // Create map instance
@@ -77,8 +86,9 @@ export function InteractiveMapDisplay({
         });
 
         // Add tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
           maxZoom: 19,
         }).addTo(map);
 
@@ -89,9 +99,9 @@ export function InteractiveMapDisplay({
         mapInstanceRef.current = map;
         setIsLoading(false);
 
-        console.log('✅ Map initialized successfully');
+        console.log("✅ Map initialized successfully");
       } catch (error) {
-        console.error('❌ Error initializing map:', error);
+        console.error("❌ Error initializing map:", error);
         setIsLoading(false);
       }
     };
@@ -104,14 +114,14 @@ export function InteractiveMapDisplay({
     // Cleanup function
     return () => {
       clearTimeout(timer);
-      
+
       if (mapInstanceRef.current) {
-        console.log('🧹 Cleaning up map instance');
+        console.log("🧹 Cleaning up map instance");
         try {
           mapInstanceRef.current.remove();
           mapInstanceRef.current = null;
         } catch (error) {
-          console.error('Error removing map:', error);
+          console.error("Error removing map:", error);
         }
       }
 
@@ -119,7 +129,7 @@ export function InteractiveMapDisplay({
       if (mapContainerRef.current) {
         try {
           delete (mapContainerRef.current as any)._leaflet_id;
-          mapContainerRef.current.innerHTML = '';
+          mapContainerRef.current.innerHTML = "";
         } catch (e) {
           // ignore
         }
@@ -137,7 +147,10 @@ export function InteractiveMapDisplay({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-center bg-gray-50 rounded-lg" style={{ height }}>
+          <div
+            className="flex items-center justify-center bg-gray-50 rounded-lg"
+            style={{ height }}
+          >
             <div className="text-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
               <p className="text-sm text-gray-600">Memuat peta...</p>
@@ -160,9 +173,9 @@ export function InteractiveMapDisplay({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div 
+        <div
           ref={mapContainerRef}
-          style={{ height }} 
+          style={{ height }}
           className="rounded-lg overflow-hidden border relative"
         >
           {isLoading && (

@@ -64,12 +64,12 @@ const CenterImage = () => {
   const backgroundSize = useTransform(
     scrollY,
     [0, SECTION_HEIGHT + 500],
-    ["170%", "100%"]
+    ["170%", "100%"],
   );
   const opacity = useTransform(
     scrollY,
     [SECTION_HEIGHT, SECTION_HEIGHT + 500],
-    [1, 0]
+    [1, 0],
   );
 
   return (
@@ -123,7 +123,13 @@ const ParallaxImages = () => {
   );
 };
 
-const ParallaxImg = ({ className, alt, src, start, end }: {
+const ParallaxImg = ({
+  className,
+  alt,
+  src,
+  start,
+  end,
+}: {
   className: string;
   alt: string;
   src: string;
@@ -168,17 +174,37 @@ const Schedule = () => {
       >
         Taman Kehati Indonesia
       </motion.h1>
-      <ScheduleItem title="Flora Indonesia" date="500+ Spesies" location="Dilindungi" />
-      <ScheduleItem title="Fauna Endemik" date="150+ Spesies" location="Langka" />
-      <ScheduleItem title="Kawasan Konservasi" date="25 Taman" location="Terpadu" />
-      <ScheduleItem title="Program Penelitian" date="50+ Program" location="Aktif" />
+      <ScheduleItem
+        title="Flora Indonesia"
+        date="500+ Spesies"
+        location="Dilindungi"
+      />
+      <ScheduleItem
+        title="Fauna Endemik"
+        date="150+ Spesies"
+        location="Langka"
+      />
+      <ScheduleItem
+        title="Kawasan Konservasi"
+        date="25 Taman"
+        location="Terpadu"
+      />
+      <ScheduleItem
+        title="Program Penelitian"
+        date="50+ Program"
+        location="Aktif"
+      />
       <ScheduleItem title="Edukasi" date="Kontinyu" location="Masyarakat" />
       <ScheduleItem title="Konservasi" date="Berkelanjutan" location="Alam" />
     </section>
   );
 };
 
-const ScheduleItem = ({ title, date, location }: {
+const ScheduleItem = ({
+  title,
+  date,
+  location,
+}: {
   title: string;
   date: string;
   location: string;

@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useSearchParams } from 'next/navigation';
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { useInView } from 'react-intersection-observer';
-import { useEffect } from 'react';
-import { getParkPage } from '../../../lib/api/public';
-import { ParkCard } from './ParkCard';
-import { Button } from '../../ui/button';
-import { Loader2 } from 'lucide-react';
+import { useSearchParams } from "next/navigation";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInView } from "react-intersection-observer";
+import { useEffect } from "react";
+import { getParkPage } from "../../../lib/api/public";
+import { ParkCard } from "./ParkCard";
+import { Button } from "../../ui/button";
+import { Loader2 } from "lucide-react";
 
 interface ParksGridProps {
   initialData: any; // Replace with proper type
@@ -25,10 +25,10 @@ export function ParksGrid({ initialData }: ParksGridProps) {
     isLoading,
     status,
   } = useInfiniteQuery({
-    queryKey: ['parks', searchParams.toString()],
+    queryKey: ["parks", searchParams.toString()],
     queryFn: async ({ pageParam = 0 }) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set('offset', String(pageParam));
+      params.set("offset", String(pageParam));
       return getParkPage(Object.fromEntries(params.entries()));
     },
     initialPageParam: 0,
@@ -55,11 +55,17 @@ export function ParksGrid({ initialData }: ParksGridProps) {
     );
   }
 
-  if (status === 'error') {
+  if (status === "error") {
     return (
       <div className="text-center py-12">
-        <p className="text-destructive">Gagal memuat data taman. Silakan coba lagi.</p>
-        <Button variant="outline" className="mt-4" onClick={() => window.location.reload()}>
+        <p className="text-destructive">
+          Gagal memuat data taman. Silakan coba lagi.
+        </p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => window.location.reload()}
+        >
           Muat Ulang
         </Button>
       </div>
@@ -98,9 +104,9 @@ export function ParksGrid({ initialData }: ParksGridProps) {
               Memuat...
             </>
           ) : hasNextPage ? (
-            'Muat Lebih Banyak'
+            "Muat Lebih Banyak"
           ) : (
-            'Sudah Sampai Akhir'
+            "Sudah Sampai Akhir"
           )}
         </Button>
       </div>

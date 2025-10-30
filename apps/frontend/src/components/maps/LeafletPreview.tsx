@@ -1,7 +1,7 @@
 "use client";
 
-import { LatLngExpression } from 'leaflet';
-import { LeafletMapWrapper } from './LeafletMapWrapper';
+import { LatLngExpression } from "leaflet";
+import { LeafletMapWrapper } from "./LeafletMapWrapper";
 
 interface LeafletPreviewProps {
   center?: LatLngExpression;
@@ -17,7 +17,7 @@ export function LeafletPreview({
   center = [-2.5489, 118.0149], // Indonesia center
   zoom = 4,
   height = "h-72",
-  markers = []
+  markers = [],
 }: LeafletPreviewProps) {
   return (
     <LeafletMapWrapper

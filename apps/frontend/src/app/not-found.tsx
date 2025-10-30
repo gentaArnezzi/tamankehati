@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function NotFound() {
   const [scrollY, setScrollY] = useState(0);
@@ -12,26 +12,27 @@ export default function NotFound() {
       setScrollY(window.scrollY);
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <div className="min-h-screen bg-white flex items-center justify-center px-4 relative overflow-hidden">
       {/* Parallax Background */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format)',
+          backgroundImage:
+            "url(https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560&auto=format)",
           transform: `translateY(${scrollY * 0.5}px)`,
-          transition: 'transform 0.1s ease-out',
-          filter: 'grayscale(100%)'
+          transition: "transform 0.1s ease-out",
+          filter: "grayscale(100%)",
         }}
       />
-      
+
       {/* White Overlay untuk maintain minimalism */}
       <div className="absolute inset-0 bg-white/85" />
-      
+
       {/* Content */}
       <div className="relative z-10 max-w-2xl w-full">
         {/* Minimalist Content */}
@@ -58,7 +59,7 @@ export default function NotFound() {
 
           {/* CTA */}
           <div className="pt-8">
-            <Link 
+            <Link
               href="/"
               className="inline-flex items-center gap-3 px-8 py-4 bg-gray-900 text-white text-sm font-light tracking-wide hover:bg-gray-800 transition-colors duration-300"
             >
@@ -69,18 +70,32 @@ export default function NotFound() {
 
           {/* Subtle Links */}
           <div className="pt-12 space-y-3">
-            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">Jelajahi</p>
+            <p className="text-xs text-gray-400 uppercase tracking-widest font-light">
+              Jelajahi
+            </p>
             <div className="flex gap-8 justify-center text-sm">
-              <Link href="/flora" className="text-gray-600 hover:text-gray-900 font-light transition-colors">
+              <Link
+                href="/flora"
+                className="text-gray-600 hover:text-gray-900 font-light transition-colors"
+              >
                 Flora
               </Link>
-              <Link href="/fauna" className="text-gray-600 hover:text-gray-900 font-light transition-colors">
+              <Link
+                href="/fauna"
+                className="text-gray-600 hover:text-gray-900 font-light transition-colors"
+              >
                 Fauna
               </Link>
-              <Link href="/taman" className="text-gray-600 hover:text-gray-900 font-light transition-colors">
+              <Link
+                href="/taman"
+                className="text-gray-600 hover:text-gray-900 font-light transition-colors"
+              >
                 Taman
               </Link>
-              <Link href="/indeks" className="text-gray-600 hover:text-gray-900 font-light transition-colors">
+              <Link
+                href="/indeks"
+                className="text-gray-600 hover:text-gray-900 font-light transition-colors"
+              >
                 Indeks
               </Link>
             </div>
@@ -90,8 +105,11 @@ export default function NotFound() {
         {/* Footer */}
         <div className="mt-24 text-center">
           <p className="text-xs text-gray-400 font-light">
-            Butuh bantuan?{' '}
-            <a href="mailto:support@tamankehati.id" className="text-gray-600 hover:text-gray-900 transition-colors border-b border-gray-300 hover:border-gray-900">
+            Butuh bantuan?{" "}
+            <a
+              href="mailto:support@tamankehati.id"
+              className="text-gray-600 hover:text-gray-900 transition-colors border-b border-gray-300 hover:border-gray-900"
+            >
               support@tamankehati.id
             </a>
           </p>
@@ -100,4 +118,3 @@ export default function NotFound() {
     </div>
   );
 }
-

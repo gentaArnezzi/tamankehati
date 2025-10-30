@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Mail, Send, CheckCircle, Sparkles } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+import { Mail, Send, CheckCircle, Sparkles } from "lucide-react";
 
 export function NewsletterSection() {
   const [isVisible, setIsVisible] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -17,10 +17,10 @@ export function NewsletterSection() {
           setIsVisible(true);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
-    const element = document.getElementById('newsletter-section');
+    const element = document.getElementById("newsletter-section");
     if (element) {
       observer.observe(element);
     }
@@ -35,26 +35,29 @@ export function NewsletterSection() {
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Simulate API call
     setTimeout(() => {
       setIsSubscribed(true);
       setIsLoading(false);
-      setEmail('');
+      setEmail("");
     }, 1500);
   };
 
   const benefits = [
-    'Update spesies baru yang ditambahkan',
-    'Artikel riset dan publikasi terkini',
-    'Berita konservasi dari seluruh Indonesia',
-    'Event dan workshop eksklusif',
-    'Tips dan panduan konservasi',
-    'Cerita sukses dan dampak nyata'
+    "Update spesies baru yang ditambahkan",
+    "Artikel riset dan publikasi terkini",
+    "Berita konservasi dari seluruh Indonesia",
+    "Event dan workshop eksklusif",
+    "Tips dan panduan konservasi",
+    "Cerita sukses dan dampak nyata",
   ];
 
   return (
-    <section id="newsletter-section" className="py-32 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
+    <section
+      id="newsletter-section"
+      className="py-32 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden"
+    >
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-emerald-500/20 via-green-500/20 to-teal-500/20 rounded-full blur-3xl" />
@@ -67,7 +70,9 @@ export function NewsletterSection() {
             key={i}
             className="absolute w-1 h-1 bg-emerald-500/30 rounded-full"
             initial={{
-              x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1200),
+              x:
+                Math.random() *
+                (typeof window !== "undefined" ? window.innerWidth : 1200),
               y: Math.random() * 800,
             }}
             animate={{
@@ -120,7 +125,8 @@ export function NewsletterSection() {
                   Tetap Update dengan Konservasi Indonesia
                 </h2>
                 <p className="text-xl text-white/90 max-w-2xl mx-auto">
-                  Dapatkan informasi terbaru tentang spesies baru, penelitian, dan upaya konservasi langsung di inbox Anda
+                  Dapatkan informasi terbaru tentang spesies baru, penelitian,
+                  dan upaya konservasi langsung di inbox Anda
                 </p>
               </motion.div>
 
@@ -221,13 +227,20 @@ export function NewsletterSection() {
                     className="mt-12 grid grid-cols-3 gap-8 max-w-2xl mx-auto text-center"
                   >
                     {[
-                      { value: '2.5K+', label: 'Subscribers' },
-                      { value: '48', label: 'Newsletter Terbit' },
-                      { value: '92%', label: 'Open Rate' }
+                      { value: "2.5K+", label: "Subscribers" },
+                      { value: "48", label: "Newsletter Terbit" },
+                      { value: "92%", label: "Open Rate" },
                     ].map((stat, i) => (
-                      <div key={i} className="border-l border-white/30 first:border-0">
-                        <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
-                        <div className="text-sm text-white/70">{stat.label}</div>
+                      <div
+                        key={i}
+                        className="border-l border-white/30 first:border-0"
+                      >
+                        <div className="text-3xl font-bold text-white mb-1">
+                          {stat.value}
+                        </div>
+                        <div className="text-sm text-white/70">
+                          {stat.label}
+                        </div>
                       </div>
                     ))}
                   </motion.div>
@@ -240,4 +253,3 @@ export function NewsletterSection() {
     </section>
   );
 }
-

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { FloraPublicSchema, PaginatedResponseSchema } from './public';
+import { z } from "zod";
+import { FloraPublicSchema, PaginatedResponseSchema } from "./public";
 
 export const FloraDetailSchema = FloraPublicSchema.extend({
   ordo: z.string().optional(),
@@ -32,7 +32,7 @@ export const FloraDetailSchema = FloraPublicSchema.extend({
         nama_ilmiah: z.string(),
         nama_umum: z.string().optional(),
         gambar_utama: z.string().optional(),
-      })
+      }),
     )
     .optional(),
 });

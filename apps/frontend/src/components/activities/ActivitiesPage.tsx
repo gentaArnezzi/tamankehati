@@ -1,18 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '../../lib/useAuth';
-import { activitiesApi, Activity, parksApi, Park } from '../../lib/api-client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Skeleton } from '../ui/skeleton';
-import { Alert, AlertDescription } from '../ui/alert';
-import { 
-  Calendar, 
-  MapPin, 
-  Plus, 
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "../../lib/useAuth";
+import { activitiesApi, Activity, parksApi, Park } from "../../lib/api-client";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { Alert, AlertDescription } from "../ui/alert";
+import {
+  Calendar,
+  MapPin,
+  Plus,
   Search,
   Filter,
   Edit,
@@ -21,46 +27,66 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  AlertCircle
-} from 'lucide-react';
-import { Input } from '../ui/input';
-import { 
+  AlertCircle,
+} from "lucide-react";
+import { Input } from "../ui/input";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select';
-import { 
+} from "../ui/select";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '../ui/dialog';
-import { ActivityForm } from './ActivityForm';
-import { ActivityDetail } from './ActivityDetail';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table';
+} from "../ui/dialog";
+import { ActivityForm } from "./ActivityForm";
+import { ActivityDetail } from "./ActivityDetail";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../ui/table";
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: 'numeric', 
-    month: 'short', 
-    year: 'numeric' 
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
   });
 };
 
 const renderStatusBadge = (status: string) => {
   const statusConfig = {
-    draft: { label: 'Draft', variant: 'secondary' as const, icon: Clock },
-    in_review: { label: 'Review', variant: 'default' as const, icon: AlertCircle },
-    approved: { label: 'Approved', variant: 'default' as const, icon: CheckCircle },
-    rejected: { label: 'Rejected', variant: 'destructive' as const, icon: XCircle },
+    draft: { label: "Draft", variant: "secondary" as const, icon: Clock },
+    in_review: {
+      label: "Review",
+      variant: "default" as const,
+      icon: AlertCircle,
+    },
+    approved: {
+      label: "Approved",
+      variant: "default" as const,
+      icon: CheckCircle,
+    },
+    rejected: {
+      label: "Rejected",
+      variant: "destructive" as const,
+      icon: XCircle,
+    },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
   const Icon = config.icon;
 
   return (
@@ -77,29 +103,31 @@ export function ActivitiesPage() {
   const [data, setData] = useState<Activity[]>([]);
   const [parks, setParks] = useState<Park[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [parkFilter, setParkFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [parkFilter, setParkFilter] = useState("all");
   const itemsPerPage = 10;
 
   const [detailOpen, setDetailOpen] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(
+    null,
+  );
   const [formOpen, setFormOpen] = useState(false);
-  const [formMode, setFormMode] = useState<'edit'>('edit');
+  const [formMode, setFormMode] = useState<"edit">("edit");
 
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
       const params: Record<string, any> = {
         limit: itemsPerPage,
         offset: (currentPage - 1) * itemsPerPage,
       };
 
-      if (statusFilter !== 'all') {
+      if (statusFilter !== "all") {
         params.status = statusFilter;
       }
 
@@ -107,11 +135,11 @@ export function ActivitiesPage() {
         params.search = searchQuery;
       }
 
-      if (parkFilter !== 'all') {
+      if (parkFilter !== "all") {
         params.park_id = parseInt(parkFilter);
       }
 
-      if (user?.role === 'regional_admin') {
+      if (user?.role === "regional_admin") {
         // Regional admin should only see their own submitted data
         params.submitted_by = user.id;
       }
@@ -120,7 +148,8 @@ export function ActivitiesPage() {
       setData(response.items);
       setTotalItems(response.total);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal memuat data kegiatan';
+      const message =
+        err instanceof Error ? err.message : "Gagal memuat data kegiatan";
       setError(message);
     } finally {
       setLoading(false);
@@ -132,7 +161,7 @@ export function ActivitiesPage() {
       const response = await parksApi.list({ limit: 100 });
       setParks(response.items);
     } catch (err) {
-      console.error('Failed to load parks:', err);
+      console.error("Failed to load parks:", err);
     }
   }, []);
 
@@ -145,12 +174,12 @@ export function ActivitiesPage() {
   }, [loadParks]);
 
   const handleCreate = () => {
-    router.push('/dashboard/activities/create');
+    router.push("/dashboard/activities/create");
   };
 
   const handleEdit = (activity: Activity) => {
     setSelectedActivity(activity);
-    setFormMode('edit');
+    setFormMode("edit");
     setFormOpen(true);
   };
 
@@ -160,7 +189,11 @@ export function ActivitiesPage() {
   };
 
   const handleDelete = async (activity: Activity) => {
-    if (!confirm(`Apakah Anda yakin ingin menghapus kegiatan "${activity.title}"?`)) {
+    if (
+      !confirm(
+        `Apakah Anda yakin ingin menghapus kegiatan "${activity.title}"?`,
+      )
+    ) {
       return;
     }
 
@@ -168,7 +201,8 @@ export function ActivitiesPage() {
       await activitiesApi.delete(activity.id);
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menghapus kegiatan';
+      const message =
+        err instanceof Error ? err.message : "Gagal menghapus kegiatan";
       setError(message);
     }
   };
@@ -178,7 +212,10 @@ export function ActivitiesPage() {
       await activitiesApi.submit(activity.id);
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal mengirim kegiatan untuk review';
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Gagal mengirim kegiatan untuk review";
       setError(message);
     }
   };
@@ -188,20 +225,22 @@ export function ActivitiesPage() {
       await activitiesApi.approve(activity.id);
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menyetujui kegiatan';
+      const message =
+        err instanceof Error ? err.message : "Gagal menyetujui kegiatan";
       setError(message);
     }
   };
 
   const handleReject = async (activity: Activity) => {
-    const reason = prompt('Alasan penolakan:');
+    const reason = prompt("Alasan penolakan:");
     if (!reason) return;
 
     try {
       await activitiesApi.reject(activity.id, reason);
       await loadData();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Gagal menolak kegiatan';
+      const message =
+        err instanceof Error ? err.message : "Gagal menolak kegiatan";
       setError(message);
     }
   };
@@ -293,12 +332,12 @@ export function ActivitiesPage() {
               </Select>
             </div>
             <div className="flex items-end">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
-                  setSearchQuery('');
-                  setStatusFilter('all');
-                  setParkFilter('all');
+                  setSearchQuery("");
+                  setStatusFilter("all");
+                  setParkFilter("all");
                 }}
                 className="w-full"
               >
@@ -314,7 +353,7 @@ export function ActivitiesPage() {
         <CardHeader>
           <CardTitle>Daftar Kegiatan ({totalItems})</CardTitle>
           <CardDescription>
-            {loading ? 'Memuat...' : `${data.length} kegiatan ditemukan`}
+            {loading ? "Memuat..." : `${data.length} kegiatan ditemukan`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -357,18 +396,10 @@ export function ActivitiesPage() {
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      {activity.park?.name || 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(activity.activity_date)}
-                    </TableCell>
-                    <TableCell>
-                      {activity.location || '-'}
-                    </TableCell>
-                    <TableCell>
-                      {renderStatusBadge(activity.status)}
-                    </TableCell>
+                    <TableCell>{activity.park?.name || "N/A"}</TableCell>
+                    <TableCell>{formatDate(activity.activity_date)}</TableCell>
+                    <TableCell>{activity.location || "-"}</TableCell>
+                    <TableCell>{renderStatusBadge(activity.status)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button
@@ -378,7 +409,9 @@ export function ActivitiesPage() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        {(activity.status === 'draft' || activity.status === 'rejected' || activity.status === 'approved') && (
+                        {(activity.status === "draft" ||
+                          activity.status === "rejected" ||
+                          activity.status === "approved") && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -387,7 +420,7 @@ export function ActivitiesPage() {
                             <Edit className="h-4 w-4" />
                           </Button>
                         )}
-                        {activity.status === 'draft' && (
+                        {activity.status === "draft" && (
                           <Button
                             variant="ghost"
                             size="sm"
@@ -396,24 +429,25 @@ export function ActivitiesPage() {
                             Submit
                           </Button>
                         )}
-                        {activity.status === 'in_review' && user?.role === 'super_admin' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleApprove(activity)}
-                            >
-                              <CheckCircle className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleReject(activity)}
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </Button>
-                          </>
-                        )}
+                        {activity.status === "in_review" &&
+                          user?.role === "super_admin" && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleApprove(activity)}
+                              >
+                                <CheckCircle className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleReject(activity)}
+                              >
+                                <XCircle className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         <Button
                           variant="ghost"
                           size="sm"
@@ -450,7 +484,9 @@ export function ActivitiesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() =>
+                setCurrentPage(Math.min(totalPages, currentPage + 1))
+              }
               disabled={currentPage === totalPages}
             >
               Selanjutnya

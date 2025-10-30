@@ -1,20 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Badge } from '../../ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../ui/card';
-import { Separator } from '../../ui/separator';
-import { ScrollArea } from '../../ui/scroll-area';
-import { Button } from '../../ui/button';
-import { MapPin, Ruler, Info, Calendar, Map, Globe, Shield, Users, TreePine, Sprout, PawPrint, BookOpen, ArrowRight, ExternalLink, Activity, Camera, ArrowLeft, ChevronRight, Home } from 'lucide-react';
-import { formatDate } from '../../../lib/utils';
-import { getParkStats } from '../../../lib/api/client';
-import type { ParkDetail } from '../../../types/parks';
-import { ParkFlora } from './ParkFlora';
-import { ParkFauna } from './ParkFauna';
-import { ParkActivities } from '../activities/ParkActivities';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "../../ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../ui/card";
+import { Separator } from "../../ui/separator";
+import { ScrollArea } from "../../ui/scroll-area";
+import { Button } from "../../ui/button";
+import {
+  MapPin,
+  Ruler,
+  Info,
+  Calendar,
+  Map,
+  Globe,
+  Shield,
+  Users,
+  TreePine,
+  Sprout,
+  PawPrint,
+  BookOpen,
+  ArrowRight,
+  ExternalLink,
+  Activity,
+  Camera,
+  ArrowLeft,
+  ChevronRight,
+  Home,
+} from "lucide-react";
+import { formatDate } from "../../../lib/utils";
+import { getParkStats } from "../../../lib/api/client";
+import type { ParkDetail } from "../../../types/parks";
+import { ParkFlora } from "./ParkFlora";
+import { ParkFauna } from "./ParkFauna";
+import { ParkActivities } from "../activities/ParkActivities";
 
 interface ParkDetailViewProps {
   park: ParkDetail;
@@ -34,8 +60,8 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -46,27 +72,31 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/park/${park.id}`
+        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/entity/park/${park.id}`,
       );
-      
+
       if (response.ok) {
         const result = await response.json();
-        console.log('Gallery response:', result);
+        console.log("Gallery response:", result);
         setGalleries(result.data || result.items || []);
       } else {
-        console.error('Gallery load failed:', response.status, response.statusText);
+        console.error(
+          "Gallery load failed:",
+          response.status,
+          response.statusText,
+        );
       }
     } catch (error) {
-      console.error('Failed to load galleries:', error);
+      console.error("Failed to load galleries:", error);
     } finally {
       setLoadingGallery(false);
     }
   };
 
   const getImageUrl = (url?: string) => {
-    if (!url) return '';
-    if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
+    if (!url) return "";
+    if (url.startsWith("http")) return url;
+    return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
   };
 
   // Use stats from park data directly
@@ -85,8 +115,8 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
           <div className="flex items-center justify-between py-4">
             {/* Back Button */}
             <Link href="/taman">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 className="gap-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-all duration-200 font-semibold"
               >
@@ -97,16 +127,16 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
 
             {/* Breadcrumbs */}
             <nav className="flex items-center gap-2 text-sm">
-              <Link 
-                href="/" 
+              <Link
+                href="/"
                 className="text-zinc-600 hover:text-emerald-700 transition-colors duration-200 flex items-center gap-1.5 font-semibold"
               >
                 <Home className="h-4 w-4" />
                 <span className="hidden sm:inline">Beranda</span>
               </Link>
               <ChevronRight className="h-4 w-4 text-zinc-400" />
-              <Link 
-                href="/taman" 
+              <Link
+                href="/taman"
                 className="text-zinc-600 hover:text-emerald-700 transition-colors duration-200 font-semibold"
               >
                 Taman
@@ -126,13 +156,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
         <div className="absolute inset-0">
           {park.gambar_utama ? (
             <div className="relative w-full h-full">
-            <Image
+              <Image
                 src={getImageUrl(park.gambar_utama)}
                 alt={park.name}
-              fill
-              className="object-cover"
-              priority
-            />
+                fill
+                className="object-cover"
+                priority
+              />
               {/* Subtle gradient overlay - only at bottom */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
             </div>
@@ -146,31 +176,35 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
           <div className="max-w-4xl space-y-6">
             {/* Status Badge - Emerald */}
             <div>
-                <Badge 
+              <Badge
                 variant="outline"
                 className="px-3 py-1 text-xs font-semibold bg-emerald-500/10 text-emerald-300 border-emerald-400/30 backdrop-blur-sm hover:bg-emerald-500/20 transition-all"
-                >
-                {park.status === 'approved' ? 'AKTIF' : 'DRAFT'}
-                </Badge>
-              </div>
+              >
+                {park.status === "approved" ? "AKTIF" : "DRAFT"}
+              </Badge>
+            </div>
 
             {/* Title - Bold & Clean */}
             <h1 className="text-5xl sm:text-6xl lg:text-8xl font-bold text-white tracking-tight leading-[1.05]">
-                {park.name}
-              </h1>
+              {park.name}
+            </h1>
 
             {/* Location & Area - Minimal */}
             <div className="flex flex-wrap items-center gap-6 text-white/90">
               <div className="flex items-center gap-2">
                 <MapPin className="h-5 w-5" />
-                <span className="text-base">{park.provinsi || park.region_name || 'Indonesia'}</span>
+                <span className="text-base">
+                  {park.provinsi || park.region_name || "Indonesia"}
+                </span>
               </div>
               {park.area_ha && (
                 <>
                   <span className="text-white/40">•</span>
                   <div className="flex items-center gap-2">
                     <Ruler className="h-5 w-5" />
-                    <span className="text-base">{park.area_ha.toLocaleString()} Ha</span>
+                    <span className="text-base">
+                      {park.area_ha.toLocaleString()} Ha
+                    </span>
                   </div>
                 </>
               )}
@@ -192,14 +226,18 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center space-y-4">
                     <div className="p-4 rounded-full bg-emerald-700 group-hover:bg-emerald-800 transition-colors duration-300">
-                    <Sprout className="w-8 h-8 text-white" />
-                  </div>
+                      <Sprout className="w-8 h-8 text-white" />
+                    </div>
                     <div>
                       <div className="text-5xl font-bold text-emerald-700">
-                    {stats.flora}
-                  </div>
-                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">Spesies Flora</h3>
-                      <p className="text-xs text-zinc-600 mt-1">Tumbuhan di taman ini</p>
+                        {stats.flora}
+                      </div>
+                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">
+                        Spesies Flora
+                      </h3>
+                      <p className="text-xs text-zinc-600 mt-1">
+                        Tumbuhan di taman ini
+                      </p>
                     </div>
                     <div className="flex items-center text-emerald-700 font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
                       <span>Lihat Detail</span>
@@ -216,14 +254,18 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center space-y-4">
                     <div className="p-4 rounded-full bg-emerald-700 group-hover:bg-emerald-800 transition-colors duration-300">
-                    <PawPrint className="w-8 h-8 text-white" />
-                  </div>
+                      <PawPrint className="w-8 h-8 text-white" />
+                    </div>
                     <div>
                       <div className="text-5xl font-bold text-emerald-700">
-                    {stats.fauna}
-                  </div>
-                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">Spesies Fauna</h3>
-                      <p className="text-xs text-zinc-600 mt-1">Hewan di taman ini</p>
+                        {stats.fauna}
+                      </div>
+                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">
+                        Spesies Fauna
+                      </h3>
+                      <p className="text-xs text-zinc-600 mt-1">
+                        Hewan di taman ini
+                      </p>
                     </div>
                     <div className="flex items-center text-emerald-700 font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
                       <span>Lihat Detail</span>
@@ -240,14 +282,18 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 <CardContent className="p-8">
                   <div className="flex flex-col items-center text-center space-y-4">
                     <div className="p-4 rounded-full bg-emerald-700 group-hover:bg-emerald-800 transition-colors duration-300">
-                    <Activity className="w-8 h-8 text-white" />
-                  </div>
+                      <Activity className="w-8 h-8 text-white" />
+                    </div>
                     <div>
                       <div className="text-5xl font-bold text-emerald-700">
-                    {stats.kegiatan || 0}
-                  </div>
-                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">Kegiatan</h3>
-                      <p className="text-xs text-zinc-600 mt-1">Aktivitas di taman ini</p>
+                        {stats.kegiatan || 0}
+                      </div>
+                      <h3 className="text-sm font-semibold text-emerald-900 mt-3 uppercase tracking-wider">
+                        Kegiatan
+                      </h3>
+                      <p className="text-xs text-zinc-600 mt-1">
+                        Aktivitas di taman ini
+                      </p>
                     </div>
                     <div className="flex items-center text-emerald-700 font-semibold text-sm group-hover:gap-3 gap-2 transition-all">
                       <span>Lihat Detail</span>
@@ -270,7 +316,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* Description */}
               {park.description && (
                 <div className="space-y-4">
-                  <h2 className="text-3xl font-bold text-emerald-700">Tentang Taman</h2>
+                  <h2 className="text-3xl font-bold text-emerald-700">
+                    Tentang Taman
+                  </h2>
                   <div className="h-1 w-20 bg-emerald-700" />
                   <p className="text-zinc-700 leading-relaxed text-lg whitespace-pre-line">
                     {park.description}
@@ -281,7 +329,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* SK Penetapan */}
               {park.sk_penetapan && (
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-semibold text-emerald-700">SK Penetapan</h3>
+                  <h3 className="text-2xl font-semibold text-emerald-700">
+                    SK Penetapan
+                  </h3>
                   <div className="h-1 w-16 bg-emerald-700" />
                   <p className="text-zinc-700 leading-relaxed whitespace-pre-line">
                     {park.sk_penetapan}
@@ -292,7 +342,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* Sejarah */}
               {park.sejarah && (
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-semibold text-emerald-700">Sejarah</h3>
+                  <h3 className="text-2xl font-semibold text-emerald-700">
+                    Sejarah
+                  </h3>
                   <div className="h-1 w-16 bg-emerald-700" />
                   <p className="text-zinc-700 leading-relaxed whitespace-pre-line">
                     {park.sejarah}
@@ -303,7 +355,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* Visi & Misi */}
               {(park.visi || park.misi) && (
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-semibold text-emerald-700">Visi & Misi</h3>
+                  <h3 className="text-2xl font-semibold text-emerald-700">
+                    Visi & Misi
+                  </h3>
                   <div className="h-1 w-16 bg-emerald-700" />
                   <div className="space-y-6">
                     {park.visi && (
@@ -311,7 +365,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                         <h4 className="text-sm font-semibold text-emerald-700 mb-3 uppercase tracking-wider">
                           Visi
                         </h4>
-                        <p className="text-zinc-700 leading-relaxed">{park.visi}</p>
+                        <p className="text-zinc-700 leading-relaxed">
+                          {park.visi}
+                        </p>
                       </div>
                     )}
                     {park.misi && (
@@ -319,7 +375,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                         <h4 className="text-sm font-semibold text-emerald-700 mb-3 uppercase tracking-wider">
                           Misi
                         </h4>
-                        <p className="text-zinc-700 leading-relaxed">{park.misi}</p>
+                        <p className="text-zinc-700 leading-relaxed">
+                          {park.misi}
+                        </p>
                       </div>
                     )}
                   </div>
@@ -329,7 +387,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* Nilai Penting */}
               {park.nilai_penting && (
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-semibold text-emerald-700">Nilai Penting</h3>
+                  <h3 className="text-2xl font-semibold text-emerald-700">
+                    Nilai Penting
+                  </h3>
                   <div className="h-1 w-16 bg-emerald-700" />
                   <p className="text-zinc-700 leading-relaxed whitespace-pre-line">
                     {park.nilai_penting}
@@ -340,7 +400,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               {/* Kondisi Fisik */}
               {park.kondisi_fisik && (
                 <div className="space-y-4">
-                  <h3 className="text-2xl font-semibold text-emerald-700">Kondisi Fisik</h3>
+                  <h3 className="text-2xl font-semibold text-emerald-700">
+                    Kondisi Fisik
+                  </h3>
                   <div className="h-1 w-16 bg-emerald-700" />
                   <p className="text-zinc-700 leading-relaxed whitespace-pre-line">
                     {park.kondisi_fisik}
@@ -362,32 +424,51 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 <CardContent className="pt-4">
                   <div className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-emerald-50">
-                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Status</span>
-                      <Badge 
-                        className={park.status === 'approved' 
-                          ? 'bg-emerald-700 hover:bg-emerald-800' 
-                          : 'bg-zinc-400 hover:bg-zinc-500'
+                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Status
+                      </span>
+                      <Badge
+                        className={
+                          park.status === "approved"
+                            ? "bg-emerald-700 hover:bg-emerald-800"
+                            : "bg-zinc-400 hover:bg-zinc-500"
                         }
                       >
-                        {park.status === 'approved' ? 'AKTIF' : 'DRAFT'}
+                        {park.status === "approved" ? "AKTIF" : "DRAFT"}
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-emerald-50">
-                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Provinsi</span>
-                      <span className="text-sm text-emerald-700 font-semibold text-right">{park.provinsi || 'N/A'}</span>
-                  </div>
+                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Provinsi
+                      </span>
+                      <span className="text-sm text-emerald-700 font-semibold text-right">
+                        {park.provinsi || "N/A"}
+                      </span>
+                    </div>
                     <div className="flex justify-between items-center py-2 border-b border-emerald-50">
-                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Pengelola</span>
-                      <span className="text-sm text-emerald-700 font-semibold text-right">{park.pengelola || 'N/A'}</span>
-                  </div>
+                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Pengelola
+                      </span>
+                      <span className="text-sm text-emerald-700 font-semibold text-right">
+                        {park.pengelola || "N/A"}
+                      </span>
+                    </div>
                     <div className="flex justify-between items-center py-2 border-b border-emerald-50">
-                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Ekoregion</span>
-                      <span className="text-sm text-emerald-700 font-semibold text-right">{park.tipe_ekoregion || 'N/A'}</span>
-                  </div>
+                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Ekoregion
+                      </span>
+                      <span className="text-sm text-emerald-700 font-semibold text-right">
+                        {park.tipe_ekoregion || "N/A"}
+                      </span>
+                    </div>
                     <div className="flex justify-between items-center py-2">
-                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Luas</span>
-                      <span className="text-sm text-emerald-700 font-bold">{park.area_ha} ha</span>
-                  </div>
+                      <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+                        Luas
+                      </span>
+                      <span className="text-sm text-emerald-700 font-bold">
+                        {park.area_ha} ha
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -402,16 +483,24 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 </CardHeader>
                 <CardContent className="pt-4 space-y-3">
                   <div>
-                    <p className="text-xs font-semibold text-zinc-500 mb-1 uppercase tracking-wider">Dibuat</p>
+                    <p className="text-xs font-semibold text-zinc-500 mb-1 uppercase tracking-wider">
+                      Dibuat
+                    </p>
                     <p className="text-sm font-semibold text-emerald-700">
-                      {park.created_at ? formatDate(park.created_at) : 'Tidak tersedia'}
+                      {park.created_at
+                        ? formatDate(park.created_at)
+                        : "Tidak tersedia"}
                     </p>
                   </div>
                   <Separator className="bg-emerald-100" />
                   <div>
-                    <p className="text-xs font-semibold text-zinc-500 mb-1 uppercase tracking-wider">Diperbarui</p>
+                    <p className="text-xs font-semibold text-zinc-500 mb-1 uppercase tracking-wider">
+                      Diperbarui
+                    </p>
                     <p className="text-sm font-semibold text-emerald-700">
-                      {park.updated_at ? formatDate(park.updated_at) : 'Tidak tersedia'}
+                      {park.updated_at
+                        ? formatDate(park.updated_at)
+                        : "Tidak tersedia"}
                     </p>
                   </div>
                 </CardContent>
@@ -422,7 +511,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                 <CardHeader className="pb-4 border-b border-emerald-100">
                   <CardTitle className="text-emerald-700 flex items-center gap-2 text-sm uppercase tracking-wider font-semibold">
                     <MapPin className="h-4 w-4" />
-                  Lokasi
+                    Lokasi
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-4 space-y-4">
@@ -442,16 +531,28 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                       </div>
                       <div className="text-sm space-y-2">
                         <p className="text-zinc-600">
-                          <span className="font-semibold text-emerald-700">Koordinat:</span> {park.latitude}, {park.longitude}
+                          <span className="font-semibold text-emerald-700">
+                            Koordinat:
+                          </span>{" "}
+                          {park.latitude}, {park.longitude}
                         </p>
                         <p className="text-zinc-600">
-                          <span className="font-semibold text-emerald-700">Alamat:</span> {park.desa_kelurahan}, {park.kecamatan}, {park.kota_kabupaten}, {park.provinsi}
+                          <span className="font-semibold text-emerald-700">
+                            Alamat:
+                          </span>{" "}
+                          {park.desa_kelurahan}, {park.kecamatan},{" "}
+                          {park.kota_kabupaten}, {park.provinsi}
                         </p>
                       </div>
-                      <Button 
-                        variant="default" 
+                      <Button
+                        variant="default"
                         className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold"
-                        onClick={() => window.open(`https://www.openstreetmap.org/?mlat=${park.latitude}&mlon=${park.longitude}&zoom=15`, '_blank')}
+                        onClick={() =>
+                          window.open(
+                            `https://www.openstreetmap.org/?mlat=${park.latitude}&mlon=${park.longitude}&zoom=15`,
+                            "_blank",
+                          )
+                        }
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Buka di Peta
@@ -461,7 +562,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
                     <div className="aspect-video bg-zinc-100 rounded-lg flex items-center justify-center border border-zinc-200">
                       <div className="text-center">
                         <Map className="w-12 h-12 text-zinc-400 mx-auto mb-2" />
-                        <p className="text-sm text-zinc-600 font-medium">Koordinat tidak tersedia</p>
+                        <p className="text-sm text-zinc-600 font-medium">
+                          Koordinat tidak tersedia
+                        </p>
                       </div>
                     </div>
                   )}
@@ -489,13 +592,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
               </div>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {galleries.map((gallery) => (
-                  <div 
-                    key={gallery.id} 
+                  <div
+                    key={gallery.id}
                     className="aspect-square relative rounded-lg overflow-hidden bg-zinc-100 border border-zinc-200 group cursor-pointer hover:shadow-lg transition-all duration-300"
                   >
                     <Image
                       src={getImageUrl(gallery.image_url)}
-                      alt={gallery.title || 'Foto taman'}
+                      alt={gallery.title || "Foto taman"}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
@@ -522,9 +625,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-emerald-700">Spesies Flora</h2>
+                <h2 className="text-3xl font-bold text-emerald-700">
+                  Spesies Flora
+                </h2>
                 <div className="h-1 w-20 bg-emerald-700 mt-3" />
-                <p className="mt-3 text-zinc-600 font-semibold">Keanekaragaman tumbuhan di taman ini</p>
+                <p className="mt-3 text-zinc-600 font-semibold">
+                  Keanekaragaman tumbuhan di taman ini
+                </p>
               </div>
               <Link
                 href={`/flora?taman=${park.id}`}
@@ -545,9 +652,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-emerald-700">Spesies Fauna</h2>
+                <h2 className="text-3xl font-bold text-emerald-700">
+                  Spesies Fauna
+                </h2>
                 <div className="h-1 w-20 bg-emerald-700 mt-3" />
-                <p className="mt-3 text-zinc-600 font-semibold">Keanekaragaman hewan di taman ini</p>
+                <p className="mt-3 text-zinc-600 font-semibold">
+                  Keanekaragaman hewan di taman ini
+                </p>
               </div>
               <Link
                 href={`/fauna?taman=${park.id}`}
@@ -568,9 +679,13 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
           <div className="space-y-8">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-3xl font-bold text-emerald-700">Kegiatan Taman</h2>
+                <h2 className="text-3xl font-bold text-emerald-700">
+                  Kegiatan Taman
+                </h2>
                 <div className="h-1 w-20 bg-emerald-700 mt-3" />
-                <p className="mt-3 text-zinc-600 font-semibold">Aktivitas dan kegiatan yang dilakukan di taman ini</p>
+                <p className="mt-3 text-zinc-600 font-semibold">
+                  Aktivitas dan kegiatan yang dilakukan di taman ini
+                </p>
               </div>
               <Link
                 href={`/kegiatan?taman=${park.id}`}

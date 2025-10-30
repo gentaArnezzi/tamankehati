@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight, Loader2 } from 'lucide-react';
-import Link from 'next/link';
-import { fetchFeaturedItems, FeaturedItem } from '../../../lib/api/featured';
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { ArrowRight, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { fetchFeaturedItems, FeaturedItem } from "../../../lib/api/featured";
 
 export function MinimalFeaturedSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  
+
   const [features, setFeatures] = useState<FeaturedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,69 +20,81 @@ export function MinimalFeaturedSection() {
         setLoading(true);
         setError(null);
         const data = await fetchFeaturedItems();
-        
+
         // If API returns data, use it
         if (data && data.length > 0) {
           setFeatures(data);
         } else {
           // If no data from API, use fallback
-          console.warn('No featured items from API, using fallback data');
+          console.warn("No featured items from API, using fallback data");
           setFeatures([
             {
               id: 1,
-              category: 'Flora',
-              title: 'Rafflesia Arnoldii',
-              description: 'Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter',
-              image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop',
-              link: '/flora'
+              category: "Flora",
+              title: "Rafflesia Arnoldii",
+              description:
+                "Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter",
+              image:
+                "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop",
+              link: "/flora",
             },
             {
               id: 2,
-              category: 'Flora',
-              title: 'Anggrek Hitam',
-              description: 'Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka',
-              image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop',
-              link: '/flora'
+              category: "Flora",
+              title: "Anggrek Hitam",
+              description:
+                "Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka",
+              image:
+                "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop",
+              link: "/flora",
             },
             {
               id: 3,
-              category: 'Fauna',
-              title: 'Orangutan Sumatera',
-              description: 'Primata langka dengan DNA 97% mirip manusia, terancam punah',
-              image: 'https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop',
-              link: '/fauna'
-            }
+              category: "Fauna",
+              title: "Orangutan Sumatera",
+              description:
+                "Primata langka dengan DNA 97% mirip manusia, terancam punah",
+              image:
+                "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop",
+              link: "/fauna",
+            },
           ]);
         }
       } catch (err) {
-        console.error('Error loading featured items:', err);
-        setError('Gagal memuat data spesies unggulan');
+        console.error("Error loading featured items:", err);
+        setError("Gagal memuat data spesies unggulan");
         // Fallback to default data if API fails (only species, no parks)
         setFeatures([
           {
             id: 1,
-            category: 'Flora',
-            title: 'Rafflesia Arnoldii',
-            description: 'Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter',
-            image: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop',
-            link: '/flora'
+            category: "Flora",
+            title: "Rafflesia Arnoldii",
+            description:
+              "Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter",
+            image:
+              "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop",
+            link: "/flora",
           },
           {
             id: 2,
-            category: 'Flora',
-            title: 'Anggrek Hitam',
-            description: 'Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka',
-            image: 'https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop',
-            link: '/flora'
+            category: "Flora",
+            title: "Anggrek Hitam",
+            description:
+              "Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka",
+            image:
+              "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop",
+            link: "/flora",
           },
           {
             id: 3,
-            category: 'Fauna',
-            title: 'Orangutan Sumatera',
-            description: 'Primata langka dengan DNA 97% mirip manusia, terancam punah',
-            image: 'https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop',
-            link: '/fauna'
-          }
+            category: "Fauna",
+            title: "Orangutan Sumatera",
+            description:
+              "Primata langka dengan DNA 97% mirip manusia, terancam punah",
+            image:
+              "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop",
+            link: "/fauna",
+          },
         ]);
       } finally {
         setLoading(false);
@@ -107,7 +119,7 @@ export function MinimalFeaturedSection() {
           </motion.h2>
           <motion.div
             initial={{ width: 0, opacity: 0 }}
-            animate={isInView ? { width: '6rem', opacity: 1 } : {}}
+            animate={isInView ? { width: "6rem", opacity: 1 } : {}}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
             className="h-1 bg-emerald-500 mx-auto rounded-full mb-6"
           />
@@ -141,10 +153,10 @@ export function MinimalFeaturedSection() {
                 key={feature.id}
                 initial={{ opacity: 0, y: 50, scale: 0.9 }}
                 animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
-                transition={{ 
-                  duration: 0.7, 
+                transition={{
+                  duration: 0.7,
                   delay: 0.4 + index * 0.15,
-                  ease: "easeOut"
+                  ease: "easeOut",
                 }}
                 whileHover={{ y: -8, transition: { duration: 0.3 } }}
               >
@@ -159,11 +171,12 @@ export function MinimalFeaturedSection() {
                         onError={(e) => {
                           // Fallback to default image if the API image fails to load
                           const target = e.target as HTMLImageElement;
-                          target.src = 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop';
+                          target.src =
+                            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop";
                         }}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      
+
                       {/* Category badge on hover */}
                       <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-emerald-600 uppercase tracking-wide opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                         {feature.category}
@@ -182,7 +195,9 @@ export function MinimalFeaturedSection() {
                         {feature.description}
                       </p>
                       <div className="flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300">
-                        <span className="group-hover:font-semibold transition-all">Pelajari</span>
+                        <span className="group-hover:font-semibold transition-all">
+                          Pelajari
+                        </span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
                       </div>
                     </div>
@@ -196,4 +211,3 @@ export function MinimalFeaturedSection() {
     </section>
   );
 }
-

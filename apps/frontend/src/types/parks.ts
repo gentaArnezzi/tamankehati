@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { PaginatedResponseSchema, ParkPublicSchema } from './public';
+import { z } from "zod";
+import { PaginatedResponseSchema, ParkPublicSchema } from "./public";
 
 export const ParkDetailSchema = ParkPublicSchema.extend({
   sk_penetapan: z.string().nullish(),
@@ -18,7 +18,7 @@ export const ParkDetailSchema = ParkPublicSchema.extend({
         url: z.string().url().nullish(),
         thumbnail: z.string().nullish(),
         kredit: z.string().nullish(),
-      })
+      }),
     )
     .optional(),
   statistik: z

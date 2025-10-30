@@ -3,19 +3,25 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  Edit, 
-  Trash2, 
-  Archive, 
-  MoreHorizontal, 
+import {
+  Edit,
+  Trash2,
+  Archive,
+  MoreHorizontal,
   Users,
   MessageSquare,
   Heart,
@@ -25,7 +31,7 @@ import {
   Eye,
   ThumbsUp,
   Reply,
-  Send
+  Send,
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -73,7 +79,7 @@ interface Comment {
 
 interface EnhancedAnnouncementDetailProps {
   announcementId: number;
-  userRole: 'super_admin' | 'regional_admin';
+  userRole: "super_admin" | "regional_admin";
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
   onPublish: (id: number) => void;
@@ -84,25 +90,25 @@ interface EnhancedAnnouncementDetailProps {
 }
 
 const PRIORITY_COLORS = {
-  low: 'bg-gray-500',
-  normal: 'bg-blue-500',
-  high: 'bg-orange-500',
-  urgent: 'bg-red-500'
+  low: "bg-gray-500",
+  normal: "bg-blue-500",
+  high: "bg-orange-500",
+  urgent: "bg-red-500",
 };
 
 const STATUS_COLORS = {
-  draft: 'bg-gray-100 text-gray-800',
-  published: 'bg-green-100 text-green-800',
-  archived: 'bg-red-100 text-red-800'
+  draft: "bg-gray-100 text-gray-800",
+  published: "bg-green-100 text-green-800",
+  archived: "bg-red-100 text-red-800",
 };
 
 const REACTION_TYPES = [
-  { type: 'like', label: 'Like', icon: '👍' },
-  { type: 'love', label: 'Love', icon: '❤️' },
-  { type: 'dislike', label: 'Dislike', icon: '👎' },
-  { type: 'angry', label: 'Angry', icon: '😠' },
-  { type: 'sad', label: 'Sad', icon: '😢' },
-  { type: 'wow', label: 'Wow', icon: '😮' }
+  { type: "like", label: "Like", icon: "👍" },
+  { type: "love", label: "Love", icon: "❤️" },
+  { type: "dislike", label: "Dislike", icon: "👎" },
+  { type: "angry", label: "Angry", icon: "😠" },
+  { type: "sad", label: "Sad", icon: "😢" },
+  { type: "wow", label: "Wow", icon: "😮" },
 ];
 
 export default function EnhancedAnnouncementDetail({
@@ -114,32 +120,35 @@ export default function EnhancedAnnouncementDetail({
   onArchive,
   onAcknowledge,
   onReact,
-  onBack
+  onBack,
 }: EnhancedAnnouncementDetailProps) {
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [submittingComment, setSubmittingComment] = useState(false);
 
   // Fetch announcement details
   const fetchAnnouncement = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/v1/enhanced/announcements/${announcementId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `/api/v1/enhanced/announcements/${announcementId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         setAnnouncement(data);
       }
     } catch (error) {
-      console.error('Error fetching announcement:', error);
+      console.error("Error fetching announcement:", error);
     } finally {
       setLoading(false);
     }
@@ -148,20 +157,23 @@ export default function EnhancedAnnouncementDetail({
   // Fetch comments
   const fetchComments = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/v1/enhanced/announcements/${announcementId}/comments`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `/api/v1/enhanced/announcements/${announcementId}/comments`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
       if (response.ok) {
         const data = await response.json();
         setComments(data);
       }
     } catch (error) {
-      console.error('Error fetching comments:', error);
+      console.error("Error fetching comments:", error);
     }
   };
 
@@ -171,25 +183,28 @@ export default function EnhancedAnnouncementDetail({
 
     setSubmittingComment(true);
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch(`/api/v1/enhanced/announcements/${announcementId}/comments`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch(
+        `/api/v1/enhanced/announcements/${announcementId}/comments`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            content: newComment,
+          }),
         },
-        body: JSON.stringify({
-          content: newComment
-        })
-      });
+      );
 
       if (response.ok) {
-        setNewComment('');
+        setNewComment("");
         fetchComments();
         fetchAnnouncement(); // Refresh to update comment count
       }
     } catch (error) {
-      console.error('Error submitting comment:', error);
+      console.error("Error submitting comment:", error);
     } finally {
       setSubmittingComment(false);
     }
@@ -201,15 +216,20 @@ export default function EnhancedAnnouncementDetail({
   }, [announcementId]);
 
   const getPriorityColor = (priority: string) => {
-    return PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || 'bg-gray-500';
+    return (
+      PRIORITY_COLORS[priority as keyof typeof PRIORITY_COLORS] || "bg-gray-500"
+    );
   };
 
   const getStatusColor = (status: string) => {
-    return STATUS_COLORS[status as keyof typeof STATUS_COLORS] || 'bg-gray-100 text-gray-800';
+    return (
+      STATUS_COLORS[status as keyof typeof STATUS_COLORS] ||
+      "bg-gray-100 text-gray-800"
+    );
   };
 
   const formatDate = (dateString: string) => {
-    return format(new Date(dateString), 'dd MMM yyyy, HH:mm');
+    return format(new Date(dateString), "dd MMM yyyy, HH:mm");
   };
 
   const isExpired = (expiresAt?: string) => {
@@ -256,14 +276,14 @@ export default function EnhancedAnnouncementDetail({
         <Button variant="outline" onClick={onBack}>
           ← Kembali
         </Button>
-        
-        {userRole === 'super_admin' && (
+
+        {userRole === "super_admin" && (
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => onEdit(announcement.id)}>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Button>
-            
+
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline">
@@ -271,17 +291,17 @@ export default function EnhancedAnnouncementDetail({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
-                {announcement.status === 'draft' && (
+                {announcement.status === "draft" && (
                   <DropdownMenuItem onClick={() => onPublish(announcement.id)}>
                     Publish
                   </DropdownMenuItem>
                 )}
-                {announcement.status === 'published' && (
+                {announcement.status === "published" && (
                   <DropdownMenuItem onClick={() => onArchive(announcement.id)}>
                     Archive
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   onClick={() => onDelete(announcement.id)}
                   className="text-red-600"
                 >
@@ -295,17 +315,26 @@ export default function EnhancedAnnouncementDetail({
       </div>
 
       {/* Announcement Content */}
-      <Card className={cn(
-        announcement.is_pinned && "border-l-4 border-l-blue-500",
-        announcement.is_featured && "bg-gradient-to-r from-blue-50 to-indigo-50"
-      )}>
+      <Card
+        className={cn(
+          announcement.is_pinned && "border-l-4 border-l-blue-500",
+          announcement.is_featured &&
+            "bg-gradient-to-r from-blue-50 to-indigo-50",
+        )}
+      >
         <CardHeader>
           <div className="flex items-center gap-3 mb-4">
-            <div className={`w-3 h-3 rounded-full ${getPriorityColor(announcement.priority)}`} />
+            <div
+              className={`w-3 h-3 rounded-full ${getPriorityColor(announcement.priority)}`}
+            />
             <Badge className={getStatusColor(announcement.status)}>
-              {announcement.status === 'draft' ? 'Draft' : 
-               announcement.status === 'archived' ? 'Archived' :
-               isExpired(announcement.expires_at) ? 'Expired' : 'Published'}
+              {announcement.status === "draft"
+                ? "Draft"
+                : announcement.status === "archived"
+                  ? "Archived"
+                  : isExpired(announcement.expires_at)
+                    ? "Expired"
+                    : "Published"}
             </Badge>
             {announcement.is_pinned && (
               <Badge variant="secondary">📌 Pinned</Badge>
@@ -314,7 +343,10 @@ export default function EnhancedAnnouncementDetail({
               <Badge variant="secondary">⭐ Featured</Badge>
             )}
             {announcement.requires_acknowledgment && (
-              <Badge variant="outline" className="text-orange-600 border-orange-600">
+              <Badge
+                variant="outline"
+                className="text-orange-600 border-orange-600"
+              >
                 <CheckCircle className="h-3 w-3 mr-1" />
                 Wajib Acknowledgment
               </Badge>
@@ -336,8 +368,8 @@ export default function EnhancedAnnouncementDetail({
           {/* Featured Image */}
           {announcement.featured_image && (
             <div className="mb-6">
-              <img 
-                src={announcement.featured_image} 
+              <img
+                src={announcement.featured_image}
                 alt={announcement.title}
                 className="w-full h-64 object-cover rounded-lg"
               />
@@ -345,7 +377,7 @@ export default function EnhancedAnnouncementDetail({
           )}
 
           {/* Content */}
-          <div 
+          <div
             className="prose prose-slate max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
             dangerouslySetInnerHTML={{ __html: announcement.content }}
           />
@@ -354,7 +386,7 @@ export default function EnhancedAnnouncementDetail({
           {announcement.tags && (
             <div className="mt-6">
               <div className="flex flex-wrap gap-2">
-                {announcement.tags.split(',').map((tag, index) => (
+                {announcement.tags.split(",").map((tag, index) => (
                   <Badge key={index} variant="secondary">
                     {tag.trim()}
                   </Badge>
@@ -400,7 +432,7 @@ export default function EnhancedAnnouncementDetail({
       </Card>
 
       {/* User Actions for Regional Admin */}
-      {userRole === 'regional_admin' && (
+      {userRole === "regional_admin" && (
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">Actions</CardTitle>
@@ -411,7 +443,10 @@ export default function EnhancedAnnouncementDetail({
               {announcement.requires_acknowledgment && (
                 <div className="flex items-center gap-2">
                   {announcement.user_has_acknowledged ? (
-                    <Badge variant="outline" className="text-green-600 border-green-600">
+                    <Badge
+                      variant="outline"
+                      className="text-green-600 border-green-600"
+                    >
                       <CheckCircle className="h-4 w-4 mr-1" />
                       Acknowledged
                     </Badge>
@@ -437,8 +472,8 @@ export default function EnhancedAnnouncementDetail({
                     size="sm"
                     onClick={() => onReact(announcement.id, reaction.type)}
                     className={cn(
-                      announcement.user_reactions.includes(reaction.type) && 
-                      "bg-blue-50 border-blue-300"
+                      announcement.user_reactions.includes(reaction.type) &&
+                        "bg-blue-50 border-blue-300",
                     )}
                   >
                     <span className="mr-1">{reaction.icon}</span>
@@ -469,12 +504,12 @@ export default function EnhancedAnnouncementDetail({
               className="mb-3"
               rows={3}
             />
-            <Button 
+            <Button
               onClick={handleSubmitComment}
               disabled={!newComment.trim() || submittingComment}
             >
               <Send className="h-4 w-4 mr-2" />
-              {submittingComment ? 'Mengirim...' : 'Kirim Komentar'}
+              {submittingComment ? "Mengirim..." : "Kirim Komentar"}
             </Button>
           </div>
 
@@ -486,7 +521,10 @@ export default function EnhancedAnnouncementDetail({
               </p>
             ) : (
               comments.map((comment) => (
-                <div key={comment.id} className="border-l-4 border-l-gray-200 pl-4">
+                <div
+                  key={comment.id}
+                  className="border-l-4 border-l-gray-200 pl-4"
+                >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -497,14 +535,15 @@ export default function EnhancedAnnouncementDetail({
                           {formatDate(comment.created_at)}
                         </span>
                         {!comment.is_approved && (
-                          <Badge variant="outline" className="text-orange-600 border-orange-600">
+                          <Badge
+                            variant="outline"
+                            className="text-orange-600 border-orange-600"
+                          >
                             Pending Approval
                           </Badge>
                         )}
                       </div>
-                      <p className="text-gray-700 text-sm">
-                        {comment.content}
-                      </p>
+                      <p className="text-gray-700 text-sm">{comment.content}</p>
                     </div>
                   </div>
                 </div>

@@ -1,52 +1,71 @@
-'use client';
+"use client";
 
-import { Activity } from '../../lib/api-client';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
-import { 
-  Calendar, 
-  MapPin, 
-  Building, 
-  User, 
-  CheckCircle, 
-  XCircle, 
+import { Activity } from "../../lib/api-client";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import {
+  Calendar,
+  MapPin,
+  Building,
+  User,
+  CheckCircle,
+  XCircle,
   Clock,
   AlertCircle,
   Image as ImageIcon,
   Eye,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleDateString('id-ID', { 
-    day: 'numeric', 
-    month: 'long', 
-    year: 'numeric' 
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 };
 
 const formatDateTime = (dateString: string) => {
   const date = new Date(dateString);
-  return date.toLocaleString('id-ID', { 
-    day: 'numeric', 
-    month: 'short', 
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  return date.toLocaleString("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 };
 
 const renderStatusBadge = (status: string) => {
   const statusConfig = {
-    draft: { label: 'Draft', variant: 'secondary' as const, icon: Clock },
-    in_review: { label: 'Review', variant: 'default' as const, icon: AlertCircle },
-    approved: { label: 'Approved', variant: 'default' as const, icon: CheckCircle },
-    rejected: { label: 'Rejected', variant: 'destructive' as const, icon: XCircle },
+    draft: { label: "Draft", variant: "secondary" as const, icon: Clock },
+    in_review: {
+      label: "Review",
+      variant: "default" as const,
+      icon: AlertCircle,
+    },
+    approved: {
+      label: "Approved",
+      variant: "default" as const,
+      icon: CheckCircle,
+    },
+    rejected: {
+      label: "Rejected",
+      variant: "destructive" as const,
+      icon: XCircle,
+    },
   };
 
-  const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
+  const config =
+    statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
   const Icon = config.icon;
 
   return (
@@ -72,7 +91,10 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
           <div className="flex items-center gap-2 mt-2">
             {renderStatusBadge(activity.status)}
             <span className="text-sm text-muted-foreground">
-              Dibuat: {activity.created_at ? formatDateTime(activity.created_at) : 'N/A'}
+              Dibuat:{" "}
+              {activity.created_at
+                ? formatDateTime(activity.created_at)
+                : "N/A"}
             </span>
           </div>
         </div>
@@ -95,7 +117,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
               {activity.images.map((image, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image}`}
                     alt={`${activity.title} - Gambar ${index + 1}`}
                     className="w-full h-48 object-cover rounded-lg border"
                   />
@@ -132,11 +154,11 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
               {formatDate(activity.activity_date)}
             </p>
             <p className="text-sm text-muted-foreground mt-1">
-              {new Date(activity.activity_date).toLocaleDateString('id-ID', { 
-                weekday: 'long',
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric' 
+              {new Date(activity.activity_date).toLocaleDateString("id-ID", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
               })}
             </p>
           </CardContent>
@@ -151,7 +173,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
           </CardHeader>
           <CardContent>
             <p className="text-lg font-semibold">
-              {activity.park?.name || 'N/A'}
+              {activity.park?.name || "N/A"}
             </p>
             {activity.park_id && (
               <p className="text-sm text-muted-foreground mt-1">
@@ -173,10 +195,11 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
               {renderStatusBadge(activity.status)}
             </div>
             <p className="text-sm text-muted-foreground mt-2">
-              {activity.status === 'approved' && 'Kegiatan telah disetujui'}
-              {activity.status === 'draft' && 'Kegiatan dalam status draft'}
-              {activity.status === 'in_review' && 'Kegiatan sedang dalam review'}
-              {activity.status === 'rejected' && 'Kegiatan ditolak'}
+              {activity.status === "approved" && "Kegiatan telah disetujui"}
+              {activity.status === "draft" && "Kegiatan dalam status draft"}
+              {activity.status === "in_review" &&
+                "Kegiatan sedang dalam review"}
+              {activity.status === "rejected" && "Kegiatan ditolak"}
             </p>
           </CardContent>
         </Card>
@@ -220,10 +243,14 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
         <CardContent className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h4 className="font-semibold text-sm text-muted-foreground mb-2">Dibuat Oleh</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                Dibuat Oleh
+              </h4>
               <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                 <User className="h-4 w-4 text-gray-600" />
-                <span className="font-medium">{activity.created_by || 'N/A'}</span>
+                <span className="font-medium">
+                  {activity.created_by || "N/A"}
+                </span>
               </div>
               {activity.created_at && (
                 <p className="text-xs text-muted-foreground mt-1">
@@ -231,10 +258,12 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                 </p>
               )}
             </div>
-            
+
             {activity.submitted_at && (
               <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-2">Dikirim untuk Review</h4>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                  Dikirim untuk Review
+                </h4>
                 <div className="p-3 bg-blue-50 rounded-lg">
                   <p className="font-medium text-blue-900">
                     {formatDateTime(activity.submitted_at)}
@@ -242,14 +271,18 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                 </div>
               </div>
             )}
-            
+
             {activity.approved_by && (
               <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-2">Disetujui Oleh</h4>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                  Disetujui Oleh
+                </h4>
                 <div className="p-3 bg-green-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="font-medium text-green-900">{activity.approved_by}</span>
+                    <span className="font-medium text-green-900">
+                      {activity.approved_by}
+                    </span>
                   </div>
                   {activity.approved_at && (
                     <p className="text-sm text-green-700 mt-1">
@@ -259,14 +292,18 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                 </div>
               </div>
             )}
-            
+
             {activity.rejected_at && (
               <div>
-                <h4 className="font-semibold text-sm text-muted-foreground mb-2">Ditolak Oleh</h4>
+                <h4 className="font-semibold text-sm text-muted-foreground mb-2">
+                  Ditolak Oleh
+                </h4>
                 <div className="p-3 bg-red-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <XCircle className="h-4 w-4 text-red-600" />
-                    <span className="font-medium text-red-900">{activity.rejected_by || 'N/A'}</span>
+                    <span className="font-medium text-red-900">
+                      {activity.rejected_by || "N/A"}
+                    </span>
                   </div>
                   <p className="text-sm text-red-700 mt-1">
                     Ditolak pada: {formatDateTime(activity.rejected_at)}
@@ -288,18 +325,22 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
 
           {/* Activity Timeline */}
           <div className="border-t pt-4">
-            <h4 className="font-semibold text-sm text-muted-foreground mb-3">Timeline Kegiatan</h4>
+            <h4 className="font-semibold text-sm text-muted-foreground mb-3">
+              Timeline Kegiatan
+            </h4>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                 <div>
                   <p className="text-sm font-medium">Kegiatan dibuat</p>
                   <p className="text-xs text-muted-foreground">
-                    {activity.created_at ? formatDateTime(activity.created_at) : 'N/A'}
+                    {activity.created_at
+                      ? formatDateTime(activity.created_at)
+                      : "N/A"}
                   </p>
                 </div>
               </div>
-              
+
               {activity.submitted_at && (
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
@@ -311,7 +352,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                   </div>
                 </div>
               )}
-              
+
               {activity.approved_at && (
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
@@ -323,7 +364,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                   </div>
                 </div>
               )}
-              
+
               {activity.rejected_at && (
                 <div className="flex items-center gap-3">
                   <div className="w-2 h-2 bg-red-500 rounded-full"></div>
@@ -357,7 +398,9 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
             </div>
             {activity.updated_at && (
               <div className="flex justify-between">
-                <span className="text-muted-foreground">Terakhir Diupdate:</span>
+                <span className="text-muted-foreground">
+                  Terakhir Diupdate:
+                </span>
                 <span>{formatDateTime(activity.updated_at)}</span>
               </div>
             )}

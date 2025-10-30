@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Search, Clock, TrendingUp } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Search, Clock, TrendingUp } from "lucide-react";
 
 interface SearchSuggestionsProps {
   query: string;
@@ -10,27 +10,27 @@ interface SearchSuggestionsProps {
 
 interface Suggestion {
   text: string;
-  type: 'recent' | 'trending' | 'suggestion';
+  type: "recent" | "trending" | "suggestion";
   count?: number;
 }
 
 const trendingSuggestions = [
-  'Rafflesia arnoldii',
-  'Orangutan Kalimantan',
-  'Taman Nasional Komodo',
-  'Biodiversitas Indonesia',
-  'Konservasi Flora',
-  'Fauna Endemik',
-  'Taman Kehati',
-  'Ekosistem Hutan'
+  "Rafflesia arnoldii",
+  "Orangutan Kalimantan",
+  "Taman Nasional Komodo",
+  "Biodiversitas Indonesia",
+  "Konservasi Flora",
+  "Fauna Endemik",
+  "Taman Kehati",
+  "Ekosistem Hutan",
 ];
 
 const popularCategories = [
-  'Flora Endemik',
-  'Fauna Langka',
-  'Taman Nasional',
-  'Artikel Konservasi',
-  'Galeri Kehati'
+  "Flora Endemik",
+  "Fauna Langka",
+  "Taman Nasional",
+  "Artikel Konservasi",
+  "Galeri Kehati",
 ];
 
 export function SearchSuggestions({ query, onSelect }: SearchSuggestionsProps) {
@@ -39,7 +39,7 @@ export function SearchSuggestions({ query, onSelect }: SearchSuggestionsProps) {
 
   useEffect(() => {
     // Load recent searches from localStorage
-    const recent = localStorage.getItem('recentSearches');
+    const recent = localStorage.getItem("recentSearches");
     if (recent) {
       setRecentSearches(JSON.parse(recent));
     }
@@ -56,43 +56,46 @@ export function SearchSuggestions({ query, onSelect }: SearchSuggestionsProps) {
 
       // Add recent searches that match the query
       recentSearches
-        .filter(search => 
-          search.toLowerCase().includes(query.toLowerCase()) && 
-          search.toLowerCase() !== query.toLowerCase()
+        .filter(
+          (search) =>
+            search.toLowerCase().includes(query.toLowerCase()) &&
+            search.toLowerCase() !== query.toLowerCase(),
         )
         .slice(0, 3)
-        .forEach(search => {
+        .forEach((search) => {
           allSuggestions.push({
             text: search,
-            type: 'recent'
+            type: "recent",
           });
         });
 
       // Add trending suggestions that match the query
       trendingSuggestions
-        .filter(suggestion => 
-          suggestion.toLowerCase().includes(query.toLowerCase()) &&
-          !allSuggestions.some(s => s.text === suggestion)
+        .filter(
+          (suggestion) =>
+            suggestion.toLowerCase().includes(query.toLowerCase()) &&
+            !allSuggestions.some((s) => s.text === suggestion),
         )
         .slice(0, 3)
-        .forEach(suggestion => {
+        .forEach((suggestion) => {
           allSuggestions.push({
             text: suggestion,
-            type: 'trending'
+            type: "trending",
           });
         });
 
       // Add category suggestions
       popularCategories
-        .filter(category => 
-          category.toLowerCase().includes(query.toLowerCase()) &&
-          !allSuggestions.some(s => s.text === category)
+        .filter(
+          (category) =>
+            category.toLowerCase().includes(query.toLowerCase()) &&
+            !allSuggestions.some((s) => s.text === category),
         )
         .slice(0, 2)
-        .forEach(category => {
+        .forEach((category) => {
           allSuggestions.push({
             text: category,
-            type: 'suggestion'
+            type: "suggestion",
           });
         });
 
@@ -106,38 +109,38 @@ export function SearchSuggestions({ query, onSelect }: SearchSuggestionsProps) {
     // Add to recent searches
     const updatedRecent = [
       suggestion,
-      ...recentSearches.filter(s => s !== suggestion)
+      ...recentSearches.filter((s) => s !== suggestion),
     ].slice(0, 10);
-    
+
     setRecentSearches(updatedRecent);
-    localStorage.setItem('recentSearches', JSON.stringify(updatedRecent));
-    
+    localStorage.setItem("recentSearches", JSON.stringify(updatedRecent));
+
     onSelect(suggestion);
   };
 
-  const getIcon = (type: Suggestion['type']) => {
+  const getIcon = (type: Suggestion["type"]) => {
     switch (type) {
-      case 'recent':
+      case "recent":
         return <Clock className="w-4 h-4 text-gray-400" />;
-      case 'trending':
+      case "trending":
         return <TrendingUp className="w-4 h-4 text-emerald-500" />;
-      case 'suggestion':
+      case "suggestion":
         return <Search className="w-4 h-4 text-blue-500" />;
       default:
         return <Search className="w-4 h-4 text-gray-400" />;
     }
   };
 
-  const getLabel = (type: Suggestion['type']) => {
+  const getLabel = (type: Suggestion["type"]) => {
     switch (type) {
-      case 'recent':
-        return 'Pencarian Terbaru';
-      case 'trending':
-        return 'Trending';
-      case 'suggestion':
-        return 'Kategori Populer';
+      case "recent":
+        return "Pencarian Terbaru";
+      case "trending":
+        return "Trending";
+      case "suggestion":
+        return "Kategori Populer";
       default:
-        return '';
+        return "";
     }
   };
 
@@ -164,18 +167,18 @@ export function SearchSuggestions({ query, onSelect }: SearchSuggestionsProps) {
               </div>
             </div>
             {suggestion.count && (
-              <div className="text-xs text-gray-400">
-                {suggestion.count}
-              </div>
+              <div className="text-xs text-gray-400">{suggestion.count}</div>
             )}
           </button>
         ))}
       </div>
-      
+
       {/* Footer with search tips */}
       <div className="border-t border-gray-100 p-3 bg-gray-50 rounded-b-xl">
         <div className="text-xs text-gray-500 text-center">
-          Tekan <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd> untuk mencari
+          Tekan{" "}
+          <kbd className="px-1 py-0.5 bg-gray-200 rounded text-xs">Enter</kbd>{" "}
+          untuk mencari
         </div>
       </div>
     </div>

@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { ArrowRight, Check } from 'lucide-react';
+import { useState, useEffect, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { ArrowRight, Check } from "lucide-react";
 
 export function MinimalNewsletterSection() {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     setTimeout(() => {
       setIsSubscribed(true);
       setIsLoading(false);
-      setEmail('');
+      setEmail("");
     }, 1500);
   };
 
@@ -51,7 +51,8 @@ export function MinimalNewsletterSection() {
                 </h2>
                 <div className="w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-6"></div>
                 <p className="text-lg text-gray-400 mb-8 max-w-2xl mx-auto">
-                  Berlangganan newsletter untuk mendapatkan informasi terbaru tentang spesies, penelitian, dan konservasi
+                  Berlangganan newsletter untuk mendapatkan informasi terbaru
+                  tentang spesies, penelitian, dan konservasi
                 </p>
 
                 <form onSubmit={handleSubscribe} className="max-w-md mx-auto">
@@ -91,4 +92,3 @@ export function MinimalNewsletterSection() {
     </section>
   );
 }
-

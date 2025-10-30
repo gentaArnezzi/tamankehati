@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import React from "react";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
 
 interface RegionData {
   provinsi?: string;
@@ -33,8 +33,8 @@ export function IndonesiaRegionSelector({
         <Label htmlFor="provinsi">Provinsi</Label>
         <Input
           id="provinsi"
-          value={initialValues.provinsi || ''}
-          onChange={(e) => handleChange('provinsi', e.target.value)}
+          value={initialValues.provinsi || ""}
+          onChange={(e) => handleChange("provinsi", e.target.value)}
           placeholder="Jawa Barat"
         />
       </div>
@@ -42,8 +42,8 @@ export function IndonesiaRegionSelector({
         <Label htmlFor="kota_kabupaten">Kota/Kabupaten</Label>
         <Input
           id="kota_kabupaten"
-          value={initialValues.kota_kabupaten || ''}
-          onChange={(e) => handleChange('kota_kabupaten', e.target.value)}
+          value={initialValues.kota_kabupaten || ""}
+          onChange={(e) => handleChange("kota_kabupaten", e.target.value)}
           placeholder="Kabupaten Bogor"
         />
       </div>
@@ -51,8 +51,8 @@ export function IndonesiaRegionSelector({
         <Label htmlFor="kecamatan">Kecamatan</Label>
         <Input
           id="kecamatan"
-          value={initialValues.kecamatan || ''}
-          onChange={(e) => handleChange('kecamatan', e.target.value)}
+          value={initialValues.kecamatan || ""}
+          onChange={(e) => handleChange("kecamatan", e.target.value)}
           placeholder="Cibinong"
         />
       </div>
@@ -60,8 +60,8 @@ export function IndonesiaRegionSelector({
         <Label htmlFor="desa_kelurahan">Desa/Kelurahan</Label>
         <Input
           id="desa_kelurahan"
-          value={initialValues.desa_kelurahan || ''}
-          onChange={(e) => handleChange('desa_kelurahan', e.target.value)}
+          value={initialValues.desa_kelurahan || ""}
+          onChange={(e) => handleChange("desa_kelurahan", e.target.value)}
           placeholder="Cibinong"
         />
       </div>

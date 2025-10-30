@@ -1,16 +1,16 @@
-import Link from 'next/link';
-import { Logo } from '../ui/logo';
+import Link from "next/link";
+import { Logo } from "../ui/logo";
 
 const NAV_LINKS = [
-  { label: 'Flora', href: '/flora' },
-  { label: 'Fauna', href: '/fauna' },
-  { label: 'Taman', href: '/taman' },
-  { label: 'Artikel', href: '/artikel' },
+  { label: "Flora", href: "/flora" },
+  { label: "Fauna", href: "/fauna" },
+  { label: "Taman", href: "/taman" },
+  { label: "Artikel", href: "/artikel" },
 ];
 
 const SUPPORT_LINKS = [
-  { label: 'Indeks Kehati', href: '/indeks' },
-  { label: 'Kontak', href: '/kontak' },
+  { label: "Indeks Kehati", href: "/indeks" },
+  { label: "Kontak", href: "/kontak" },
 ];
 
 export function Footer() {
@@ -25,13 +25,14 @@ export function Footer() {
               <Logo size="lg" />
             </Link>
             <p className="text-slate-600 leading-relaxed max-w-md text-sm">
-              Portal nasional untuk data flora, fauna, dan taman konservasi Indonesia. 
-              Memperkuat riset, edukasi, dan aksi lapangan keanekaragaman hayati.
+              Portal nasional untuk data flora, fauna, dan taman konservasi
+              Indonesia. Memperkuat riset, edukasi, dan aksi lapangan
+              keanekaragaman hayati.
             </p>
             <div className="mt-6">
               <p className="text-sm text-slate-500 mb-1">Kontak</p>
-              <a 
-                href="mailto:info@tamankehati.id" 
+              <a
+                href="mailto:info@tamankehati.id"
                 className="text-slate-700 hover:text-emerald-600 transition-colors text-sm"
               >
                 info@tamankehati.id
@@ -41,12 +42,14 @@ export function Footer() {
 
           {/* Navigation Links */}
           <div className="lg:col-span-3">
-            <h3 className="text-sm font-medium text-slate-900 mb-4">Navigasi</h3>
+            <h3 className="text-sm font-medium text-slate-900 mb-4">
+              Navigasi
+            </h3>
             <ul className="space-y-3">
               {NAV_LINKS.map((item) => (
                 <li key={item.href}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="text-slate-600 hover:text-emerald-600 transition-colors text-sm"
                   >
                     {item.label}
@@ -58,12 +61,14 @@ export function Footer() {
 
           {/* Support Links */}
           <div className="lg:col-span-4">
-            <h3 className="text-sm font-medium text-slate-900 mb-4">Dukungan</h3>
+            <h3 className="text-sm font-medium text-slate-900 mb-4">
+              Dukungan
+            </h3>
             <ul className="space-y-3">
               {SUPPORT_LINKS.map((item) => (
                 <li key={item.href}>
-                  <Link 
-                    href={item.href} 
+                  <Link
+                    href={item.href}
                     className="text-slate-600 hover:text-emerald-600 transition-colors text-sm"
                   >
                     {item.label}
@@ -81,14 +86,14 @@ export function Footer() {
               © {new Date().getFullYear()} Taman Kehati. Semua hak dilindungi.
             </p>
             <div className="flex gap-6">
-              <Link 
-                href="/kebijakan-privasi" 
+              <Link
+                href="/kebijakan-privasi"
                 className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
               >
                 Kebijakan Privasi
               </Link>
-              <Link 
-                href="/ketentuan" 
+              <Link
+                href="/ketentuan"
                 className="text-xs text-slate-500 hover:text-slate-700 transition-colors"
               >
                 Ketentuan

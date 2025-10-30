@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Search, ArrowRight } from 'lucide-react';
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Search, ArrowRight } from "lucide-react";
 
 export function MinimalHeroSection() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const { scrollY } = useScroll();
-  
+
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const y = useTransform(scrollY, [0, 300], [0, 100]);
   const scale = useTransform(scrollY, [0, 300], [1, 1.1]);
@@ -24,10 +24,7 @@ export function MinimalHeroSection() {
   return (
     <section className="relative min-h-screen w-full flex items-center justify-center overflow-hidden">
       {/* Parallax Background Image */}
-      <motion.div 
-        style={{ scale }}
-        className="absolute inset-0 z-0"
-      >
+      <motion.div style={{ scale }} className="absolute inset-0 z-0">
         <Image
           src="/home/hero.jpg"
           alt="Taman Kehati Indonesia"
@@ -39,7 +36,7 @@ export function MinimalHeroSection() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-white/70" />
       </motion.div>
 
-      <motion.div 
+      <motion.div
         style={{ opacity, y }}
         className="container mx-auto max-w-7xl px-6 py-20 relative z-10 -mt-20"
       >
@@ -73,7 +70,8 @@ export function MinimalHeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-base md:text-lg text-white/90 max-w-2xl mx-auto leading-relaxed"
           >
-            Portal terpadu untuk riset biodiversitas, edukasi konservasi, dan data ekologi Indonesia.
+            Portal terpadu untuk riset biodiversitas, edukasi konservasi, dan
+            data ekologi Indonesia.
           </motion.p>
 
           {/* Minimal Search Bar */}
@@ -132,9 +130,9 @@ export function MinimalHeroSection() {
             className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 border-t border-white/20"
           >
             {[
-              { value: '500+', label: 'Spesies' },
-              { value: '52', label: 'Taman' },
-              { value: '145', label: 'Publikasi' },
+              { value: "500+", label: "Spesies" },
+              { value: "52", label: "Taman" },
+              { value: "145", label: "Publikasi" },
             ].map((stat, i) => (
               <div key={i} className="text-center">
                 <div className="text-2xl font-semibold text-white mb-1">
@@ -165,4 +163,3 @@ export function MinimalHeroSection() {
     </section>
   );
 }
-

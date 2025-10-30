@@ -1,14 +1,9 @@
-import { Flora, galleryApi } from '../../lib/api-client';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '../ui/dialog';
-import { Badge } from '../ui/badge';
-import { Separator } from '../ui/separator';
-import { Calendar, MapPin, Leaf, FileText, Heart } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { Flora, galleryApi } from "../../lib/api-client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Badge } from "../ui/badge";
+import { Separator } from "../ui/separator";
+import { Calendar, MapPin, Leaf, FileText, Heart } from "lucide-react";
+import { useState, useEffect } from "react";
 
 interface FloraDetailProps {
   open: boolean;
@@ -17,23 +12,25 @@ interface FloraDetailProps {
 }
 
 export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
-  const [galleryImages, setGalleryImages] = useState<Array<{
-    id: number;
-    title: string;
-    description: string;
-    image_url: string;
-    entity_type: string;
-    entity_id: number;
-    status: string;
-    created_at: string;
-    updated_at: string;
-  }>>([]);
+  const [galleryImages, setGalleryImages] = useState<
+    Array<{
+      id: number;
+      title: string;
+      description: string;
+      image_url: string;
+      entity_type: string;
+      entity_id: number;
+      status: string;
+      created_at: string;
+      updated_at: string;
+    }>
+  >([]);
   const [loadingGallery, setLoadingGallery] = useState(false);
 
   useEffect(() => {
     if (data?.id && open) {
       // Only try to fetch gallery if backend is available
-      const enableGallery = process.env.NEXT_PUBLIC_ENABLE_GALLERY !== 'false';
+      const enableGallery = process.env.NEXT_PUBLIC_ENABLE_GALLERY !== "false";
       if (enableGallery) {
         fetchGalleryImages();
       } else {
@@ -45,10 +42,10 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
 
   const fetchGalleryImages = async () => {
     if (!data?.id) return;
-    
+
     try {
       setLoadingGallery(true);
-      const response = await galleryApi.getByEntity('flora', data.id);
+      const response = await galleryApi.getByEntity("flora", data.id);
       if (response.success && response.data) {
         setGalleryImages(response.data);
       } else {
@@ -58,8 +55,8 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
     } catch (error: any) {
       // Silently handle error - gallery is optional feature
       // Only log in development
-      if (process.env.NODE_ENV === 'development') {
-        console.debug('Gallery fetch skipped - backend may not be available');
+      if (process.env.NODE_ENV === "development") {
+        console.debug("Gallery fetch skipped - backend may not be available");
       }
       setGalleryImages([]);
     } finally {
@@ -71,12 +68,24 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, { label: string; className: string }> = {
-      draft: { label: 'Draft', className: 'bg-gray-100 text-gray-800 border-gray-200' },
-      in_review: { label: 'Dalam Peninjauan', className: 'bg-blue-100 text-blue-800 border-blue-200' },
-      approved: { label: 'Disetujui', className: 'bg-green-100 text-green-800 border-green-200' },
-      rejected: { label: 'Ditolak', className: 'bg-red-100 text-red-800 border-red-200' },
+      draft: {
+        label: "Draft",
+        className: "bg-gray-100 text-gray-800 border-gray-200",
+      },
+      in_review: {
+        label: "Dalam Peninjauan",
+        className: "bg-blue-100 text-blue-800 border-blue-200",
+      },
+      approved: {
+        label: "Disetujui",
+        className: "bg-green-100 text-green-800 border-green-200",
+      },
+      rejected: {
+        label: "Ditolak",
+        className: "bg-red-100 text-red-800 border-red-200",
+      },
     };
-    
+
     const config = variants[status] || variants.draft;
     return (
       <Badge variant="outline" className={config.className}>
@@ -86,15 +95,15 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return '-';
+    if (!dateString) return "-";
     const date = new Date(dateString);
-    if (Number.isNaN(date.getTime())) return '-';
-    return date.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    if (Number.isNaN(date.getTime())) return "-";
+    return date.toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -120,11 +129,15 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.gambar_utama && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_utama}`}
+                src={
+                  data.gambar_utama.startsWith("http")
+                    ? data.gambar_utama
+                    : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_utama}`
+                }
                 alt={data.nama_ilmiah}
                 className="w-full h-64 object-cover"
                 onError={(e) => {
-                  (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                  (e.target as HTMLImageElement).src = "/placeholder-image.png";
                 }}
               />
             </div>
@@ -133,10 +146,10 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {/* Gallery Images */}
           <div>
             <h3 className="flex items-center gap-2 mb-3">
-              <FileText className="h-5 w-5" style={{ color: '#356447' }} />
+              <FileText className="h-5 w-5" style={{ color: "#356447" }} />
               <span>Galeri Gambar ({galleryImages.length})</span>
             </h3>
-            
+
             {loadingGallery ? (
               <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg">
                 <p className="text-sm text-gray-500">Memuat galeri gambar...</p>
@@ -147,20 +160,31 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image.image_url}`}
+                        src={
+                          image.image_url.startsWith("http")
+                            ? image.image_url
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image.image_url}`
+                        }
                         alt={image.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="mt-2">
-                      <p className="text-xs font-medium text-gray-900 truncate" title={image.title}>
+                      <p
+                        className="text-xs font-medium text-gray-900 truncate"
+                        title={image.title}
+                      >
                         {image.title}
                       </p>
                       {image.description && (
-                        <p className="text-xs text-gray-500 truncate" title={image.description}>
+                        <p
+                          className="text-xs text-gray-500 truncate"
+                          title={image.description}
+                        >
                           {image.description}
                         </p>
                       )}
@@ -171,17 +195,24 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
             ) : (
               <div className="text-center py-8 border border-dashed border-gray-300 rounded-lg bg-gray-50">
                 <FileText className="h-12 w-12 mx-auto text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Belum ada gambar di galeri</p>
-                <p className="text-xs text-gray-400 mt-1">Gambar dapat ditambahkan melalui menu galeri</p>
+                <p className="text-sm text-gray-500">
+                  Belum ada gambar di galeri
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Gambar dapat ditambahkan melalui menu galeri
+                </p>
               </div>
             )}
           </div>
 
           {/* Gambar Detail Flora */}
-          {(data.gambar_daun || data.gambar_batang || data.gambar_bunga || data.gambar_buah) && (
+          {(data.gambar_daun ||
+            data.gambar_batang ||
+            data.gambar_bunga ||
+            data.gambar_buah) && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: '#356447' }} />
+                <FileText className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Dokumentasi Detail Flora</span>
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -189,17 +220,26 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_daun.startsWith('http') ? data.gambar_daun : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_daun}`}
+                        src={
+                          data.gambar_daun.startsWith("http")
+                            ? data.gambar_daun
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_daun}`
+                        }
                         alt="Pertelaan Daun"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-xs font-medium text-gray-900">Pertelaan Daun</p>
-                      <p className="text-[10px] text-gray-500">Detail struktur daun</p>
+                      <p className="text-xs font-medium text-gray-900">
+                        Pertelaan Daun
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        Detail struktur daun
+                      </p>
                     </div>
                   </div>
                 )}
@@ -207,17 +247,26 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_batang.startsWith('http') ? data.gambar_batang : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_batang}`}
+                        src={
+                          data.gambar_batang.startsWith("http")
+                            ? data.gambar_batang
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_batang}`
+                        }
                         alt="Batang/Percabangan"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-xs font-medium text-gray-900">Batang</p>
-                      <p className="text-[10px] text-gray-500">Batang & percabangan</p>
+                      <p className="text-xs font-medium text-gray-900">
+                        Batang
+                      </p>
+                      <p className="text-[10px] text-gray-500">
+                        Batang & percabangan
+                      </p>
                     </div>
                   </div>
                 )}
@@ -225,17 +274,24 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_bunga.startsWith('http') ? data.gambar_bunga : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_bunga}`}
+                        src={
+                          data.gambar_bunga.startsWith("http")
+                            ? data.gambar_bunga
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_bunga}`
+                        }
                         alt="Bunga"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="text-center">
                       <p className="text-xs font-medium text-gray-900">Bunga</p>
-                      <p className="text-[10px] text-gray-500">Detail struktur bunga</p>
+                      <p className="text-[10px] text-gray-500">
+                        Detail struktur bunga
+                      </p>
                     </div>
                   </div>
                 )}
@@ -243,17 +299,24 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_buah.startsWith('http') ? data.gambar_buah : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${data.gambar_buah}`}
+                        src={
+                          data.gambar_buah.startsWith("http")
+                            ? data.gambar_buah
+                            : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${data.gambar_buah}`
+                        }
                         alt="Buah"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                          (e.target as HTMLImageElement).src =
+                            "/placeholder-image.png";
                         }}
                       />
                     </div>
                     <div className="text-center">
                       <p className="text-xs font-medium text-gray-900">Buah</p>
-                      <p className="text-[10px] text-gray-500">Detail struktur buah</p>
+                      <p className="text-[10px] text-gray-500">
+                        Detail struktur buah
+                      </p>
                     </div>
                   </div>
                 )}
@@ -264,17 +327,21 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {/* Informasi Taksonomi */}
           <div>
             <h3 className="flex items-center gap-2 mb-3">
-              <Leaf className="h-5 w-5" style={{ color: '#356447' }} />
+              <Leaf className="h-5 w-5" style={{ color: "#356447" }} />
               <span>Informasi Taksonomi</span>
             </h3>
             <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Nama Ilmiah</p>
+                <p className="text-sm text-muted-foreground mb-1">
+                  Nama Ilmiah
+                </p>
                 <p className="italic">{data.nama_ilmiah}</p>
               </div>
               {data.nama_umum && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Nama Umum</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Nama Umum
+                  </p>
                   <p>{data.nama_umum}</p>
                 </div>
               )}
@@ -298,17 +365,25 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
               )}
               {data.status_iucn && (
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Status IUCN</p>
+                  <p className="text-sm text-muted-foreground mb-1">
+                    Status IUCN
+                  </p>
                   <Badge variant="outline">{data.status_iucn}</Badge>
                 </div>
               )}
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Status Endemik</p>
-                <Badge 
-                  variant="outline" 
-                  className={data.is_endemic ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-gray-100 text-gray-600 border-gray-200'}
+                <p className="text-sm text-muted-foreground mb-1">
+                  Status Endemik
+                </p>
+                <Badge
+                  variant="outline"
+                  className={
+                    data.is_endemic
+                      ? "bg-amber-100 text-amber-800 border-amber-200"
+                      : "bg-gray-100 text-gray-600 border-gray-200"
+                  }
                 >
-                  {data.is_endemic ? '✓ Endemik Indonesia' : 'Bukan Endemik'}
+                  {data.is_endemic ? "✓ Endemik Indonesia" : "Bukan Endemik"}
                 </Badge>
               </div>
             </div>
@@ -318,10 +393,12 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.morfologi && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <Leaf className="h-5 w-5" style={{ color: '#356447' }} />
+                <Leaf className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Morfologi</span>
               </h3>
-              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">{data.morfologi}</p>
+              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
+                {data.morfologi}
+              </p>
             </div>
           )}
 
@@ -329,10 +406,12 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.deskripsi && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: '#356447' }} />
+                <FileText className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Deskripsi</span>
               </h3>
-              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">{data.deskripsi}</p>
+              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
+                {data.deskripsi}
+              </p>
             </div>
           )}
 
@@ -340,10 +419,12 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.habitat && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <MapPin className="h-5 w-5" style={{ color: '#356447' }} />
+                <MapPin className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Habitat</span>
               </h3>
-              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">{data.habitat}</p>
+              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
+                {data.habitat}
+              </p>
             </div>
           )}
 
@@ -351,37 +432,52 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.manfaat && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <Heart className="h-5 w-5" style={{ color: '#356447' }} />
+                <Heart className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Manfaat / Kegunaan</span>
               </h3>
-              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">{data.manfaat}</p>
+              <p className="p-4 bg-gray-50 rounded-lg leading-relaxed">
+                {data.manfaat}
+              </p>
             </div>
           )}
 
           {/* Informasi Tambahan */}
-          {(data.sinonim || data.waktu_berbunga || data.penyebaran || data.metode_perbanyakan) && (
+          {(data.sinonim ||
+            data.waktu_berbunga ||
+            data.penyebaran ||
+            data.metode_perbanyakan) && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: '#356447' }} />
+                <FileText className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Informasi Tambahan</span>
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
                 {data.waktu_berbunga && (
                   <div>
-                    <p className="text-sm text-muted-foreground mb-1">Waktu Berbunga</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Waktu Berbunga
+                    </p>
                     <p className="text-sm">{data.waktu_berbunga}</p>
                   </div>
                 )}
                 {data.penyebaran && (
                   <div className="md:col-span-2">
-                    <p className="text-sm text-muted-foreground mb-1">Penyebaran</p>
-                    <p className="text-sm whitespace-pre-line">{data.penyebaran}</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Penyebaran
+                    </p>
+                    <p className="text-sm whitespace-pre-line">
+                      {data.penyebaran}
+                    </p>
                   </div>
                 )}
                 {data.metode_perbanyakan && (
                   <div className="md:col-span-2">
-                    <p className="text-sm text-muted-foreground mb-1">Metode Perbanyakan</p>
-                    <p className="text-sm whitespace-pre-line">{data.metode_perbanyakan}</p>
+                    <p className="text-sm text-muted-foreground mb-1">
+                      Metode Perbanyakan
+                    </p>
+                    <p className="text-sm whitespace-pre-line">
+                      {data.metode_perbanyakan}
+                    </p>
                   </div>
                 )}
               </div>
@@ -392,11 +488,13 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.referensi && (
             <div>
               <h3 className="flex items-center gap-2 mb-3">
-                <FileText className="h-5 w-5" style={{ color: '#356447' }} />
+                <FileText className="h-5 w-5" style={{ color: "#356447" }} />
                 <span>Referensi</span>
               </h3>
               <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                <p className="text-sm leading-relaxed whitespace-pre-line text-gray-700">{data.referensi}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-line text-gray-700">
+                  {data.referensi}
+                </p>
               </div>
             </div>
           )}
@@ -409,7 +507,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
               <p className="text-muted-foreground mb-1">Taman</p>
               <p className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                {data.park?.name || '-'}
+                {data.park?.name || "-"}
               </p>
             </div>
             <div>
@@ -421,7 +519,9 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
             </div>
             {data.updated_at !== data.created_at && (
               <div>
-                <p className="text-muted-foreground mb-1">Terakhir Diperbarui</p>
+                <p className="text-muted-foreground mb-1">
+                  Terakhir Diperbarui
+                </p>
                 <p className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   {formatDate(data.updated_at)}

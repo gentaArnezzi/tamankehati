@@ -1,36 +1,48 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
-  ComposedChart
-} from 'recharts';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  TreePine, 
-  Bird, 
-  MapPin, 
+  ComposedChart,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  TreePine,
+  Bird,
+  MapPin,
   Calendar,
   BarChart3,
   PieChart as PieChartIcon,
@@ -65,8 +77,8 @@ import {
   ArrowUp,
   ArrowDown,
   Minus,
-  Plus as PlusIcon
-} from 'lucide-react';
+  Plus as PlusIcon,
+} from "lucide-react";
 
 interface ModernDashboardProps {
   user?: any;
@@ -74,9 +86,13 @@ interface ModernDashboardProps {
   loading?: boolean;
 }
 
-const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading = false }) => {
-  const [timeRange, setTimeRange] = useState('7d');
-  const [activeTab, setActiveTab] = useState('home');
+const ModernDashboard: React.FC<ModernDashboardProps> = ({
+  user,
+  data,
+  loading = false,
+}) => {
+  const [timeRange, setTimeRange] = useState("7d");
+  const [activeTab, setActiveTab] = useState("home");
 
   // Sample data for demonstration
   const sampleData = {
@@ -84,7 +100,7 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
       unique: 18600,
       totalPageviews: 55900,
       bounceRate: 54,
-      visitDuration: '2m 56s',
+      visitDuration: "2m 56s",
       chartData: [
         { period: 1, visitors: 120, pageviews: 340 },
         { period: 2, visitors: 190, pageviews: 280 },
@@ -100,16 +116,16 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
         { period: 12, visitors: 420, pageviews: 580 },
         { period: 13, visitors: 390, pageviews: 540 },
         { period: 14, visitors: 450, pageviews: 620 },
-        { period: 15, visitors: 480, pageviews: 680 }
-      ]
+        { period: 15, visitors: 480, pageviews: 680 },
+      ],
     },
     countries: [
-      { name: 'United States', flag: '🇺🇸', percentage: 55 },
-      { name: 'Canada', flag: '🇨🇦', percentage: 48 },
-      { name: 'France', flag: '🇫🇷', percentage: 40 },
-      { name: 'Italy', flag: '🇮🇹', percentage: 32 },
-      { name: 'Australia', flag: '🇦🇺', percentage: 25 },
-      { name: 'India', flag: '🇮🇳', percentage: 15 }
+      { name: "United States", flag: "🇺🇸", percentage: 55 },
+      { name: "Canada", flag: "🇨🇦", percentage: 48 },
+      { name: "France", flag: "🇫🇷", percentage: 40 },
+      { name: "Italy", flag: "🇮🇹", percentage: 32 },
+      { name: "Australia", flag: "🇦🇺", percentage: 25 },
+      { name: "India", flag: "🇮🇳", percentage: 15 },
     ],
     financial: {
       totalBalance: 21550,
@@ -117,46 +133,79 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
       saving: 500,
       totalInvestment: 32819,
       totalProfit: 1260000,
-      totalReturn: 1028000
+      totalReturn: 1028000,
     },
     portfolios: [
-      { name: 'ASSET A', value: 365.51, change: 2.16, positive: true, color: 'bg-green-500' },
-      { name: 'ASSET B', value: 165.31, change: -2.16, positive: false, color: 'bg-yellow-500' },
-      { name: 'ASSET C', value: 165.31, change: -2.16, positive: false, color: 'bg-blue-500' }
+      {
+        name: "ASSET A",
+        value: 365.51,
+        change: 2.16,
+        positive: true,
+        color: "bg-green-500",
+      },
+      {
+        name: "ASSET B",
+        value: 165.31,
+        change: -2.16,
+        positive: false,
+        color: "bg-yellow-500",
+      },
+      {
+        name: "ASSET C",
+        value: 165.31,
+        change: -2.16,
+        positive: false,
+        color: "bg-blue-500",
+      },
     ],
     dailyTasks: [
-      { name: 'Information A', current: 45100, total: 100000 },
-      { name: 'Information B', current: 454, total: 1000 },
-      { name: 'Information C', current: 21, total: 120 }
+      { name: "Information A", current: 45100, total: 100000 },
+      { name: "Information B", current: 454, total: 1000 },
+      { name: "Information C", current: 21, total: 120 },
     ],
     users: [
-      { name: 'John Doe', username: '@john.user', status: 'Active', role: 'Sales' },
-      { name: 'Jane Smith', username: '@jane.smith', status: 'Active', role: 'Marketing' },
-      { name: 'Bob Johnson', username: '@bob.johnson', status: 'Inactive', role: 'Developer' }
-    ]
+      {
+        name: "John Doe",
+        username: "@john.user",
+        status: "Active",
+        role: "Sales",
+      },
+      {
+        name: "Jane Smith",
+        username: "@jane.smith",
+        status: "Active",
+        role: "Marketing",
+      },
+      {
+        name: "Bob Johnson",
+        username: "@bob.johnson",
+        status: "Inactive",
+        role: "Developer",
+      },
+    ],
   };
 
   const chartData = sampleData.visitors.chartData;
   const weeklyData = [
-    { day: 'SUN', value: 120 },
-    { day: 'TUE', value: 180 },
-    { day: 'WED', value: 220 },
-    { day: 'THU', value: 190 },
-    { day: 'FRI', value: 250 },
-    { day: 'SAT', value: 280 },
-    { day: 'SUN', value: 320 }
+    { day: "SUN", value: 120 },
+    { day: "TUE", value: 180 },
+    { day: "WED", value: 220 },
+    { day: "THU", value: 190 },
+    { day: "FRI", value: 250 },
+    { day: "SAT", value: 280 },
+    { day: "SUN", value: 320 },
   ];
 
   const donutData = [
-    { name: 'Shortlisted', value: 30, color: '#10b981' },
-    { name: 'Accepted', value: 25, color: '#3b82f6' },
-    { name: 'Rejected', value: 452, color: '#ef4444' }
+    { name: "Shortlisted", value: 30, color: "#10b981" },
+    { name: "Accepted", value: 25, color: "#3b82f6" },
+    { name: "Rejected", value: 452, color: "#ef4444" },
   ];
 
   const taskData = [
-    { name: 'Completed', value: 60, color: '#10b981' },
-    { name: 'In Progress', value: 25, color: '#f59e0b' },
-    { name: 'Pending', value: 15, color: '#8b5cf6' }
+    { name: "Completed", value: 60, color: "#10b981" },
+    { name: "In Progress", value: 25, color: "#f59e0b" },
+    { name: "Pending", value: 15, color: "#8b5cf6" },
   ];
 
   if (loading) {
@@ -164,7 +213,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <RefreshCw className="mx-auto h-8 w-8 animate-spin text-primary" />
-          <p className="mt-2 text-sm text-muted-foreground">Loading dashboard...</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Loading dashboard...
+          </p>
         </div>
       </div>
     );
@@ -187,17 +238,17 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           <nav className="flex-1 flex justify-center">
             <div className="flex items-center gap-8">
               {[
-                { name: 'Home', active: true },
-                { name: 'Layout', active: false },
-                { name: 'Chart', active: false },
-                { name: 'Payment', active: false }
+                { name: "Home", active: true },
+                { name: "Layout", active: false },
+                { name: "Chart", active: false },
+                { name: "Payment", active: false },
               ].map((item) => (
                 <button
                   key={item.name}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    item.active 
-                      ? 'bg-blue-100 text-blue-700' 
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                    item.active
+                      ? "bg-blue-100 text-blue-700"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
                   }`}
                 >
                   {item.name}
@@ -214,18 +265,18 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                 11
               </Badge>
             </Button>
-            
+
             <Button variant="ghost" size="sm" className="relative">
               <Bell className="h-5 w-5" />
               <Badge className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
                 7
               </Badge>
             </Button>
-            
+
             <Button variant="ghost" size="sm">
               <Settings className="h-5 w-5" />
             </Button>
-            
+
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                 <User className="h-4 w-4" />
@@ -243,7 +294,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           <Card>
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Top Countries</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  Top Countries
+                </CardTitle>
                 <Select value={timeRange} onValueChange={setTimeRange}>
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue />
@@ -269,18 +322,28 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                   </Button>
                 </div>
               </div>
-              
+
               {/* Country List */}
               <div className="space-y-3">
                 {sampleData.countries.map((country, index) => (
-                  <div key={index} className="flex items-center justify-between">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{country.flag}</span>
-                      <span className="text-sm font-medium">{country.name}</span>
+                      <span className="text-sm font-medium">
+                        {country.name}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Progress value={country.percentage} className="w-16 h-2" />
-                      <span className="text-sm text-gray-600 w-8">{country.percentage}%</span>
+                      <Progress
+                        value={country.percentage}
+                        className="w-16 h-2"
+                      />
+                      <span className="text-sm text-gray-600 w-8">
+                        {country.percentage}%
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -291,7 +354,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           {/* Company Data Performance */}
           <Card>
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold">Company data performance</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                Company data performance
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex justify-center mb-4">
@@ -321,19 +386,31 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                   </div>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <div className="flex items-center justify-between p-2 bg-green-50 rounded-lg">
-                  <span className="text-sm font-medium text-green-800">Shortlisted</span>
-                  <span className="text-sm font-semibold text-green-800">30</span>
+                  <span className="text-sm font-medium text-green-800">
+                    Shortlisted
+                  </span>
+                  <span className="text-sm font-semibold text-green-800">
+                    30
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
-                  <span className="text-sm font-medium text-blue-800">Accepted</span>
-                  <span className="text-sm font-semibold text-blue-800">25</span>
+                  <span className="text-sm font-medium text-blue-800">
+                    Accepted
+                  </span>
+                  <span className="text-sm font-semibold text-blue-800">
+                    25
+                  </span>
                 </div>
                 <div className="flex items-center justify-between p-2 bg-red-50 rounded-lg">
-                  <span className="text-sm font-medium text-red-800">Rejected</span>
-                  <span className="text-sm font-semibold text-red-800">452</span>
+                  <span className="text-sm font-medium text-red-800">
+                    Rejected
+                  </span>
+                  <span className="text-sm font-semibold text-red-800">
+                    452
+                  </span>
                 </div>
               </div>
             </CardContent>
@@ -346,7 +423,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           <Card>
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Visitors Analytics</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  Visitors Analytics
+                </CardTitle>
                 <Button variant="ghost" size="sm" className="text-blue-600">
                   View All
                 </Button>
@@ -359,49 +438,65 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="period" stroke="#666" />
                     <YAxis stroke="#666" />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'white', 
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '8px',
-                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                      }} 
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "white",
+                        border: "1px solid #e5e7eb",
+                        borderRadius: "8px",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      }}
                     />
-                    <Bar dataKey="visitors" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="pageviews" fill="#10b981" radius={[4, 4, 0, 0]} />
+                    <Bar
+                      dataKey="visitors"
+                      fill="#3b82f6"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="pageviews"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              
+
               {/* Metrics Cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="p-4 bg-white border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">18.6K Unique Visitors</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      18.6K Unique Visitors
+                    </span>
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   </div>
                   <div className="text-xs text-green-600 font-medium">+18%</div>
                 </div>
-                
+
                 <div className="p-4 bg-white border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">55.9K Total Pageviews</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      55.9K Total Pageviews
+                    </span>
                     <TrendingDown className="h-4 w-4 text-red-500" />
                   </div>
                   <div className="text-xs text-red-600 font-medium">-25%</div>
                 </div>
-                
+
                 <div className="p-4 bg-white border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">54% Bounce Rate</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      54% Bounce Rate
+                    </span>
                     <TrendingDown className="h-4 w-4 text-red-500" />
                   </div>
                   <div className="text-xs text-red-600 font-medium">-7%</div>
                 </div>
-                
+
                 <div className="p-4 bg-white border border-gray-200 rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-600">2m 56s Visit Duration</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      2m 56s Visit Duration
+                    </span>
                     <TrendingUp className="h-4 w-4 text-green-500" />
                   </div>
                   <div className="text-xs text-green-600 font-medium">+12%</div>
@@ -415,43 +510,55 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium opacity-90">Total Balance</span>
+                  <span className="text-sm font-medium opacity-90">
+                    Total Balance
+                  </span>
                   <DollarSign className="h-4 w-4" />
                 </div>
-                <div className="text-2xl font-bold">${sampleData.financial.totalBalance.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  ${sampleData.financial.totalBalance.toLocaleString()}
+                </div>
                 <div className="text-xs opacity-90">62.5%</div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium opacity-90">Investment</span>
+                  <span className="text-sm font-medium opacity-90">
+                    Investment
+                  </span>
                   <TrendingUp className="h-4 w-4" />
                 </div>
-                <div className="text-2xl font-bold">${sampleData.financial.investment.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  ${sampleData.financial.investment.toLocaleString()}
+                </div>
                 <div className="text-xs opacity-90">5.5%</div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium opacity-90">Saving</span>
                   <PiggyBank className="h-4 w-4" />
                 </div>
-                <div className="text-2xl font-bold">${sampleData.financial.saving.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  ${sampleData.financial.saving.toLocaleString()}
+                </div>
                 <div className="text-xs opacity-90">5.5%</div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm font-medium opacity-90">Saving</span>
                   <PiggyBank className="h-4 w-4" />
                 </div>
-                <div className="text-2xl font-bold">${sampleData.financial.saving.toLocaleString()}</div>
+                <div className="text-2xl font-bold">
+                  ${sampleData.financial.saving.toLocaleString()}
+                </div>
                 <div className="text-xs opacity-90">5.5%</div>
               </CardContent>
             </Card>
@@ -463,19 +570,23 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-medium opacity-90">Information A -21.73%</div>
+                    <div className="text-sm font-medium opacity-90">
+                      Information A -21.73%
+                    </div>
                     <div className="text-lg font-semibold">Stock Wallet</div>
                   </div>
                   <Settings className="h-6 w-6" />
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <div className="text-sm font-medium opacity-90">Information B -21.73%</div>
+                    <div className="text-sm font-medium opacity-90">
+                      Information B -21.73%
+                    </div>
                     <div className="text-lg font-semibold">Stock Wallet</div>
                   </div>
                   <Grid className="h-6 w-6" />
@@ -499,7 +610,11 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                       <XAxis dataKey="day" stroke="#666" />
                       <YAxis stroke="#666" />
                       <Tooltip />
-                      <Bar dataKey="value" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      <Bar
+                        dataKey="value"
+                        fill="#10b981"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -531,17 +646,20 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
                     </ResponsiveContainer>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   {sampleData.dailyTasks.map((task, index) => (
                     <div key={index} className="space-y-1">
                       <div className="flex justify-between text-sm">
                         <span className="font-medium">{task.name}</span>
-                        <span className="text-gray-600">{task.current.toLocaleString()}/{task.total.toLocaleString()}</span>
+                        <span className="text-gray-600">
+                          {task.current.toLocaleString()}/
+                          {task.total.toLocaleString()}
+                        </span>
                       </div>
-                      <Progress 
-                        value={(task.current / task.total) * 100} 
-                        className="h-2" 
+                      <Progress
+                        value={(task.current / task.total) * 100}
+                        className="h-2"
                       />
                     </div>
                   ))}
@@ -557,7 +675,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           <Card>
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Company data performance</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  Company data performance
+                </CardTitle>
                 <Button variant="ghost" size="sm" className="text-blue-600">
                   View All
                 </Button>
@@ -566,28 +686,40 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
             <CardContent className="space-y-4">
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-green-800">Total Investment</span>
+                  <span className="text-sm font-medium text-green-800">
+                    Total Investment
+                  </span>
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
-                <div className="text-xl font-bold text-green-900">${sampleData.financial.totalInvestment.toLocaleString()}</div>
+                <div className="text-xl font-bold text-green-900">
+                  ${sampleData.financial.totalInvestment.toLocaleString()}
+                </div>
                 <div className="text-sm text-green-700">+5.3%</div>
               </div>
-              
+
               <div className="p-4 bg-green-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-green-800">Total Profit</span>
+                  <span className="text-sm font-medium text-green-800">
+                    Total Profit
+                  </span>
                   <TrendingUp className="h-4 w-4 text-green-600" />
                 </div>
-                <div className="text-xl font-bold text-green-900">${sampleData.financial.totalProfit.toLocaleString()}</div>
+                <div className="text-xl font-bold text-green-900">
+                  ${sampleData.financial.totalProfit.toLocaleString()}
+                </div>
                 <div className="text-sm text-green-700">0.58%</div>
               </div>
-              
+
               <div className="p-4 bg-red-50 rounded-lg">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-red-800">Total Return</span>
+                  <span className="text-sm font-medium text-red-800">
+                    Total Return
+                  </span>
                   <TrendingDown className="h-4 w-4 text-red-600" />
                 </div>
-                <div className="text-xl font-bold text-red-900">${sampleData.financial.totalReturn.toLocaleString()}</div>
+                <div className="text-xl font-bold text-red-900">
+                  ${sampleData.financial.totalReturn.toLocaleString()}
+                </div>
                 <div className="text-sm text-red-700">0.18%</div>
               </div>
             </CardContent>
@@ -601,17 +733,22 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { name: 'Withdraw', icon: DollarSign },
-                  { name: 'Transfer', icon: ArrowUpDown },
-                  { name: 'My Card', icon: CreditCard },
-                  { name: 'Deposit', icon: PiggyBank },
-                  { name: 'Add More', icon: Plus }
+                  { name: "Withdraw", icon: DollarSign },
+                  { name: "Transfer", icon: ArrowUpDown },
+                  { name: "My Card", icon: CreditCard },
+                  { name: "Deposit", icon: PiggyBank },
+                  { name: "Add More", icon: Plus },
                 ].map((service, index) => (
-                  <div key={index} className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                  <div
+                    key={index}
+                    className="flex flex-col items-center p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
                     <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-2">
                       <service.icon className="h-6 w-6 text-blue-600" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">{service.name}</span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {service.name}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -621,19 +758,27 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           {/* Portfolios */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg font-semibold">Portfolios</CardTitle>
+              <CardTitle className="text-lg font-semibold">
+                Portfolios
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
                 {sampleData.portfolios.map((portfolio, index) => (
                   <div key={index} className="p-3 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-sm">{portfolio.name}</span>
-                      <div className={`w-3 h-3 rounded-full ${portfolio.color}`}></div>
+                      <span className="font-medium text-sm">
+                        {portfolio.name}
+                      </span>
+                      <div
+                        className={`w-3 h-3 rounded-full ${portfolio.color}`}
+                      ></div>
                     </div>
                     <div className="text-lg font-bold">${portfolio.value}</div>
-                    <div className={`text-sm ${portfolio.positive ? 'text-green-600' : 'text-red-600'}`}>
-                      {portfolio.positive ? '+' : ''}${portfolio.change}
+                    <div
+                      className={`text-sm ${portfolio.positive ? "text-green-600" : "text-red-600"}`}
+                    >
+                      {portfolio.positive ? "+" : ""}${portfolio.change}
                     </div>
                   </div>
                 ))}
@@ -645,7 +790,9 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
           <Card>
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">User Overview</CardTitle>
+                <CardTitle className="text-lg font-semibold">
+                  User Overview
+                </CardTitle>
                 <Button variant="ghost" size="sm" className="text-blue-600">
                   View All
                 </Button>
@@ -654,20 +801,29 @@ const ModernDashboard: React.FC<ModernDashboardProps> = ({ user, data, loading =
             <CardContent>
               <div className="space-y-3">
                 {sampleData.users.map((user, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
                         <User className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="text-sm font-medium">{user.name}</div>
-                        <div className="text-xs text-gray-600">{user.username}</div>
+                        <div className="text-xs text-gray-600">
+                          {user.username}
+                        </div>
                       </div>
                     </div>
                     <div className="text-right">
                       <div className="flex items-center gap-1 mb-1">
-                        <div className={`w-2 h-2 rounded-full ${user.status === 'Active' ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                        <span className="text-xs text-gray-600">{user.status}</span>
+                        <div
+                          className={`w-2 h-2 rounded-full ${user.status === "Active" ? "bg-green-500" : "bg-gray-400"}`}
+                        ></div>
+                        <span className="text-xs text-gray-600">
+                          {user.status}
+                        </span>
                       </div>
                       <div className="text-xs text-gray-500">{user.role}</div>
                     </div>

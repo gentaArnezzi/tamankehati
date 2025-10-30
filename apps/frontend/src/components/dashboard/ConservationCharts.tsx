@@ -1,27 +1,40 @@
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   AreaChart,
   Area,
   LineChart,
-  Line
-} from 'recharts';
-import { Shield, MapPin, TreePine, Target, AlertTriangle, CheckCircle } from 'lucide-react';
+  Line,
+} from "recharts";
+import {
+  Shield,
+  MapPin,
+  TreePine,
+  Target,
+  AlertTriangle,
+  CheckCircle,
+} from "lucide-react";
 
 interface ConservationData {
   parks: {
@@ -40,46 +53,51 @@ interface ConservationData {
 
 interface ConservationChartsProps {
   data: ConservationData;
-  chartType?: 'bar' | 'pie' | 'area' | 'line';
+  chartType?: "bar" | "pie" | "area" | "line";
 }
 
-const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType = 'bar' }) => {
+const ConservationCharts: React.FC<ConservationChartsProps> = ({
+  data,
+  chartType = "bar",
+}) => {
   const colors = {
-    primary: '#3b82f6',
-    secondary: '#10b981',
-    accent: '#f59e0b',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-    success: '#10b981',
-    info: '#06b6d4',
-    purple: '#8b5cf6',
-    pink: '#ec4899'
+    primary: "#3b82f6",
+    secondary: "#10b981",
+    accent: "#f59e0b",
+    danger: "#ef4444",
+    warning: "#f59e0b",
+    success: "#10b981",
+    info: "#06b6d4",
+    purple: "#8b5cf6",
+    pink: "#ec4899",
   };
 
   const statusColors = {
-    'approved': '#10b981',
-    'published': '#10b981',
-    'draft': '#6b7280',
-    'in_review': '#f59e0b',
-    'rejected': '#ef4444',
-    'archived': '#9ca3af'
+    approved: "#10b981",
+    published: "#10b981",
+    draft: "#6b7280",
+    in_review: "#f59e0b",
+    rejected: "#ef4444",
+    archived: "#9ca3af",
   };
 
   // Prepare data for charts
-  const statusData = data.conservation_status.map(status => ({
+  const statusData = data.conservation_status.map((status) => ({
     ...status,
-    color: statusColors[status.status as keyof typeof statusColors] || colors.primary
+    color:
+      statusColors[status.status as keyof typeof statusColors] ||
+      colors.primary,
   }));
 
-  const areaData = data.conservation_status.map(status => ({
+  const areaData = data.conservation_status.map((status) => ({
     status: status.status,
     area_ha: status.total_area_ha,
-    count: status.count
+    count: status.count,
   }));
 
   const renderChart = () => {
     switch (chartType) {
-      case 'pie':
+      case "pie":
         return (
           <PieChart>
             <Pie
@@ -100,33 +118,33 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
             <Legend />
           </PieChart>
         );
-      case 'area':
+      case "area":
         return (
           <AreaChart data={areaData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" />
             <YAxis />
             <Tooltip />
-            <Area 
-              type="monotone" 
-              dataKey="area_ha" 
-              stroke={colors.primary} 
+            <Area
+              type="monotone"
+              dataKey="area_ha"
+              stroke={colors.primary}
               fill={colors.primary}
               name="Area (ha)"
             />
           </AreaChart>
         );
-      case 'line':
+      case "line":
         return (
           <LineChart data={areaData}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="status" />
             <YAxis />
             <Tooltip />
-            <Line 
-              type="monotone" 
-              dataKey="area_ha" 
-              stroke={colors.primary} 
+            <Line
+              type="monotone"
+              dataKey="area_ha"
+              stroke={colors.primary}
               strokeWidth={2}
               name="Area (ha)"
             />
@@ -158,9 +176,7 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data.parks.total}</div>
-            <p className="text-xs text-muted-foreground">
-              Protected areas
-            </p>
+            <p className="text-xs text-muted-foreground">Protected areas</p>
           </CardContent>
         </Card>
 
@@ -173,9 +189,7 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
             <div className="text-2xl font-bold">
               {data.parks.total_area_ha.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Hectares protected
-            </p>
+            <p className="text-xs text-muted-foreground">Hectares protected</p>
           </CardContent>
         </Card>
 
@@ -188,9 +202,7 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
             <div className="text-2xl font-bold">
               {data.parks.avg_area_ha.toFixed(0)}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Hectares per park
-            </p>
+            <p className="text-xs text-muted-foreground">Hectares per park</p>
           </CardContent>
         </Card>
 
@@ -203,9 +215,7 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
             <div className="text-2xl font-bold">
               {data.parks.max_area_ha.toLocaleString()}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Hectares
-            </p>
+            <p className="text-xs text-muted-foreground">Hectares</p>
           </CardContent>
         </Card>
       </div>
@@ -229,7 +239,9 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
         <Card>
           <CardHeader>
             <CardTitle>Area vs Count Analysis</CardTitle>
-            <CardDescription>Relationship between park count and total area</CardDescription>
+            <CardDescription>
+              Relationship between park count and total area
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -240,17 +252,17 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
                 <YAxis yAxisId="right" orientation="right" />
                 <Tooltip />
                 <Legend />
-                <Bar 
-                  yAxisId="left" 
-                  dataKey="count" 
-                  name="Park Count" 
-                  fill={colors.primary} 
+                <Bar
+                  yAxisId="left"
+                  dataKey="count"
+                  name="Park Count"
+                  fill={colors.primary}
                 />
-                <Bar 
-                  yAxisId="right" 
-                  dataKey="area_ha" 
-                  name="Area (ha)" 
-                  fill={colors.secondary} 
+                <Bar
+                  yAxisId="right"
+                  dataKey="area_ha"
+                  name="Area (ha)"
+                  fill={colors.secondary}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -262,7 +274,9 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
       <Card>
         <CardHeader>
           <CardTitle>Detailed Status Breakdown</CardTitle>
-          <CardDescription>Comprehensive conservation status analysis</CardDescription>
+          <CardDescription>
+            Comprehensive conservation status analysis
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -270,10 +284,13 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
               <div key={index} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <Badge 
-                      style={{ 
-                        backgroundColor: statusColors[status.status as keyof typeof statusColors] || colors.primary,
-                        color: 'white'
+                    <Badge
+                      style={{
+                        backgroundColor:
+                          statusColors[
+                            status.status as keyof typeof statusColors
+                          ] || colors.primary,
+                        color: "white",
                       }}
                     >
                       {status.status}
@@ -285,17 +302,22 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
                       {status.total_area_ha.toLocaleString()} ha
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {data.parks.total_area_ha > 0 
-                        ? ((status.total_area_ha / data.parks.total_area_ha) * 100).toFixed(1)
-                        : 0}% of total area
+                      {data.parks.total_area_ha > 0
+                        ? (
+                            (status.total_area_ha / data.parks.total_area_ha) *
+                            100
+                          ).toFixed(1)
+                        : 0}
+                      % of total area
                     </div>
                   </div>
                 </div>
-                <Progress 
-                  value={data.parks.total_area_ha > 0 
-                    ? (status.total_area_ha / data.parks.total_area_ha) * 100 
-                    : 0
-                  } 
+                <Progress
+                  value={
+                    data.parks.total_area_ha > 0
+                      ? (status.total_area_ha / data.parks.total_area_ha) * 100
+                      : 0
+                  }
                   className="h-2"
                 />
               </div>
@@ -314,7 +336,9 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">Total Protected Area</span>
+                <span className="text-sm font-medium">
+                  Total Protected Area
+                </span>
                 <span className="text-lg font-bold">
                   {data.parks.total_area_ha.toLocaleString()} ha
                 </span>
@@ -344,7 +368,9 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
         <Card>
           <CardHeader>
             <CardTitle>Conservation Efficiency</CardTitle>
-            <CardDescription>Conservation effectiveness metrics</CardDescription>
+            <CardDescription>
+              Conservation effectiveness metrics
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -352,12 +378,22 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
                 <span className="text-sm font-medium">Approved Parks</span>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold">
-                    {data.conservation_status.find(s => s.status === 'approved')?.count || 0}
+                    {data.conservation_status.find(
+                      (s) => s.status === "approved",
+                    )?.count || 0}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    ({data.parks.total > 0 
-                      ? ((data.conservation_status.find(s => s.status === 'approved')?.count || 0) / data.parks.total * 100).toFixed(1)
-                      : 0}%)
+                    (
+                    {data.parks.total > 0
+                      ? (
+                          ((data.conservation_status.find(
+                            (s) => s.status === "approved",
+                          )?.count || 0) /
+                            data.parks.total) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %)
                   </span>
                 </div>
               </div>
@@ -365,12 +401,22 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
                 <span className="text-sm font-medium">Pending Review</span>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold">
-                    {data.conservation_status.find(s => s.status === 'in_review')?.count || 0}
+                    {data.conservation_status.find(
+                      (s) => s.status === "in_review",
+                    )?.count || 0}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    ({data.parks.total > 0 
-                      ? ((data.conservation_status.find(s => s.status === 'in_review')?.count || 0) / data.parks.total * 100).toFixed(1)
-                      : 0}%)
+                    (
+                    {data.parks.total > 0
+                      ? (
+                          ((data.conservation_status.find(
+                            (s) => s.status === "in_review",
+                          )?.count || 0) /
+                            data.parks.total) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %)
                   </span>
                 </div>
               </div>
@@ -378,12 +424,21 @@ const ConservationCharts: React.FC<ConservationChartsProps> = ({ data, chartType
                 <span className="text-sm font-medium">Draft Status</span>
                 <div className="flex items-center gap-2">
                   <span className="text-lg font-bold">
-                    {data.conservation_status.find(s => s.status === 'draft')?.count || 0}
+                    {data.conservation_status.find((s) => s.status === "draft")
+                      ?.count || 0}
                   </span>
                   <span className="text-sm text-muted-foreground">
-                    ({data.parks.total > 0 
-                      ? ((data.conservation_status.find(s => s.status === 'draft')?.count || 0) / data.parks.total * 100).toFixed(1)
-                      : 0}%)
+                    (
+                    {data.parks.total > 0
+                      ? (
+                          ((data.conservation_status.find(
+                            (s) => s.status === "draft",
+                          )?.count || 0) /
+                            data.parks.total) *
+                          100
+                        ).toFixed(1)
+                      : 0}
+                    %)
                   </span>
                 </div>
               </div>

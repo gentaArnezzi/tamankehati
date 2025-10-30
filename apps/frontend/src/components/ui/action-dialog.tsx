@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import * as React from 'react';
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,14 +8,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from './dialog';
-import { Button } from './button';
-import { Textarea } from './textarea';
-import { Label } from './label';
-import { AlertCircle, CheckCircle, XCircle, Info } from 'lucide-react';
-import { cn } from './utils';
+} from "./dialog";
+import { Button } from "./button";
+import { Textarea } from "./textarea";
+import { Label } from "./label";
+import { AlertCircle, CheckCircle, XCircle, Info } from "lucide-react";
+import { cn } from "./utils";
 
-type ActionType = 'approve' | 'reject' | 'delete' | 'confirm' | 'info';
+type ActionType = "approve" | "reject" | "delete" | "confirm" | "info";
 
 interface ActionDialogProps {
   open: boolean;
@@ -36,47 +36,48 @@ interface ActionDialogProps {
 const typeConfig = {
   approve: {
     icon: CheckCircle,
-    iconColor: 'text-green-500',
-    title: 'Setujui Data',
-    description: 'Apakah Anda yakin ingin menyetujui data ini?',
-    confirmLabel: 'Ya, Setujui',
-    confirmVariant: 'default' as const,
+    iconColor: "text-green-500",
+    title: "Setujui Data",
+    description: "Apakah Anda yakin ingin menyetujui data ini?",
+    confirmLabel: "Ya, Setujui",
+    confirmVariant: "default" as const,
     requireReason: false,
   },
   reject: {
     icon: XCircle,
-    iconColor: 'text-red-500',
-    title: 'Tolak Data',
-    description: 'Apakah Anda yakin ingin menolak data ini?',
-    confirmLabel: 'Ya, Tolak',
-    confirmVariant: 'destructive' as const,
+    iconColor: "text-red-500",
+    title: "Tolak Data",
+    description: "Apakah Anda yakin ingin menolak data ini?",
+    confirmLabel: "Ya, Tolak",
+    confirmVariant: "destructive" as const,
     requireReason: true,
   },
   delete: {
     icon: AlertCircle,
-    iconColor: 'text-red-500',
-    title: 'Hapus Data',
-    description: 'Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.',
-    confirmLabel: 'Ya, Hapus',
-    confirmVariant: 'destructive' as const,
+    iconColor: "text-red-500",
+    title: "Hapus Data",
+    description:
+      "Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.",
+    confirmLabel: "Ya, Hapus",
+    confirmVariant: "destructive" as const,
     requireReason: false,
   },
   confirm: {
     icon: Info,
-    iconColor: 'text-blue-500',
-    title: 'Konfirmasi',
-    description: 'Apakah Anda yakin ingin melanjutkan?',
-    confirmLabel: 'Ya, Lanjutkan',
-    confirmVariant: 'default' as const,
+    iconColor: "text-blue-500",
+    title: "Konfirmasi",
+    description: "Apakah Anda yakin ingin melanjutkan?",
+    confirmLabel: "Ya, Lanjutkan",
+    confirmVariant: "default" as const,
     requireReason: false,
   },
   info: {
     icon: Info,
-    iconColor: 'text-blue-500',
-    title: 'Informasi',
-    description: '',
-    confirmLabel: 'OK',
-    confirmVariant: 'default' as const,
+    iconColor: "text-blue-500",
+    title: "Informasi",
+    description: "",
+    confirmLabel: "OK",
+    confirmVariant: "default" as const,
     requireReason: false,
   },
 };
@@ -90,16 +91,16 @@ export function ActionDialog({
   onConfirm,
   onCancel,
   confirmLabel: customConfirmLabel,
-  cancelLabel = 'Batal',
+  cancelLabel = "Batal",
   isLoading = false,
   requireReason: customRequireReason,
-  reasonLabel = 'Alasan',
-  reasonPlaceholder = 'Masukkan alasan...',
+  reasonLabel = "Alasan",
+  reasonPlaceholder = "Masukkan alasan...",
 }: ActionDialogProps) {
-  const [reason, setReason] = React.useState('');
+  const [reason, setReason] = React.useState("");
   const config = typeConfig[type];
   const Icon = config.icon;
-  
+
   const requireReason = customRequireReason ?? config.requireReason ?? false;
   const title = customTitle ?? config.title;
   const description = customDescription ?? config.description;
@@ -118,12 +119,12 @@ export function ActionDialog({
     } else {
       onOpenChange(false);
     }
-    setReason('');
+    setReason("");
   };
 
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      setReason('');
+      setReason("");
     }
     onOpenChange(open);
   };
@@ -133,7 +134,7 @@ export function ActionDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <div className="flex items-start gap-4">
-            <div className={cn('mt-0.5', config.iconColor)}>
+            <div className={cn("mt-0.5", config.iconColor)}>
               <Icon className="h-6 w-6" />
             </div>
             <div className="flex-1 space-y-1">
@@ -160,7 +161,7 @@ export function ActionDialog({
         )}
 
         <DialogFooter className="gap-2 sm:gap-0">
-          {type !== 'info' && (
+          {type !== "info" && (
             <Button
               type="button"
               variant="outline"
@@ -176,7 +177,7 @@ export function ActionDialog({
             onClick={handleConfirm}
             disabled={isLoading || (requireReason && !reason.trim())}
           >
-            {isLoading ? 'Memproses...' : confirmLabel}
+            {isLoading ? "Memproses..." : confirmLabel}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -200,14 +201,17 @@ export function ApprovalDialog({
   onApprove,
   onReject,
   isLoading,
-  itemName = 'data ini',
+  itemName = "data ini",
 }: ApprovalDialogProps) {
-  const [action, setAction] = React.useState<'approve' | 'reject' | null>(null);
+  const [action, setAction] = React.useState<"approve" | "reject" | null>(null);
 
-  const handleAction = async (actionType: 'approve' | 'reject', reason?: string) => {
-    if (actionType === 'approve') {
+  const handleAction = async (
+    actionType: "approve" | "reject",
+    reason?: string,
+  ) => {
+    if (actionType === "approve") {
       await onApprove();
-    } else if (actionType === 'reject' && reason) {
+    } else if (actionType === "reject" && reason) {
       await onReject(reason);
     }
     setAction(null);
@@ -229,7 +233,7 @@ export function ApprovalDialog({
             <Button
               variant="outline"
               className="flex-1"
-              onClick={() => setAction('reject')}
+              onClick={() => setAction("reject")}
               disabled={isLoading}
             >
               <XCircle className="mr-2 h-4 w-4" />
@@ -237,7 +241,7 @@ export function ApprovalDialog({
             </Button>
             <Button
               className="flex-1"
-              onClick={() => setAction('approve')}
+              onClick={() => setAction("approve")}
               disabled={isLoading}
             >
               <CheckCircle className="mr-2 h-4 w-4" />
@@ -247,22 +251,22 @@ export function ApprovalDialog({
         </DialogContent>
       </Dialog>
 
-      {action === 'approve' && (
+      {action === "approve" && (
         <ActionDialog
           open={true}
           onOpenChange={() => setAction(null)}
           type="approve"
-          onConfirm={() => handleAction('approve')}
+          onConfirm={() => handleAction("approve")}
           isLoading={isLoading}
         />
       )}
 
-      {action === 'reject' && (
+      {action === "reject" && (
         <ActionDialog
           open={true}
           onOpenChange={() => setAction(null)}
           type="reject"
-          onConfirm={(reason) => handleAction('reject', reason)}
+          onConfirm={(reason) => handleAction("reject", reason)}
           isLoading={isLoading}
           requireReason={true}
         />
@@ -270,4 +274,3 @@ export function ApprovalDialog({
     </>
   );
 }
-

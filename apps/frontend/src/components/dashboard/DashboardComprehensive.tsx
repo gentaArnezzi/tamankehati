@@ -1,39 +1,51 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   ScatterChart,
   Scatter,
-  ComposedChart
-} from 'recharts';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
-  TreePine, 
-  Bird, 
-  MapPin, 
+  ComposedChart,
+} from "recharts";
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
+  TreePine,
+  Bird,
+  MapPin,
   Calendar,
   BarChart3,
   PieChart as PieChartIcon,
@@ -48,8 +60,8 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-  Download
-} from 'lucide-react';
+  Download,
+} from "lucide-react";
 
 interface DashboardData {
   user_role: string;
@@ -78,12 +90,14 @@ interface DashboardComprehensiveProps {
   initialData?: DashboardData;
 }
 
-const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initialData }) => {
+const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({
+  initialData,
+}) => {
   const [data, setData] = useState<DashboardData | null>(initialData || null);
   const [loading, setLoading] = useState(!initialData);
-  const [timeRange, setTimeRange] = useState('yearly');
-  const [chartType, setChartType] = useState('line');
-  const [activeTab, setActiveTab] = useState('overview');
+  const [timeRange, setTimeRange] = useState("yearly");
+  const [chartType, setChartType] = useState("line");
+  const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
     if (!initialData) {
@@ -94,18 +108,21 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/v1/dashboard/comprehensive?time_range=${timeRange}&chart_type=${chartType}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
+      const response = await fetch(
+        `/api/v1/dashboard/comprehensive?time_range=${timeRange}&chart_type=${chartType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
       if (response.ok) {
         const result = await response.json();
         setData(result);
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
@@ -113,25 +130,28 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
 
   const downloadReport = async (reportType: string) => {
     try {
-      const response = await fetch(`/api/v1/dashboard/reports?report_type=${reportType}`, {
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      
+      const response = await fetch(
+        `/api/v1/dashboard/reports?report_type=${reportType}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        },
+      );
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = `${reportType}_report_${new Date().toISOString().split('T')[0]}.pdf`;
+        a.download = `${reportType}_report_${new Date().toISOString().split("T")[0]}.pdf`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
       }
     } catch (error) {
-      console.error('Error downloading report:', error);
+      console.error("Error downloading report:", error);
     }
   };
 
@@ -147,8 +167,12 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
     return (
       <div className="text-center py-8">
         <AlertTriangle className="mx-auto h-12 w-12 text-muted-foreground" />
-        <h3 className="mt-2 text-sm font-medium text-gray-900">No data available</h3>
-        <p className="mt-1 text-sm text-gray-500">Unable to load dashboard data.</p>
+        <h3 className="mt-2 text-sm font-medium text-gray-900">
+          No data available
+        </h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Unable to load dashboard data.
+        </p>
       </div>
     );
   }
@@ -157,25 +181,25 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
 
   // Color schemes for charts
   const colors = {
-    primary: '#3b82f6',
-    secondary: '#10b981',
-    accent: '#f59e0b',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-    success: '#10b981',
-    info: '#06b6d4',
-    purple: '#8b5cf6',
-    pink: '#ec4899'
+    primary: "#3b82f6",
+    secondary: "#10b981",
+    accent: "#f59e0b",
+    danger: "#ef4444",
+    warning: "#f59e0b",
+    success: "#10b981",
+    info: "#06b6d4",
+    purple: "#8b5cf6",
+    pink: "#ec4899",
   };
 
   const iucnColors = {
-    'CR': '#dc2626', // Critically Endangered - Red
-    'EN': '#ea580c', // Endangered - Orange
-    'VU': '#d97706', // Vulnerable - Amber
-    'NT': '#eab308', // Near Threatened - Yellow
-    'LC': '#22c55e', // Least Concern - Green
-    'DD': '#6b7280', // Data Deficient - Gray
-    'NE': '#9ca3af'  // Not Evaluated - Light Gray
+    CR: "#dc2626", // Critically Endangered - Red
+    EN: "#ea580c", // Endangered - Orange
+    VU: "#d97706", // Vulnerable - Amber
+    NT: "#eab308", // Near Threatened - Yellow
+    LC: "#22c55e", // Least Concern - Green
+    DD: "#6b7280", // Data Deficient - Gray
+    NE: "#9ca3af", // Not Evaluated - Light Gray
   };
 
   return (
@@ -183,12 +207,16 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Comprehensive Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Comprehensive Dashboard
+          </h1>
           <p className="text-muted-foreground">
-            {data.user_role === 'super_admin' ? 'System-wide analytics and insights' : 'Regional park analytics and insights'}
+            {data.user_role === "super_admin"
+              ? "System-wide analytics and insights"
+              : "Regional park analytics and insights"}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-2">
           <Select value={timeRange} onValueChange={setTimeRange}>
             <SelectTrigger className="w-40">
@@ -203,7 +231,7 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
               <SelectItem value="five_years">5 Years</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Select value={chartType} onValueChange={setChartType}>
             <SelectTrigger className="w-32">
               <SelectValue />
@@ -215,8 +243,12 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
               <SelectItem value="pie">Pie</SelectItem>
             </SelectContent>
           </Select>
-          
-          <Button onClick={() => downloadReport('comprehensive')} variant="outline" size="sm">
+
+          <Button
+            onClick={() => downloadReport("comprehensive")}
+            variant="outline"
+            size="sm"
+          >
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
@@ -231,7 +263,9 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <TreePine className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.biodiversity.summary.total_species}</div>
+            <div className="text-2xl font-bold">
+              {analytics.biodiversity.summary.total_species}
+            </div>
             <p className="text-xs text-muted-foreground">
               {analytics.biodiversity.summary.total_endemic} endemic species
             </p>
@@ -240,13 +274,18 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Protected Areas</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Protected Areas
+            </CardTitle>
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{analytics.conservation.parks.total}</div>
+            <div className="text-2xl font-bold">
+              {analytics.conservation.parks.total}
+            </div>
             <p className="text-xs text-muted-foreground">
-              {analytics.conservation.parks.total_area_ha.toLocaleString()} ha protected
+              {analytics.conservation.parks.total_area_ha.toLocaleString()} ha
+              protected
             </p>
           </CardContent>
         </Card>
@@ -258,7 +297,10 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {analytics.activities.by_status.reduce((sum: number, item: any) => sum + item.count, 0)}
+              {analytics.activities.by_status.reduce(
+                (sum: number, item: any) => sum + item.count,
+                0,
+              )}
             </div>
             <p className="text-xs text-muted-foreground">
               Total activities conducted
@@ -273,7 +315,8 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {analytics.content.articles.total + analytics.content.galleries.total}
+              {analytics.content.articles.total +
+                analytics.content.galleries.total}
             </div>
             <p className="text-xs text-muted-foreground">
               Articles & galleries published
@@ -283,7 +326,11 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
       </div>
 
       {/* Main Dashboard Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="space-y-4"
+      >
         <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="biodiversity">Biodiversity</TabsTrigger>
@@ -298,26 +345,36 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Species Discovery Timeline</CardTitle>
-                <CardDescription>New species discovered over time</CardDescription>
+                <CardDescription>
+                  New species discovered over time
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <ComposedChart data={analytics.biodiversity.timeline}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="period" 
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                    <XAxis
+                      dataKey="period"
+                      tickFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
                     <YAxis />
-                    <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    <Tooltip
+                      labelFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
                     <Legend />
-                    <Bar dataKey="species_count" name="Species Count" fill={colors.primary} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="species_count" 
-                      stroke={colors.secondary} 
+                    <Bar
+                      dataKey="species_count"
+                      name="Species Count"
+                      fill={colors.primary}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="species_count"
+                      stroke={colors.secondary}
                       strokeWidth={2}
                     />
                   </ComposedChart>
@@ -329,37 +386,149 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>IUCN Status Distribution</CardTitle>
-                <CardDescription>Conservation status of recorded species</CardDescription>
+                <CardDescription>
+                  Conservation status of recorded species
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
                       data={[
-                        { name: 'Critically Endangered', value: analytics.biodiversity.flora.iucn_status.critically_endangered + analytics.biodiversity.fauna.iucn_status.critically_endangered, color: iucnColors.CR },
-                        { name: 'Endangered', value: analytics.biodiversity.flora.iucn_status.endangered + analytics.biodiversity.fauna.iucn_status.endangered, color: iucnColors.EN },
-                        { name: 'Vulnerable', value: analytics.biodiversity.flora.iucn_status.vulnerable + analytics.biodiversity.fauna.iucn_status.vulnerable, color: iucnColors.VU },
-                        { name: 'Near Threatened', value: analytics.biodiversity.flora.iucn_status.near_threatened + analytics.biodiversity.fauna.iucn_status.near_threatened, color: iucnColors.NT },
-                        { name: 'Least Concern', value: analytics.biodiversity.flora.iucn_status.least_concern + analytics.biodiversity.fauna.iucn_status.least_concern, color: iucnColors.LC },
-                        { name: 'Data Deficient', value: analytics.biodiversity.flora.iucn_status.data_deficient + analytics.biodiversity.fauna.iucn_status.data_deficient, color: iucnColors.DD },
-                        { name: 'Not Evaluated', value: analytics.biodiversity.flora.iucn_status.not_evaluated + analytics.biodiversity.fauna.iucn_status.not_evaluated, color: iucnColors.NE }
+                        {
+                          name: "Critically Endangered",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .critically_endangered +
+                            analytics.biodiversity.fauna.iucn_status
+                              .critically_endangered,
+                          color: iucnColors.CR,
+                        },
+                        {
+                          name: "Endangered",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .endangered +
+                            analytics.biodiversity.fauna.iucn_status.endangered,
+                          color: iucnColors.EN,
+                        },
+                        {
+                          name: "Vulnerable",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .vulnerable +
+                            analytics.biodiversity.fauna.iucn_status.vulnerable,
+                          color: iucnColors.VU,
+                        },
+                        {
+                          name: "Near Threatened",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .near_threatened +
+                            analytics.biodiversity.fauna.iucn_status
+                              .near_threatened,
+                          color: iucnColors.NT,
+                        },
+                        {
+                          name: "Least Concern",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .least_concern +
+                            analytics.biodiversity.fauna.iucn_status
+                              .least_concern,
+                          color: iucnColors.LC,
+                        },
+                        {
+                          name: "Data Deficient",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .data_deficient +
+                            analytics.biodiversity.fauna.iucn_status
+                              .data_deficient,
+                          color: iucnColors.DD,
+                        },
+                        {
+                          name: "Not Evaluated",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .not_evaluated +
+                            analytics.biodiversity.fauna.iucn_status
+                              .not_evaluated,
+                          color: iucnColors.NE,
+                        },
                       ]}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name} ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
                       {[
-                        { name: 'Critically Endangered', value: analytics.biodiversity.flora.iucn_status.critically_endangered + analytics.biodiversity.fauna.iucn_status.critically_endangered, color: iucnColors.CR },
-                        { name: 'Endangered', value: analytics.biodiversity.flora.iucn_status.endangered + analytics.biodiversity.fauna.iucn_status.endangered, color: iucnColors.EN },
-                        { name: 'Vulnerable', value: analytics.biodiversity.flora.iucn_status.vulnerable + analytics.biodiversity.fauna.iucn_status.vulnerable, color: iucnColors.VU },
-                        { name: 'Near Threatened', value: analytics.biodiversity.flora.iucn_status.near_threatened + analytics.biodiversity.fauna.iucn_status.near_threatened, color: iucnColors.NT },
-                        { name: 'Least Concern', value: analytics.biodiversity.flora.iucn_status.least_concern + analytics.biodiversity.fauna.iucn_status.least_concern, color: iucnColors.LC },
-                        { name: 'Data Deficient', value: analytics.biodiversity.flora.iucn_status.data_deficient + analytics.biodiversity.fauna.iucn_status.data_deficient, color: iucnColors.DD },
-                        { name: 'Not Evaluated', value: analytics.biodiversity.flora.iucn_status.not_evaluated + analytics.biodiversity.fauna.iucn_status.not_evaluated, color: iucnColors.NE }
+                        {
+                          name: "Critically Endangered",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .critically_endangered +
+                            analytics.biodiversity.fauna.iucn_status
+                              .critically_endangered,
+                          color: iucnColors.CR,
+                        },
+                        {
+                          name: "Endangered",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .endangered +
+                            analytics.biodiversity.fauna.iucn_status.endangered,
+                          color: iucnColors.EN,
+                        },
+                        {
+                          name: "Vulnerable",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .vulnerable +
+                            analytics.biodiversity.fauna.iucn_status.vulnerable,
+                          color: iucnColors.VU,
+                        },
+                        {
+                          name: "Near Threatened",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .near_threatened +
+                            analytics.biodiversity.fauna.iucn_status
+                              .near_threatened,
+                          color: iucnColors.NT,
+                        },
+                        {
+                          name: "Least Concern",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .least_concern +
+                            analytics.biodiversity.fauna.iucn_status
+                              .least_concern,
+                          color: iucnColors.LC,
+                        },
+                        {
+                          name: "Data Deficient",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .data_deficient +
+                            analytics.biodiversity.fauna.iucn_status
+                              .data_deficient,
+                          color: iucnColors.DD,
+                        },
+                        {
+                          name: "Not Evaluated",
+                          value:
+                            analytics.biodiversity.flora.iucn_status
+                              .not_evaluated +
+                            analytics.biodiversity.fauna.iucn_status
+                              .not_evaluated,
+                          color: iucnColors.NE,
+                        },
                       ].map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
@@ -377,24 +546,35 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Regional Distribution</CardTitle>
-                <CardDescription>Parks and protected areas by region</CardDescription>
+                <CardDescription>
+                  Parks and protected areas by region
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analytics.geographic.regional_distribution.map((region: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <h4 className="font-medium">{region.provinsi}</h4>
-                        <p className="text-sm text-muted-foreground">{region.kota_kabupaten}</p>
-                      </div>
-                      <div className="text-right">
-                        <div className="font-medium">{region.park_count} parks</div>
-                        <div className="text-sm text-muted-foreground">
-                          {region.total_area_ha.toLocaleString()} ha
+                  {analytics.geographic.regional_distribution.map(
+                    (region: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-4 border rounded-lg"
+                      >
+                        <div>
+                          <h4 className="font-medium">{region.provinsi}</h4>
+                          <p className="text-sm text-muted-foreground">
+                            {region.kota_kabupaten}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-medium">
+                            {region.park_count} parks
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {region.total_area_ha.toLocaleString()} ha
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -408,16 +588,36 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Flora vs Fauna</CardTitle>
-                <CardDescription>Species distribution comparison</CardDescription>
+                <CardDescription>
+                  Species distribution comparison
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={[
-                    { name: 'Total', flora: analytics.biodiversity.flora.total, fauna: analytics.biodiversity.fauna.total },
-                    { name: 'Endemic', flora: analytics.biodiversity.flora.endemic, fauna: analytics.biodiversity.fauna.endemic },
-                    { name: 'Approved', flora: analytics.biodiversity.flora.approved, fauna: analytics.biodiversity.fauna.approved },
-                    { name: 'Pending', flora: analytics.biodiversity.flora.pending, fauna: analytics.biodiversity.fauna.pending }
-                  ]}>
+                  <BarChart
+                    data={[
+                      {
+                        name: "Total",
+                        flora: analytics.biodiversity.flora.total,
+                        fauna: analytics.biodiversity.fauna.total,
+                      },
+                      {
+                        name: "Endemic",
+                        flora: analytics.biodiversity.flora.endemic,
+                        fauna: analytics.biodiversity.fauna.endemic,
+                      },
+                      {
+                        name: "Approved",
+                        flora: analytics.biodiversity.flora.approved,
+                        fauna: analytics.biodiversity.fauna.approved,
+                      },
+                      {
+                        name: "Pending",
+                        flora: analytics.biodiversity.flora.pending,
+                        fauna: analytics.biodiversity.fauna.pending,
+                      },
+                    ]}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -434,31 +634,43 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Endemic Species Analysis</CardTitle>
-                <CardDescription>Endemic species distribution and trends</CardDescription>
+                <CardDescription>
+                  Endemic species distribution and trends
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Flora Endemic</span>
                     <div className="flex items-center gap-2">
-                      <Progress 
-                        value={(analytics.biodiversity.flora.endemic / analytics.biodiversity.flora.total) * 100} 
+                      <Progress
+                        value={
+                          (analytics.biodiversity.flora.endemic /
+                            analytics.biodiversity.flora.total) *
+                          100
+                        }
                         className="w-24"
                       />
                       <span className="text-sm text-muted-foreground">
-                        {analytics.biodiversity.flora.endemic}/{analytics.biodiversity.flora.total}
+                        {analytics.biodiversity.flora.endemic}/
+                        {analytics.biodiversity.flora.total}
                       </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Fauna Endemic</span>
                     <div className="flex items-center gap-2">
-                      <Progress 
-                        value={(analytics.biodiversity.fauna.endemic / analytics.biodiversity.fauna.total) * 100} 
+                      <Progress
+                        value={
+                          (analytics.biodiversity.fauna.endemic /
+                            analytics.biodiversity.fauna.total) *
+                          100
+                        }
                         className="w-24"
                       />
                       <span className="text-sm text-muted-foreground">
-                        {analytics.biodiversity.fauna.endemic}/{analytics.biodiversity.fauna.total}
+                        {analytics.biodiversity.fauna.endemic}/
+                        {analytics.biodiversity.fauna.total}
                       </span>
                     </div>
                   </div>
@@ -472,7 +684,9 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Monthly Discovery Patterns</CardTitle>
-                <CardDescription>Species discovery patterns by month</CardDescription>
+                <CardDescription>
+                  Species discovery patterns by month
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
@@ -482,11 +696,11 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
                     <YAxis />
                     <Tooltip />
                     <Legend />
-                    <Area 
-                      type="monotone" 
-                      dataKey="species_count" 
-                      stackId="1" 
-                      stroke={colors.primary} 
+                    <Area
+                      type="monotone"
+                      dataKey="species_count"
+                      stackId="1"
+                      stroke={colors.primary}
                       fill={colors.primary}
                       name="Species Count"
                     />
@@ -504,34 +718,50 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Park Area Distribution</CardTitle>
-                <CardDescription>Protected area coverage and statistics</CardDescription>
+                <CardDescription>
+                  Protected area coverage and statistics
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="text-center">
-                      <div className="text-2xl font-bold">{analytics.conservation.parks.total}</div>
-                      <div className="text-sm text-muted-foreground">Total Parks</div>
+                      <div className="text-2xl font-bold">
+                        {analytics.conservation.parks.total}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Total Parks
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-2xl font-bold">
                         {analytics.conservation.parks.total_area_ha.toLocaleString()}
                       </div>
-                      <div className="text-sm text-muted-foreground">Hectares Protected</div>
+                      <div className="text-sm text-muted-foreground">
+                        Hectares Protected
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Average Area</span>
-                      <span>{analytics.conservation.parks.avg_area_ha.toFixed(2)} ha</span>
+                      <span>
+                        {analytics.conservation.parks.avg_area_ha.toFixed(2)} ha
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Largest Park</span>
-                      <span>{analytics.conservation.parks.max_area_ha.toLocaleString()} ha</span>
+                      <span>
+                        {analytics.conservation.parks.max_area_ha.toLocaleString()}{" "}
+                        ha
+                      </span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Smallest Park</span>
-                      <span>{analytics.conservation.parks.min_area_ha.toLocaleString()} ha</span>
+                      <span>
+                        {analytics.conservation.parks.min_area_ha.toLocaleString()}{" "}
+                        ha
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -546,19 +776,30 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {analytics.conservation.conservation_status.map((status: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-2 border rounded">
-                      <div className="flex items-center gap-2">
-                        <Badge variant={status.status === 'approved' ? 'default' : 'secondary'}>
-                          {status.status}
-                        </Badge>
-                        <span className="text-sm">{status.count} parks</span>
+                  {analytics.conservation.conservation_status.map(
+                    (status: any, index: number) => (
+                      <div
+                        key={index}
+                        className="flex items-center justify-between p-2 border rounded"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Badge
+                            variant={
+                              status.status === "approved"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {status.status}
+                          </Badge>
+                          <span className="text-sm">{status.count} parks</span>
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          {status.total_area_ha.toLocaleString()} ha
+                        </span>
                       </div>
-                      <span className="text-sm text-muted-foreground">
-                        {status.total_area_ha.toLocaleString()} ha
-                      </span>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -572,15 +813,22 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>User Activity</CardTitle>
-                <CardDescription>User engagement and activity trends</CardDescription>
+                <CardDescription>
+                  User engagement and activity trends
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {analytics.users.by_role.map((role: any, index: number) => (
-                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 border rounded-lg"
+                    >
                       <div className="flex items-center gap-2">
                         <Users className="h-4 w-4" />
-                        <span className="font-medium capitalize">{role.role.replace('_', ' ')}</span>
+                        <span className="font-medium capitalize">
+                          {role.role.replace("_", " ")}
+                        </span>
                       </div>
                       <div className="text-right">
                         <div className="font-medium">{role.total}</div>
@@ -598,24 +846,30 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
-                <CardDescription>Approval rates and processing efficiency</CardDescription>
+                <CardDescription>
+                  Approval rates and processing efficiency
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {analytics.performance.approval_rates.map((rate: any, index: number) => (
-                    <div key={index} className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-medium capitalize">{rate.entity_type}</span>
-                        <span>{rate.approval_rate.toFixed(1)}%</span>
+                  {analytics.performance.approval_rates.map(
+                    (rate: any, index: number) => (
+                      <div key={index} className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="font-medium capitalize">
+                            {rate.entity_type}
+                          </span>
+                          <span>{rate.approval_rate.toFixed(1)}%</span>
+                        </div>
+                        <Progress value={rate.approval_rate} className="h-2" />
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>{rate.approved} approved</span>
+                          <span>{rate.pending} pending</span>
+                          <span>{rate.rejected} rejected</span>
+                        </div>
                       </div>
-                      <Progress value={rate.approval_rate} className="h-2" />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>{rate.approved} approved</span>
-                        <span>{rate.pending} pending</span>
-                        <span>{rate.rejected} rejected</span>
-                      </div>
-                    </div>
-                  ))}
+                    ),
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -626,24 +880,30 @@ const DashboardComprehensive: React.FC<DashboardComprehensiveProps> = ({ initial
             <Card>
               <CardHeader>
                 <CardTitle>Activity Timeline</CardTitle>
-                <CardDescription>Activities conducted over time</CardDescription>
+                <CardDescription>
+                  Activities conducted over time
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={analytics.activities.timeline}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis 
-                      dataKey="period" 
-                      tickFormatter={(value) => new Date(value).toLocaleDateString()}
+                    <XAxis
+                      dataKey="period"
+                      tickFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
                     <YAxis />
-                    <Tooltip 
-                      labelFormatter={(value) => new Date(value).toLocaleDateString()}
+                    <Tooltip
+                      labelFormatter={(value) =>
+                        new Date(value).toLocaleDateString()
+                      }
                     />
-                    <Line 
-                      type="monotone" 
-                      dataKey="activity_count" 
-                      stroke={colors.primary} 
+                    <Line
+                      type="monotone"
+                      dataKey="activity_count"
+                      stroke={colors.primary}
                       strokeWidth={2}
                       name="Activities"
                     />

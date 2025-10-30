@@ -1,6 +1,6 @@
 /**
  * Centralized API URL configuration
- * 
+ *
  * Always use getApiUrl() to get the correct API base URL
  * Never hardcode localhost:8000 in components!
  */
@@ -10,7 +10,10 @@
  * Defaults to production URL if not set
  */
 export function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
+  return (
+    process.env.NEXT_PUBLIC_API_URL ||
+    "https://tamankehati-backend-pxnu.onrender.com"
+  );
 }
 
 /**
@@ -20,7 +23,7 @@ export function getApiUrl(): string {
  */
 export function apiUrl(path: string): string {
   const baseUrl = getApiUrl();
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
 }
 
@@ -30,12 +33,12 @@ export function apiUrl(path: string): string {
  * @returns Full URL to the image
  */
 export function imageUrl(path: string | null | undefined): string {
-  if (!path) return '/placeholder.png';
-  if (path.startsWith('http://') || path.startsWith('https://')) {
+  if (!path) return "/placeholder.png";
+  if (path.startsWith("http://") || path.startsWith("https://")) {
     return path; // Already full URL
   }
   const baseUrl = getApiUrl();
-  const cleanPath = path.startsWith('/') ? path : `/${path}`;
+  const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${baseUrl}${cleanPath}`;
 }
 
@@ -43,4 +46,3 @@ export function imageUrl(path: string | null | undefined): string {
  * API Base URL constant (for backward compatibility)
  */
 export const API_BASE_URL = getApiUrl();
-

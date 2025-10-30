@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export function TentangHero() {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -32,7 +32,7 @@ export function TentangHero() {
 
       {/* Dark black overlay */}
       <div className="absolute inset-0 bg-black/40" />
-      
+
       {/* Subtle bottom overlay with standard dark brown */}
       <div className="absolute inset-0 bg-gradient-to-t from-amber-950/30 via-transparent to-transparent" />
 
@@ -55,7 +55,11 @@ export function TentangHero() {
             {/* Description */}
             <div className="max-w-5xl mb-20">
               <p className="text-lg leading-relaxed text-amber-50 font-light">
-                Kawasan konservasi sumber daya alam hayati lokal di luar kawasan hutan yang bertujuan melestarikan spesies tumbuhan dan satwa asli, terutama yang terancam punah. Kawasan ini berfungsi sebagai pusat konservasi in-situ dan ex-situ serta menjadi sarana edukasi dan rekreasi bagi masyarakat.
+                Kawasan konservasi sumber daya alam hayati lokal di luar kawasan
+                hutan yang bertujuan melestarikan spesies tumbuhan dan satwa
+                asli, terutama yang terancam punah. Kawasan ini berfungsi
+                sebagai pusat konservasi in-situ dan ex-situ serta menjadi
+                sarana edukasi dan rekreasi bagi masyarakat.
               </p>
             </div>
 

@@ -1,11 +1,17 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Search, X, Filter, MapPin, Calendar, TreePine } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect } from "react";
+import { Search, X, Filter, MapPin, Calendar, TreePine } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface TamanSearchBarProps {
   searchQuery: string;
@@ -18,17 +24,17 @@ interface TamanSearchBarProps {
 }
 
 const QUICK_FILTERS = [
-  { key: 'status', value: 'published', label: 'Aktif', icon: Calendar },
-  { key: 'status', value: 'draft', label: 'Draft', icon: Calendar },
+  { key: "status", value: "published", label: "Aktif", icon: Calendar },
+  { key: "status", value: "draft", label: "Draft", icon: Calendar },
 ];
 
 const SEARCH_SUGGESTIONS = [
-  'Taman Nasional',
-  'Konservasi',
-  'Biodiversitas',
-  'Ekosistem',
-  'Flora Endemik',
-  'Fauna Langka',
+  "Taman Nasional",
+  "Konservasi",
+  "Biodiversitas",
+  "Ekosistem",
+  "Flora Endemik",
+  "Fauna Langka",
 ];
 
 export function TamanSearchBar({
@@ -38,7 +44,7 @@ export function TamanSearchBar({
   onStatusChange,
   onFilterToggle,
   totalResults,
-  isMobile = false
+  isMobile = false,
 }: TamanSearchBarProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [localQuery, setLocalQuery] = useState(searchQuery);
@@ -60,8 +66,8 @@ export function TamanSearchBar({
   };
 
   const handleQuickFilter = (key: string, value: string) => {
-    if (key === 'status') {
-      onStatusChange(statusFilter === value ? '' : value);
+    if (key === "status") {
+      onStatusChange(statusFilter === value ? "" : value);
     }
   };
 
@@ -92,8 +98,8 @@ export function TamanSearchBar({
                 variant="ghost"
                 size="icon"
                 onClick={() => {
-                  setLocalQuery('');
-                  onSearchChange('');
+                  setLocalQuery("");
+                  onSearchChange("");
                 }}
                 className="absolute right-12 top-1/2 transform -translate-y-1/2 h-8 w-8 text-gray-400 hover:text-gray-600"
               >
@@ -101,7 +107,7 @@ export function TamanSearchBar({
               </Button>
             )}
           </div>
-          
+
           <Button
             type="submit"
             className="absolute right-2 top-1/2 transform -translate-y-1/2 h-8 px-4"
@@ -115,22 +121,21 @@ export function TamanSearchBar({
         {showSuggestions && (
           <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
             <div className="p-2">
-              <div className="text-xs font-medium text-gray-500 px-3 py-2">Saran pencarian:</div>
-              {SEARCH_SUGGESTIONS
-                .filter(suggestion => 
-                  suggestion.toLowerCase().includes(localQuery.toLowerCase())
-                )
-                .map((suggestion, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2"
-                  >
-                    <Search className="h-4 w-4 text-gray-400" />
-                    {suggestion}
-                  </button>
-                ))
-              }
+              <div className="text-xs font-medium text-gray-500 px-3 py-2">
+                Saran pencarian:
+              </div>
+              {SEARCH_SUGGESTIONS.filter((suggestion) =>
+                suggestion.toLowerCase().includes(localQuery.toLowerCase()),
+              ).map((suggestion, index) => (
+                <button
+                  key={index}
+                  onClick={() => handleSuggestionClick(suggestion)}
+                  className="w-full text-left px-3 py-2 hover:bg-gray-50 rounded-lg text-sm flex items-center gap-2"
+                >
+                  <Search className="h-4 w-4 text-gray-400" />
+                  {suggestion}
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -139,9 +144,9 @@ export function TamanSearchBar({
       {/* Quick Filters */}
       <div className="flex flex-wrap gap-2">
         {QUICK_FILTERS.map((filter, index) => {
-          const isActive = 
-            (filter.key === 'status' && statusFilter === filter.value);
-          
+          const isActive =
+            filter.key === "status" && statusFilter === filter.value;
+
           return (
             <Button
               key={index}
@@ -150,9 +155,10 @@ export function TamanSearchBar({
               onClick={() => handleQuickFilter(filter.key, filter.value)}
               className={`
                 flex items-center gap-2 transition-all duration-200
-                ${isActive 
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
-                  : 'hover:bg-emerald-50 hover:border-emerald-200'
+                ${
+                  isActive
+                    ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    : "hover:bg-emerald-50 hover:border-emerald-200"
                 }
               `}
             >
@@ -187,13 +193,13 @@ export function TamanSearchBar({
           <div className="text-sm text-gray-600">
             <span className="font-medium">{totalResults}</span> taman ditemukan
           </div>
-          
+
           {activeFiltersCount > 0 && (
             <Badge variant="secondary" className="text-xs">
               {activeFiltersCount} filter
             </Badge>
           )}
-          
+
           <Button
             variant="outline"
             size="sm"
@@ -201,7 +207,7 @@ export function TamanSearchBar({
             className="flex items-center gap-2"
           >
             <Filter className="h-4 w-4" />
-            {isMobile ? 'Filter' : 'Filter Lanjutan'}
+            {isMobile ? "Filter" : "Filter Lanjutan"}
           </Button>
         </div>
       </div>

@@ -1,75 +1,75 @@
-"use client"
+"use client";
 
-import { memo, useEffect, useLayoutEffect, useMemo, useState } from "react"
+import { memo, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   AnimatePresence,
   motion,
   useAnimation,
   useMotionValue,
   useTransform,
-} from "framer-motion"
+} from "framer-motion";
 
 export const useIsomorphicLayoutEffect =
-  typeof window !== "undefined" ? useLayoutEffect : useEffect
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
 
 type UseMediaQueryOptions = {
-  defaultValue?: boolean
-  initializeWithValue?: boolean
-}
+  defaultValue?: boolean;
+  initializeWithValue?: boolean;
+};
 
-const IS_SERVER = typeof window === "undefined"
+const IS_SERVER = typeof window === "undefined";
 
 export function useMediaQuery(
   query: string,
   {
     defaultValue = false,
     initializeWithValue = true,
-  }: UseMediaQueryOptions = {}
+  }: UseMediaQueryOptions = {},
 ): boolean {
   const getMatches = (query: string): boolean => {
     if (IS_SERVER) {
-      return defaultValue
+      return defaultValue;
     }
-    return window.matchMedia(query).matches
-  }
+    return window.matchMedia(query).matches;
+  };
 
   const [matches, setMatches] = useState<boolean>(() => {
     if (initializeWithValue) {
-      return getMatches(query)
+      return getMatches(query);
     }
-    return defaultValue
-  })
+    return defaultValue;
+  });
 
   const handleChange = () => {
-    setMatches(getMatches(query))
-  }
+    setMatches(getMatches(query));
+  };
 
   useIsomorphicLayoutEffect(() => {
-    const matchMedia = window.matchMedia(query)
-    handleChange()
+    const matchMedia = window.matchMedia(query);
+    handleChange();
 
-    matchMedia.addEventListener("change", handleChange)
+    matchMedia.addEventListener("change", handleChange);
 
     return () => {
-      matchMedia.removeEventListener("change", handleChange)
-    }
-  }, [query])
+      matchMedia.removeEventListener("change", handleChange);
+    };
+  }, [query]);
 
-  return matches
+  return matches;
 }
 
-const duration = 0.15
-const transition = { duration, ease: "easeInOut" as const }
-const transitionOverlay = { duration: 0.5, ease: "easeInOut" as const }
+const duration = 0.15;
+const transition = { duration, ease: "easeInOut" as const };
+const transitionOverlay = { duration: 0.5, ease: "easeInOut" as const };
 
 interface CarouselItem {
-  imgUrl: string
-  name: string
-  scientificName: string
-  description: string
-  category: 'flora' | 'fauna'
-  status: string
-  region: string
+  imgUrl: string;
+  name: string;
+  scientificName: string;
+  description: string;
+  category: "flora" | "fauna";
+  status: string;
+  region: string;
 }
 
 const Carousel = memo(
@@ -79,38 +79,40 @@ const Carousel = memo(
     cards,
     isCarouselActive,
   }: {
-    handleClick: (item: CarouselItem, index: number) => void
-    controls: any
-    cards: CarouselItem[]
-    isCarouselActive: boolean
+    handleClick: (item: CarouselItem, index: number) => void;
+    controls: any;
+    cards: CarouselItem[];
+    isCarouselActive: boolean;
   }) => {
-    const isScreenSizeSm = useMediaQuery("(max-width: 640px)")
-    const cylinderWidth = isScreenSizeSm ? 1400 : 2200
-    const faceCount = cards.length
-    const faceWidth = cylinderWidth / faceCount
-    const radius = cylinderWidth / (2 * Math.PI)
-    const rotation = useMotionValue(0)
+    const isScreenSizeSm = useMediaQuery("(max-width: 640px)");
+    const cylinderWidth = isScreenSizeSm ? 1400 : 2200;
+    const faceCount = cards.length;
+    const faceWidth = cylinderWidth / faceCount;
+    const radius = cylinderWidth / (2 * Math.PI);
+    const rotation = useMotionValue(0);
     const transform = useTransform(
       rotation,
-      (value) => `rotate3d(0, 1, 0, ${value}deg)`
-    )
+      (value) => `rotate3d(0, 1, 0, ${value}deg)`,
+    );
 
     const getStatusColor = (status: string) => {
       switch (status) {
-        case 'Kritis':
-          return 'bg-red-100 text-red-800 border-red-200'
-        case 'Endemik':
-          return 'bg-blue-100 text-blue-800 border-blue-200'
-        case 'Lindungi':
-          return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+        case "Kritis":
+          return "bg-red-100 text-red-800 border-red-200";
+        case "Endemik":
+          return "bg-blue-100 text-blue-800 border-blue-200";
+        case "Lindungi":
+          return "bg-yellow-100 text-yellow-800 border-yellow-200";
         default:
-          return 'bg-gray-100 text-gray-800 border-gray-200'
+          return "bg-gray-100 text-gray-800 border-gray-200";
       }
-    }
+    };
 
     const getCategoryColor = (category: string) => {
-      return category === 'flora' ? 'bg-emerald-100 text-emerald-800' : 'bg-teal-100 text-teal-800'
-    }
+      return category === "flora"
+        ? "bg-emerald-100 text-emerald-800"
+        : "bg-teal-100 text-teal-800";
+    };
 
     return (
       <div
@@ -172,24 +174,34 @@ const Carousel = memo(
                   transition={transition}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
-                
+
                 {/* Badges */}
                 <div className="absolute top-3 left-3">
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${getStatusColor(item.status)}`}>
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border backdrop-blur-sm ${getStatusColor(item.status)}`}
+                  >
                     {item.status}
                   </span>
                 </div>
                 <div className="absolute top-3 right-3">
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${getCategoryColor(item.category)}`}>
-                    {item.category === 'flora' ? 'Flora' : 'Fauna'}
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${getCategoryColor(item.category)}`}
+                  >
+                    {item.category === "flora" ? "Flora" : "Fauna"}
                   </span>
                 </div>
 
                 {/* Content */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                  <h3 className="text-xl font-bold mb-1.5 drop-shadow-lg">{item.name}</h3>
-                  <p className="text-sm italic text-white/90 mb-2 drop-shadow">{item.scientificName}</p>
-                  <p className="text-sm text-white/95 line-clamp-2 mb-3 drop-shadow">{item.description}</p>
+                  <h3 className="text-xl font-bold mb-1.5 drop-shadow-lg">
+                    {item.name}
+                  </h3>
+                  <p className="text-sm italic text-white/90 mb-2 drop-shadow">
+                    {item.scientificName}
+                  </p>
+                  <p className="text-sm text-white/95 line-clamp-2 mb-3 drop-shadow">
+                    {item.description}
+                  </p>
                   <div className="flex items-center justify-between text-sm">
                     <span className="drop-shadow">📍 {item.region}</span>
                   </div>
@@ -199,48 +211,50 @@ const Carousel = memo(
           ))}
         </motion.div>
       </div>
-    )
-  }
-)
+    );
+  },
+);
 
-Carousel.displayName = "Carousel"
+Carousel.displayName = "Carousel";
 
 interface ThreeDPhotoCarouselProps {
-  items: CarouselItem[]
+  items: CarouselItem[];
 }
 
 function ThreeDPhotoCarousel({ items }: ThreeDPhotoCarouselProps) {
-  const [activeItem, setActiveItem] = useState<CarouselItem | null>(null)
-  const [isCarouselActive, setIsCarouselActive] = useState(true)
-  const controls = useAnimation()
+  const [activeItem, setActiveItem] = useState<CarouselItem | null>(null);
+  const [isCarouselActive, setIsCarouselActive] = useState(true);
+  const controls = useAnimation();
 
   const handleClick = (item: CarouselItem) => {
-    setActiveItem(item)
-    setIsCarouselActive(false)
-    controls.stop()
-  }
+    setActiveItem(item);
+    setIsCarouselActive(false);
+    controls.stop();
+  };
 
   const handleClose = () => {
-    setActiveItem(null)
-    setIsCarouselActive(true)
-  }
+    setActiveItem(null);
+    setIsCarouselActive(true);
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'Kritis':
-        return 'bg-red-100 text-red-800 border-red-200'
-      case 'Endemik':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'Lindungi':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200'
+      case "Kritis":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "Endemik":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "Lindungi":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
-  }
+  };
 
   const getCategoryColor = (category: string) => {
-    return category === 'flora' ? 'bg-emerald-100 text-emerald-800' : 'bg-teal-100 text-teal-800'
-  }
+    return category === "flora"
+      ? "bg-emerald-100 text-emerald-800"
+      : "bg-teal-100 text-teal-800";
+  };
 
   return (
     <motion.div layout className="relative">
@@ -257,7 +271,7 @@ function ThreeDPhotoCarousel({ items }: ThreeDPhotoCarouselProps) {
             style={{ willChange: "opacity" }}
             transition={transitionOverlay}
           >
-            <div 
+            <div
               className="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
@@ -281,11 +295,15 @@ function ThreeDPhotoCarousel({ items }: ThreeDPhotoCarouselProps) {
                     }}
                   />
                   <div className="absolute top-4 left-4 flex gap-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(activeItem.status)}`}>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusColor(activeItem.status)}`}
+                    >
                       {activeItem.status}
                     </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(activeItem.category)}`}>
-                      {activeItem.category === 'flora' ? 'Flora' : 'Fauna'}
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(activeItem.category)}`}
+                    >
+                      {activeItem.category === "flora" ? "Flora" : "Fauna"}
                     </span>
                   </div>
                 </div>
@@ -333,8 +351,7 @@ function ThreeDPhotoCarousel({ items }: ThreeDPhotoCarouselProps) {
         />
       </div>
     </motion.div>
-  )
+  );
 }
 
-export { ThreeDPhotoCarousel, type CarouselItem }
-
+export { ThreeDPhotoCarousel, type CarouselItem };

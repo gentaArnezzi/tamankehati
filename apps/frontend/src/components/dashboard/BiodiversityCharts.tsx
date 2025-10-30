@@ -1,30 +1,36 @@
 "use client";
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { 
-  LineChart, 
-  Line, 
-  AreaChart, 
-  Area, 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
+import {
+  LineChart,
+  Line,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
   Cell,
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   ComposedChart,
   ScatterChart,
-  Scatter
-} from 'recharts';
-import { TreePine, Bird, AlertTriangle, CheckCircle, Eye } from 'lucide-react';
+  Scatter,
+} from "recharts";
+import { TreePine, Bird, AlertTriangle, CheckCircle, Eye } from "lucide-react";
 
 interface BiodiversityData {
   flora: {
@@ -72,91 +78,110 @@ interface BiodiversityData {
 
 interface BiodiversityChartsProps {
   data: BiodiversityData;
-  chartType?: 'line' | 'bar' | 'area' | 'pie';
+  chartType?: "line" | "bar" | "area" | "pie";
 }
 
-const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType = 'line' }) => {
+const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({
+  data,
+  chartType = "line",
+}) => {
   const colors = {
-    primary: '#3b82f6',
-    secondary: '#10b981',
-    accent: '#f59e0b',
-    danger: '#ef4444',
-    warning: '#f59e0b',
-    success: '#10b981',
-    info: '#06b6d4',
-    purple: '#8b5cf6',
-    pink: '#ec4899'
+    primary: "#3b82f6",
+    secondary: "#10b981",
+    accent: "#f59e0b",
+    danger: "#ef4444",
+    warning: "#f59e0b",
+    success: "#10b981",
+    info: "#06b6d4",
+    purple: "#8b5cf6",
+    pink: "#ec4899",
   };
 
   const iucnColors = {
-    'CR': '#dc2626',
-    'EN': '#ea580c',
-    'VU': '#d97706',
-    'NT': '#eab308',
-    'LC': '#22c55e',
-    'DD': '#6b7280',
-    'NE': '#9ca3af'
+    CR: "#dc2626",
+    EN: "#ea580c",
+    VU: "#d97706",
+    NT: "#eab308",
+    LC: "#22c55e",
+    DD: "#6b7280",
+    NE: "#9ca3af",
   };
 
   // Prepare IUCN data for charts
   const iucnData = [
-    { 
-      name: 'Critically Endangered', 
-      value: data.flora.iucn_status.critically_endangered + data.fauna.iucn_status.critically_endangered,
+    {
+      name: "Critically Endangered",
+      value:
+        data.flora.iucn_status.critically_endangered +
+        data.fauna.iucn_status.critically_endangered,
       flora: data.flora.iucn_status.critically_endangered,
       fauna: data.fauna.iucn_status.critically_endangered,
-      color: iucnColors.CR
+      color: iucnColors.CR,
     },
-    { 
-      name: 'Endangered', 
-      value: data.flora.iucn_status.endangered + data.fauna.iucn_status.endangered,
+    {
+      name: "Endangered",
+      value:
+        data.flora.iucn_status.endangered + data.fauna.iucn_status.endangered,
       flora: data.flora.iucn_status.endangered,
       fauna: data.fauna.iucn_status.endangered,
-      color: iucnColors.EN
+      color: iucnColors.EN,
     },
-    { 
-      name: 'Vulnerable', 
-      value: data.flora.iucn_status.vulnerable + data.fauna.iucn_status.vulnerable,
+    {
+      name: "Vulnerable",
+      value:
+        data.flora.iucn_status.vulnerable + data.fauna.iucn_status.vulnerable,
       flora: data.flora.iucn_status.vulnerable,
       fauna: data.fauna.iucn_status.vulnerable,
-      color: iucnColors.VU
+      color: iucnColors.VU,
     },
-    { 
-      name: 'Near Threatened', 
-      value: data.flora.iucn_status.near_threatened + data.fauna.iucn_status.near_threatened,
+    {
+      name: "Near Threatened",
+      value:
+        data.flora.iucn_status.near_threatened +
+        data.fauna.iucn_status.near_threatened,
       flora: data.flora.iucn_status.near_threatened,
       fauna: data.fauna.iucn_status.near_threatened,
-      color: iucnColors.NT
+      color: iucnColors.NT,
     },
-    { 
-      name: 'Least Concern', 
-      value: data.flora.iucn_status.least_concern + data.fauna.iucn_status.least_concern,
+    {
+      name: "Least Concern",
+      value:
+        data.flora.iucn_status.least_concern +
+        data.fauna.iucn_status.least_concern,
       flora: data.flora.iucn_status.least_concern,
       fauna: data.fauna.iucn_status.least_concern,
-      color: iucnColors.LC
+      color: iucnColors.LC,
     },
-    { 
-      name: 'Data Deficient', 
-      value: data.flora.iucn_status.data_deficient + data.fauna.iucn_status.data_deficient,
+    {
+      name: "Data Deficient",
+      value:
+        data.flora.iucn_status.data_deficient +
+        data.fauna.iucn_status.data_deficient,
       flora: data.flora.iucn_status.data_deficient,
       fauna: data.fauna.iucn_status.data_deficient,
-      color: iucnColors.DD
+      color: iucnColors.DD,
     },
-    { 
-      name: 'Not Evaluated', 
-      value: data.flora.iucn_status.not_evaluated + data.fauna.iucn_status.not_evaluated,
+    {
+      name: "Not Evaluated",
+      value:
+        data.flora.iucn_status.not_evaluated +
+        data.fauna.iucn_status.not_evaluated,
       flora: data.flora.iucn_status.not_evaluated,
       fauna: data.fauna.iucn_status.not_evaluated,
-      color: iucnColors.NE
-    }
+      color: iucnColors.NE,
+    },
   ];
 
   // Prepare comparison data
   const comparisonData = [
-    { name: 'Total', flora: data.flora.total, fauna: data.fauna.total },
-    { name: 'Endemic', flora: data.flora.endemic, fauna: data.fauna.endemic },
-    { name: 'Approved', flora: data.flora.approved, fauna: data.fauna.approved },
-    { name: 'Pending', flora: data.flora.pending, fauna: data.fauna.pending }
+    { name: "Total", flora: data.flora.total, fauna: data.fauna.total },
+    { name: "Endemic", flora: data.flora.endemic, fauna: data.fauna.endemic },
+    {
+      name: "Approved",
+      flora: data.flora.approved,
+      fauna: data.fauna.approved,
+    },
+    { name: "Pending", flora: data.flora.pending, fauna: data.fauna.pending },
   ];
 
   // Group timeline data by period
@@ -169,7 +194,7 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
       acc.push({
         period: item.period,
         [item.kingdom]: item.species_count,
-        total: item.species_count
+        total: item.species_count,
       });
     }
     return acc;
@@ -177,16 +202,16 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
 
   const renderChart = () => {
     switch (chartType) {
-      case 'bar':
+      case "bar":
         return (
           <BarChart data={timelineData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="period" 
+            <XAxis
+              dataKey="period"
               tickFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <YAxis />
-            <Tooltip 
+            <Tooltip
               labelFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <Legend />
@@ -194,38 +219,38 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
             <Bar dataKey="fauna" name="Fauna" fill={colors.secondary} />
           </BarChart>
         );
-      case 'area':
+      case "area":
         return (
           <AreaChart data={timelineData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="period" 
+            <XAxis
+              dataKey="period"
               tickFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <YAxis />
-            <Tooltip 
+            <Tooltip
               labelFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <Legend />
-            <Area 
-              type="monotone" 
-              dataKey="flora" 
-              stackId="1" 
-              stroke={colors.primary} 
+            <Area
+              type="monotone"
+              dataKey="flora"
+              stackId="1"
+              stroke={colors.primary}
               fill={colors.primary}
               name="Flora"
             />
-            <Area 
-              type="monotone" 
-              dataKey="fauna" 
-              stackId="1" 
-              stroke={colors.secondary} 
+            <Area
+              type="monotone"
+              dataKey="fauna"
+              stackId="1"
+              stroke={colors.secondary}
               fill={colors.secondary}
               name="Fauna"
             />
           </AreaChart>
         );
-      case 'pie':
+      case "pie":
         return (
           <PieChart>
             <Pie
@@ -233,7 +258,9 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              label={({ name, percent }) =>
+                `${name} ${(percent * 100).toFixed(0)}%`
+              }
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -250,26 +277,26 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
         return (
           <LineChart data={timelineData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="period" 
+            <XAxis
+              dataKey="period"
               tickFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <YAxis />
-            <Tooltip 
+            <Tooltip
               labelFormatter={(value) => new Date(value).toLocaleDateString()}
             />
             <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="flora" 
-              stroke={colors.primary} 
+            <Line
+              type="monotone"
+              dataKey="flora"
+              stroke={colors.primary}
               strokeWidth={2}
               name="Flora"
             />
-            <Line 
-              type="monotone" 
-              dataKey="fauna" 
-              stroke={colors.secondary} 
+            <Line
+              type="monotone"
+              dataKey="fauna"
+              stroke={colors.secondary}
               strokeWidth={2}
               name="Fauna"
             />
@@ -288,7 +315,9 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
             <TreePine className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.summary.total_species}</div>
+            <div className="text-2xl font-bold">
+              {data.summary.total_species}
+            </div>
             <p className="text-xs text-muted-foreground">
               {data.summary.total_endemic} endemic
             </p>
@@ -328,9 +357,13 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {data.summary.total_species > 0 
-                ? ((data.summary.total_approved / data.summary.total_species) * 100).toFixed(1)
-                : 0}%
+              {data.summary.total_species > 0
+                ? (
+                    (data.summary.total_approved / data.summary.total_species) *
+                    100
+                  ).toFixed(1)
+                : 0}
+              %
             </div>
             <p className="text-xs text-muted-foreground">
               {data.summary.total_approved} approved
@@ -358,7 +391,9 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
         <Card>
           <CardHeader>
             <CardTitle>IUCN Status Distribution</CardTitle>
-            <CardDescription>Conservation status of recorded species</CardDescription>
+            <CardDescription>
+              Conservation status of recorded species
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -368,7 +403,9 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
                   cx="50%"
                   cy="50%"
                   labelLine={false}
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
                   outerRadius={80}
                   fill="#8884d8"
                   dataKey="value"
@@ -412,15 +449,21 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
         <Card>
           <CardHeader>
             <CardTitle>Endemic Species Analysis</CardTitle>
-            <CardDescription>Endemic species distribution and trends</CardDescription>
+            <CardDescription>
+              Endemic species distribution and trends
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Flora Endemic</span>
                 <div className="flex items-center gap-2">
-                  <Progress 
-                    value={data.flora.total > 0 ? (data.flora.endemic / data.flora.total) * 100 : 0} 
+                  <Progress
+                    value={
+                      data.flora.total > 0
+                        ? (data.flora.endemic / data.flora.total) * 100
+                        : 0
+                    }
                     className="w-24"
                   />
                   <span className="text-sm text-muted-foreground">
@@ -431,8 +474,12 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Fauna Endemic</span>
                 <div className="flex items-center gap-2">
-                  <Progress 
-                    value={data.fauna.total > 0 ? (data.fauna.endemic / data.fauna.total) * 100 : 0} 
+                  <Progress
+                    value={
+                      data.fauna.total > 0
+                        ? (data.fauna.endemic / data.fauna.total) * 100
+                        : 0
+                    }
                     className="w-24"
                   />
                   <span className="text-sm text-muted-foreground">
@@ -449,7 +496,9 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
       <Card>
         <CardHeader>
           <CardTitle>IUCN Status Details</CardTitle>
-          <CardDescription>Detailed breakdown of conservation status</CardDescription>
+          <CardDescription>
+            Detailed breakdown of conservation status
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -457,8 +506,8 @@ const BiodiversityCharts: React.FC<BiodiversityChartsProps> = ({ data, chartType
               <div key={index} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium">{status.name}</h4>
-                  <Badge 
-                    style={{ backgroundColor: status.color, color: 'white' }}
+                  <Badge
+                    style={{ backgroundColor: status.color, color: "white" }}
                   >
                     {status.value}
                   </Badge>

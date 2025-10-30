@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { X } from 'lucide-react';
+import * as React from "react";
+import { X } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -9,10 +9,10 @@ import {
   SheetFooter,
   SheetTitle,
   SheetDescription,
-} from './sheet';
-import { Button } from './button';
-import { ScrollArea } from './scroll-area';
-import { cn } from './utils';
+} from "./sheet";
+import { Button } from "./button";
+import { ScrollArea } from "./scroll-area";
+import { cn } from "./utils";
 
 interface FormSheetProps {
   open: boolean;
@@ -25,16 +25,16 @@ interface FormSheetProps {
   submitLabel?: string;
   cancelLabel?: string;
   isSubmitting?: boolean;
-  side?: 'right' | 'left';
-  width?: 'sm' | 'md' | 'lg' | 'xl';
+  side?: "right" | "left";
+  width?: "sm" | "md" | "lg" | "xl";
   showFooter?: boolean;
 }
 
 const widthClasses = {
-  sm: 'sm:max-w-sm',
-  md: 'sm:max-w-md',
-  lg: 'sm:max-w-lg',
-  xl: 'sm:max-w-xl',
+  sm: "sm:max-w-sm",
+  md: "sm:max-w-md",
+  lg: "sm:max-w-lg",
+  xl: "sm:max-w-xl",
 };
 
 export function FormSheet({
@@ -45,11 +45,11 @@ export function FormSheet({
   children,
   onSubmit,
   onCancel,
-  submitLabel = 'Simpan',
-  cancelLabel = 'Batal',
+  submitLabel = "Simpan",
+  cancelLabel = "Batal",
   isSubmitting = false,
-  side = 'right',
-  width = 'lg',
+  side = "right",
+  width = "lg",
   showFooter = true,
 }: FormSheetProps) {
   const handleCancel = () => {
@@ -71,10 +71,7 @@ export function FormSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={side}
-        className={cn(
-          'flex flex-col p-0 w-full',
-          widthClasses[width]
-        )}
+        className={cn("flex flex-col p-0 w-full", widthClasses[width])}
       >
         {/* Header - Fixed */}
         <SheetHeader className="px-6 py-4 border-b">
@@ -92,9 +89,7 @@ export function FormSheet({
 
         {/* Body - Scrollable */}
         <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
-          <ScrollArea className="flex-1 px-6 py-4">
-            {children}
-          </ScrollArea>
+          <ScrollArea className="flex-1 px-6 py-4">{children}</ScrollArea>
 
           {/* Footer - Fixed */}
           {showFooter && (
@@ -107,11 +102,8 @@ export function FormSheet({
               >
                 {cancelLabel}
               </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Menyimpan...' : submitLabel}
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Menyimpan..." : submitLabel}
               </Button>
             </SheetFooter>
           )}
@@ -129,9 +121,14 @@ interface FormSectionProps {
   className?: string;
 }
 
-export function FormSection({ title, description, children, className }: FormSectionProps) {
+export function FormSection({
+  title,
+  description,
+  children,
+  className,
+}: FormSectionProps) {
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {(title || description) && (
         <div className="space-y-1">
           {title && <h3 className="text-sm font-medium">{title}</h3>}
@@ -144,4 +141,3 @@ export function FormSection({ title, description, children, className }: FormSec
     </div>
   );
 }
-
