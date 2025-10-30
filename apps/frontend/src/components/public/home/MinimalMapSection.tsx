@@ -74,8 +74,8 @@ export function MinimalMapSection() {
         
         // Fetch parks and stats data in parallel
         const [parksResponse, statsResponse] = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/public/parks?limit=100`),
-          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/public/stats`)
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/public/parks?limit=100`),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/public/stats`)
         ]);
 
         // Process parks data

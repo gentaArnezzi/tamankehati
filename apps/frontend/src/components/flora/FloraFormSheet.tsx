@@ -140,7 +140,7 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         iucn_status: formData.status_iucn || ''
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-description', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/public/generate-flora-description', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -200,7 +200,7 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         iucn_status: formData.status_iucn || ''
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-morphology', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/public/generate-flora-morphology', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -260,7 +260,7 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
         iucn_status: formData.status_iucn || ''
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-benefits', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/public/generate-flora-benefits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -501,7 +501,7 @@ export function FloraFormSheet({ open, onOpenChange, flora, onSuccess }: FloraFo
           {formData.gambar_utama && (
             <div className="mt-2 rounded-lg border p-2">
               <img
-                src={formData.gambar_utama.startsWith('http') ? formData.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${formData.gambar_utama}`}
+                src={formData.gambar_utama.startsWith('http') ? formData.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${formData.gambar_utama}`}
                 alt="Preview"
                 className="h-32 w-full object-cover rounded"
                 onError={(e) => {

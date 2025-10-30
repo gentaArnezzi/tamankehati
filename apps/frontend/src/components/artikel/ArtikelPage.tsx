@@ -114,7 +114,7 @@ export function ArtikelPage() {
       }
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/?${params}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -187,7 +187,7 @@ export function ArtikelPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/${artikel.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/${artikel.id}`,
         {
           method: 'PUT',
           headers: {
@@ -234,7 +234,7 @@ export function ArtikelPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/${artikel.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/${artikel.id}`,
         {
           method: 'DELETE',
           headers: {

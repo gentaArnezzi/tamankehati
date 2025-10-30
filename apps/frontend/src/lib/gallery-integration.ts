@@ -22,7 +22,7 @@ export async function createGalleryForEntity(
   metadata: GalleryMetadata
 ): Promise<void> {
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
     const token = localStorage.getItem('auth_token');
     
     if (!token) {

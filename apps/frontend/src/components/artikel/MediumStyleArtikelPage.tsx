@@ -60,7 +60,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -95,7 +95,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
 
       console.log('Loading article:', articleId);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/${articleId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/${articleId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -171,8 +171,8 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       }
 
       const url = mode === 'edit' && articleId
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/${articleId}`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/${articleId}`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/articles/`;
       
       const method = mode === 'edit' ? 'PUT' : 'POST';
       
@@ -311,7 +311,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
       .replace(/`(.*?)`/g, '<code>$1</code>')
       .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
         // Handle relative URLs by prepending API URL
-        const imageUrl = url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url}`;
+        const imageUrl = url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
         return `<img src="${imageUrl}" alt="${alt}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
       })
       .replace(/\n/g, '<br>');
@@ -401,7 +401,7 @@ export function MediumStyleArtikelPage({ articleId, mode = 'create' }: MediumSty
               setFeaturedImage('');
             }}
             selectedFile={selectedFile}
-            previewUrl={featuredImage?.startsWith('http') ? featuredImage : featuredImage ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${featuredImage}` : undefined}
+            previewUrl={featuredImage?.startsWith('http') ? featuredImage : featuredImage ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${featuredImage}` : undefined}
             maxSize={10}
             acceptedTypes={['image/jpeg', 'image/png', 'image/gif', 'image/webp', '.jpg', '.jpeg', '.png', '.gif', '.webp']}
           />

@@ -2,7 +2,7 @@
 
 import { HttpClient, PaginatedResponse } from './http-client';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-zxb9.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-pxnu.onrender.com';
 console.log('API_BASE_URL:', API_BASE_URL);
 const AUTH_TOKEN_KEY = 'auth_token';
 const AUTH_USER_KEY = 'auth_user';

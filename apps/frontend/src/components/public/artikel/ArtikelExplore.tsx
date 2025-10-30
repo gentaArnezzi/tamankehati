@@ -31,7 +31,7 @@ const getImageUrl = (imageUrl: string | undefined) => {
     return imageUrl;
   }
   
-  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${imageUrl}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${imageUrl}`;
 };
 
 export function ArtikelExplore({ initialData, initialParams }: ArtikelExploreProps) {

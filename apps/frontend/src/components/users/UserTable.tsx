@@ -142,7 +142,7 @@ export function UserTable({ data, loading, onEdit, onPreview, onToggleActive, on
                     <Avatar key={user.profile_picture_url || `user-avatar-${user.id}`} className="flex-shrink-0 w-10 h-10 shadow-sm">
                       {user.profile_picture_url && (
                         <AvatarImage 
-                          src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${user.profile_picture_url}`}
+                          src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${user.profile_picture_url}`}
                           alt={user.nama || 'User avatar'}
                         />
                       )}

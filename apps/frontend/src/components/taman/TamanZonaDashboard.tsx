@@ -133,7 +133,7 @@ export function TamanZonaDashboard() {
       
       console.log('Submit park:', parkId, 'with token length:', token.length);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/parks/${parkId}/submit`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/parks/${parkId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

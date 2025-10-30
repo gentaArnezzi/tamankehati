@@ -10,7 +10,7 @@
  * Defaults to production URL if not set
  */
 export function getApiUrl(): string {
-  return process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+  return process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
 }
 
 /**

@@ -26,7 +26,7 @@ export function useNewUserDetection() {
 
       try {
         const token = localStorage.getItem('auth_token');
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
         
         // Check if user has any parks
         const response = await fetch(`${apiUrl}/api/v1/parks?submitted_by=me`, {

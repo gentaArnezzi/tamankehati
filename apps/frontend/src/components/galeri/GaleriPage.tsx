@@ -106,7 +106,7 @@ export function GaleriPage() {
             if (!imageUrl.startsWith('/')) {
               imageUrl = '/' + imageUrl;
             }
-            imageUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${imageUrl}`;
+            imageUrl = `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${imageUrl}`;
           }
           
           // Validate URL format
@@ -190,7 +190,7 @@ export function GaleriPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

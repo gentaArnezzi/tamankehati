@@ -422,7 +422,7 @@ function CreateActivityPageContent() {
                     {images.map((image, index) => {
                       const isExistingImage = index < existingImages.length;
                       const imageUrl = isExistingImage 
-                        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image}`
+                        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${image}`
                         : image; // For new files, image is already a blob URL
                       
                       return (

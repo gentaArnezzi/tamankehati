@@ -31,7 +31,7 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

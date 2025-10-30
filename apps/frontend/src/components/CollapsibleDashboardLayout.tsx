@@ -145,7 +145,7 @@ export function CollapsibleDashboardLayout({
         console.log('🔄 Fetching pending approval counts...');
 
         // ✅ Use unified approvals endpoint that returns counts for all entities
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
         const response = await fetch(`${apiUrl}/api/v1/approvals`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
@@ -509,7 +509,7 @@ const Logo = ({ user }: { user: User | null }) => {
     <Avatar key={user?.profile_picture_url || 'no-avatar-sidebar'} className="size-10 shrink-0 shadow-sm border-2 border-white">
       {user?.profile_picture_url && (
         <AvatarImage 
-          src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${user.profile_picture_url}`}
+          src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${user.profile_picture_url}`}
           alt={user?.nama || 'Profile photo'}
         />
       )}

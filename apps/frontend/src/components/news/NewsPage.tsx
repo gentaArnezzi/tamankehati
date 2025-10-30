@@ -158,7 +158,7 @@ export function NewsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -205,8 +205,8 @@ export function NewsPage() {
   const handleSubmit = async (formData: Partial<News>) => {
     try {
       const url = formMode === 'create' 
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/${formData.id}`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${formData.id}`;
       
       const method = formMode === 'create' ? 'POST' : 'PUT';
       
@@ -241,7 +241,7 @@ export function NewsPage() {
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}`,
         {
           method: 'DELETE',
           headers: {
@@ -265,7 +265,7 @@ export function NewsPage() {
   const handlePublish = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/${id}/publish`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}/publish`,
         {
           method: 'POST',
           headers: {
@@ -289,7 +289,7 @@ export function NewsPage() {
   const handleArchive = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/news/${id}/archive`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/news/${id}/archive`,
         {
           method: 'POST',
           headers: {

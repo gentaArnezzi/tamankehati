@@ -48,7 +48,7 @@ export default function TamanDetailPage() {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/park/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/park/${id}`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -73,7 +73,7 @@ export default function TamanDetailPage() {
   const getImageUrl = (url?: string) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url}`;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${url}`;
   };
 
   const getStatusBadge = (status?: string) => {

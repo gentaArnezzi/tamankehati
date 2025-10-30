@@ -212,7 +212,7 @@ export default function TanyaKehatiPage() {
 
   const checkApiHealth = async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
         method: 'POST',
         headers: {
@@ -275,7 +275,7 @@ export default function TanyaKehatiPage() {
     setIsLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com';
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
         method: 'POST',
         headers: {

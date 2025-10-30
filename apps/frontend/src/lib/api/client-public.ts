@@ -9,7 +9,7 @@ import {
   type FaunaPublic,
 } from '../../types/public';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-zxb9.onrender.com';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-pxnu.onrender.com';
 
 type PrimitiveParam = string | number | boolean;
 type SearchParams = Record<string, PrimitiveParam | PrimitiveParam[] | undefined | null>;
