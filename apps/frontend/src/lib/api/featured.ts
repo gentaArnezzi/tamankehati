@@ -2,7 +2,7 @@
 
 import { FloraPublic, FaunaPublic, TamanPublic } from '../../types/public';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-zxb9.onrender.com';
 
 export interface FeaturedItem {
   id: string | number;
