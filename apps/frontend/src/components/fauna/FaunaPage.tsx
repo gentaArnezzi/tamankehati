@@ -166,9 +166,9 @@ export function FaunaPage() {
   const fetchExistingGalleries = async (faunaId: string | number) => {
     setLoadingGalleries(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/fauna/${faunaId}`, {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/galleries/entity/fauna/' + faunaId, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
       });
       
@@ -210,10 +210,10 @@ export function FaunaPage() {
   const deleteMarkedGalleries = async () => {
     const deletePromises = Array.from(galleriesToDelete).map(async (galleryId) => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${galleryId}`, {
+        const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/galleries/' + galleryId, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
           },
         });
         
@@ -252,7 +252,7 @@ export function FaunaPage() {
         setError('');
         
         // Create cache key
-        const cacheKey = `fauna-${currentPage}-${searchQuery}-${statusFilter}-${user?.id}`;
+        const cacheKey = 'fauna-' + currentPage + '-' + searchQuery + '-' + statusFilter + '-' + (user?.id || '');
         const now = Date.now();
         const cacheExpiry = 10000; // 10 seconds cache for faster updates
         
@@ -347,17 +347,17 @@ export function FaunaPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -378,17 +378,17 @@ export function FaunaPage() {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -426,7 +426,7 @@ export function FaunaPage() {
       // ✅ Delete marked galleries before submit (edit mode only)
       if (formMode === 'edit' && galleriesToDelete.size > 0) {
         const deleteResult = await deleteMarkedGalleries();
-        console.log(`✅ Deleted ${deleteResult.successCount} fauna galleries, ${deleteResult.failCount} failed`);
+        console.log('✅ Deleted ' + deleteResult.successCount + ' fauna galleries, ' + deleteResult.failCount + ' failed');
       }
       
       console.log('Fauna form submitting - mode:', formMode, 'status:', submitStatus);
@@ -497,7 +497,7 @@ export function FaunaPage() {
             await createGalleryForEntity(imageUrl, {
               entityType: 'fauna',
               entityId: Number(faunaResult.id),
-              title: `${values.nama_umum || values.nama_ilmiah} - ${values.nama_ilmiah} (Gambar Utama)`,
+              title: (values.nama_umum || values.nama_ilmiah) + ' - ' + values.nama_ilmiah + ' (Gambar Utama)',
               description: values.deskripsi || '',
               parkId: Number(values.park_id) || 1,
             });
@@ -512,11 +512,11 @@ export function FaunaPage() {
             await createGalleryForEntity(url, {
               entityType: 'fauna',
               entityId: Number(faunaResult.id),
-              title: `${values.nama_umum || values.nama_ilmiah} - ${values.nama_ilmiah} ${isMainImage ? '(Gambar Utama)' : `(Gambar ${i + 1})`}`,
+              title: (values.nama_umum || values.nama_ilmiah) + ' - ' + values.nama_ilmiah + ' ' + (isMainImage ? '(Gambar Utama)' : '(Gambar ' + (i + 1) + ')'),
               description: values.deskripsi || '',
               parkId: Number(values.park_id) || 1,
             });
-            console.log(`Gallery record created for fauna image ${i + 1}:`, faunaResult.id);
+            console.log('Gallery record created for fauna image ' + (i + 1) + ':', faunaResult.id);
           }
         } catch (galleryError) {
           console.error('Failed to create gallery records:', galleryError);
@@ -1084,9 +1084,9 @@ export function FaunaPage() {
                         return (
                           <div key={gallery.id} className="relative group">
                             <img
-                              src={gallery.image_url?.startsWith('http') ? gallery.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${gallery.image_url || '/placeholder.png'}`}
+                              src={gallery.image_url?.startsWith('http') ? gallery.image_url : (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + (gallery.image_url || '/placeholder.png')}
                               alt={gallery.title}
-                              className={`w-full h-24 object-cover rounded border ${isMarkedForDeletion ? 'border-red-500 opacity-50 grayscale' : 'border-slate-200'}`}
+                              className={'w-full h-24 object-cover rounded border ' + (isMarkedForDeletion ? 'border-red-500 opacity-50 grayscale' : 'border-slate-200')}
                             />
                             {!isMarkedForDeletion ? (
                               <button
@@ -1112,7 +1112,7 @@ export function FaunaPage() {
                               </button>
                             )}
                             
-                            <p className={`text-xs mt-1 truncate ${isMarkedForDeletion ? 'text-red-600 line-through' : 'text-slate-600'}`} title={gallery.title || 'Gallery image'}>
+                            <p className={'text-xs mt-1 truncate ' + (isMarkedForDeletion ? 'text-red-600 line-through' : 'text-slate-600')} title={gallery.title || 'Gallery image'}>
                               {isMarkedForDeletion ? '🗑️ Akan dihapus' : (gallery.title || 'Untitled')}
                             </p>
                           </div>

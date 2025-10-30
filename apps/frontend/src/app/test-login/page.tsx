@@ -24,19 +24,19 @@ export default function TestLoginPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setResult(`❌ Login failed: ${errorData.detail || 'Unknown error'}`);
+        setResult("Login failed: " + (errorData.detail || 'Unknown error'));
         return;
       }
 
       const data = await response.json();
       localStorage.setItem('auth_token', data.access_token);
       
-      setResult(`✅ Login successful! Token: ${data.access_token.substring(0, 50)}...`);
+      setResult("Login successful! Token: " + data.access_token.substring(0, 50) + "...");
       
       // Test dashboard API
-      const dashboardResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/dashboard/comprehensive-simple?time_range=yearly', {
+      const dashboardResponse = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/dashboard/comprehensive-simple?time_range=yearly', {
         headers: {
-          'Authorization': `Bearer ${data.access_token}`,
+          'Authorization': 'Bearer ' + data.access_token,
           'Content-Type': 'application/json'
         }
       });

@@ -83,17 +83,17 @@ export default function CreateFaunaPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch(`(process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/gallery-image'', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -114,17 +114,17 @@ export default function CreateFaunaPage() {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -178,7 +178,7 @@ export default function CreateFaunaPage() {
         iucn_status: formData.status_iucn || ''
       };
 
-      const descriptionRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/public/generate-fauna-description', {
+      const descriptionRes = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/public/generate-fauna-description', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(aiData),

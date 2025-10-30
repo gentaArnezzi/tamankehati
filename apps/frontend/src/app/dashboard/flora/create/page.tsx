@@ -84,10 +84,10 @@ export default function CreateFloraPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
@@ -115,10 +115,10 @@ export default function CreateFloraPage() {
         formData.append('files', file);
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });

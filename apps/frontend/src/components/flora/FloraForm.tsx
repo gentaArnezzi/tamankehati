@@ -173,7 +173,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       // ✅ Fix: Use correct endpoint with entity_type and entity_id in path
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/entity/flora/${floraId}`, {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
       });
       
@@ -222,7 +222,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/galleries/${galleryId}`, {
           method: 'DELETE',
           headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+            'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
           },
         });
         
@@ -262,17 +262,17 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/gallery-image', {
+      const response = await fetch(`(process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/gallery-image'', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -293,17 +293,17 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
         formData.append('files', file);
       });
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          'Authorization': 'Bearer ' + localStorage.getItem('auth_token'),
         },
         body: formData,
       });
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        throw new Error('Upload failed: ' + response.status + ' - ' + errorText);
       }
       
       const result = await response.json();
@@ -343,9 +343,9 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
       
       // ✅ Delete marked galleries FIRST before submitting flora data
       if (galleriesToDelete.size > 0) {
-        console.log(`🗑️ Deleting ${galleriesToDelete.size} marked galleries...`);
+        console.log('🗑️ Deleting ' + galleriesToDelete.size + ' marked galleries...');
         const deleteResult = await deleteMarkedGalleries();
-        console.log(`✅ Deleted ${deleteResult.successCount} galleries, ${deleteResult.failCount} failed`);
+        console.log('✅ Deleted ' + deleteResult.successCount + ' galleries, ' + deleteResult.failCount + ' failed');
       }
       
       let imageUrl = data.gambar_utama;
@@ -430,7 +430,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
             await createGalleryForEntity(imageUrl, {
               entityType: 'flora',
               entityId: Number(floraResult.id),
-              title: `${data.nama_umum || data.nama_ilmiah} - ${data.nama_ilmiah} (Gambar Utama)`,
+              title: (data.nama_umum || data.nama_ilmiah) + ' - ' + data.nama_ilmiah + ' (Gambar Utama)',
               description: data.deskripsi || '',
               parkId: Number(data.park_id) || 1,
               status: galleryStatus,
@@ -446,12 +446,12 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
             await createGalleryForEntity(url, {
               entityType: 'flora',
               entityId: Number(floraResult.id),
-              title: `${data.nama_umum || data.nama_ilmiah} - ${data.nama_ilmiah} ${isMainImage ? '(Gambar Utama)' : `(Gambar ${i + 1})`}`,
+              title: (data.nama_umum || data.nama_ilmiah) + ' - ' + data.nama_ilmiah + ' ' + (isMainImage ? '(Gambar Utama)' : '(Gambar ' + (i + 1) + ')'),
               description: data.deskripsi || '',
               parkId: Number(data.park_id) || 1,
               status: galleryStatus,
             });
-            console.log(`Gallery record created for flora image ${i + 1}:`, floraResult.id, 'status:', galleryStatus);
+            console.log('Gallery record created for flora image ' + (i + 1) + ':', floraResult.id, 'status:', galleryStatus);
           }
         } catch (galleryError) {
           console.error('Failed to create gallery records:', galleryError);
@@ -818,18 +818,18 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
                     {existingGalleries.map((gallery) => {
                       // Safe image URL handling
                       const imageUrl = gallery.image_url 
-                        ? (gallery.image_url.startsWith('http') ? gallery.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}${gallery.image_url}`)
+                        ? (gallery.image_url.startsWith('http') ? gallery.image_url : (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + gallery.image_url)
                         : '/placeholder-image.png'; // Fallback image
                       
                       const isMarkedForDeletion = galleriesToDelete.has(gallery.id);
                       
                       return (
-                        <div key={gallery.id} className={`relative group ${isMarkedForDeletion ? 'opacity-50' : ''}`}>
-                          <div className={`relative ${isMarkedForDeletion ? 'border-2 border-red-500 rounded' : ''}`}>
+                        <div key={gallery.id} className={'relative group' + (isMarkedForDeletion ? ' opacity-50' : '')}>
+                          <div className={'relative' + (isMarkedForDeletion ? ' border-2 border-red-500 rounded' : '')}>
                             <img 
                               src={imageUrl}
                               alt={gallery.title || 'Gallery image'}
-                              className={`w-full h-24 object-cover rounded ${isMarkedForDeletion ? 'grayscale' : ''}`}
+                              className={'w-full h-24 object-cover rounded' + (isMarkedForDeletion ? ' grayscale' : '')}
                               onError={(e) => {
                                 // Fallback if image fails to load
                                 e.currentTarget.src = '/placeholder-image.png';
@@ -868,7 +868,7 @@ export function FloraForm({ open, onOpenChange, onSubmit, initialData, mode }: F
                             </button>
                           )}
                           
-                          <p className={`text-xs mt-1 truncate ${isMarkedForDeletion ? 'text-red-600 line-through' : 'text-slate-600'}`} title={gallery.title || 'Gallery image'}>
+                          <p className={'text-xs mt-1 truncate' + (isMarkedForDeletion ? ' text-red-600 line-through' : ' text-slate-600')} title={gallery.title || 'Gallery image'}>
                             {isMarkedForDeletion ? '🗑️ Akan dihapus' : (gallery.title || 'Untitled')}
                           </p>
                         </div>

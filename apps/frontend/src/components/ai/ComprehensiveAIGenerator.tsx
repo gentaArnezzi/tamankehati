@@ -169,7 +169,7 @@ export default function ComprehensiveAIGenerator() {
     
     try {
       console.log('Testing Ollama connection...');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/test-ollama', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/test-ollama', {
         signal: controller.signal
       });
       
@@ -185,7 +185,7 @@ export default function ComprehensiveAIGenerator() {
         const errorText = await response.text();
         console.error('Response error:', errorText);
         setConnectionStatus('error');
-        toast.error(`Gagal terhubung ke Ollama: ${response.status}`);
+        toast.error('Gagal terhubung ke Ollama: ' + response.status);
       }
     } catch (error) {
       console.error('Connection error:', error);
@@ -193,7 +193,7 @@ export default function ComprehensiveAIGenerator() {
       if (error instanceof Error && error.name === 'AbortError') {
         toast.error('Timeout: Ollama tidak merespons dalam 30 detik');
       } else {
-        toast.error(`Gagal terhubung ke Ollama: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        toast.error('Gagal terhubung ke Ollama: ' + (error instanceof Error ? error.message : 'Unknown error'));
       }
     } finally {
       clearTimeout(timeoutId);
@@ -203,15 +203,15 @@ export default function ComprehensiveAIGenerator() {
   const generateFloraFauna = async (type: 'description' | 'morphology' | 'benefits') => {
     setLoading(true);
     try {
-      const endpoint = type === 'description' 
-        ? (floraFaunaType === 'flora' ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-flora-description' : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-fauna-description')
-        : (floraFaunaType === 'flora' ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-flora-${type}` : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-fauna-${type}`);
+      const endpoint = type === 'description'
+        ? (floraFaunaType === 'flora' ? (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-flora-description' : (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-fauna-description')
+        : (floraFaunaType === 'flora' ? (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-flora-' + type : (process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-fauna-' + type);
       
       // Get auth token
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers['Authorization'] = 'Bearer ' + token;
       }
       
       const response = await fetch(endpoint, {
@@ -227,7 +227,7 @@ export default function ComprehensiveAIGenerator() {
           ...prev,
           [type]: result.description
         }));
-        toast.success(`${type === 'description' ? 'Deskripsi' : type === 'morphology' ? 'Morfologi' : 'Manfaat'} berhasil dibuat!`);
+        toast.success((type === 'description' ? 'Deskripsi' : type === 'morphology' ? 'Morfologi' : 'Manfaat') + ' berhasil dibuat!');
       } else {
         toast.error(result.message || 'Gagal membuat deskripsi');
       }
@@ -245,10 +245,10 @@ export default function ComprehensiveAIGenerator() {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers['Authorization'] = 'Bearer ' + token;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-article', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-article', {
         method: 'POST',
         headers,
         body: JSON.stringify(articleData)
@@ -276,10 +276,10 @@ export default function ComprehensiveAIGenerator() {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = { 'Content-Type': 'application/json' };
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers['Authorization'] = 'Bearer ' + token;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/generate-news', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/generate-news', {
         method: 'POST',
         headers,
         body: JSON.stringify(newsData)
@@ -313,7 +313,7 @@ export default function ComprehensiveAIGenerator() {
       formData.append('park_id', parkInfo.park_id);
       formData.append('park_name', parkInfo.park_name);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/preview-csv-mapping', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/preview-csv-mapping', {
         method: 'POST',
         body: formData
       });
@@ -352,10 +352,10 @@ export default function ComprehensiveAIGenerator() {
       const token = localStorage.getItem('auth_token');
       const headers: Record<string, string> = {};
       if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+        headers['Authorization'] = 'Bearer ' + token;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com'}/api/v1/ai/test-extract-csv', {
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-pxnu.onrender.com') + '/api/v1/ai/test-extract-csv', {
         method: 'POST',
         headers,
         body: formData
@@ -365,7 +365,7 @@ export default function ComprehensiveAIGenerator() {
       setCsvExtraction(result);
       
       if (result.success) {
-        toast.success(`Data CSV berhasil diekstrak: ${result.valid_records} dari ${result.total_records} record`);
+        toast.success('Data CSV berhasil diekstrak: ' + result.valid_records + ' dari ' + result.total_records + ' record');
       } else {
         toast.error(result.message || 'Gagal mengekstrak data CSV');
       }
@@ -689,7 +689,7 @@ export default function ComprehensiveAIGenerator() {
                       <Input
                         value={point}
                         onChange={(e) => updateKeyPoint(index, e.target.value)}
-                        placeholder={`Poin ${index + 1}`}
+                        placeholder={'Poin ' + (index + 1)}
                       />
                       <Button
                         variant="outline"
@@ -902,7 +902,7 @@ export default function ComprehensiveAIGenerator() {
                     <AlertCircle className="h-4 w-4" />
                     <AlertDescription>
                       {csvExtraction.success 
-                        ? `Data berhasil diekstrak: ${csvExtraction.valid_records} dari ${csvExtraction.total_records} record`
+                        ? 'Data berhasil diekstrak: ' + csvExtraction.valid_records + ' dari ' + csvExtraction.total_records + ' record'
                         : csvExtraction.message
                       }
                     </AlertDescription>
