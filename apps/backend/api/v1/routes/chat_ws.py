@@ -17,11 +17,19 @@ async def chat_ws(websocket: WebSocket, session_id: int, db: AsyncSession = Depe
             await ws_rate_check(websocket, route=f"/api/v1/chat/ws/{session_id}", limit=60, window_sec=60, scope="token")
             data = await websocket.receive_json()
             content = data.get("content", "")
-            provider_name = (data.get("provider") or "openai").lower()
+            provider_name = (data.get("provider") or "google").lower()
             use_tools = bool(data.get("use_tools", True))
             await chat_service.add_message(db, session_id, "user", content)
             history = await chat_service.prepare_messages_with_context(db, session_id, use_tools=use_tools)
-            prov = OllamaProvider() if provider_name == "ollama" else OpenAIProvider()
+            
+            # Choose provider
+            if provider_name == "ollama":
+                prov = OllamaProvider()
+            elif provider_name == "google" or provider_name == "gemini":
+                from ai.providers.google_provider import GoogleProvider
+                prov = GoogleProvider()
+            else:  # openai
+                prov = OpenAIProvider()
             await websocket.send_json({"event": "start"})
             aggregated = []
             async for chunk in prov.stream(history):

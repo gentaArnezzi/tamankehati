@@ -52,7 +52,7 @@ export function RegionEditForm({ onSuccess, onCancel, regionToEdit }: RegionEdit
     setError('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/crud/regions/${regionToEdit.id}/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/crud/regions/${regionToEdit.id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

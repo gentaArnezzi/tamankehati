@@ -117,7 +117,7 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
           {data.gambar_utama && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `http://localhost:8000${data.gambar_utama}`}
+                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_utama}`}
                 alt={data.nama_ilmiah}
                 className="w-full h-64 object-cover"
                 onError={(e) => {
@@ -144,7 +144,7 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={image.image_url.startsWith('http') ? image.image_url : `http://localhost:8000${image.image_url}`}
+                        src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image.image_url}`}
                         alt={image.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {

@@ -166,7 +166,7 @@ export function FaunaPage() {
   const fetchExistingGalleries = async (faunaId: string | number) => {
     setLoadingGalleries(true);
     try {
-      const response = await fetch(`http://localhost:8000/api/v1/galleries/entity/fauna/${faunaId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/fauna/${faunaId}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
         },
@@ -210,7 +210,7 @@ export function FaunaPage() {
   const deleteMarkedGalleries = async () => {
     const deletePromises = Array.from(galleriesToDelete).map(async (galleryId) => {
       try {
-        const response = await fetch(`http://localhost:8000/api/v1/galleries/${galleryId}`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/${galleryId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -347,7 +347,7 @@ export function FaunaPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8000/api/v1/upload/gallery-image', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -378,7 +378,7 @@ export function FaunaPage() {
         formData.append('files', file);
       });
       
-      const response = await fetch('http://localhost:8000/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -1084,7 +1084,7 @@ export function FaunaPage() {
                         return (
                           <div key={gallery.id} className="relative group">
                             <img
-                              src={gallery.image_url?.startsWith('http') ? gallery.image_url : `http://localhost:8000${gallery.image_url || '/placeholder.png'}`}
+                              src={gallery.image_url?.startsWith('http') ? gallery.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${gallery.image_url || '/placeholder.png'}`}
                               alt={gallery.title}
                               className={`w-full h-24 object-cover rounded border ${isMarkedForDeletion ? 'border-red-500 opacity-50 grayscale' : 'border-slate-200'}`}
                             />

@@ -132,7 +132,7 @@ const ComprehensiveDashboardPage: React.FC = () => {
       }
 
       // Use the simple comprehensive dashboard API
-      const response = await fetch(`http://localhost:8000/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

@@ -120,7 +120,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
           {data.gambar_utama && (
             <div className="rounded-lg overflow-hidden border">
               <img
-                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `http://localhost:8000${data.gambar_utama}`}
+                src={data.gambar_utama.startsWith('http') ? data.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_utama}`}
                 alt={data.nama_ilmiah}
                 className="w-full h-64 object-cover"
                 onError={(e) => {
@@ -147,7 +147,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div key={image.id} className="relative group">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={image.image_url.startsWith('http') ? image.image_url : `http://localhost:8000${image.image_url}`}
+                        src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image.image_url}`}
                         alt={image.title}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
@@ -189,7 +189,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_daun.startsWith('http') ? data.gambar_daun : `http://localhost:8000${data.gambar_daun}`}
+                        src={data.gambar_daun.startsWith('http') ? data.gambar_daun : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_daun}`}
                         alt="Pertelaan Daun"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
@@ -207,7 +207,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_batang.startsWith('http') ? data.gambar_batang : `http://localhost:8000${data.gambar_batang}`}
+                        src={data.gambar_batang.startsWith('http') ? data.gambar_batang : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_batang}`}
                         alt="Batang/Percabangan"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
@@ -225,7 +225,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_bunga.startsWith('http') ? data.gambar_bunga : `http://localhost:8000${data.gambar_bunga}`}
+                        src={data.gambar_bunga.startsWith('http') ? data.gambar_bunga : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_bunga}`}
                         alt="Bunga"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {
@@ -243,7 +243,7 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <div className="space-y-2">
                     <div className="aspect-square rounded-lg overflow-hidden border bg-gray-50">
                       <img
-                        src={data.gambar_buah.startsWith('http') ? data.gambar_buah : `http://localhost:8000${data.gambar_buah}`}
+                        src={data.gambar_buah.startsWith('http') ? data.gambar_buah : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${data.gambar_buah}`}
                         alt="Buah"
                         className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
                         onError={(e) => {

@@ -123,7 +123,7 @@ export function DashboardWithAnalytics() {
       setError('');
       
       const token = localStorage.getItem('auth_token');
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || '${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}';
 
       const response = await fetch(
         `${apiUrl}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,

@@ -27,11 +27,19 @@ async def get_messages(session_id: int, db: AsyncSession = Depends(get_session))
 async def send_message(session_id: int, body: SendMessageIn, db: AsyncSession = Depends(get_session)):
     # store user message
     await chat_service.add_message(db, session_id, "user", body.content)
-    # choose provider
-    provider_name = (body.provider or "openai").lower()
+    # choose provider (default to google now)
+    provider_name = (body.provider or "google").lower()
     if provider_name == "ollama":
+        from ai.providers.ollama_provider import OllamaProvider
         provider = OllamaProvider()
-    else:
+    elif provider_name == "google" or provider_name == "gemini":
+        from ai.providers.google_provider import GoogleProvider
+        try:
+            provider = GoogleProvider()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(e))
+    else:  # openai
+        from ai.providers.openai_provider import OpenAIProvider
         try:
             provider = OpenAIProvider()
         except Exception as e:

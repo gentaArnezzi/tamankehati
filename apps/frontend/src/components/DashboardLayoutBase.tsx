@@ -155,7 +155,7 @@ export function DashboardLayoutBase({
             <Avatar key={user?.profile_picture_url || 'no-avatar-header-base'} className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
               {user?.profile_picture_url && (
                 <AvatarImage 
-                  src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${user.profile_picture_url}`}
+                  src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${user.profile_picture_url}`}
                   alt={user?.nama || user?.display_name || 'Profile photo'}
                 />
               )}
@@ -193,7 +193,7 @@ export function DashboardLayoutBase({
                 <Avatar key={user?.profile_picture_url || 'no-avatar-mobile-base'} className="h-10 w-10">
                   {user?.profile_picture_url && (
                     <AvatarImage 
-                      src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${user.profile_picture_url}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${user.profile_picture_url}`}
                       alt={user?.nama || user?.display_name || 'Profile photo'}
                     />
                   )}

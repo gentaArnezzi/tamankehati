@@ -301,7 +301,7 @@ export function FaunaFormSheet({ open, onOpenChange, fauna, onSuccess }: FaunaFo
           {formData.gambar_utama && (
             <div className="mt-2 rounded-lg border p-2">
               <img
-                src={formData.gambar_utama.startsWith('http') ? formData.gambar_utama : `http://localhost:8000${formData.gambar_utama}`}
+                src={formData.gambar_utama.startsWith('http') ? formData.gambar_utama : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${formData.gambar_utama}`}
                 alt="Preview"
                 className="h-32 w-full object-cover rounded"
                 onError={(e) => {

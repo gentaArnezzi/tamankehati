@@ -15,7 +15,7 @@ const ITEMS_PER_PAGE = 12;
 const getImageUrl = (url?: string | null) => {
   if (!url) return null;
   if (url.startsWith('http')) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+  return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url}`;
 };
 const PROVINSI_OPTIONS = [
   'Aceh',

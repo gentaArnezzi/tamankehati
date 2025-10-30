@@ -90,7 +90,7 @@ export default function SettingsPage() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/profile`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/users/me/profile`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -153,7 +153,7 @@ export default function SettingsPage() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/change-password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/users/me/change-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -196,7 +196,7 @@ export default function SettingsPage() {
         return;
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/notifications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/users/me/notifications`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -254,7 +254,7 @@ export default function SettingsPage() {
       const formDataToUpload = new FormData();
       formDataToUpload.append('file', file);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/users/me/upload-photo`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/users/me/upload-photo`, {
         method: 'POST',
         headers: {
           'Authorization': 'Bearer ' + token,
@@ -351,7 +351,7 @@ export default function SettingsPage() {
               <Avatar key={user?.profile_picture_url || 'no-avatar'} className="h-24 w-24 border-4 border-white shadow-lg">
                 {user?.profile_picture_url && (
                   <AvatarImage 
-                    src={`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${user.profile_picture_url}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${user.profile_picture_url}`}
                     alt={user?.nama || 'Profile photo'}
                   />
                 )}

@@ -11,7 +11,7 @@ export default function TestLoginPage() {
     setResult('Testing login...');
     
     try {
-      const response = await fetch('http://localhost:8000/api/v1/auth/login', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ export default function TestLoginPage() {
       setResult(`✅ Login successful! Token: ${data.access_token.substring(0, 50)}...`);
       
       // Test dashboard API
-      const dashboardResponse = await fetch('http://localhost:8000/api/v1/dashboard/comprehensive-simple?time_range=yearly', {
+      const dashboardResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/dashboard/comprehensive-simple?time_range=yearly', {
         headers: {
           'Authorization': `Bearer ${data.access_token}`,
           'Content-Type': 'application/json'

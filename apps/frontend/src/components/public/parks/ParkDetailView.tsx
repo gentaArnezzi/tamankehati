@@ -46,7 +46,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/entity/park/${park.id}`
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/entity/park/${park.id}`
       );
       
       if (response.ok) {
@@ -66,7 +66,7 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
   const getImageUrl = (url?: string) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}${url}`;
+    return `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${url}`;
   };
 
   // Use stats from park data directly

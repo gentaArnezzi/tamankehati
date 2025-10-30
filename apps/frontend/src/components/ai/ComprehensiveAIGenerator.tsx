@@ -169,7 +169,7 @@ export default function ComprehensiveAIGenerator() {
     
     try {
       console.log('Testing Ollama connection...');
-      const response = await fetch('http://localhost:8000/api/v1/ai/test-ollama', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/test-ollama', {
         signal: controller.signal
       });
       
@@ -204,8 +204,8 @@ export default function ComprehensiveAIGenerator() {
     setLoading(true);
     try {
       const endpoint = type === 'description' 
-        ? (floraFaunaType === 'flora' ? 'http://localhost:8000/api/v1/ai/generate-flora-description' : 'http://localhost:8000/api/v1/ai/generate-fauna-description')
-        : (floraFaunaType === 'flora' ? `http://localhost:8000/api/v1/ai/generate-flora-${type}` : `http://localhost:8000/api/v1/ai/generate-fauna-${type}`);
+        ? (floraFaunaType === 'flora' ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-flora-description' : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-fauna-description')
+        : (floraFaunaType === 'flora' ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-flora-${type}` : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-fauna-${type}`);
       
       // Get auth token
       const token = localStorage.getItem('auth_token');
@@ -248,7 +248,7 @@ export default function ComprehensiveAIGenerator() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/ai/generate-article', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-article', {
         method: 'POST',
         headers,
         body: JSON.stringify(articleData)
@@ -279,7 +279,7 @@ export default function ComprehensiveAIGenerator() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/ai/generate-news', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/generate-news', {
         method: 'POST',
         headers,
         body: JSON.stringify(newsData)
@@ -313,7 +313,7 @@ export default function ComprehensiveAIGenerator() {
       formData.append('park_id', parkInfo.park_id);
       formData.append('park_name', parkInfo.park_name);
 
-      const response = await fetch('http://localhost:8000/api/v1/ai/preview-csv-mapping', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/preview-csv-mapping', {
         method: 'POST',
         body: formData
       });
@@ -355,7 +355,7 @@ export default function ComprehensiveAIGenerator() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const response = await fetch('http://localhost:8000/api/v1/ai/test-extract-csv', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/test-extract-csv', {
         method: 'POST',
         headers,
         body: formData

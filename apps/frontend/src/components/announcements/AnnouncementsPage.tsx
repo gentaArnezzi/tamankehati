@@ -154,7 +154,7 @@ export function AnnouncementsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/?${params}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -199,8 +199,8 @@ export function AnnouncementsPage() {
   const handleSubmit = async (formData: Partial<Announcement>) => {
     try {
       const url = formMode === 'create' 
-        ? `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/`
-        : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/${formData.id}`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/`
+        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/${formData.id}`;
       
       const method = formMode === 'create' ? 'POST' : 'PUT';
       
@@ -235,7 +235,7 @@ export function AnnouncementsPage() {
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/${id}`,
         {
           method: 'DELETE',
           headers: {
@@ -259,7 +259,7 @@ export function AnnouncementsPage() {
   const handlePublish = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/${id}/publish`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/${id}/publish`,
         {
           method: 'POST',
           headers: {
@@ -283,7 +283,7 @@ export function AnnouncementsPage() {
   const handleArchive = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/${id}/archive`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/${id}/archive`,
         {
           method: 'POST',
           headers: {

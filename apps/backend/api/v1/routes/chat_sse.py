@@ -13,12 +13,20 @@ router = APIRouter(prefix="/chat")
 rl_sse = rate_limiter(limit=20, window_sec=60, scope="ip")
 
 @router.get("/sse/{session_id}", dependencies=[Depends(rl_sse)])
-async def chat_sse(session_id: int, request: Request, q: str, provider: str = "openai", use_tools: bool = True, db: AsyncSession = Depends(get_session)):
+async def chat_sse(session_id: int, request: Request, q: str, provider: str = "google", use_tools: bool = True, db: AsyncSession = Depends(get_session)):
     async def event_stream():
         try:
             await chat_service.add_message(db, session_id, "user", q)
             history = await chat_service.prepare_messages_with_context(db, session_id, use_tools=use_tools)
-            prov = OllamaProvider() if provider.lower() == "ollama" else OpenAIProvider()
+            
+            # Choose provider
+            if provider.lower() == "ollama":
+                prov = OllamaProvider()
+            elif provider.lower() in ["google", "gemini"]:
+                from ai.providers.google_provider import GoogleProvider
+                prov = GoogleProvider()
+            else:  # openai
+                prov = OpenAIProvider()
             yield "event: start\n\n"
             aggregated = []
             async for chunk in prov.stream(history):

@@ -84,7 +84,7 @@ export default function CreateFloraPage() {
       const formData = new FormData();
       formData.append('file', file);
       
-      const response = await fetch('http://localhost:8000/api/v1/upload/gallery-image', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -115,7 +115,7 @@ export default function CreateFloraPage() {
         formData.append('files', file);
       });
       
-      const response = await fetch('http://localhost:8000/api/v1/upload/multiple-gallery-images', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/multiple-gallery-images', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -183,19 +183,19 @@ export default function CreateFloraPage() {
 
       // Generate all three descriptions in parallel with timeout
       const [descriptionRes, morphologyRes, benefitsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/v1/ai/public/generate-flora-description', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-description', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aiData),
           signal: controller.signal
         }),
-        fetch('http://localhost:8000/api/v1/ai/public/generate-flora-morphology', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-morphology', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aiData),
           signal: controller.signal
         }),
-        fetch('http://localhost:8000/api/v1/ai/public/generate-flora-benefits', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-benefits', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(aiData),

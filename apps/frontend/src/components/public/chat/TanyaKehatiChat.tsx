@@ -75,7 +75,7 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
     setIsLoading(true);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com';
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
         method: 'POST',
         headers: {

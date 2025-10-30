@@ -64,7 +64,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
     const fetchGalleryImages = async () => {
       try {
         // Fetch directly from backend API
-        const response = await fetch(`http://localhost:8000/api/public/flora/${flora.id}/gallery`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/public/flora/${flora.id}/gallery`);
         if (response.ok) {
           const data = await response.json();
           console.log('Gallery data fetched:', data);
@@ -223,7 +223,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                       <div className="aspect-square relative overflow-hidden bg-slate-100">
                         <Image
-                          src={flora.gambar_daun.startsWith('http') ? flora.gambar_daun : `http://localhost:8000${flora.gambar_daun}`}
+                          src={flora.gambar_daun.startsWith('http') ? flora.gambar_daun : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${flora.gambar_daun}`}
                           alt={`Pertelaan daun ${flora.nama_ilmiah}`}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -242,7 +242,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                       <div className="aspect-square relative overflow-hidden bg-slate-100">
                         <Image
-                          src={flora.gambar_batang.startsWith('http') ? flora.gambar_batang : `http://localhost:8000${flora.gambar_batang}`}
+                          src={flora.gambar_batang.startsWith('http') ? flora.gambar_batang : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${flora.gambar_batang}`}
                           alt={`Batang dan percabangan ${flora.nama_ilmiah}`}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -261,7 +261,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                       <div className="aspect-square relative overflow-hidden bg-slate-100">
                         <Image
-                          src={flora.gambar_bunga.startsWith('http') ? flora.gambar_bunga : `http://localhost:8000${flora.gambar_bunga}`}
+                          src={flora.gambar_bunga.startsWith('http') ? flora.gambar_bunga : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${flora.gambar_bunga}`}
                           alt={`Bunga ${flora.nama_ilmiah}`}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -280,7 +280,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                       <div className="aspect-square relative overflow-hidden bg-slate-100">
                         <Image
-                          src={flora.gambar_buah.startsWith('http') ? flora.gambar_buah : `http://localhost:8000${flora.gambar_buah}`}
+                          src={flora.gambar_buah.startsWith('http') ? flora.gambar_buah : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${flora.gambar_buah}`}
                           alt={`Buah ${flora.nama_ilmiah}`}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -510,7 +510,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
-                    src={image.image_url.startsWith('http') ? image.image_url : `http://localhost:8000${image.image_url}`}
+                    src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image.image_url}`}
                     alt={image.title}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"

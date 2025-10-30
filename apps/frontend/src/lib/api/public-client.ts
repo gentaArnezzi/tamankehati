@@ -16,7 +16,7 @@ import {
   TamanPublicSchema,
 } from '../../types/public';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === 'production' ? 'https://tamankehati-backend.onrender.com' : 'http://localhost:8000');
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'https://tamankehati-backend-zxb9.onrender.com';
 
 type Primitive = string | number | boolean;
 type SearchParams = Record<string, Primitive | Primitive[] | undefined | null>;

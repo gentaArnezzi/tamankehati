@@ -385,7 +385,7 @@ export function SettingsPage() {
                   <h4 className="text-sm">Dokumentasi</h4>
                   <p className="text-sm text-muted-foreground">
                     Akses dokumentasi API lengkap di{' '}
-                    <a href="http://localhost:8000/docs" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    <a href=`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/docs" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                       http://localhost:8000/docs
                     </a>
                   </p>

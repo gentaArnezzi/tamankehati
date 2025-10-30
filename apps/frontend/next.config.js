@@ -4,12 +4,13 @@ const nextConfig = {
     domains: [
       'localhost', 
       'tamankehati-21.onrender.com', 
+      'tamankehati-backend-zxb9.onrender.com',
+      'tamankehati-backend.onrender.com',
       'images.unsplash.com', 
       'example.com', 
       'picsum.photos',
       'chatgpt.com',
-      'cdn.prod.website-files.com',
-      'tamankehati-backend.onrender.com'
+      'cdn.prod.website-files.com'
     ],
   },
   typescript: {
@@ -20,11 +21,10 @@ const nextConfig = {
   },
   // Optimasi untuk development
   experimental: {
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled - requires 'critters' package
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
-  // Kompilasi yang lebih cepat
-  swcMinify: true,
+  // swcMinify is now default in Next.js 15+
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },

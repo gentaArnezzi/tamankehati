@@ -68,8 +68,8 @@ export default function AIFloraFaunaGenerator() {
     setLoading(true);
     try {
       const endpoint = type === 'flora' 
-        ? 'http://localhost:8000/api/v1/ai/public/generate-flora-description'
-        : 'http://localhost:8000/api/v1/ai/public/generate-fauna-description';
+        ? `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-description'
+        : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-fauna-description';
       
       const data = type === 'flora' ? floraData : faunaData;
       
@@ -102,7 +102,7 @@ export default function AIFloraFaunaGenerator() {
     
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/ai/public/generate-flora-morphology', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-morphology', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -131,7 +131,7 @@ export default function AIFloraFaunaGenerator() {
     
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/ai/public/generate-flora-benefits', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/generate-flora-benefits', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export default function AIFloraFaunaGenerator() {
   const testOllamaConnection = async () => {
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8000/api/v1/ai/public/test-ollama');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/ai/public/test-ollama');
       const result = await response.json();
       
       if (result.success) {

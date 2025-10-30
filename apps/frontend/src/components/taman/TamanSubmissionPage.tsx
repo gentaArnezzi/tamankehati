@@ -314,7 +314,7 @@ export function TamanSubmissionPage() {
       const formDataUpload = new FormData();
       formDataUpload.append('file', file);
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/upload/gallery-image`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/upload/gallery-image`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -429,7 +429,7 @@ export function TamanSubmissionPage() {
           park_id: parkId, // Also include park_id for reference
         };
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -449,7 +449,7 @@ export function TamanSubmissionPage() {
         // Submit for review if park is being submitted for review
         if (result.id && shouldSubmitForReview) {
           try {
-            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/galleries/${result.id}/submit`, {
+            const submitResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/galleries/${result.id}/submit`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -673,7 +673,7 @@ export function TamanSubmissionPage() {
         return;
       }
       
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/parks/${parkId}/submit`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/parks/${parkId}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

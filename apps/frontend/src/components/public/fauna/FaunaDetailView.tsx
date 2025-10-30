@@ -65,7 +65,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
     const fetchGalleryImages = async () => {
       try {
         // Fetch directly from backend API
-        const response = await fetch(`http://localhost:8000/api/public/fauna/${fauna.id}/gallery`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/public/fauna/${fauna.id}/gallery`);
         if (response.ok) {
           const data = await response.json();
           console.log('Fauna Gallery data fetched:', data);
@@ -377,7 +377,7 @@ export function FaunaDetailView({ fauna }: FaunaDetailViewProps) {
               >
                 <div className="aspect-square relative overflow-hidden bg-slate-100">
                   <Image
-                    src={image.image_url.startsWith('http') ? image.image_url : `http://localhost:8000${image.image_url}`}
+                    src={image.image_url.startsWith('http') ? image.image_url : `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}${image.image_url}`}
                     alt={image.title}
                     fill
                     className="object-cover transition-transform duration-300 group-hover:scale-110"

@@ -68,7 +68,7 @@ export function ArtikelCreatePage() {
 
       // Create article via API
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/articles/`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/articles/`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

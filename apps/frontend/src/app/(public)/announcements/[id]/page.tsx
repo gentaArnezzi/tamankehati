@@ -55,7 +55,7 @@ export default function AnnouncementDetailPage() {
       setError('');
       
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements/public/${params.id}`
+        `${process.env.NEXT_PUBLIC_API_URL || 'https://tamankehati-backend-zxb9.onrender.com'}/api/v1/announcements/public/${params.id}`
       );
 
       if (!response.ok) {
