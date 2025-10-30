@@ -121,7 +121,7 @@ export const getPublicStats = cache(async (): Promise<PublicStats> => {
 export const getParkStats = cache(
   async (parkId: number): Promise<PublicStats> => {
     const fetcher = createFetcher(PublicStatsSchema, { revalidate: 300 });
-    return fetcher(`/api/public/stats/park/${parkId}`);
+    return fetcher(`/api/public/stats/park/${parkId}/`);
   },
 );
 
@@ -137,7 +137,7 @@ export const getAvailableRegions = cache(
       ),
       { revalidate: 300 },
     );
-    const response = (await fetcher("/api/public/stats/regions")) as any;
+    const response = (await fetcher("/api/public/stats/regions/")) as any;
     return response.regions || [];
   },
 );
@@ -167,7 +167,7 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
   if (params.limit) backendParams.limit = params.limit;
   if (params.offset) backendParams.offset = params.offset;
 
-  const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
+  const url = `${API_BASE_URL}/api/public/parks/${buildQuery(backendParams)}`;
   console.log("[SSR] Fetching taman data from:", url);
 
   const response = await fetch(url, {
