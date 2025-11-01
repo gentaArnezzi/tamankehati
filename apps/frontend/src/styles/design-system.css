@@ -289,37 +289,21 @@ body {
 }
 
 /* Grid System */
-.grid {
-  display: grid;
-}
+/* REMOVED: Custom grid classes removed to prevent conflicts with Tailwind CSS */
+/* Tailwind CSS already provides these utilities:
+   - .grid (display: grid)
+   - .grid-cols-1, .grid-cols-2, .grid-cols-3, .grid-cols-4
+   - .gap-2, .gap-4, .gap-6, .gap-8
+   - Responsive variants: .sm:grid-cols-*, .md:grid-cols-*, .lg:grid-cols-*
+   
+   Using Tailwind classes prevents CSS conflicts and ensures consistent responsive behavior.
+   If you need custom grid behavior, use Tailwind's @layer utilities instead.
+*/
 
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-
-.gap-2 { gap: var(--space-2); }
-.gap-4 { gap: var(--space-4); }
-.gap-6 { gap: var(--space-6); }
-.gap-8 { gap: var(--space-8); }
-
-/* Responsive Design */
-@media (min-width: 640px) {
-  .sm\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .sm\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (min-width: 768px) {
-  .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-}
-
-@media (min-width: 1024px) {
-  .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .lg\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .lg\:grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-}
+/* NOTE: If you need custom gap values, use Tailwind's gap utilities:
+   gap-1, gap-2, gap-3, gap-4, gap-6, gap-8, gap-12, etc.
+   Or extend Tailwind config if you need values that don't exist.
+*/
 
 /* Container */
 .container {

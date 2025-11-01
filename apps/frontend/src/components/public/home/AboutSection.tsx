@@ -30,7 +30,7 @@ export function AboutSection() {
       className="relative min-h-[70vh] sm:min-h-[100vh] py-12 sm:py-16 md:py-20 lg:py-24 bg-white overflow-x-hidden z-0"
     >
       {/* Arc Gallery Background */}
-      <div className="absolute inset-0 z-0 -top-40 overflow-x-hidden">
+      <div className="absolute inset-0 z-0 -top-40 overflow-x-hidden overflow-y-visible">
         <ArcGalleryHero
           images={forestImages}
           startAngle={20}

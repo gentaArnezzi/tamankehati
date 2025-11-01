@@ -23,8 +23,21 @@ export const AnimatedTestimonials = ({
   className?: string;
 }) => {
   const [active, setActive] = useState(0);
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
+  );
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.3 });
+
+  useEffect(() => {
+    const checkDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+    };
+    
+    checkDesktop();
+    window.addEventListener('resize', checkDesktop);
+    return () => window.removeEventListener('resize', checkDesktop);
+  }, []);
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -52,17 +65,25 @@ export const AnimatedTestimonials = ({
   return (
     <div
       ref={containerRef}
-      className={cn("w-full py-16 px-8 relative z-0", className)}
+      className={cn("w-full py-8 lg:py-16 px-4 lg:px-8 relative z-0", className)}
     >
-      <div className="relative flex flex-row gap-0 items-center z-0">
+      <div 
+        className="relative flex flex-col lg:flex-row gap-6 lg:gap-0 items-center z-0"
+        style={{
+          flexDirection: isDesktop ? 'row' : 'column',
+        }}
+      >
         {/* Left: Stacked Images - Slide from left */}
         <motion.div
-          className="w-1/2 pl-6"
+          className="w-full lg:w-1/2 lg:pl-6"
+          style={{
+            width: isDesktop ? '50%' : '100%',
+          }}
           initial={{ opacity: 0, x: -100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <div className="relative h-[450px] w-full">
+          <div className="relative h-[250px] sm:h-[300px] lg:h-[450px] w-full">
             <AnimatePresence>
               {testimonials.map((testimonial, index) => (
                 <motion.div
@@ -111,7 +132,10 @@ export const AnimatedTestimonials = ({
 
         {/* Right: Content - Slide from right */}
         <motion.div
-          className="w-1/2 flex justify-between flex-col py-4 pl-12 pr-6"
+          className="w-full lg:w-1/2 flex justify-between flex-col py-4 lg:pl-12 lg:pr-6"
+          style={{
+            width: isDesktop ? '50%' : '100%',
+          }}
           initial={{ opacity: 0, x: 100 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
@@ -135,13 +159,13 @@ export const AnimatedTestimonials = ({
               ease: "easeInOut",
             }}
           >
-            <h3 className="text-2xl font-bold text-slate-900">
+            <h3 className="text-xl lg:text-2xl font-bold text-slate-900">
               {testimonials[active].name}
             </h3>
-            <p className="text-sm text-slate-600">
+            <p className="text-xs lg:text-sm text-slate-600 mt-1">
               {testimonials[active].designation}
             </p>
-            <motion.p className="text-lg text-slate-600 mt-8">
+            <motion.p className="text-base lg:text-lg text-slate-600 mt-4 lg:mt-8">
               {testimonials[active].quote.split(" ").map((word, index) => (
                 <motion.span
                   key={index}
@@ -167,7 +191,7 @@ export const AnimatedTestimonials = ({
               ))}
             </motion.p>
           </motion.div>
-          <div className="flex gap-4 pt-12">
+          <div className="flex gap-4 pt-6 lg:pt-12">
             <button
               onClick={handlePrev}
               className="h-10 w-10 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center group/button transition-colors"

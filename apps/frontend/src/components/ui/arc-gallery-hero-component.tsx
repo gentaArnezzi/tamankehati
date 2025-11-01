@@ -34,6 +34,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   const [dimensions, setDimensions] = useState({
     radius: radiusLg,
     cardSize: cardSizeLg,
+    containerHeight: radiusLg * 1.5,
   });
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -42,13 +43,28 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      let radius, cardSize;
+      
       if (width < 640) {
-        setDimensions({ radius: radiusSm, cardSize: cardSizeSm });
+        radius = radiusSm;
+        cardSize = cardSizeSm;
       } else if (width < 1024) {
-        setDimensions({ radius: radiusMd, cardSize: cardSizeMd });
+        radius = radiusMd;
+        cardSize = cardSizeMd;
       } else {
-        setDimensions({ radius: radiusLg, cardSize: cardSizeLg });
+        radius = radiusLg;
+        cardSize = cardSizeLg;
       }
+      
+      // Calculate container height - don't clamp too aggressively to ensure images are visible
+      // Only prevent extreme overflow on very small screens
+      const calculatedHeight = radius * 1.5;
+      const containerHeight = viewportHeight < 500 
+        ? Math.min(calculatedHeight, viewportHeight * 1.1) 
+        : calculatedHeight;
+      
+      setDimensions({ radius, cardSize, containerHeight });
     };
 
     handleResize(); // Set initial size
@@ -89,20 +105,24 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   return (
     <section
       ref={sectionRef}
-      className={`relative overflow-x-hidden bg-transparent min-h-screen flex flex-col ${className}`}
+      className={`relative overflow-x-hidden overflow-visible bg-transparent ${className}`}
+      style={{
+        // Allow normal scrolling but prevent unwanted internal scrolling
+        minHeight: `${dimensions.radius * 1.5}px`,
+      }}
     >
       {/* Background ring container that controls geometry */}
       <div
         className="relative mx-auto w-full"
         style={{
           width: "100%",
-          // Give it a bit more height to prevent clipping
-          height: dimensions.radius * 1.5,
+          // Use calculated height to show all images
+          height: `${dimensions.radius * 1.5}px`,
           maxWidth: "100vw",
         }}
       >
         {/* Center pivot for transforms - positioned at bottom center */}
-        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-full max-w-full">
+        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-full max-w-full pointer-events-none">
           {/* Each image is positioned on the circle and rotated to face outward */}
           {images.map((src, i) => {
             const angle = startAngle + step * i; // degrees
@@ -138,7 +158,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
                 }}
               >
                 <div
-                  className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-[15] cursor-pointer group"
+                  className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-[15] cursor-pointer group pointer-events-auto"
                   style={{
                     transform: `rotate(${angle / 6}deg)`,
                     width: "100%",
