@@ -105,15 +105,15 @@ export function MinimalFeaturedSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-white">
-      <div className="container mx-auto max-w-7xl px-6">
+    <section ref={sectionRef} className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 sm:mb-16">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, ease: "easeOut" }}
-            className="text-5xl md:text-6xl font-light text-slate-900 mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6"
           >
             Spesies Unggulan
           </motion.h2>
@@ -121,13 +121,13 @@ export function MinimalFeaturedSection() {
             initial={{ width: 0, opacity: 0 }}
             animate={isInView ? { width: "6rem", opacity: 1 } : {}}
             transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-            className="h-1 bg-emerald-500 mx-auto rounded-full mb-6"
+            className="h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"
           />
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="text-lg text-gray-600 max-w-2xl mx-auto"
+            className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4"
           >
             Kenali kekayaan hayati Indonesia yang dilindungi dan dilestarikan
           </motion.p>
@@ -147,7 +147,7 @@ export function MinimalFeaturedSection() {
             <p className="text-gray-500 text-sm">Menampilkan data contoh</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.id}
@@ -184,17 +184,17 @@ export function MinimalFeaturedSection() {
                     </div>
 
                     {/* Content */}
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <div className="text-xs font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                         {feature.category}
                       </div>
-                      <h3 className="text-xl font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300">
+                      <h3 className="text-lg sm:text-xl font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300">
                         {feature.title}
                       </h3>
-                      <p className="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
+                      <p className="text-sm sm:text-base text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
                         {feature.description}
                       </p>
-                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300">
+                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]">
                         <span className="group-hover:font-semibold transition-all">
                           Pelajari
                         </span>

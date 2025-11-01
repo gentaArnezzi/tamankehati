@@ -27,33 +27,33 @@ export function AboutSection() {
   return (
     <section
       ref={ref}
-      className="relative min-h-[100vh] py-24 bg-white overflow-hidden z-0"
+      className="relative min-h-[70vh] sm:min-h-[100vh] py-12 sm:py-16 md:py-20 lg:py-24 bg-white overflow-x-hidden z-0"
     >
       {/* Arc Gallery Background */}
-      <div className="absolute inset-0 z-0 -top-40">
+      <div className="absolute inset-0 z-0 -top-40 overflow-x-hidden">
         <ArcGalleryHero
           images={forestImages}
           startAngle={20}
           endAngle={160}
           radiusLg={550}
           radiusMd={450}
-          radiusSm={350}
+          radiusSm={280}
           cardSizeLg={150}
           cardSizeMd={120}
-          cardSizeSm={90}
+          cardSizeSm={85}
         />
       </div>
 
       {/* Content Overlay */}
-      <div className="relative z-10 flex min-h-[100vh] items-end justify-center pb-32 pointer-events-none">
-        <div className="container mx-auto max-w-7xl px-8 pointer-events-auto">
+      <div className="relative z-10 flex min-h-[70vh] sm:min-h-[100vh] items-end justify-center pb-12 sm:pb-16 md:pb-24 lg:pb-32 pointer-events-none">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pointer-events-auto">
           <div className="text-center">
             {/* Badge */}
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-8 py-4 text-sm font-light text-slate-800 mb-16 shadow-sm backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-xs sm:text-sm font-light text-slate-800 mb-8 sm:mb-12 md:mb-16 shadow-sm backdrop-blur-sm"
             >
               Selamat Datang di Taman Kehati Indonesia
             </motion.div>
@@ -63,9 +63,9 @@ export function AboutSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="max-w-4xl mx-auto"
+              className="max-w-4xl mx-auto px-4"
             >
-              <p className="text-2xl md:text-3xl leading-relaxed text-slate-800 font-light tracking-wide">
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed text-slate-800 font-light tracking-wide">
                 Sebuah benteng konservasi yang didedikasikan untuk melindungi
                 dan melestarikan kekayaan flora dan fauna asli Nusantara.
                 Temukan laboratorium alam kami, tempat spesies langka dirawat

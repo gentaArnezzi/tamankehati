@@ -35,16 +35,16 @@ export function AboutTamanSection() {
   return (
     <section
       ref={ref}
-      className="pt-12 pb-32 bg-white overflow-hidden relative z-0"
+      className="pt-12 sm:pt-16 md:pt-20 lg:pt-24 pb-16 sm:pb-24 md:pb-32 bg-white overflow-hidden relative z-0"
     >
       {/* Title Section - Centered with container */}
-      <div className="container mx-auto max-w-7xl px-6">
-        <div className="text-center mb-12">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="text-center mb-8 sm:mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="text-5xl font-light text-slate-900 md:text-6xl mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6"
           >
             Apa itu Taman Kehati?
           </motion.h2>
@@ -67,16 +67,16 @@ export function AboutTamanSection() {
       </motion.div>
 
       {/* Bottom Badge - Centered with container */}
-      <div className="container mx-auto max-w-7xl px-6">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="mt-12 text-center"
+          className="mt-8 sm:mt-12 text-center"
         >
-          <div className="inline-flex items-center gap-3 text-emerald-600 font-medium">
+          <div className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-emerald-600 font-medium px-4">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-            Pelajari lebih lanjut tentang program konservasi kami
+            <span>Pelajari lebih lanjut tentang program konservasi kami</span>
           </div>
         </motion.div>
       </div>

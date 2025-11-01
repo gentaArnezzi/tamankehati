@@ -89,19 +89,20 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   return (
     <section
       ref={sectionRef}
-      className={`relative overflow-hidden bg-transparent min-h-screen flex flex-col ${className}`}
+      className={`relative overflow-x-hidden bg-transparent min-h-screen flex flex-col ${className}`}
     >
       {/* Background ring container that controls geometry */}
       <div
-        className="relative mx-auto"
+        className="relative mx-auto w-full"
         style={{
           width: "100%",
           // Give it a bit more height to prevent clipping
           height: dimensions.radius * 1.5,
+          maxWidth: "100vw",
         }}
       >
         {/* Center pivot for transforms - positioned at bottom center */}
-        <div className="absolute left-1/2 bottom-0 -translate-x-1/2">
+        <div className="absolute left-1/2 bottom-0 -translate-x-1/2 w-full max-w-full">
           {/* Each image is positioned on the circle and rotated to face outward */}
           {images.map((src, i) => {
             const angle = startAngle + step * i; // degrees
@@ -111,6 +112,13 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
             const x = Math.cos(angleRad) * dimensions.radius;
             const y = Math.sin(angleRad) * dimensions.radius;
 
+            // Calculate the actual left position accounting for card width
+            const cardHalfWidth = dimensions.cardSize / 2;
+            
+            // Use clamp to prevent overflow on mobile while keeping desktop layout
+            // Clamp ensures position stays within viewport bounds
+            const clampedLeft = `clamp(${cardHalfWidth}px, calc(50% + ${x}px), calc(100% - ${cardHalfWidth}px))`;
+
             return (
               <div
                 key={i}
@@ -118,7 +126,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
                 style={{
                   width: dimensions.cardSize,
                   height: dimensions.cardSize,
-                  left: `calc(50% + ${x}px)`,
+                  left: clampedLeft,
                   bottom: `${y}px`,
                   animationDelay: isVisible ? `${i * 200}ms` : "0ms",
                   opacity: isVisible ? undefined : 0,
@@ -126,6 +134,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
                     ? undefined
                     : "translate(calc(-50% - 100px), 50%) scale(0.8)",
                   zIndex: count - i,
+                  maxWidth: '100vw',
                 }}
               >
                 <div

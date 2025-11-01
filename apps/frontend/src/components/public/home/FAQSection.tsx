@@ -51,14 +51,14 @@ export function FAQSection() {
   };
 
   return (
-    <section ref={ref} className="bg-white py-24">
-      <div className="container mx-auto max-w-7xl px-6">
-        <div className="mx-auto max-w-3xl text-center mb-20">
+    <section ref={ref} className="bg-white py-12 sm:py-16 md:py-20 lg:py-24">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto max-w-3xl text-center mb-12 sm:mb-16 md:mb-20">
           <motion.h2
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="text-5xl font-light text-gray-900 mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 sm:mb-6"
           >
             Pertanyaan yang Sering Diajukan
           </motion.h2>
@@ -66,34 +66,34 @@ export function FAQSection() {
             initial={{ width: 0 }}
             animate={isInView ? { width: "6rem" } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="h-1 bg-emerald-500 mx-auto rounded-full mb-6"
+            className="h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"
           />
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-lg text-gray-500"
+            className="text-sm sm:text-base md:text-lg text-gray-500 px-4"
           >
             Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan
             platform konservasi kami.
           </motion.p>
         </div>
 
-        <div className="max-w-4xl mx-auto">
-          <div className="space-y-6">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="space-y-4 sm:space-y-6">
             {faqData.map((faq, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+                className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  className="w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
-                  <h3 className="text-lg font-medium text-gray-900 pr-4">
+                  <h3 className="text-sm sm:text-base md:text-lg font-medium text-gray-900 pr-4">
                     {faq.question}
                   </h3>
                   <motion.svg
@@ -113,8 +113,8 @@ export function FAQSection() {
                   </motion.svg>
                 </button>
                 {openIndex === index && (
-                  <div className="px-8 pb-6">
-                    <p className="text-gray-600 leading-relaxed">
+                  <div className="px-4 sm:px-6 md:px-8 pb-4 sm:pb-5 md:pb-6">
+                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
                       {faq.answer}
                     </p>
                   </div>

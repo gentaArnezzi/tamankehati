@@ -121,41 +121,41 @@ export function MinimalMapSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="py-24 bg-white">
-      <div className="container mx-auto max-w-7xl px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+    <section ref={sectionRef} className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white">
+      <div className="container mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 lg:gap-16 items-center">
           {/* Left: Content */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-5xl md:text-6xl font-light text-slate-900 mb-6">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6">
               Jelajahi Taman Konservasi
             </h2>
-            <div className="w-24 h-1 bg-emerald-500 rounded-full mb-6"></div>
-            <p className="text-lg text-gray-600 mb-8">
+            <div className="w-16 sm:w-24 h-1 bg-emerald-500 rounded-full mb-4 sm:mb-6"></div>
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-6 sm:mb-8">
               Lebih dari 70 taman konservasi tersebar di seluruh Indonesia,
               masing-masing menjaga kekayaan hayati yang unik.
             </p>
 
             {/* Regions List */}
-            <div className="space-y-4 mb-8">
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
               {regions.map((region, index) => (
                 <motion.div
                   key={region.name}
                   initial={{ opacity: 0, x: -20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ delay: 0.2 + index * 0.1 }}
-                  className="flex items-center justify-between p-4 border border-gray-100 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/50 transition-all group cursor-pointer"
+                  className="flex items-center justify-between p-3 sm:p-4 border border-gray-100 rounded-lg hover:border-emerald-500 hover:bg-emerald-50/50 transition-all group cursor-pointer min-h-[44px]"
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                    <span className="font-medium text-slate-900">
+                    <span className="text-sm sm:text-base font-medium text-slate-900">
                       {region.name}
                     </span>
                   </div>
-                  <span className="text-sm text-gray-500 group-hover:text-emerald-600">
+                  <span className="text-xs sm:text-sm text-gray-500 group-hover:text-emerald-600">
                     {region.parks} Taman
                   </span>
                 </motion.div>
@@ -164,7 +164,7 @@ export function MinimalMapSection() {
 
             <Link
               href="/taman"
-              className="inline-flex items-center gap-2 text-gray-900 hover:text-emerald-600 font-medium group"
+              className="inline-flex items-center gap-2 text-sm sm:text-base text-gray-900 hover:text-emerald-600 font-medium group min-h-[44px]"
             >
               Lihat Peta Lengkap
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -181,12 +181,13 @@ export function MinimalMapSection() {
             {!loading && (
               <>
                 {parks.length > 0 && (
-                  <MapWrapper
-                    center={[-2.5, 118.0]}
-                    zoom={5}
-                    scrollWheelZoom={true}
-                    height="600px"
-                    markers={parks
+                  <div className="h-[400px] sm:h-[500px] lg:h-[600px] rounded-xl overflow-hidden">
+                    <MapWrapper
+                      center={[-2.5, 118.0]}
+                      zoom={5}
+                      scrollWheelZoom={true}
+                      height="100%"
+                      markers={parks
                       .filter((park) => park.latitude && park.longitude)
                       .map((park) => ({
                         position: [
@@ -200,7 +201,8 @@ export function MinimalMapSection() {
                         </div>`,
                         key: park.id,
                       }))}
-                  />
+                    />
+                  </div>
                 )}
 
                 {/* Stats Overlay - Always show */}
@@ -208,28 +210,28 @@ export function MinimalMapSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ delay: 0.8 }}
-                  className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur-md rounded-xl p-6 border border-emerald-100 shadow-lg z-20"
+                  className="absolute bottom-3 sm:bottom-6 left-3 sm:left-6 right-3 sm:right-6 bg-white/90 backdrop-blur-md rounded-xl p-4 sm:p-6 border border-emerald-100 shadow-lg z-20"
                 >
-                  <div className="grid grid-cols-3 gap-6 text-center">
+                  <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
                     <div>
-                      <div className="text-3xl font-light text-slate-900">
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-900">
                         {stats?.total_taman || parks.length || 0}
                       </div>
-                      <div className="text-sm text-slate-600 mt-1">Taman</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1">Taman</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-light text-slate-900">
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-900">
                         5
                       </div>
-                      <div className="text-sm text-slate-600 mt-1">Pulau</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1">Pulau</div>
                     </div>
                     <div>
-                      <div className="text-3xl font-light text-slate-900">
+                      <div className="text-xl sm:text-2xl lg:text-3xl font-light text-slate-900">
                         {stats
                           ? `${(stats.total_flora + stats.total_fauna).toLocaleString()}+`
                           : "500+"}
                       </div>
-                      <div className="text-sm text-slate-600 mt-1">Spesies</div>
+                      <div className="text-xs sm:text-sm text-slate-600 mt-1">Spesies</div>
                     </div>
                   </div>
                 </motion.div>
