@@ -37,10 +37,10 @@ export function MinimalNewsletterSection() {
                 <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl sm:text-2xl font-light text-white">
+                <h3 className="text-4xl sm:text-5xl font-light text-white">
                   Terima kasih telah berlangganan
                 </h3>
-                <p className="text-sm sm:text-base text-gray-400">
+                <p className="text-xl sm:text-2xl md:text-3xl text-gray-400">
                   Kami akan mengirimkan update terbaru ke email Anda
                 </p>
               </div>
@@ -50,7 +50,7 @@ export function MinimalNewsletterSection() {
                   Dapatkan Update Terbaru
                 </h2>
                 <div className="w-16 sm:w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"></div>
-                <p className="text-sm sm:text-base md:text-lg text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
+                <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
                   Berlangganan newsletter untuk mendapatkan informasi terbaru
                   tentang spesies, penelitian, dan konservasi
                 </p>
@@ -80,7 +80,7 @@ export function MinimalNewsletterSection() {
                       )}
                     </button>
                   </div>
-                  <p className="text-sm text-gray-500 mt-4">
+                  <p className="text-xl text-gray-500 mt-4">
                     Gratis, tanpa spam. Berhenti langganan kapan saja.
                   </p>
                 </form>

@@ -53,7 +53,7 @@ export function AboutSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-xs sm:text-sm font-light text-slate-800 mb-8 sm:mb-12 md:mb-16 shadow-sm backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-4 sm:px-6 md:px-8 py-2 sm:py-3 md:py-4 text-lg sm:text-xl md:text-2xl lg:text-3xl font-light text-slate-800 mb-8 sm:mb-12 md:mb-16 shadow-sm backdrop-blur-sm"
             >
               Selamat Datang di Taman Kehati Indonesia
             </motion.div>
@@ -65,7 +65,7 @@ export function AboutSection() {
               transition={{ duration: 0.6, delay: 0.5 }}
               className="max-w-4xl mx-auto px-4"
             >
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl leading-relaxed text-slate-800 font-light tracking-wide">
+              <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl leading-relaxed text-slate-800 font-light tracking-wide">
                 Sebuah benteng konservasi yang didedikasikan untuk melindungi
                 dan melestarikan kekayaan flora dan fauna asli Nusantara.
                 Temukan laboratorium alam kami, tempat spesies langka dirawat

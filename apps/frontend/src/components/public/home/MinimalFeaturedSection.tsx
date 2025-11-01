@@ -127,7 +127,7 @@ export function MinimalFeaturedSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto px-4"
+            className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 max-w-2xl mx-auto px-4"
           >
             Kenali kekayaan hayati Indonesia yang dilindungi dan dilestarikan
           </motion.p>
@@ -185,16 +185,16 @@ export function MinimalFeaturedSection() {
 
                     {/* Content */}
                     <div className="p-4 sm:p-6">
-                      <div className="text-xs font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="text-lg font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300">
                         {feature.category}
                       </div>
-                      <h3 className="text-lg sm:text-xl font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300">
+                      <h3 className="text-3xl sm:text-4xl font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300">
                         {feature.title}
                       </h3>
-                      <p className="text-sm sm:text-base text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
+                      <p className="text-xl sm:text-2xl text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
                         {feature.description}
                       </p>
-                      <div className="flex items-center gap-2 text-sm font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]">
+                      <div className="flex items-center gap-2 text-xl sm:text-2xl font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]">
                         <span className="group-hover:font-semibold transition-all">
                           Pelajari
                         </span>

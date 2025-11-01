@@ -74,7 +74,7 @@ export function AboutTamanSection() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="mt-8 sm:mt-12 text-center"
         >
-          <div className="inline-flex items-center gap-2 sm:gap-3 text-sm sm:text-base text-emerald-600 font-medium px-4">
+          <div className="inline-flex items-center gap-2 sm:gap-3 text-xl sm:text-2xl md:text-3xl text-emerald-600 font-medium px-4">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
             <span>Pelajari lebih lanjut tentang program konservasi kami</span>
           </div>
