@@ -58,7 +58,7 @@ export function MinimalHeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-bold tracking-tight text-white px-2 leading-tight"
-            style={{ fontSize: 'clamp(1.875rem, 5vw, 5rem)' }}
+            style={{ fontSize: 'clamp(1.875rem, 4vw, 4rem)' }}
           >
             Jelajahi Flora & Fauna
             <span className="block mt-1 sm:mt-2">Nusantara</span>
@@ -85,13 +85,13 @@ export function MinimalHeroSection() {
             className="max-w-2xl mx-auto px-4"
           >
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-gray-400" />
+              <Search className="absolute left-4 sm:left-6 lg:left-8 xl:left-10 top-1/2 -translate-y-1/2 w-5 h-5 sm:w-6 sm:h-6 lg:w-8 lg:h-8 xl:w-10 xl:h-10 text-gray-500 z-10" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari spesies, taman, atau artikel..."
-                className="w-full pl-10 sm:pl-12 lg:pl-16 xl:pl-20 pr-4 py-3 sm:py-4 lg:py-6 xl:py-8 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl text-sm sm:text-base md:text-lg lg:text-3xl xl:text-4xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-lg"
+                className="w-full pl-12 sm:pl-14 lg:pl-20 xl:pl-24 pr-4 py-3 sm:py-4 lg:py-6 xl:py-8 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl text-sm sm:text-base md:text-lg lg:text-3xl xl:text-4xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-lg"
               />
             </div>
           </motion.form>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 
 interface FAQItem {
   question: string;
@@ -113,13 +113,37 @@ export function FAQSection() {
                     />
                   </motion.svg>
                 </button>
-                {openIndex === index && (
-                  <div className="px-4 sm:px-6 md:px-8 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-gray-600 leading-relaxed" style={{ fontSize: 'clamp(1rem, 1.3vw, 1.375rem)' }}>
-                      {faq.answer}
-                    </p>
-                  </div>
-                )}
+                <AnimatePresence>
+                  {openIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ 
+                        duration: 0.4, 
+                        ease: [0.4, 0, 0.2, 1] 
+                      }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 sm:px-6 md:px-8 pb-4 sm:pb-5 md:pb-6">
+                        <motion.p 
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -10 }}
+                          transition={{ 
+                            duration: 0.3, 
+                            delay: 0.1,
+                            ease: "easeOut"
+                          }}
+                          className="text-gray-600 leading-relaxed" 
+                          style={{ fontSize: 'clamp(1rem, 1.3vw, 1.375rem)' }}
+                        >
+                          {faq.answer}
+                        </motion.p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             ))}
           </div>
