@@ -412,16 +412,19 @@ export function AnnouncementsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Pengumuman & Berita</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-2xl sm:text-3xl font-bold">Pengumuman & Berita</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
             Kelola pengumuman dan berita untuk pengguna
           </p>
         </div>
-        <Button onClick={handleCreate} className="flex items-center gap-2">
+        <Button 
+          onClick={handleCreate} 
+          className="flex items-center gap-2 w-full sm:w-auto"
+        >
           <Plus className="h-4 w-4" />
           Buat Pengumuman
         </Button>
@@ -429,8 +432,8 @@ export function AnnouncementsPage() {
 
       {/* Filters */}
       <Card>
-        <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <CardContent className="p-4 sm:p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             <div>
               <label className="text-sm font-medium mb-2 block">
                 Pencarian
@@ -518,23 +521,23 @@ export function AnnouncementsPage() {
             key={announcement.id}
             className="hover:shadow-md transition-shadow"
           >
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex-1 space-y-3">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
                   <div className="flex items-center gap-2">
                     {announcement.is_pinned && (
-                      <Pin className="h-4 w-4 text-blue-600" />
+                      <Pin className="h-4 w-4 text-blue-600 flex-shrink-0" />
                     )}
                     {announcement.is_featured && (
-                      <Star className="h-4 w-4 text-yellow-600" />
+                      <Star className="h-4 w-4 text-yellow-600 flex-shrink-0" />
                     )}
-                    <h3 className="text-lg font-semibold line-clamp-1">
+                    <h3 className="text-base sm:text-lg font-semibold line-clamp-2 truncate">
                       {announcement.title}
                     </h3>
                   </div>
 
                   {announcement.summary && (
-                    <p className="text-muted-foreground line-clamp-2">
+                    <p className="text-sm text-muted-foreground line-clamp-2">
                       {announcement.summary}
                     </p>
                   )}
@@ -553,13 +556,13 @@ export function AnnouncementsPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      <span>Author ID: {announcement.author_id || "N/A"}</span>
+                      <User className="h-3 w-3 flex-shrink-0" />
+                      <span className="truncate">Author ID: {announcement.author_id || "N/A"}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
+                      <Clock className="h-3 w-3 flex-shrink-0" />
                       <span>
                         {new Date(announcement.created_at).toLocaleDateString(
                           "id-ID",
@@ -567,14 +570,19 @@ export function AnnouncementsPage() {
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
+                      <Eye className="h-3 w-3 flex-shrink-0" />
                       <span>{announcement.view_count} views</span>
                     </div>
                     {announcement.published_at && (
                       <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        <span>
+                        <Calendar className="h-3 w-3 flex-shrink-0" />
+                        <span className="hidden sm:inline">
                           Published:{" "}
+                          {new Date(
+                            announcement.published_at,
+                          ).toLocaleDateString("id-ID")}
+                        </span>
+                        <span className="sm:hidden">
                           {new Date(
                             announcement.published_at,
                           ).toLocaleDateString("id-ID")}
@@ -584,13 +592,15 @@ export function AnnouncementsPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 ml-4">
+                <div className="flex items-center gap-2 sm:ml-4 flex-shrink-0">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleView(announcement)}
+                    className="flex-1 sm:flex-initial"
                   >
-                    <Eye className="h-4 w-4" />
+                    <Eye className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Lihat</span>
                   </Button>
 
                   <DropdownMenu>
@@ -641,16 +651,17 @@ export function AnnouncementsPage() {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex justify-center">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
+              className="w-full sm:w-auto"
             >
               Previous
             </Button>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               Halaman {currentPage} dari {totalPages}
             </span>
             <Button
@@ -660,6 +671,7 @@ export function AnnouncementsPage() {
                 setCurrentPage((prev) => Math.min(totalPages, prev + 1))
               }
               disabled={currentPage === totalPages}
+              className="w-full sm:w-auto"
             >
               Next
             </Button>

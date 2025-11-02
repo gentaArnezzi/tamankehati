@@ -192,29 +192,29 @@ export function RegionalAnnouncementsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-2">
-            <Megaphone className="w-8 h-8 text-green-600" />
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2">
+            <Megaphone className="w-6 h-6 sm:w-8 sm:h-8 text-green-600 flex-shrink-0" />
             Pengumuman
           </h1>
-          <p className="text-gray-600 mt-1">Pengumuman dari Super Admin</p>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Pengumuman dari Super Admin</p>
         </div>
       </div>
 
       {/* Search */}
       <Card>
-        <CardContent className="pt-6">
+        <CardContent className="pt-4 sm:pt-6">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
             <Input
               type="text"
               placeholder="Cari pengumuman..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-9 sm:pl-10"
             />
           </div>
         </CardContent>
@@ -276,42 +276,42 @@ export function RegionalAnnouncementsPage() {
               }`}
               onClick={() => setSelectedAnnouncement(announcement)}
             >
-              <CardHeader>
+              <CardHeader className="p-4 sm:p-6">
                 <div className="flex justify-between items-start gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
                       <PriorityBadge priority={announcement.priority} />
                       <Badge variant="secondary">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
                         Dipublikasikan
                       </Badge>
                     </div>
-                    <CardTitle className="text-xl flex items-start gap-2">
+                    <CardTitle className="text-lg sm:text-xl flex items-start gap-2">
                       {announcement.priority === "urgent" && (
-                        <PriorityIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-1" />
+                        <PriorityIcon className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 flex-shrink-0 mt-1" />
                       )}
-                      {announcement.title}
+                      <span className="truncate">{announcement.title}</span>
                     </CardTitle>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
                 {/* Content Preview */}
                 <div
-                  className="text-gray-700 line-clamp-3 prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-800"
+                  className="text-sm sm:text-base text-gray-700 line-clamp-3 prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-800"
                   dangerouslySetInnerHTML={{ __html: announcement.content }}
                 />
 
                 {/* Metadata */}
-                <div className="flex flex-wrap gap-4 text-sm text-gray-500 pt-2 border-t">
+                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 pt-2 border-t">
                   {announcement.author && (
                     <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      <span>{announcement.author.name}</span>
+                      <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">{announcement.author.name}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
+                    <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                     <span>
                       {formatDate(
                         announcement.published_at || announcement.created_at,
@@ -327,54 +327,55 @@ export function RegionalAnnouncementsPage() {
       {/* Detail Dialog */}
       {selectedAnnouncement && (
         <div
-          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 sm:p-6"
           onClick={() => setSelectedAnnouncement(null)}
         >
           <Card
-            className="w-full max-w-2xl max-h-[80vh] overflow-y-auto"
+            className="w-full max-w-2xl max-h-[90vh] sm:max-h-[80vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <CardHeader>
+            <CardHeader className="p-4 sm:p-6">
               <div className="flex justify-between items-start gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
                     <PriorityBadge priority={selectedAnnouncement.priority} />
                     <Badge variant="secondary">
                       <CheckCircle2 className="w-3 h-3 mr-1" />
                       Dipublikasikan
                     </Badge>
                   </div>
-                  <CardTitle className="text-2xl">
+                  <CardTitle className="text-xl sm:text-2xl break-words">
                     {selectedAnnouncement.title}
                   </CardTitle>
                 </div>
                 <button
                   onClick={() => setSelectedAnnouncement(null)}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-gray-400 hover:text-gray-600 flex-shrink-0 p-1"
+                  aria-label="Close"
                 >
-                  <XCircle className="w-6 h-6" />
+                  <XCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="p-4 sm:p-6 pt-0 space-y-3 sm:space-y-4">
               {/* Full Content */}
               <div
-                className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
+                className="prose prose-sm sm:prose-base max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
                 dangerouslySetInnerHTML={{
                   __html: selectedAnnouncement.content,
                 }}
               />
 
               {/* Metadata */}
-              <div className="flex flex-wrap gap-4 text-sm text-gray-500 pt-4 border-t">
+              <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 pt-4 border-t">
                 {selectedAnnouncement.author && (
                   <div className="flex items-center gap-1">
-                    <User className="w-4 h-4" />
+                    <User className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                     <span>Oleh: {selectedAnnouncement.author.name}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-1">
-                  <Calendar className="w-4 h-4" />
+                  <Calendar className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span>
                     Dipublikasikan:{" "}
                     {formatDate(
@@ -384,7 +385,7 @@ export function RegionalAnnouncementsPage() {
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" />
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span>
                     Diperbarui: {formatDate(selectedAnnouncement.updated_at)}
                   </span>

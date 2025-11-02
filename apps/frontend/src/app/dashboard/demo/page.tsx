@@ -237,30 +237,31 @@ export default function DashboardDemoPage() {
       onNavigate={(path) => router.push(path)}
       onLogout={() => router.push("/login")}
     >
-      <div className="p-6 space-y-6">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Dashboard Demo - Tableau Style
             </h1>
-            <p className="text-gray-600 mt-2">
+            <p className="text-sm sm:text-base text-gray-600 mt-2">
               Visualisasi data keanekaragaman hayati Indonesia
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Button
               variant="outline"
               onClick={handleRefresh}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               <RefreshCw
-                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+                className={`h-4 w-4 sm:mr-2 ${loading ? "animate-spin" : ""}`}
               />
-              Refresh
+              <span className="hidden sm:inline">Refresh</span>
             </Button>
             <Select value={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-full sm:w-32">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -270,103 +271,106 @@ export default function DashboardDemoPage() {
                 <SelectItem value="yearly">Tahunan</SelectItem>
               </SelectContent>
             </Select>
-            <Button onClick={() => handleExport("pdf")}>
-              <Download className="h-4 w-4 mr-2" />
-              Export
+            <Button 
+              onClick={() => handleExport("pdf")}
+              className="w-full sm:w-auto"
+            >
+              <Download className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Export</span>
             </Button>
           </div>
         </div>
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
                     Total Spesies
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {mockData.analytics.totalSpecies.toLocaleString()}
                   </p>
                   <p className="text-xs text-green-600 flex items-center mt-1">
-                    <TrendingUp className="h-3 w-3 mr-1" />
-                    +12% dari tahun lalu
+                    <TrendingUp className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">+12% dari tahun lalu</span>
                   </p>
                 </div>
-                <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <TreePine className="h-6 w-6 text-green-600" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                  <TreePine className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
                     Taman Konservasi
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {mockData.analytics.totalParks}
                   </p>
                   <p className="text-xs text-blue-600 flex items-center mt-1">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {mockData.analytics.totalArea.toLocaleString()} ha
+                    <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{mockData.analytics.totalArea.toLocaleString()} ha</span>
                   </p>
                 </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <MapPin className="h-6 w-6 text-blue-600" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                  <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
                     Spesies Endemik
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {mockData.analytics.endemicSpecies}
                   </p>
                   <p className="text-xs text-purple-600 flex items-center mt-1">
-                    <Shield className="h-3 w-3 mr-1" />
-                    {(
+                    <Shield className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{(
                       (mockData.analytics.endemicSpecies /
                         mockData.analytics.totalSpecies) *
                       100
                     ).toFixed(1)}
-                    % dari total
+                    % dari total</span>
                   </p>
                 </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <Shield className="h-6 w-6 text-purple-600" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                  <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs sm:text-sm font-medium text-gray-600">
                     Peneliti Aktif
                   </p>
-                  <p className="text-2xl font-bold text-gray-900">
+                  <p className="text-xl sm:text-2xl font-bold text-gray-900">
                     {mockData.analytics.totalResearchers}
                   </p>
                   <p className="text-xs text-orange-600 flex items-center mt-1">
-                    <Users className="h-3 w-3 mr-1" />
-                    {mockData.analytics.activeStudies} studi aktif
+                    <Users className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{mockData.analytics.activeStudies} studi aktif</span>
                   </p>
                 </div>
-                <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center">
-                  <Users className="h-6 w-6 text-orange-600" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                  <Users className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
                 </div>
               </div>
             </CardContent>
@@ -377,33 +381,34 @@ export default function DashboardDemoPage() {
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="space-y-6"
+          className="space-y-4 sm:space-y-6"
         >
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="biodiversity">Biodiversitas</TabsTrigger>
-            <TabsTrigger value="conservation">Konservasi</TabsTrigger>
-            <TabsTrigger value="research">Riset</TabsTrigger>
-            <TabsTrigger value="geographic">Geografis</TabsTrigger>
-            <TabsTrigger value="trends">Trends</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+            <TabsTrigger value="biodiversity" className="text-xs sm:text-sm">Biodiversitas</TabsTrigger>
+            <TabsTrigger value="conservation" className="text-xs sm:text-sm">Konservasi</TabsTrigger>
+            <TabsTrigger value="research" className="text-xs sm:text-sm">Riset</TabsTrigger>
+            <TabsTrigger value="geographic" className="text-xs sm:text-sm">Geografis</TabsTrigger>
+            <TabsTrigger value="trends" className="text-xs sm:text-sm">Trends</TabsTrigger>
           </TabsList>
 
           {/* Overview Tab */}
-          <TabsContent value="overview" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Species Distribution by Region */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
                     Distribusi Spesies per Wilayah
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Flora dan fauna berdasarkan pulau/wilayah di Indonesia
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={mockData.biodiversity.floraByRegion}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="region" />
@@ -413,23 +418,25 @@ export default function DashboardDemoPage() {
                       <Bar dataKey="flora" fill="#10B981" name="Flora" />
                       <Bar dataKey="fauna" fill="#3B82F6" name="Fauna" />
                     </BarChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Conservation Status */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <PieChartIcon className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     Status Konservasi IUCN
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Distribusi spesies berdasarkan status konservasi
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={mockData.biodiversity.conservationStatus}
@@ -454,24 +461,26 @@ export default function DashboardDemoPage() {
                       </Pie>
                       <Tooltip />
                     </PieChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Monthly Discoveries */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                   Penemuan Spesies Bulanan
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Trend penemuan spesies baru dan publikasi penelitian
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[300px] sm:h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
                   <ComposedChart
                     data={mockData.biodiversity.monthlyDiscoveries}
                   >
@@ -495,27 +504,29 @@ export default function DashboardDemoPage() {
                       name="Publikasi"
                     />
                   </ComposedChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Biodiversity Tab */}
-          <TabsContent value="biodiversity" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="biodiversity" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Endemic Species by Region */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Shield className="h-4 w-4 sm:h-5 sm:w-5" />
                     Spesies Endemik per Wilayah
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Distribusi spesies endemik Indonesia
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={mockData.biodiversity.floraByRegion}
                       layout="horizontal"
@@ -530,48 +541,52 @@ export default function DashboardDemoPage() {
                         name="Spesies Endemik"
                       />
                     </BarChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Species Density Scatter */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Target className="h-4 w-4 sm:h-5 sm:w-5" />
                     Kepadatan Spesies vs Luas Area
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Hubungan antara luas taman dan jumlah spesies
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart data={mockData.biodiversity.parkDistribution}>
                       <CartesianGrid />
                       <XAxis dataKey="area" name="Luas Area (ha)" />
                       <YAxis dataKey="species" name="Jumlah Spesies" />
                       <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                      <Scatter dataKey="species" fill="#F59E0B" />
+                      <Scatter dataKey="species" fill="#F59E0B"                       />
                     </ScatterChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Radial Chart for Conservation Status */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
                   Status Konservasi Radial
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Visualisasi radial status konservasi spesies
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[300px] sm:h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
                   <RadialBarChart
                     cx="50%"
                     cy="50%"
@@ -585,29 +600,31 @@ export default function DashboardDemoPage() {
                       fill="#10B981"
                     />
                     <Tooltip />
-                    <Legend />
+                    <Legend                     />
                   </RadialBarChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Conservation Tab */}
-          <TabsContent value="conservation" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="conservation" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Park Area Distribution */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5" />
                     Distribusi Luas Taman Nasional
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Luas area dan jumlah spesies di setiap taman
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       data={mockData.biodiversity.parkDistribution.slice(0, 6)}
                     >
@@ -626,48 +643,52 @@ export default function DashboardDemoPage() {
                         name="Luas Area (ha)"
                       />
                     </BarChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Visitor vs Species */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Users className="h-4 w-4 sm:h-5 sm:w-5" />
                     Pengunjung vs Spesies
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Hubungan antara jumlah pengunjung dan keragaman spesies
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <ScatterChart data={mockData.biodiversity.parkDistribution}>
                       <CartesianGrid />
                       <XAxis dataKey="visitors" name="Pengunjung" />
                       <YAxis dataKey="species" name="Spesies" />
                       <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-                      <Scatter dataKey="species" fill="#EF4444" />
+                      <Scatter dataKey="species" fill="#EF4444"                       />
                     </ScatterChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
 
             {/* Treemap for Park Distribution */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Layers className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Layers className="h-4 w-4 sm:h-5 sm:w-5" />
                   Distribusi Taman Nasional (Treemap)
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Visualisasi hierarkis luas area taman nasional
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={400}>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[300px] sm:h-[400px]">
+                  <ResponsiveContainer width="100%" height="100%">
                   <Treemap
                     width={400}
                     height={200}
@@ -682,27 +703,29 @@ export default function DashboardDemoPage() {
                     stroke="#fff"
                     fill="#8884d8"
                   />
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
           {/* Research Tab */}
-          <TabsContent value="research" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="research" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Research Activity Over Time */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     Aktivitas Riset Tahunan
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Trend studi, publikasi, dan kolaborasi penelitian
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={mockData.biodiversity.researchActivity}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
@@ -734,23 +757,25 @@ export default function DashboardDemoPage() {
                         name="Kolaborasi"
                       />
                     </AreaChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Research Output Funnel */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Zap className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Zap className="h-4 w-4 sm:h-5 sm:w-5" />
                     Output Riset (Funnel)
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Konversi dari studi ke publikasi dan kolaborasi
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <FunnelChart>
                       <Funnel
                         dataKey="value"
@@ -773,33 +798,37 @@ export default function DashboardDemoPage() {
                         />
                       </Funnel>
                     </FunnelChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           </TabsContent>
 
           {/* Geographic Tab */}
-          <TabsContent value="geographic" className="space-y-6">
-            <InteractiveMap />
+          <TabsContent value="geographic" className="space-y-4 sm:space-y-6">
+            <div className="w-full overflow-hidden">
+              <InteractiveMap />
+            </div>
           </TabsContent>
 
           {/* Trends Tab */}
-          <TabsContent value="trends" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TabsContent value="trends" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
               {/* Discovery Trends */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5" />
                     Trend Penemuan Spesies
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Analisis trend penemuan spesies baru
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={mockData.biodiversity.monthlyDiscoveries}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
@@ -814,23 +843,25 @@ export default function DashboardDemoPage() {
                         name="Penemuan"
                       />
                     </LineChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
 
               {/* Research Growth */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5" />
+                <CardHeader className="p-4 sm:p-6">
+                  <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                    <Activity className="h-4 w-4 sm:h-5 sm:w-5" />
                     Pertumbuhan Riset
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-xs sm:text-sm">
                     Pertumbuhan aktivitas penelitian tahunan
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={mockData.biodiversity.researchActivity}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="year" />
@@ -844,7 +875,8 @@ export default function DashboardDemoPage() {
                         name="Studi"
                       />
                     </AreaChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -853,20 +885,20 @@ export default function DashboardDemoPage() {
 
         {/* Footer Info */}
         <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <Database className="h-8 w-8 text-green-600" />
-                <div>
-                  <h3 className="font-semibold text-gray-900">
+          <CardContent className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <Database className="h-6 w-6 sm:h-8 sm:w-8 text-green-600 flex-shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-sm sm:text-base font-semibold text-gray-900">
                     Data Terakhir Diperbarui
                   </h3>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-xs sm:text-sm text-gray-600">
                     26 Januari 2025, 14:30 WIB
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Badge variant="outline" className="flex items-center gap-1">
                   <CheckCircle className="h-3 w-3 text-green-600" />
                   Data Terverifikasi

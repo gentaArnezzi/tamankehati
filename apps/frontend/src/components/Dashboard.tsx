@@ -175,25 +175,25 @@ export function Dashboard() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Product Tour Component */}
       {user?.role === "regional_admin" && (
         <ProductTour run={runTour} onFinish={() => setRunTour(false)} />
       )}
 
       {/* Welcome Header - Improved Contrast */}
-      <div className="relative overflow-hidden rounded-2xl bg-white border-2 border-gray-200 p-8 shadow-lg">
+      <div className="relative overflow-hidden rounded-2xl bg-white border-2 border-gray-200 p-4 sm:p-6 lg:p-8 shadow-lg">
         <div className="relative">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3">
               <div className="p-2 bg-brand-100 rounded-lg">
-                <Sparkles className="h-6 w-6 text-brand-600" />
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-brand-600" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                   Selamat Datang, {user?.nama}!
                 </h1>
-                <p className="text-gray-900 text-lg font-medium">
+                <p className="text-gray-900 text-base sm:text-lg font-medium">
                   {user?.role === "super_admin"
                     ? "🎯 Super Admin Dashboard"
                     : "🌳 Regional Admin Dashboard"}
@@ -201,15 +201,16 @@ export function Dashboard() {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {/* Modern Dashboard Button */}
               <Button
                 onClick={() => (window.location.href = "/dashboard/modern")}
                 variant="outline"
-                className="flex items-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600"
+                className="flex items-center justify-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600 w-full sm:w-auto"
               >
                 <BarChart3 className="h-4 w-4" />
-                Modern Dashboard
+                <span className="hidden sm:inline">Modern Dashboard</span>
+                <span className="sm:hidden">Modern</span>
               </Button>
 
               {/* Data-Driven Dashboard Button */}
@@ -218,10 +219,11 @@ export function Dashboard() {
                   (window.location.href = "/dashboard/data-driven")
                 }
                 variant="outline"
-                className="flex items-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600"
+                className="flex items-center justify-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600 w-full sm:w-auto"
               >
                 <Activity className="h-4 w-4" />
-                Data Dashboard
+                <span className="hidden sm:inline">Data Dashboard</span>
+                <span className="sm:hidden">Data</span>
               </Button>
 
               {/* Tamankehati Dashboard Button */}
@@ -230,10 +232,11 @@ export function Dashboard() {
                   (window.location.href = "/dashboard/tamankehati")
                 }
                 variant="outline"
-                className="flex items-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600"
+                className="flex items-center justify-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600 w-full sm:w-auto"
               >
                 <TreePine className="h-4 w-4" />
-                Tamankehati Dashboard
+                <span className="hidden sm:inline">Tamankehati Dashboard</span>
+                <span className="sm:hidden">Tamankehati</span>
               </Button>
 
               {/* Tour Button - Only for Regional Admin */}
@@ -241,7 +244,7 @@ export function Dashboard() {
                 <Button
                   onClick={() => setRunTour(true)}
                   variant="outline"
-                  className="flex items-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600"
+                  className="flex items-center justify-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600 w-full sm:w-auto"
                 >
                   <HelpCircle className="h-4 w-4" />
                   Panduan
@@ -253,7 +256,7 @@ export function Dashboard() {
       </div>
 
       {/* Stats Grid - Role-based content */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {loading ? (
           <>
             {Array.from({ length: 4 }).map((_, i) => (
@@ -644,31 +647,31 @@ export function Dashboard() {
             </CardTitle>
             <CardDescription>Pintasan untuk tugas umum</CardDescription>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <button className="group p-6 rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 hover:border-green-400 dark:hover:border-green-700 hover:shadow-lg transition-all duration-300 text-left">
-                <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
-                  <TreePine className="h-5 w-5 text-white" />
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+              <button className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 hover:border-green-400 dark:hover:border-green-700 hover:shadow-lg transition-all duration-300 text-left">
+                <div className="p-2 sm:p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl w-fit mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <TreePine className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <p className="text-sm font-bold text-gray-900">Tambah Flora</p>
+                <p className="text-xs sm:text-sm font-bold text-gray-900">Tambah Flora</p>
                 <p className="text-xs text-gray-900 mt-1 font-medium">
                   Dokumentasi spesies baru
                 </p>
               </button>
-              <button className="group p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-2 border-blue-200 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-lg transition-all duration-300 text-left">
-                <div className="p-3 bg-gradient-to-br from-blue-500 to-sky-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
-                  <Bird className="h-5 w-5 text-white" />
+              <button className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-50 to-sky-50 dark:from-blue-950 dark:to-sky-950 border-2 border-blue-200 hover:border-blue-400 dark:hover:border-blue-700 hover:shadow-lg transition-all duration-300 text-left">
+                <div className="p-2 sm:p-3 bg-gradient-to-br from-blue-500 to-sky-500 rounded-xl w-fit mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <Bird className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <p className="text-sm font-bold text-gray-900">Tambah Fauna</p>
+                <p className="text-xs sm:text-sm font-bold text-gray-900">Tambah Fauna</p>
                 <p className="text-xs text-gray-900 mt-1 font-medium">
                   Catat satwa liar
                 </p>
               </button>
-              <button className="group p-6 rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 hover:border-violet-400 dark:hover:border-violet-700 hover:shadow-lg transition-all duration-300 text-left">
-                <div className="p-3 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
-                  <MapPin className="h-5 w-5 text-white" />
+              <button className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-violet-50 to-purple-50 border-2 border-violet-200 hover:border-violet-400 dark:hover:border-violet-700 hover:shadow-lg transition-all duration-300 text-left">
+                <div className="p-2 sm:p-3 bg-gradient-to-br from-violet-500 to-purple-500 rounded-xl w-fit mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                  <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-                <p className="text-sm font-bold text-gray-900">
+                <p className="text-xs sm:text-sm font-bold text-gray-900">
                   Catat Observasi
                 </p>
                 <p className="text-xs text-gray-900 mt-1 font-medium">
@@ -676,11 +679,11 @@ export function Dashboard() {
                 </p>
               </button>
               {user?.role === "super_admin" && (
-                <button className="group p-6 rounded-2xl bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 hover:border-orange-400 dark:hover:border-orange-700 hover:shadow-lg transition-all duration-300 text-left">
-                  <div className="p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl w-fit mb-3 group-hover:scale-110 transition-transform">
-                    <CheckCircle className="h-5 w-5 text-white" />
+                <button className="group p-4 sm:p-6 rounded-xl sm:rounded-2xl bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 hover:border-orange-400 dark:hover:border-orange-700 hover:shadow-lg transition-all duration-300 text-left">
+                  <div className="p-2 sm:p-3 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl w-fit mb-2 sm:mb-3 group-hover:scale-110 transition-transform">
+                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                   </div>
-                  <p className="text-sm font-bold text-gray-900">
+                  <p className="text-xs sm:text-sm font-bold text-gray-900">
                     Tinjau Persetujuan
                   </p>
                   <p className="text-xs text-gray-900 mt-1 font-medium">

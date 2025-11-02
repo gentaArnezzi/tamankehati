@@ -19,6 +19,8 @@ import {
   ChevronDown,
   Settings,
   CircleHelp,
+  Menu,
+  X,
 } from "lucide-react";
 import type { User } from "../lib/api-client";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -158,6 +160,7 @@ export function CollapsibleDashboardLayout({
   onLogout,
 }: CollapsibleDashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [runOnboarding, setRunOnboarding] = useState(false);
   const onboardingStartedRef = useRef(false); // Track if onboarding has been started
@@ -338,11 +341,23 @@ export function CollapsibleDashboardLayout({
       />
 
       <div className="flex w-full bg-gray-50 text-gray-900">
+        {/* Mobile Menu Overlay */}
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
         {/* Sidebar */}
         <nav
-          className={`sticky top-0 h-screen shrink-0 border-r transition-all duration-300 ease-in-out ${
-            sidebarOpen ? "w-64" : "w-16"
-          } border-gray-200 bg-white p-2 shadow-sm`}
+          className={`
+            fixed lg:sticky top-0 h-screen shrink-0 border-r 
+            transition-all duration-300 ease-in-out 
+            border-gray-200 bg-white p-2 shadow-sm z-40
+            ${mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
+            ${sidebarOpen ? "w-64" : "w-16"}
+          `}
         >
           {/* Title Section */}
           <div className="mb-6 border-b border-gray-200 pb-4 relative user-menu-container">
@@ -384,6 +399,7 @@ export function CollapsibleDashboardLayout({
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      setMobileMenuOpen(false);
                       onNavigate("/dashboard/settings");
                     }}
                     className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -394,6 +410,7 @@ export function CollapsibleDashboardLayout({
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      setMobileMenuOpen(false);
                       onNavigate("/dashboard/help");
                     }}
                     className="flex items-center gap-3 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
@@ -405,6 +422,7 @@ export function CollapsibleDashboardLayout({
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
+                      setMobileMenuOpen(false);
                       onLogout();
                     }}
                     className="flex items-center gap-3 w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
@@ -437,7 +455,10 @@ export function CollapsibleDashboardLayout({
               return (
                 <button
                   key={item.id}
-                  onClick={() => onNavigate(item.path)}
+                  onClick={() => {
+                    onNavigate(item.path);
+                    setMobileMenuOpen(false); // Close mobile menu on navigation
+                  }}
                   data-tour={getTourDataAttr(item.id)}
                   className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${
                     isSelected
@@ -506,7 +527,10 @@ export function CollapsibleDashboardLayout({
             {/* Settings Button */}
             {sidebarOpen && (
               <button
-                onClick={() => onNavigate("/dashboard/settings")}
+                onClick={() => {
+                  onNavigate("/dashboard/settings");
+                  setMobileMenuOpen(false);
+                }}
                 className={`relative flex h-11 w-full items-center rounded-md transition-all duration-200 ${
                   currentPage === "settings"
                     ? "bg-brand-50 text-brand-700 shadow-sm border-l-2 border-brand-500"
@@ -523,7 +547,10 @@ export function CollapsibleDashboardLayout({
             {/* Logout Button */}
             {sidebarOpen && (
               <button
-                onClick={onLogout}
+                onClick={() => {
+                  onLogout();
+                  setMobileMenuOpen(false);
+                }}
                 className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-900 hover:bg-gray-50 hover:text-gray-900"
               >
                 <div className="grid h-full w-12 place-content-center">
@@ -534,10 +561,10 @@ export function CollapsibleDashboardLayout({
             )}
           </div>
 
-          {/* Toggle Button */}
+          {/* Toggle Button - Hidden on Mobile */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="absolute bottom-0 left-0 right-0 border-t border-gray-200 transition-colors hover:bg-gray-50"
+            className="hidden lg:block absolute bottom-0 left-0 right-0 border-t border-gray-200 transition-colors hover:bg-gray-50"
           >
             <div className="flex items-center p-3">
               <div className="grid size-10 place-content-center">
@@ -561,20 +588,33 @@ export function CollapsibleDashboardLayout({
         </nav>
 
         {/* Main Content */}
-        <div className="flex-1 bg-gray-50 overflow-auto">
+        <div className="flex-1 bg-gray-50 overflow-auto w-full">
           {/* Header */}
-          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
+          <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
+            <div className="flex items-center justify-between gap-4">
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? (
+                  <X className="w-5 h-5 text-gray-900" />
+                ) : (
+                  <Menu className="w-5 h-5 text-gray-900" />
+                )}
+              </button>
+
+              <div className="flex-1 min-w-0">
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
                   {navItems.find((item) => item.id === currentPage)?.label ||
                     "Dashboard"}
                 </h1>
-                <p className="text-gray-700 mt-1 text-sm font-medium">
+                <p className="text-gray-700 mt-1 text-xs sm:text-sm font-medium truncate">
                   Selamat datang kembali, {user?.nama}
                 </p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 sm:gap-4">
                 <NotificationDropdown
                   notifications={notifications}
                   unreadCount={unreadCount}
@@ -588,7 +628,7 @@ export function CollapsibleDashboardLayout({
           </div>
 
           {/* Page Content */}
-          <div className="p-6">{children}</div>
+          <div className="p-4 sm:p-6">{children}</div>
         </div>
       </div>
     </div>

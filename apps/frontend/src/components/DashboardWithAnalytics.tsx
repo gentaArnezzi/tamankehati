@@ -260,14 +260,14 @@ export function DashboardWithAnalytics() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
             Dashboard Analytics
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-sm sm:text-base text-gray-600 mt-2">
             {user?.role === "super_admin"
               ? "Visualisasi data keanekaragaman hayati seluruh Indonesia"
               : "Visualisasi data yang Anda kelola"}
@@ -278,15 +278,20 @@ export function DashboardWithAnalytics() {
               : "🛡️ Regional Admin - Data Anda"}
           </Badge>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={handleRefresh} disabled={loading}>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleRefresh} 
+            disabled={loading}
+            className="w-full sm:w-auto"
+          >
             <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              className={`h-4 w-4 sm:mr-2 ${loading ? "animate-spin" : ""}`}
             />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </Button>
           <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -297,99 +302,102 @@ export function DashboardWithAnalytics() {
               <SelectItem value="five_years">5 Tahun</SelectItem>
             </SelectContent>
           </Select>
-          <Button onClick={() => handleExport("pdf")}>
-            <Download className="h-4 w-4 mr-2" />
-            Export
+          <Button 
+            onClick={() => handleExport("pdf")}
+            className="w-full sm:w-auto"
+          >
+            <Download className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Export</span>
           </Button>
         </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   Total Spesies
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {data.analytics.biodiversity.summary.total_species.toLocaleString()}
                 </p>
                 <p className="text-xs text-green-600 flex items-center mt-1">
-                  <CheckCircle className="h-3 w-3 mr-1" />
-                  {data.analytics.biodiversity.summary.total_approved}{" "}
-                  terverifikasi
+                  <CheckCircle className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{data.analytics.biodiversity.summary.total_approved}{" "}
+                  terverifikasi</span>
                 </p>
               </div>
-              <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                <Sparkles className="h-6 w-6 text-green-600" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                <Sparkles className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   Kawasan Konservasi
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {data.analytics.conservation.parks.total}
                 </p>
                 <p className="text-xs text-blue-600 flex items-center mt-1">
-                  <MapPin className="h-3 w-3 mr-1" />
-                  {data.analytics.conservation.parks.total_area_ha.toLocaleString()}{" "}
-                  ha
+                  <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{data.analytics.conservation.parks.total_area_ha.toLocaleString()}{" "}
+                  ha</span>
                 </p>
               </div>
-              <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <MapPin className="h-6 w-6 text-blue-600" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">
                   Spesies Endemik
                 </p>
-                <p className="text-2xl font-bold text-gray-900">
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {data.analytics.biodiversity.summary.total_endemic}
                 </p>
                 <p className="text-xs text-purple-600 flex items-center mt-1">
-                  <Shield className="h-3 w-3 mr-1" />
-                  {data.analytics.biodiversity.summary.endemic_rate.toFixed(1)}%
-                  dari total
+                  <Shield className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{data.analytics.biodiversity.summary.endemic_rate.toFixed(1)}%
+                  dari total</span>
                 </p>
               </div>
-              <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                <Shield className="h-6 w-6 text-purple-600" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                <Shield className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Kegiatan</p>
-                <p className="text-2xl font-bold text-gray-900">
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm font-medium text-gray-600">Kegiatan</p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900">
                   {data.analytics.activities.total}
                 </p>
                 <p className="text-xs text-orange-600 flex items-center mt-1">
-                  <Activity className="h-3 w-3 mr-1" />
-                  Aktivitas terdokumentasi
+                  <Activity className="h-3 w-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">Aktivitas terdokumentasi</span>
                 </p>
               </div>
-              <div className="h-12 w-12 bg-orange-100 rounded-full flex items-center justify-center">
-                <Activity className="h-6 w-6 text-orange-600" />
+              <div className="h-10 w-10 sm:h-12 sm:w-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 ml-2">
+                <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
               </div>
             </div>
           </CardContent>
@@ -402,30 +410,31 @@ export function DashboardWithAnalytics() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="biodiversity">Biodiversitas</TabsTrigger>
-          <TabsTrigger value="conservation">Konservasi</TabsTrigger>
-          <TabsTrigger value="statistics">Statistik</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
+          <TabsTrigger value="biodiversity" className="text-xs sm:text-sm">Biodiversitas</TabsTrigger>
+          <TabsTrigger value="conservation" className="text-xs sm:text-sm">Konservasi</TabsTrigger>
+          <TabsTrigger value="statistics" className="text-xs sm:text-sm">Statistik</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
-        <TabsContent value="overview" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="overview" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Species Distribution */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />
                   Distribusi Flora & Fauna
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Total spesies, endemik, dan yang terverifikasi
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={biodiversityData}>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={biodiversityData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -439,24 +448,26 @@ export function DashboardWithAnalytics() {
                       name="Terverifikasi"
                     />
                   </BarChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
             {/* Status Distribution */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <PieChartIcon className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <PieChartIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                   Status Verifikasi
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-xs sm:text-sm">
                   Distribusi data berdasarkan status verifikasi
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
                     <Pie
                       data={statusDistribution}
                       cx="50%"
@@ -478,7 +489,8 @@ export function DashboardWithAnalytics() {
                     </Pie>
                     <Tooltip />
                   </PieChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -496,11 +508,12 @@ export function DashboardWithAnalytics() {
                     Trend penemuan spesies baru per bulan
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <LineChart
-                      data={data.analytics.biodiversity.monthly_discoveries}
-                    >
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart
+                        data={data.analytics.biodiversity.monthly_discoveries}
+                      >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="month" />
                       <YAxis />
@@ -514,8 +527,9 @@ export function DashboardWithAnalytics() {
                         name="Penemuan Spesies"
                         dot={{ fill: "#10B981", r: 4 }}
                       />
-                    </LineChart>
-                  </ResponsiveContainer>
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -536,11 +550,12 @@ export function DashboardWithAnalytics() {
                       : "Flora dan fauna di taman yang Anda kelola"}
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart
-                      data={data.analytics.biodiversity.regional_distribution}
-                    >
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[250px] sm:h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart
+                        data={data.analytics.biodiversity.regional_distribution}
+                      >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="region"
@@ -553,16 +568,17 @@ export function DashboardWithAnalytics() {
                       <Legend />
                       <Bar dataKey="flora" fill="#10B981" name="Flora" />
                       <Bar dataKey="fauna" fill="#3B82F6" name="Fauna" />
-                    </BarChart>
-                  </ResponsiveContainer>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             )}
         </TabsContent>
 
         {/* Biodiversity Tab */}
-        <TabsContent value="biodiversity" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <TabsContent value="biodiversity" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {/* Endemic vs Non-Endemic */}
             <Card>
               <CardHeader>
@@ -574,9 +590,10 @@ export function DashboardWithAnalytics() {
                   Distribusi spesies endemik vs non-endemik
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
                     <Pie
                       data={conservationStatusData}
                       cx="50%"
@@ -594,7 +611,8 @@ export function DashboardWithAnalytics() {
                     <Tooltip />
                     <Legend />
                   </PieChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -609,24 +627,26 @@ export function DashboardWithAnalytics() {
                   Perbandingan jumlah flora dan fauna
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={biodiversityData} layout="horizontal">
+              <CardContent className="p-4 sm:p-6 pt-0">
+                <div className="h-[250px] sm:h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={biodiversityData} layout="horizontal">
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
                     <YAxis dataKey="name" type="category" width={60} />
                     <Tooltip />
                     <Bar dataKey="total" fill="#10B981" name="Total Spesies" />
                   </BarChart>
-                </ResponsiveContainer>
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
           </div>
         </TabsContent>
 
         {/* Conservation Tab */}
-        <TabsContent value="conservation" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <TabsContent value="conservation" className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             <Card>
               <CardHeader>
                 <CardTitle>Total Kawasan</CardTitle>
@@ -679,11 +699,12 @@ export function DashboardWithAnalytics() {
                     Luas area dan jumlah spesies di setiap taman konservasi
                   </CardDescription>
                 </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={400}>
-                    <ComposedChart
-                      data={data.analytics.biodiversity.park_distribution}
-                    >
+                <CardContent className="p-4 sm:p-6 pt-0">
+                  <div className="h-[300px] sm:h-[400px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <ComposedChart
+                        data={data.analytics.biodiversity.park_distribution}
+                      >
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis
                         dataKey="name"
@@ -709,15 +730,16 @@ export function DashboardWithAnalytics() {
                         strokeWidth={2}
                         name="Jumlah Spesies"
                       />
-                    </ComposedChart>
-                  </ResponsiveContainer>
+                      </ComposedChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
             )}
         </TabsContent>
 
         {/* Statistics Tab */}
-        <TabsContent value="statistics" className="space-y-6">
+        <TabsContent value="statistics" className="space-y-4 sm:space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Informasi Data</CardTitle>
@@ -767,8 +789,8 @@ export function DashboardWithAnalytics() {
 
       {/* Footer Info */}
       <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+        <CardContent className="p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <Activity className="h-8 w-8 text-green-600" />
               <div>
@@ -786,7 +808,7 @@ export function DashboardWithAnalytics() {
                 </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Badge variant="outline" className="flex items-center gap-1">
                 <CheckCircle className="h-3 w-3 text-green-600" />
                 Data Terverifikasi

@@ -224,27 +224,31 @@ export function UserPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl mb-2 flex items-center gap-2">
-            <Users className="h-8 w-8" style={{ color: "#356447" }} />
+          <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
+            <Users className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
             Manajemen Pengguna
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Kelola akun pengguna sistem Taman Kehati
           </p>
         </div>
-        <Button onClick={handleCreate} style={{ backgroundColor: "#233c2b" }}>
+        <Button 
+          onClick={handleCreate} 
+          style={{ backgroundColor: "#233c2b" }}
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-2 h-4 w-4" />
           Tambah Pengguna
         </Button>
       </div>
 
       <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-5">
-            <div className="md:col-span-2">
+        <CardContent className="pt-4 sm:pt-6">
+          <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
+            <div className="sm:col-span-2 lg:col-span-2">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -255,14 +259,14 @@ export function UserPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button onClick={loadData} variant="secondary">
+                <Button onClick={loadData} variant="secondary" className="sm:hidden">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
 
             <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter Role" />
               </SelectTrigger>
               <SelectContent>
@@ -274,7 +278,7 @@ export function UserPage() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger className="w-full">
                 <SelectValue placeholder="Filter Status" />
               </SelectTrigger>
               <SelectContent>
@@ -298,7 +302,7 @@ export function UserPage() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={loadData} variant="outline" size="icon">
+              <Button onClick={loadData} variant="outline" size="icon" className="hidden sm:flex">
                 <RefreshCw className="h-4 w-4" />
               </Button>
             </div>
@@ -313,9 +317,9 @@ export function UserPage() {
         </Alert>
       )}
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">
               Total Pengguna
             </div>
@@ -323,7 +327,7 @@ export function UserPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">
               Pengguna Aktif
             </div>
@@ -333,7 +337,7 @@ export function UserPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">
               Pengguna Nonaktif
             </div>
@@ -343,7 +347,7 @@ export function UserPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">
               Admin Regional
             </div>

@@ -742,14 +742,14 @@ export function FaunaPage() {
   }, [formOpen, selectedFauna]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl mb-2 flex items-center gap-2">
-            <Bird className="h-8 w-8" style={{ color: "#356447" }} />
+          <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
+            <Bird className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
             Manajemen Fauna
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Kelola data keanekaragaman fauna Indonesia
             {/* wilayah field removed from User type */}
           </p>
@@ -758,6 +758,7 @@ export function FaunaPage() {
           onClick={handleCreate}
           data-tour="add-fauna-button"
           style={{ backgroundColor: "#233c2b" }}
+          className="w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
           Tambah Fauna
@@ -765,9 +766,9 @@ export function FaunaPage() {
       </div>
 
       <Card>
-        <CardContent className="pt-6">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="md:col-span-2">
+        <CardContent className="pt-4 sm:pt-6">
+            <div className="grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-3">
+            <div className="sm:col-span-2">
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -779,42 +780,39 @@ export function FaunaPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button onClick={handleSearch} variant="secondary">
+                <Button onClick={handleSearch} variant="secondary" className="sm:hidden">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Input
-                placeholder="Cari fauna..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-[200px]"
-              />
-              <Select
-                value={statusFilter}
-                onValueChange={(value) => {
-                  setStatusFilter(value);
-                  setCurrentPage(1);
-                }}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filter Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="in_review">Dalam Tinjauan</SelectItem>
-                  <SelectItem value="approved">Disetujui</SelectItem>
-                  <SelectItem value="rejected">Ditolak</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              <div className="flex-1">
+                <Select
+                  value={statusFilter}
+                  onValueChange={(value) => {
+                    setStatusFilter(value);
+                    setCurrentPage(1);
+                  }}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Filter Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Semua Status</SelectItem>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="in_review">Dalam Tinjauan</SelectItem>
+                    <SelectItem value="approved">Disetujui</SelectItem>
+                    <SelectItem value="rejected">Ditolak</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               {/* Region filtering removed - using user-based access control */}
               <Button
                 onClick={loadData}
                 variant="outline"
                 size="icon"
                 title="Muat ulang"
+                className="hidden sm:flex"
               >
                 <RefreshCw className="h-4 w-4" />
               </Button>
@@ -829,15 +827,15 @@ export function FaunaPage() {
         </Alert>
       )}
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">Total Data</div>
             <div className="text-2xl">{totalItems}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">Draft</div>
             <div className="text-2xl">
               {data.filter((item) => item.status === "draft").length}
@@ -845,7 +843,7 @@ export function FaunaPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">
               Dalam Peninjauan
             </div>
@@ -855,7 +853,7 @@ export function FaunaPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             <div className="text-sm text-muted-foreground mb-1">Disetujui</div>
             <div className="text-2xl">
               {data.filter((item) => item.status === "approved").length}
