@@ -180,11 +180,29 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
   };
 
   const uploadFile = async (file: File): Promise<string> => {
-    console.log("Uploading park image:", file.name, "Size:", file.size);
+    console.log("Uploading park image:", file.name, "Size:", (file.size / 1024 / 1024).toFixed(2) + "MB");
+
+    // Import compression utility
+    const { compressImage, needsCompression } = await import("../../utils/imageCompression");
+    
+    // Compress image if needed (files > 3MB)
+    let fileToUpload = file;
+    if (needsCompression(file, 3)) {
+      try {
+        console.log("📸 Compressing park image before upload...");
+        fileToUpload = await compressImage(file, {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          quality: 0.8,
+        });
+      } catch (error) {
+        console.warn("⚠️ Compression failed, using original file:", error);
+      }
+    }
 
     try {
       const formDataUpload = new FormData();
-      formDataUpload.append("file", file);
+      formDataUpload.append("file", fileToUpload);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
