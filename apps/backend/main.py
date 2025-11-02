@@ -28,6 +28,7 @@ import users.models
 from core.logging.setup import configure_logging
 from core.middleware.ratelimit_headers import RateLimitHeadersMiddleware
 from middleware.security import SecurityHeadersMiddleware, RequestSizeLimitMiddleware
+from middleware.firewall import IPFirewallMiddleware
 from utils.events import on
 from core.notifications.handlers import (
     notify_review_submitted, notify_approved, notify_rejected
@@ -184,6 +185,10 @@ app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
 # ------------------------------------------------------------------------------
 # SECURITY MIDDLEWARE (registered in proper order)
 # ------------------------------------------------------------------------------
+# Firewall middleware (IP whitelist/blacklist) - should be early in the chain
+# Disabled by default, enable via FIREWALL_ENABLED=true
+app.add_middleware(IPFirewallMiddleware)
+
 # Security headers middleware (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, HSTS)
 app.add_middleware(SecurityHeadersMiddleware)
 
