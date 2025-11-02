@@ -64,6 +64,38 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Optimasi untuk production
+  productionBrowserSourceMaps: false,
+  // Optimasi routing - prefetching
+  async rewrites() {
+    return [];
+  },
+  // Optimasi prefetching untuk navigation yang lebih cepat
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on'
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN'
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=3600, stale-while-revalidate=86400'
+          }
+        ],
+      },
+    ];
+  },
+  // Optimasi untuk SSR
+  reactStrictMode: true,
+  // Optimasi compress
+  compress: true,
   // Webpack optimizations
   webpack: (config, { dev, isServer }) => {
     if (dev && !isServer) {

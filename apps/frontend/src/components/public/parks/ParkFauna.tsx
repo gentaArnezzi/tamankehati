@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
@@ -9,6 +8,7 @@ import { Skeleton } from "../../ui/skeleton";
 import { PawPrint, ArrowRight } from "lucide-react";
 import { getFaunaList } from "../../../lib/api/client-public";
 import type { FaunaPublic } from "../../../types/public";
+import { InstantLink } from "../../ui/instant-link";
 
 interface ParkFaunaProps {
   parkId: number;
@@ -79,7 +79,11 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
           key={item.id}
           className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
         >
-          <Link href={`/fauna/${item.id}`}>
+          <InstantLink 
+            href={`/fauna/${item.id}`}
+            prefetchType="fauna"
+            prefetchId={item.id}
+          >
             <CardContent className="p-0">
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
@@ -127,7 +131,7 @@ export function ParkFauna({ parkId }: ParkFaunaProps) {
                 </div>
               </div>
             </CardContent>
-          </Link>
+          </InstantLink>
         </Card>
       ))}
     </div>

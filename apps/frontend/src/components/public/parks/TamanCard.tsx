@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "../../ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "../../ui/card";
@@ -8,6 +7,7 @@ import { Button } from "../../ui/button";
 import { MapPin, Calendar, ArrowRight, Leaf } from "lucide-react";
 import { formatDate } from "../../../lib/utils";
 import type { TamanPublic } from "../../../types/public";
+import { InstantLink } from "../../ui/instant-link";
 
 interface TamanCardProps {
   taman: TamanPublic;
@@ -76,10 +76,15 @@ export function TamanCard({ taman }: TamanCardProps) {
           variant="outline"
           className="w-full group-hover:bg-emerald-50 group-hover:border-emerald-200 group-hover:text-emerald-700 transition-all duration-200"
         >
-          <Link href={`/taman/${taman.id}`} className="flex items-center gap-2">
+          <InstantLink 
+            href={`/taman/${taman.id}`}
+            prefetchType="taman"
+            prefetchId={taman.id}
+            className="flex items-center gap-2"
+          >
             <span>Lihat Detail</span>
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          </InstantLink>
         </Button>
       </CardFooter>
     </Card>

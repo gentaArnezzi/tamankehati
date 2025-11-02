@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "../../lib/useAuth";
+import { useNewsList } from "../../lib/api/queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { PageLoading, InlineLoading } from "../ui/page-loading";
+import { getNewsListPlaceholder } from "../../lib/api/query-helpers";
 import {
   Card,
   CardContent,
@@ -127,10 +131,7 @@ const PRIORITY_OPTIONS = [
 
 export function NewsPage() {
   const { user } = useAuth();
-  const [news, setNews] = useState<News[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [totalItems, setTotalItems] = useState(0);
+  const queryClient = useQueryClient();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
 
@@ -146,63 +147,48 @@ export function NewsPage() {
   const [selectedNews, setSelectedNews] = useState<News | null>(null);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
 
-  const loadData = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  // Build query params
+  const queryParams: Record<string, any> = {
+    limit: itemsPerPage,
+    offset: (currentPage - 1) * itemsPerPage,
+  };
 
-      const params = new URLSearchParams({
-        limit: itemsPerPage.toString(),
-        offset: ((currentPage - 1) * itemsPerPage).toString(),
-      });
+  if (searchQuery) {
+    queryParams.q = searchQuery;
+  }
+  if (categoryFilter !== "all") {
+    queryParams.category_filter = categoryFilter;
+  }
+  if (statusFilter !== "all") {
+    queryParams.status_filter = statusFilter;
+  }
+  if (featuredFilter !== null) {
+    queryParams.featured_only = featuredFilter;
+  }
 
-      if (searchQuery) {
-        params.append("q", searchQuery);
-      }
-      if (categoryFilter !== "all") {
-        params.append("category_filter", categoryFilter);
-      }
-      if (statusFilter !== "all") {
-        params.append("status_filter", statusFilter);
-      }
-      if (featuredFilter !== null) {
-        params.append("featured_only", featuredFilter.toString());
-      }
+  // Use React Query hook untuk data fetching dengan caching dan placeholderData
+  const placeholderData = queryClient 
+    ? (getNewsListPlaceholder(queryClient, queryParams) as typeof newsData)
+    : undefined;
+    
+  const {
+    data: newsData,
+    isLoading: loading,
+    error: queryError,
+    refetch: loadData,
+    isFetching,
+  } = useNewsList(queryParams, {
+    placeholderData, // Instant load dari cache
+  });
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/?${params}`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
-          },
-        },
-      );
+  const news = newsData?.items || [];
+  const totalItems = newsData?.total || 0;
+  const error = queryError ? (queryError as Error).message : "";
 
-      if (!response.ok) {
-        throw new Error("Gagal memuat data berita");
-      }
-
-      const data: NewsListResponse = await response.json();
-      setNews(data.items);
-      setTotalItems(data.total);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Gagal memuat data");
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    currentPage,
-    searchQuery,
-    categoryFilter,
-    statusFilter,
-    featuredFilter,
-    itemsPerPage,
-  ]);
-
-  useEffect(() => {
+  // Wrapper untuk loadData agar bisa digunakan sebagai event handler
+  const handleRefresh = () => {
     loadData();
-  }, [loadData]);
+  };
 
   const handleCreate = () => {
     setSelectedNews(null);
@@ -410,18 +396,19 @@ export function NewsPage() {
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  if (loading && news.length === 0) {
+  // Loading state tidak blocking - hanya jika tidak ada data dari cache
+  if (loading && news.length === 0 && !newsData) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
+      <div className="space-y-6">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl mb-2 flex items-center gap-2">
+              <BookOpen className="h-8 w-8" style={{ color: "#356447" }} />
+              Manajemen Berita
+            </h1>
+          </div>
         </div>
-        <div className="grid gap-4">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full" />
-          ))}
-        </div>
+        <PageLoading type="table" />
       </div>
     );
   }
@@ -461,7 +448,7 @@ export function NewsPage() {
                     className="pl-10"
                   />
                 </div>
-                <Button onClick={loadData} variant="secondary">
+                <Button onClick={handleRefresh} variant="secondary">
                   <Search className="h-4 w-4" />
                 </Button>
               </div>
@@ -509,9 +496,19 @@ export function NewsPage() {
         </Alert>
       )}
 
+      {/* Loading indicator saat fetching di background */}
+      {isFetching && news.length > 0 && (
+        <div className="fixed top-0 left-0 right-0 h-1 bg-emerald-100 z-50">
+          <div className="h-full bg-emerald-600 animate-pulse" style={{ width: "30%" }} />
+        </div>
+      )}
+
       {/* News List */}
       <div className="grid gap-4">
-        {news.map((item) => (
+        {loading && news.length === 0 ? (
+          <PageLoading type="table" />
+        ) : (
+          news.map((item) => (
           <Card key={item.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex justify-between items-start">
@@ -630,7 +627,8 @@ export function NewsPage() {
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Pagination */}

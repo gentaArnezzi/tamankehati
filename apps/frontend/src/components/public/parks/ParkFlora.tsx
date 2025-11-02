@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
@@ -9,6 +8,7 @@ import { Skeleton } from "../../ui/skeleton";
 import { Sprout, ArrowRight } from "lucide-react";
 import { getFloraList } from "../../../lib/api/client-public";
 import type { FloraPublic } from "../../../types/public";
+import { InstantLink } from "../../ui/instant-link";
 
 interface ParkFloraProps {
   parkId: number;
@@ -79,7 +79,11 @@ export function ParkFlora({ parkId }: ParkFloraProps) {
           key={item.id}
           className="group overflow-hidden hover:shadow-lg transition-shadow duration-300"
         >
-          <Link href={`/flora/${item.id}`}>
+          <InstantLink 
+            href={`/flora/${item.id}`}
+            prefetchType="flora"
+            prefetchId={item.id}
+          >
             <CardContent className="p-0">
               <div className="relative h-48 w-full overflow-hidden">
                 <Image
@@ -117,7 +121,7 @@ export function ParkFlora({ parkId }: ParkFloraProps) {
                 </div>
               </div>
             </CardContent>
-          </Link>
+          </InstantLink>
         </Card>
       ))}
     </div>

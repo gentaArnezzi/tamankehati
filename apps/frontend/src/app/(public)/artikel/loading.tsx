@@ -3,9 +3,10 @@
 import { PageSkeleton } from "../../../components/ui/page-skeleton";
 
 /**
- * Loading skeleton untuk fauna list page
+ * Loading skeleton untuk artikel list page
  * Ditampilkan saat navigation (tidak blocking)
  */
 export default function Loading() {
   return <PageSkeleton />;
 }
+

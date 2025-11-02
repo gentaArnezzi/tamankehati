@@ -46,14 +46,23 @@ export function ImageWithFallback({
     );
   }
 
+  // Build full URL
+  const imageUrl = src.startsWith("http")
+    ? src
+    : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`;
+
   const imageProps: any = {
-    src: src.startsWith("http")
-      ? src
-      : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`,
+    src: imageUrl,
     alt,
     className,
     sizes,
-    onError: () => setImageError(true),
+    onError: () => {
+      console.warn(`Image failed to load: ${imageUrl}`);
+      setImageError(true);
+    },
+    // Skip Next.js optimization for external images that might fail
+    // This prevents 404 errors from breaking the page
+    unoptimized: false,
   };
 
   // Priority and loading are mutually exclusive

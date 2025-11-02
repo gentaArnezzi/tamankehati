@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "../../ui/badge";
 import { MapPin, Leaf, Calendar } from "lucide-react";
 import { ImageWithFallback } from "../../ui/image-with-fallback";
+import { InstantLink } from "../../ui/instant-link";
 
 type EntityCardProps = {
   href: string;
@@ -29,14 +30,32 @@ export function EntityCard({
   area,
   created_at,
 }: EntityCardProps) {
+  // Detect type dari href untuk prefetch yang lebih agresif
+  const getPrefetchType = (url: string): { type?: "flora" | "fauna" | "taman"; id?: string } => {
+    const floraMatch = url.match(/\/flora\/(\d+)/);
+    if (floraMatch) return { type: "flora", id: floraMatch[1] };
+    
+    const faunaMatch = url.match(/\/fauna\/(\d+)/);
+    if (faunaMatch) return { type: "fauna", id: faunaMatch[1] };
+    
+    const tamanMatch = url.match(/\/taman\/(\d+)/);
+    if (tamanMatch) return { type: "taman", id: tamanMatch[1] };
+    
+    return {};
+  };
+
+  const prefetchInfo = getPrefetchType(href);
+  const LinkComponent = prefetchInfo.type ? InstantLink : Link;
+
   if (variant === "horizontal") {
     return (
       <article className="flex overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-500">
         {/* Image Section */}
-        <Link
+        <LinkComponent
           href={href}
+          prefetchType={prefetchInfo.type}
+          prefetchId={prefetchInfo.id}
           className="relative block h-40 w-56 flex-shrink-0 overflow-hidden"
-          prefetch={true}
         >
           <ImageWithFallback
             src={image}
@@ -47,7 +66,7 @@ export function EntityCard({
             sizes="224px"
             loading="lazy"
           />
-        </Link>
+        </LinkComponent>
 
         {/* Content Section */}
         <div className="flex flex-1 flex-col p-5 space-y-3">
@@ -62,13 +81,14 @@ export function EntityCard({
               </Badge>
             )}
             <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-              <Link
+              <LinkComponent
                 href={href}
+                prefetchType={prefetchInfo.type}
+                prefetchId={prefetchInfo.id}
                 className="hover:text-emerald-600 transition-colors focus:outline-none"
-                prefetch={true}
               >
                 {title}
-              </Link>
+              </LinkComponent>
             </h3>
             {subtitle && (
               <p className="text-sm text-gray-600 line-clamp-2">{subtitle}</p>
@@ -120,10 +140,11 @@ export function EntityCard({
           )}
 
           {/* Action Link */}
-          <Link
+          <LinkComponent
             href={href}
+            prefetchType={prefetchInfo.type}
+            prefetchId={prefetchInfo.id}
             className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 transition hover:text-emerald-700 hover:gap-2"
-            prefetch={true}
           >
             Lihat detail
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -135,7 +156,7 @@ export function EntityCard({
                 strokeLinejoin="round"
               />
             </svg>
-          </Link>
+          </LinkComponent>
         </div>
       </article>
     );
@@ -144,10 +165,11 @@ export function EntityCard({
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-500">
       {/* Image Section */}
-      <Link 
-        href={href} 
+      <LinkComponent 
+        href={href}
+        prefetchType={prefetchInfo.type}
+        prefetchId={prefetchInfo.id}
         className="relative block h-48 w-full overflow-hidden"
-        prefetch={true}
       >
         <ImageWithFallback
           src={image}
@@ -157,8 +179,8 @@ export function EntityCard({
           className="object-cover transition duration-500 hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 360px"
           loading="lazy"
-        />
-      </Link>
+          />
+      </LinkComponent>
 
       {/* Content Section */}
       <div className="flex flex-1 flex-col p-5 space-y-3">
@@ -173,13 +195,14 @@ export function EntityCard({
             </Badge>
           )}
           <h3 className="text-lg font-semibold text-gray-900 line-clamp-2">
-            <Link
+            <LinkComponent
               href={href}
+              prefetchType={prefetchInfo.type}
+              prefetchId={prefetchInfo.id}
               className="hover:text-emerald-600 transition-colors focus:outline-none"
-              prefetch={true}
             >
               {title}
-            </Link>
+            </LinkComponent>
           </h3>
           {subtitle && (
             <p className="text-sm text-gray-600 line-clamp-2">{subtitle}</p>
@@ -231,10 +254,11 @@ export function EntityCard({
         )}
 
         {/* Action Link */}
-        <Link
+        <LinkComponent
           href={href}
+          prefetchType={prefetchInfo.type}
+          prefetchId={prefetchInfo.id}
           className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 transition hover:text-emerald-700 hover:gap-2"
-          prefetch={true}
         >
           Lihat detail
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -246,7 +270,7 @@ export function EntityCard({
               strokeLinejoin="round"
             />
           </svg>
-        </Link>
+        </LinkComponent>
       </div>
     </article>
   );

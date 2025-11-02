@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Menu, X } from "lucide-react";
 import { TanyaKehatiButton } from "./chat/TanyaKehatiChat";
@@ -101,25 +102,26 @@ export function PublicHeader() {
               </button>
             )}
 
-            <a className="transition-opacity hover:opacity-80" href="/">
+            <Link href="/" prefetch={true} className="transition-opacity hover:opacity-80">
               <Logo
                 size="md"
                 textColor={shouldBeTransparent ? "text-white" : "text-slate-900"}
               />
-            </a>
+            </Link>
           </div>
 
           {/* Desktop Navigation - Visible on desktop (>= 1024px) */}
           {isDesktop && (
             <nav className="flex items-center gap-8">
-            <a
+            <Link
+              href="/"
+              prefetch={true}
               className={`text-sm font-medium transition-colors hover:text-slate-600 ${
                 !shouldBeTransparent ? "text-slate-700" : "text-white"
               }`}
-              href="/"
             >
               Beranda
-            </a>
+            </Link>
 
             {/* Eksplorasi Dropdown */}
             <div className="relative group">
@@ -133,8 +135,9 @@ export function PublicHeader() {
               </button>
               <div className="absolute top-full left-0 mt-3 w-72 bg-white/98 backdrop-blur-xl rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-200 z-[110]">
                 <div className="py-4">
-                  <a
+                  <Link
                     href="/flora"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -143,9 +146,10 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Keanekaragaman tumbuhan
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/fauna"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -154,9 +158,10 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Keanekaragaman hewan
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/taman"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -165,9 +170,10 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Area perlindungan alam
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/kegiatan"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -176,16 +182,17 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Aktivitas dan program konservasi
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/artikel"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                   >
                     <div className="font-medium text-slate-900">Artikel</div>
                     <div className="text-xs text-slate-500 mt-1">
                       Informasi dan berita
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -202,8 +209,9 @@ export function PublicHeader() {
               </button>
               <div className="absolute top-full left-0 mt-3 w-64 bg-white/98 backdrop-blur-xl rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 border border-slate-200 z-[110]">
                 <div className="py-4">
-                  <a
+                  <Link
                     href="/indeks"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -212,9 +220,10 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Dashboard data publik
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/misi"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
@@ -223,16 +232,17 @@ export function PublicHeader() {
                     <div className="text-xs text-slate-500 mt-1">
                       Visi, Misi dan tujuan konservasi
                     </div>
-                  </a>
-                  <a
+                  </Link>
+                  <Link
                     href="/kontak"
+                    prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors"
                   >
                     <div className="font-medium text-slate-900">Kontak</div>
                     <div className="text-xs text-slate-500 mt-1">
                       Hubungi kami
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -243,8 +253,9 @@ export function PublicHeader() {
           {isDesktop && (
           <div className="flex items-center flex-shrink-0">
             {/* Tanya Kehati Button with Logo */}
-            <a
+            <Link
               href="/tanya-kehati"
+              prefetch={true}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 min-h-[44px] ${
                 !shouldBeTransparent ? "hover:bg-slate-50" : "hover:bg-white/10"
               }`}
@@ -261,15 +272,16 @@ export function PublicHeader() {
               >
                 Tanya Kehati
               </span>
-            </a>
+            </Link>
           </div>
           )}
 
           {/* Actions - Mobile: Tanya Kehati button di mobile (optional, bisa dihilangkan jika tidak perlu) */}
           {!isDesktop && (
             <div className="flex items-center">
-              <a
+              <Link
                 href="/tanya-kehati"
+                prefetch={true}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-200 hover:scale-105 min-h-[44px] ${
                   !shouldBeTransparent ? "hover:bg-slate-50" : "hover:bg-white/10"
                 }`}
@@ -279,7 +291,7 @@ export function PublicHeader() {
                   alt="Tanya Kehati"
                   className="w-6 h-6 object-contain"
                 />
-              </a>
+              </Link>
             </div>
           )}
         </div>
@@ -318,13 +330,14 @@ export function PublicHeader() {
             {/* Mobile Menu Content */}
             <nav className="flex-1 overflow-y-auto py-4">
               <div className="px-4 space-y-1">
-                <a
+                <Link
                   href="/"
+                  prefetch={true}
                   className="block px-4 py-3 text-base font-medium text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex items-center"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Beranda
-                </a>
+                </Link>
 
                 {/* Eksplorasi Section */}
                 <div className="px-4 py-2">
@@ -332,8 +345,9 @@ export function PublicHeader() {
                     Eksplorasi
                   </div>
                   <div className="space-y-1">
-                    <a
+                    <Link
                       href="/flora"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -341,9 +355,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Keanekaragaman tumbuhan
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/fauna"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -351,9 +366,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Keanekaragaman hewan
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/taman"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -361,9 +377,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Area perlindungan alam
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/kegiatan"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -371,9 +388,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Aktivitas dan program konservasi
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/artikel"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -381,7 +399,7 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Informasi dan berita
                       </div>
-                    </a>
+                    </Link>
                   </div>
                 </div>
 
@@ -391,8 +409,9 @@ export function PublicHeader() {
                     Informasi
                   </div>
                   <div className="space-y-1">
-                    <a
+                    <Link
                       href="/indeks"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -400,9 +419,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Dashboard data publik
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/misi"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -410,9 +430,10 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Visi, Misi dan tujuan konservasi
                       </div>
-                    </a>
-                    <a
+                    </Link>
+                    <Link
                       href="/kontak"
+                      prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
@@ -420,14 +441,15 @@ export function PublicHeader() {
                       <div className="text-xs text-slate-500 mt-0.5">
                         Hubungi kami
                       </div>
-                    </a>
+                    </Link>
                   </div>
                 </div>
 
                 {/* Tanya Kehati Button - Mobile */}
                 <div className="px-4 pt-4 mt-4 border-t border-slate-200">
-                  <a
+                  <Link
                     href="/tanya-kehati"
+                    prefetch={true}
                     className="flex items-center gap-3 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 rounded-lg transition-colors min-h-[44px]"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -439,7 +461,7 @@ export function PublicHeader() {
                     <span className="text-sm font-medium text-emerald-700">
                       Tanya Kehati
                     </span>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </nav>
