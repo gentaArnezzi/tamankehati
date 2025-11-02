@@ -92,7 +92,7 @@ export function MinimalMapSection() {
             `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/parks?limit=100`,
           ),
           fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/stats`,
+            `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/stats/`,
           ),
         ]);
 
