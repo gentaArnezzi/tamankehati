@@ -1,5 +1,6 @@
+import os
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from core.database.session import get_session
@@ -8,17 +9,36 @@ from api.v1.serializers.public import FaunaPublicOut, FaunaPublicListResponse
 
 router = APIRouter()
 
-def _build_image_url(image_path: str) -> str:
+def _build_image_url(image_path: str, request: Optional[Request] = None) -> str:
     """Build full URL for image path"""
     if not image_path:
         return ""
     if image_path.startswith('http'):
         return image_path
-    return f"http://localhost:8000{image_path}"
+    
+    # Use environment variable if available, otherwise try to detect from request
+    base_url = os.getenv("API_BASE_URL") or os.getenv("BACKEND_URL")
+    
+    if not base_url and request:
+        # Try to get base URL from request
+        scheme = request.url.scheme
+        host = request.url.hostname
+        port = request.url.port
+        if port and port not in [80, 443]:
+            base_url = f"{scheme}://{host}:{port}"
+        else:
+            base_url = f"{scheme}://{host}"
+    
+    # Fallback to production URL or localhost for development
+    if not base_url:
+        base_url = os.getenv("RENDER_EXTERNAL_URL") or "https://tamankehati-backend-pxnu.onrender.com"
+    
+    return f"{base_url}{image_path}"
 
 @router.get("", response_model=FaunaPublicListResponse)
 @router.get("/", response_model=FaunaPublicListResponse)
 async def get_fauna(
+    request: Request,
     search: Optional[str] = Query(None, description="Search by name"),
     status_iucn: Optional[str] = Query(None, description="Filter by IUCN status"),
     provinsi: Optional[str] = Query(None, description="Filter by park province"),
@@ -87,7 +107,7 @@ async def get_fauna(
                 deskripsi=fauna_item.description or "",
                 habitat=fauna_item.habitat or "",
                 wilayah=park_provinsi or "",
-                gambar_utama=_build_image_url(fauna_item.gambar_utama or ""),
+                gambar_utama=_build_image_url(fauna_item.gambar_utama or "", request),
                 status=fauna_item.status
             ))
         
@@ -107,6 +127,7 @@ async def get_fauna(
 @router.get("/{id}", response_model=FaunaPublicOut)
 async def get_fauna_by_id(
     id: int,
+    request: Request,
     db: AsyncSession = Depends(get_session)
 ):
     """Get single fauna by ID with enhanced data"""
@@ -177,7 +198,7 @@ async def get_fauna_by_id(
             status_hama=item.status_hama or "",
             tingkat_hama=item.tingkat_hama or "",
             wilayah=wilayah,
-            gambar_utama=_build_image_url(item.gambar_utama or ""),
+            gambar_utama=_build_image_url(item.gambar_utama or "", request),
             status=item.status,
             is_endemic=item.is_endemic or False,
             park_info=park_info,

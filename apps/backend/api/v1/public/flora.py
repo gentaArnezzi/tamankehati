@@ -1,5 +1,6 @@
+import os
 from typing import Optional
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, Query, HTTPException, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, or_
 from core.database.session import get_session
@@ -9,17 +10,36 @@ from api.v1.serializers.public import FloraPublicOut, FloraPublicListResponse
 
 router = APIRouter()
 
-def _build_image_url(image_path: str) -> str:
+def _build_image_url(image_path: str, request: Optional[Request] = None) -> str:
     """Build full URL for image path"""
     if not image_path:
         return ""
     if image_path.startswith('http'):
         return image_path
-    return f"http://localhost:8000{image_path}"
+    
+    # Use environment variable if available, otherwise try to detect from request
+    base_url = os.getenv("API_BASE_URL") or os.getenv("BACKEND_URL")
+    
+    if not base_url and request:
+        # Try to get base URL from request
+        scheme = request.url.scheme
+        host = request.url.hostname
+        port = request.url.port
+        if port and port not in [80, 443]:
+            base_url = f"{scheme}://{host}:{port}"
+        else:
+            base_url = f"{scheme}://{host}"
+    
+    # Fallback to production URL or localhost for development
+    if not base_url:
+        base_url = os.getenv("RENDER_EXTERNAL_URL") or "https://tamankehati-backend-pxnu.onrender.com"
+    
+    return f"{base_url}{image_path}"
 
 @router.get("", response_model=FloraPublicListResponse)
 @router.get("/", response_model=FloraPublicListResponse)
 async def get_flora(
+    request: Request,
     search: Optional[str] = Query(None, description="Search by name"),
     status_iucn: Optional[str] = Query(None, description="Filter by IUCN status"),
     provinsi: Optional[str] = Query(None, description="Filter by park province"),
@@ -88,7 +108,7 @@ async def get_flora(
                 deskripsi=flora_item.description or "",
                 habitat=flora_item.habitat or "",
                 wilayah=park_provinsi or "",
-                gambar_utama=_build_image_url(flora_item.gambar_utama or ""),
+                gambar_utama=_build_image_url(flora_item.gambar_utama or "", request),
                 status=flora_item.status
             ))
         
@@ -108,6 +128,7 @@ async def get_flora(
 @router.get("/{id}", response_model=FloraPublicOut)
 async def get_flora_by_id(
     id: int,
+    request: Request,
     db: AsyncSession = Depends(get_session)
 ):
     """Get single flora by ID with enhanced data"""
@@ -179,11 +200,11 @@ async def get_flora_by_id(
             metode_perbanyakan=item.propagation_method or "",
             referensi=item.reference or "",
             wilayah=wilayah,
-            gambar_utama=_build_image_url(item.gambar_utama or ""),
-            gambar_daun=_build_image_url(item.leaf_image_url or ""),
-            gambar_batang=_build_image_url(item.stem_image_url or ""),
-            gambar_bunga=_build_image_url(item.flower_image_url or ""),
-            gambar_buah=_build_image_url(item.fruit_image_url or ""),
+            gambar_utama=_build_image_url(item.gambar_utama or "", request),
+            gambar_daun=_build_image_url(item.leaf_image_url or "", request),
+            gambar_batang=_build_image_url(item.stem_image_url or "", request),
+            gambar_bunga=_build_image_url(item.flower_image_url or "", request),
+            gambar_buah=_build_image_url(item.fruit_image_url or "", request),
             status=item.status,
             is_endemic=item.is_endemic or False,
             park_info=park_info,
@@ -201,6 +222,7 @@ async def get_flora_by_id(
 @router.get("/{id}/gallery")
 async def get_flora_gallery(
     id: int,
+    request: Request,
     db: AsyncSession = Depends(get_session)
 ):
     """Get gallery images for a specific flora"""
@@ -233,7 +255,7 @@ async def get_flora_gallery(
                 "id": item.id,
                 "title": item.title,
                 "description": item.description,
-                "image_url": _build_image_url(item.image_url or ""),
+                "image_url": _build_image_url(item.image_url or "", request),
                 "created_at": item.created_at.isoformat() if item.created_at else None
             } for item in gallery_items
         ]
