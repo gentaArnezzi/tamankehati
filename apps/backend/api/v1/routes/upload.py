@@ -66,9 +66,9 @@ async def upload_gallery_image(
             detail=f"File type not allowed. Allowed types: {', '.join(ALLOWED_EXTENSIONS)}"
         )
     
-    # Check file size
-    file_content = await file.read()
-    if len(file_content) > MAX_FILE_SIZE:
+    # Check file size first by checking content-length header
+    content_length = file.size if hasattr(file, 'size') else None
+    if content_length and content_length > MAX_FILE_SIZE:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
@@ -83,9 +83,25 @@ async def upload_gallery_image(
     print(f"UPLOAD_DIR exists: {os.path.exists(UPLOAD_DIR)}")
     
     try:
-        # Save file
+        # Save file using streaming to avoid loading entire file into memory
+        total_size = 0
         async with aiofiles.open(file_path, 'wb') as f:
-            await f.write(file_content)
+            # Stream chunks instead of reading entire file at once
+            while True:
+                chunk = await file.read(8192)  # Read 8KB chunks
+                if not chunk:
+                    break
+                total_size += len(chunk)
+                # Check size during streaming
+                if total_size > MAX_FILE_SIZE:
+                    # Clean up partial file
+                    if os.path.exists(file_path):
+                        os.remove(file_path)
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
+                    )
+                await f.write(chunk)
         
         print(f"File saved successfully to: {file_path}")
         print(f"File exists after save: {os.path.exists(file_path)}")
@@ -99,7 +115,7 @@ async def upload_gallery_image(
             "success": True,
             "filename": filename,
             "url": file_url,
-            "size": len(file_content),
+            "size": total_size,
             "message": "File uploaded successfully"
         })
         
@@ -197,9 +213,9 @@ async def upload_multiple_gallery_images(
                 })
                 continue
             
-            # Check file size
-            file_content = await file.read()
-            if len(file_content) > MAX_FILE_SIZE:
+            # Check file size first by checking content-length header
+            content_length = file.size if hasattr(file, 'size') else None
+            if content_length and content_length > MAX_FILE_SIZE:
                 failed_files.append({
                     "filename": file.filename,
                     "error": f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
@@ -210,28 +226,48 @@ async def upload_multiple_gallery_images(
             filename = generate_filename(file.filename)
             file_path = os.path.join(UPLOAD_DIR, filename)
             
-            # Save file
-            async with aiofiles.open(file_path, 'wb') as f:
-                await f.write(file_content)
-            
-            # Generate URL
-            file_url = f"/uploads/{filename}"
-            
-            uploaded_files.append({
-                "filename": filename,
-                "original_name": file.filename,
-                "url": file_url,
-                "size": len(file_content)
-            })
-            
-        except Exception as e:
-            failed_files.append({
-                "filename": file.filename,
-                "error": str(e)
-            })
-            # Clean up file if upload failed
-            if 'file_path' in locals() and os.path.exists(file_path):
-                os.remove(file_path)
+            # Save file using streaming to avoid loading entire file into memory
+            total_size = 0
+            try:
+                async with aiofiles.open(file_path, 'wb') as f:
+                    # Stream chunks instead of reading entire file at once
+                    while True:
+                        chunk = await file.read(8192)  # Read 8KB chunks
+                        if not chunk:
+                            break
+                        total_size += len(chunk)
+                        # Check size during streaming
+                        if total_size > MAX_FILE_SIZE:
+                            # Clean up partial file
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                            raise ValueError(f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB")
+                        await f.write(chunk)
+                
+                # Generate URL
+                file_url = f"/uploads/{filename}"
+                
+                uploaded_files.append({
+                    "filename": filename,
+                    "original_name": file.filename,
+                    "url": file_url,
+                    "size": total_size
+                })
+            except ValueError as ve:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": str(ve)
+                })
+                continue
+            except Exception as e:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": str(e)
+                })
+                # Clean up file if upload failed
+                if 'file_path' in locals() and os.path.exists(file_path):
+                    os.remove(file_path)
+                continue
     
     return JSONResponse(content={
         "success": len(uploaded_files) > 0,
@@ -291,9 +327,9 @@ async def upload_activity_images(
                 })
                 continue
             
-            # Check file size
-            file_content = await file.read()
-            if len(file_content) > MAX_FILE_SIZE:
+            # Check file size first by checking content-length header
+            content_length = file.size if hasattr(file, 'size') else None
+            if content_length and content_length > MAX_FILE_SIZE:
                 failed_files.append({
                     "filename": file.filename,
                     "error": f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB"
@@ -304,28 +340,48 @@ async def upload_activity_images(
             filename = generate_filename(file.filename)
             file_path = os.path.join(UPLOAD_DIR, filename)
             
-            # Save file
-            async with aiofiles.open(file_path, 'wb') as f:
-                await f.write(file_content)
-            
-            # Generate URL
-            file_url = f"/uploads/{filename}"
-            
-            uploaded_files.append({
-                "filename": filename,
-                "original_name": file.filename,
-                "url": file_url,
-                "size": len(file_content)
-            })
-            
-        except Exception as e:
-            failed_files.append({
-                "filename": file.filename,
-                "error": str(e)
-            })
-            # Clean up file if upload failed
-            if 'file_path' in locals() and os.path.exists(file_path):
-                os.remove(file_path)
+            # Save file using streaming to avoid loading entire file into memory
+            total_size = 0
+            try:
+                async with aiofiles.open(file_path, 'wb') as f:
+                    # Stream chunks instead of reading entire file at once
+                    while True:
+                        chunk = await file.read(8192)  # Read 8KB chunks
+                        if not chunk:
+                            break
+                        total_size += len(chunk)
+                        # Check size during streaming
+                        if total_size > MAX_FILE_SIZE:
+                            # Clean up partial file
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                            raise ValueError(f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB")
+                        await f.write(chunk)
+                
+                # Generate URL
+                file_url = f"/uploads/{filename}"
+                
+                uploaded_files.append({
+                    "filename": filename,
+                    "original_name": file.filename,
+                    "url": file_url,
+                    "size": total_size
+                })
+            except ValueError as ve:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": str(ve)
+                })
+                continue
+            except Exception as e:
+                failed_files.append({
+                    "filename": file.filename,
+                    "error": str(e)
+                })
+                # Clean up file if upload failed
+                if 'file_path' in locals() and os.path.exists(file_path):
+                    os.remove(file_path)
+                continue
     
     return JSONResponse(content={
         "success": len(uploaded_files) > 0,

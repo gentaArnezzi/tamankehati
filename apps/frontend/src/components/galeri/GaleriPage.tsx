@@ -239,7 +239,34 @@ export function GaleriPage() {
   };
 
   const uploadFile = async (file: File): Promise<string> => {
-    console.log("Uploading file:", file.name, "Size:", file.size);
+    console.log("Uploading file:", file.name, "Size:", (file.size / 1024 / 1024).toFixed(2) + "MB");
+
+    // Import compression utility
+    const { compressImage, needsCompression } = await import("../../utils/imageCompression");
+    
+    // Compress image if needed (files > 3MB)
+    let fileToUpload = file;
+    if (needsCompression(file, 3)) {
+      try {
+        console.log("📸 Compressing image before upload...");
+        fileToUpload = await compressImage(file, {
+          maxSizeMB: 2,              // Target 2MB
+          maxWidthOrHeight: 1920,    // Max 1920px
+          quality: 0.8,               // 80% quality
+        });
+        console.log(`✅ Compression complete: ${(file.size / 1024 / 1024).toFixed(2)}MB → ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
+      } catch (error) {
+        console.warn("⚠️ Compression failed, using original file:", error);
+        // Continue with original file if compression fails
+      }
+    }
+
+    // Check file size before upload (client-side validation)
+    const maxSizeMB = 10;
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (fileToUpload.size > maxSizeBytes) {
+      throw new Error(`File terlalu besar. Maksimal ${maxSizeMB}MB. File Anda: ${(fileToUpload.size / 1024 / 1024).toFixed(2)}MB`);
+    }
 
     try {
       // Check if user is authenticated
@@ -252,32 +279,60 @@ export function GaleriPage() {
 
       // Try direct fetch first as fallback
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", fileToUpload);
 
-      const response = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
-          "/api/v1/upload/gallery-image",
-        {
-          method: "POST",
-          headers: {
-            Authorization: "Bearer " + token,
+      // Add timeout for upload (2 minutes for large files)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minutes timeout
+
+      try {
+        const response = await fetch(
+          (process.env.NEXT_PUBLIC_API_URL ||
+            "https://tamankehati-backend-pxnu.onrender.com") +
+            "/api/v1/upload/gallery-image",
+          {
+            method: "POST",
+            headers: {
+              Authorization: "Bearer " + token,
+            },
+            body: formData,
+            signal: controller.signal,
           },
-          body: formData,
-        },
-      );
+        );
 
-      console.log("Upload response status:", response.status);
+        clearTimeout(timeoutId);
+        console.log("Upload response status:", response.status);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Upload error response:", errorText);
-        throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error("Upload error response:", errorText);
+          
+          // Better error messages
+          if (response.status === 413) {
+            throw new Error("File terlalu besar. Maksimal 10MB.");
+          } else if (response.status === 400) {
+            try {
+              const errorData = JSON.parse(errorText);
+              throw new Error(errorData.detail || "Upload gagal. Periksa format file.");
+            } catch {
+              throw new Error(errorText || "Upload gagal. Periksa file Anda.");
+            }
+          } else if (response.status === 504 || response.status === 502) {
+            throw new Error("Server timeout. Coba lagi atau kurangi ukuran file.");
+          }
+          throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("Upload success:", result);
+        return result.url;
+      } catch (err: any) {
+        clearTimeout(timeoutId);
+        if (err.name === 'AbortError') {
+          throw new Error("Upload timeout. File terlalu besar atau koneksi lambat. Coba kurangi ukuran file atau coba lagi.");
+        }
+        throw err;
       }
-
-      const result = await response.json();
-      console.log("Upload success:", result);
-      return result.url;
     } catch (error) {
       console.error("Upload error details:", error);
 

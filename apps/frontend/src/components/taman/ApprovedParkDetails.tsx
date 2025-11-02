@@ -300,10 +300,28 @@ export function ApprovedParkDetails({
   const uploadMultipleFiles = async (files: File[]) => {
     const uploadedUrls: string[] = [];
 
+    // Import compression utility
+    const { compressImage, needsCompression } = await import("../../utils/imageCompression");
+
     for (const file of files) {
       try {
+        // Compress image if needed (files > 3MB)
+        let fileToUpload = file;
+        if (needsCompression(file, 3)) {
+          try {
+            console.log(`📸 Compressing ${file.name} before upload...`);
+            fileToUpload = await compressImage(file, {
+              maxSizeMB: 2,
+              maxWidthOrHeight: 1920,
+              quality: 0.8,
+            });
+          } catch (error) {
+            console.warn(`⚠️ Compression failed for ${file.name}, using original:`, error);
+          }
+        }
+
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", fileToUpload);
 
         console.log(`Uploading gallery file ${file.name}:`, {
           name: file.name,

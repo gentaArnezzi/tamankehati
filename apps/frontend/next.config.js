@@ -48,11 +48,6 @@ const nextConfig = {
       'chatgpt.com',
       'cdn.prod.website-files.com'
     ],
-    // Optimasi image loading
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60,
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -60,18 +55,10 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Optimasi untuk development dan production
+  // Optimasi untuk development
   experimental: {
-    optimizePackageImports: [
-      'lucide-react', 
-      '@radix-ui/react-icons',
-      '@radix-ui/react-dialog',
-      '@radix-ui/react-dropdown-menu',
-      '@radix-ui/react-select',
-      '@radix-ui/react-tabs',
-      'recharts',
-      'framer-motion',
-    ],
+    // optimizeCss: true, // Disabled - requires 'critters' package
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
   swcMinify: true,
   compiler: {
@@ -117,46 +104,6 @@ const nextConfig = {
         aggregateTimeout: 300,
       };
     }
-    
-    // Optimasi untuk production bundle
-    if (!dev && !isServer) {
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-        runtimeChunk: 'single',
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20,
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-            },
-            // Framework chunk
-            framework: {
-              chunks: 'all',
-              name: 'framework',
-              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|next)[\\/]/,
-              priority: 40,
-              enforce: true,
-            },
-          },
-        },
-      };
-    }
-    
     return config;
   },
 };

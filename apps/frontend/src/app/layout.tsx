@@ -1,33 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
-import { Cormorant_Garamond, Dancing_Script, Great_Vibes } from "next/font/google";
 import "../globals.css";
 import "../index.css";
 import "../styles/product-tour.css";
 import { Providers } from "./providers";
-
-// Optimasi font loading dengan next/font
-const cormorantGaramond = Cormorant_Garamond({
-  weight: ["300", "400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-cormorant-garamond",
-});
-
-const dancingScript = Dancing_Script({
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-dancing-script",
-});
-
-const greatVibes = Great_Vibes({
-  weight: ["400"],
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-great-vibes",
-});
 
 export const metadata: Metadata = {
   title: "Taman Kehati",
@@ -47,10 +23,19 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html 
-      lang="id"
-      className={`${cormorantGaramond.variable} ${dancingScript.variable} ${greatVibes.variable}`}
-    >
+    <html lang="id">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin="anonymous"
+        />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Dancing+Script:wght@400;500;600;700&family=Great+Vibes&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>

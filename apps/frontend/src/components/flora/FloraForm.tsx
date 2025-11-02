@@ -304,11 +304,29 @@ export function FloraForm({
   // Removed zone loading logic as we now use park_id
 
   const uploadFile = async (file: File): Promise<string> => {
-    console.log("Uploading flora image:", file.name, "Size:", file.size);
+    console.log("Uploading flora image:", file.name, "Size:", (file.size / 1024 / 1024).toFixed(2) + "MB");
+
+    // Import compression utility
+    const { compressImage, needsCompression } = await import("../../utils/imageCompression");
+    
+    // Compress image if needed (files > 3MB)
+    let fileToUpload = file;
+    if (needsCompression(file, 3)) {
+      try {
+        console.log("📸 Compressing flora image before upload...");
+        fileToUpload = await compressImage(file, {
+          maxSizeMB: 2,
+          maxWidthOrHeight: 1920,
+          quality: 0.8,
+        });
+      } catch (error) {
+        console.warn("⚠️ Compression failed, using original file:", error);
+      }
+    }
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", fileToUpload);
 
       const response = await fetch(base + "/api/v1/upload/gallery-image", {
         method: "POST",
@@ -337,11 +355,27 @@ export function FloraForm({
   const uploadMultipleFiles = async (files: File[]): Promise<string[]> => {
     console.log("Uploading multiple flora images:", files.length);
 
+    // Import compression utility
+    const { compressImage, needsCompression } = await import("../../utils/imageCompression");
+
     try {
       const formData = new FormData();
-      files.forEach((file) => {
-        formData.append("files", file);
-      });
+      // Compress files before adding to FormData
+      for (const file of files) {
+        let fileToUpload = file;
+        if (needsCompression(file, 3)) {
+          try {
+            fileToUpload = await compressImage(file, {
+              maxSizeMB: 2,
+              maxWidthOrHeight: 1920,
+              quality: 0.8,
+            });
+          } catch (error) {
+            console.warn(`⚠️ Compression failed for ${file.name}, using original:`, error);
+          }
+        }
+        formData.append("files", fileToUpload);
+      }
 
       const response = await fetch(
         base + "/api/v1/upload/multiple-gallery-images",
