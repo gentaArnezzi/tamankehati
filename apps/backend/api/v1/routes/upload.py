@@ -15,7 +15,8 @@ import aiofiles
 router = APIRouter(prefix="/upload")
 
 # Configuration
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+# Use UPLOAD_DIRECTORY to match main.py static files mount
+UPLOAD_DIR = os.getenv("UPLOAD_DIRECTORY") or os.getenv("UPLOAD_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "uploads")
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp", ".tiff"}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
