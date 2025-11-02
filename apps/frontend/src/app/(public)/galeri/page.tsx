@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   description: "Jelajahi koleksi foto keanekaragaman hayati Indonesia",
 };
 
-export const revalidate = 3600;
+// ISR - Regenerate every 5 minutes for fresher gallery
+export const revalidate = 300;
 
 type GaleriPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

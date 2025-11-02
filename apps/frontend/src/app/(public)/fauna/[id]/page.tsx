@@ -5,6 +5,9 @@ import { JsonLd } from "@/components/public/seo/JsonLd";
 import { getFaunaDetail, getFaunaList } from "@/lib/api/public";
 import type { FaunaDetail } from "@/types/fauna";
 
+// ISR - Regenerate every 5 minutes for faster response
+export const revalidate = 300;
+
 type FaunaDetailPageProps = {
   params: Promise<{ id: string }>;
 };
@@ -39,12 +42,20 @@ export default async function FaunaDetailPage({
 }: FaunaDetailPageProps) {
   try {
     const { id } = await params;
+    
+    // Fetch fauna detail - this is cached and will be fast
     const fauna = await getFaunaDetail(id);
-    const related = await getFaunaList({
-      famili: fauna.famili,
-      limit: 6,
-      offset: 0,
-    }).catch(() => null);
+    
+    // Skip related fetch if konten_terkait already exists - saves one API call
+    const related = fauna.konten_terkait?.length
+      ? null
+      : fauna.famili
+        ? await getFaunaList({
+            famili: fauna.famili,
+            limit: 6,
+            offset: 0,
+          }).catch(() => null)
+        : null;
 
     const enrichedFauna: FaunaDetail = {
       ...fauna,
@@ -82,7 +93,9 @@ export default async function FaunaDetailPage({
       </div>
     );
   } catch (error) {
-    console.error("Fauna detail not found", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Fauna detail not found", error);
+    }
     notFound();
   }
 }

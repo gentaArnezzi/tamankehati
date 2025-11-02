@@ -5,6 +5,9 @@ import { JsonLd } from "../../../../components/public/seo/JsonLd";
 import { getFloraDetail, getFloraList } from "../../../../lib/api/public";
 import type { FloraDetail } from "../../../../types/flora";
 
+// ISR - Regenerate every 5 minutes for faster response
+export const revalidate = 300;
+
 type FloraDetailPageProps = {
   params: Promise<{ id: string }>;
 };
@@ -39,12 +42,20 @@ export default async function FloraDetailPage({
 }: FloraDetailPageProps) {
   try {
     const { id } = await params;
+    
+    // Fetch flora detail - this is cached and will be fast
     const flora = await getFloraDetail(id);
-    const related = await getFloraList({
-      famili: flora.famili,
-      limit: 6,
-      offset: 0,
-    }).catch(() => null);
+    
+    // Skip related fetch if konten_terkait already exists - saves one API call
+    const related = flora.konten_terkait?.length
+      ? null
+      : flora.famili
+        ? await getFloraList({
+            famili: flora.famili,
+            limit: 6,
+            offset: 0,
+          }).catch(() => null)
+        : null;
 
     const enrichedFlora: FloraDetail = {
       ...flora,
@@ -58,7 +69,7 @@ export default async function FloraDetailPage({
             nama_ilmiah: item.nama_ilmiah,
             nama_umum: item.nama_umum,
             gambar_utama: item.gambar_utama,
-          })),
+          })) ?? [],
     };
 
     const siteUrl =
@@ -76,13 +87,15 @@ export default async function FloraDetailPage({
     };
 
     return (
-      <div className="pt-16 px-6 md:px-8 lg:px-12 bg-white min-h-screen">
+      <div className="pt-16 bg-white min-h-screen overflow-x-hidden">
         <JsonLd data={jsonLd} />
         <FloraDetailView flora={enrichedFlora} />
       </div>
     );
   } catch (error) {
-    console.error("Flora detail not found", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Flora detail not found", error);
+    }
     notFound();
   }
 }

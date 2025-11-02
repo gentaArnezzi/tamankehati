@@ -100,7 +100,9 @@ export const fetchTamanPage = async (params?: SearchParams) => {
   }
 
   const url = `${API_BASE_URL}/api/public/parks${toQuery(backendParams)}`;
-  console.log("Fetching taman data from:", url);
+  if (process.env.NODE_ENV === "development") {
+    console.log("Fetching taman data from:", url);
+  }
 
   const response = await fetch(url, {
     method: "GET",
@@ -150,31 +152,60 @@ export async function getLatestArticles(limit = 6) {
   try {
     const response = await fetch(
       `${API_BASE_URL}/api/public/artikel/?limit=${limit}`,
+      {
+        cache: "no-store",
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     const data = await response.json();
-    return z.array(ArtikelPublicSchema).parse(data);
+    
+    // Handle both paginated response and direct array
+    if (Array.isArray(data)) {
+      return z.array(ArtikelPublicSchema).parse(data);
+    }
+    if (data.items && Array.isArray(data.items)) {
+      return z.array(ArtikelPublicSchema).parse(data.items);
+    }
+    
+    // If structure is different, try to extract items
+    throw new Error("Unexpected response format");
   } catch (error) {
-    console.warn("Failed to fetch latest articles, using empty array:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.warn("Failed to fetch latest articles, using empty array:", error);
+    }
     return [];
   }
 }
 
 export async function getGalleryHighlights() {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/public/galeri/?limit=6`);
+    const response = await fetch(`${API_BASE_URL}/api/public/galeri/?limit=6`, {
+      cache: "no-store",
+    });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
     const data = await response.json();
-    return z.array(GaleriPublicSchema).parse(data);
+    
+    // Handle both paginated response and direct array
+    if (Array.isArray(data)) {
+      return z.array(GaleriPublicSchema).parse(data);
+    }
+    if (data.items && Array.isArray(data.items)) {
+      return z.array(GaleriPublicSchema).parse(data.items);
+    }
+    
+    // If structure is different, try to extract items
+    throw new Error("Unexpected response format");
   } catch (error) {
-    console.warn(
-      "Failed to fetch gallery highlights, using empty array:",
-      error,
-    );
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "Failed to fetch gallery highlights, using empty array:",
+        error,
+      );
+    }
     return [];
   }
 }

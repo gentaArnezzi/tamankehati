@@ -1,20 +1,31 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { fetchFeaturedItems, FeaturedItem } from "../../../lib/api/featured";
 
-export function MinimalFeaturedSection() {
+interface MinimalFeaturedSectionProps {
+  initialFeatures?: FeaturedItem[];
+}
+
+export const MinimalFeaturedSection = memo(function MinimalFeaturedSection({ initialFeatures }: MinimalFeaturedSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
 
-  const [features, setFeatures] = useState<FeaturedItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [features, setFeatures] = useState<FeaturedItem[]>(initialFeatures || []);
+  const [loading, setLoading] = useState(!initialFeatures);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If we have initial features from server, skip client-side fetch
+    if (initialFeatures && initialFeatures.length > 0) {
+      return;
+    }
+
+    // Only fetch if no initial data provided (client-side fallback)
     const loadFeaturedItems = async () => {
       try {
         setLoading(true);
@@ -118,16 +129,16 @@ export function MinimalFeaturedSection() {
             Spesies Unggulan
           </motion.h2>
           <motion.div
-            initial={{ width: 0, opacity: 0 }}
-            animate={isInView ? { width: "6rem", opacity: 1 } : {}}
-            transition={{ duration: 0.7, delay: 0.2, ease: "easeOut" }}
-            className="h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"
+            initial={{ width: 0 }}
+            animate={isInView ? { width: "6rem" } : {}}
+            transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
+            className="h-0.5 bg-emerald-500 mx-auto rounded-full mb-6 sm:mb-8"
           />
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="text-gray-600 max-w-2xl mx-auto px-4"
+            transition={{ duration: 0.5, delay: 0.3, ease: "easeOut" }}
+            className="text-slate-500 max-w-2xl mx-auto px-4"
             style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             Kenali kekayaan hayati Indonesia yang dilindungi dan dilestarikan
@@ -148,58 +159,57 @@ export function MinimalFeaturedSection() {
             <p className="text-gray-500 text-sm">Menampilkan data contoh</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             {features.map((feature, index) => (
               <motion.div
                 key={feature.id}
-                initial={{ opacity: 0, y: 50, scale: 0.9 }}
-                animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+                initial={{ opacity: 0, y: 20 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{
-                  duration: 0.7,
-                  delay: 0.4 + index * 0.15,
+                  duration: 0.5,
+                  delay: 0.2 + index * 0.1,
                   ease: "easeOut",
                 }}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
               >
-                <Link href={feature.link} className="group block">
-                  <div className="relative overflow-hidden rounded-lg bg-white shadow-md hover:shadow-2xl transition-shadow duration-500">
+                <Link 
+                  href={feature.link} 
+                  className="group block"
+                  prefetch={true}
+                >
+                  <div className="bg-white rounded-xl border border-slate-100 hover:border-slate-200 transition-all duration-300 overflow-hidden h-full flex flex-col">
                     {/* Image */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
-                      <img
-                        src={feature.image}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
+                      <Image
+                        src={feature.image || "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop"}
                         alt={feature.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                        onError={(e) => {
-                          // Fallback to default image if the API image fails to load
-                          const target = e.target as HTMLImageElement;
-                          target.src =
-                            "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop";
-                        }}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 400px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        loading="lazy"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-                      {/* Category badge on hover */}
-                      <div className="absolute top-4 left-4 px-3 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-medium text-emerald-600 uppercase tracking-wide opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                        {feature.category}
-                      </div>
                     </div>
 
                     {/* Content */}
-                    <div className="p-4 sm:p-6">
-                      <div className="font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300" style={{ fontSize: 'clamp(0.75rem, 1vw, 1rem)' }}>
+                    <div className="p-6 sm:p-8 flex flex-col flex-1">
+                      {/* Category */}
+                      <div className="text-xs font-medium text-emerald-600 uppercase tracking-wide mb-3" style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}>
                         {feature.category}
                       </div>
-                      <h3 className="font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300" style={{ fontSize: 'clamp(1.25rem, 1.8vw, 2rem)' }}>
+                      
+                      {/* Title */}
+                      <h3 className="font-medium text-slate-900 mb-3 group-hover:text-slate-700 transition-colors duration-300" style={{ fontSize: 'clamp(1.25rem, 1.8vw, 1.75rem)' }}>
                         {feature.title}
                       </h3>
-                      <p className="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
+                      
+                      {/* Description */}
+                      <p className="text-slate-500 mb-6 flex-1 text-sm leading-relaxed" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
                         {feature.description}
                       </p>
-                      <div className="flex items-center gap-2 font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
-                        <span className="group-hover:font-semibold transition-all">
-                          Pelajari
-                        </span>
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform duration-300" />
+                      
+                      {/* Link */}
+                      <div className="flex items-center gap-2 text-sm font-medium text-slate-700 group-hover:text-emerald-600 transition-colors duration-300" style={{ fontSize: 'clamp(0.875rem, 1vw, 1rem)' }}>
+                        <span>Pelajari lebih lanjut</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
                       </div>
                     </div>
                   </div>
@@ -211,4 +221,4 @@ export function MinimalFeaturedSection() {
       </div>
     </section>
   );
-}
+});

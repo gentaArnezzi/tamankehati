@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     "Temukan satwa liar Indonesia dengan filter status konservasi, klasifikasi taksonomi, dan penyebaran geografis.",
 };
 
-export const revalidate = 3600;
+// ISR - Regenerate every 5 minutes for fresher data
+export const revalidate = 300;
 
 type FaunaPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

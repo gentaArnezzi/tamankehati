@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
+import Image from "next/image";
 
 export function StatsSection() {
   const [isVisible, setIsVisible] = useState(false);
-  const [scrollY, setScrollY] = useState(0);
-  const sectionRef = useRef<HTMLElement>(null);
   const [counts, setCounts] = useState({
     species: 0,
     research: 0,
@@ -43,34 +42,43 @@ export function StatsSection() {
   }, []);
 
   useEffect(() => {
-    if (isVisible) {
-      const duration = 2000; // 2 seconds
-      const steps = 60;
-      const stepDuration = duration / steps;
+    if (!isVisible) return;
 
-      const animateCount = (key: keyof typeof targets) => {
-        let current = 0;
-        const increment = targets[key] / steps;
+    const duration = 2000; // 2 seconds
+    const steps = 60;
+    const stepDuration = duration / steps;
+    const timers: NodeJS.Timeout[] = [];
 
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= targets[key]) {
-            current = targets[key];
-            clearInterval(timer);
-          }
-          setCounts((prev) => ({ ...prev, [key]: Math.floor(current) }));
-        }, stepDuration);
-      };
+    const animateCount = (key: keyof typeof targets) => {
+      let current = 0;
+      const increment = targets[key] / steps;
 
-      // Animate each counter with a slight delay
-      setTimeout(() => animateCount("species"), 0);
-      setTimeout(() => animateCount("research"), 200);
-      setTimeout(() => animateCount("education"), 400);
-      setTimeout(() => animateCount("conservation"), 600);
-    }
+      const timer = setInterval(() => {
+        current += increment;
+        if (current >= targets[key]) {
+          current = targets[key];
+          clearInterval(timer);
+        }
+        setCounts((prev) => ({ ...prev, [key]: Math.floor(current) }));
+      }, stepDuration);
+      
+      timers.push(timer);
+    };
+
+    // Animate each counter with a slight delay
+    const timeouts: NodeJS.Timeout[] = [];
+    timeouts.push(setTimeout(() => animateCount("species"), 0));
+    timeouts.push(setTimeout(() => animateCount("research"), 200));
+    timeouts.push(setTimeout(() => animateCount("education"), 400));
+    timeouts.push(setTimeout(() => animateCount("conservation"), 600));
+
+    return () => {
+      timers.forEach(timer => clearInterval(timer));
+      timeouts.forEach(timeout => clearTimeout(timeout));
+    };
   }, [isVisible]);
 
-  const stats = [
+  const stats = useMemo(() => [
     {
       number: counts.species,
       suffix: "+",
@@ -99,7 +107,7 @@ export function StatsSection() {
       description: "Program konservasi yang berhasil",
       gradient: "from-lime-500 to-green-600",
     },
-  ];
+  ], [counts]);
 
   return (
     <section id="stats-section" className="py-40 bg-white">
@@ -166,34 +174,46 @@ export function StatsSection() {
           {/* Right Column - Images Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-4">
-              <div className="aspect-square bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl overflow-hidden">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-emerald-100 to-green-200 rounded-2xl overflow-hidden relative">
+                <Image
                   src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=400&fit=crop&crop=center"
                   alt="Forest conservation"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 400px"
+                  className="object-cover"
+                  loading="lazy"
                 />
               </div>
-              <div className="aspect-square bg-gradient-to-br from-teal-100 to-emerald-200 rounded-2xl overflow-hidden">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-teal-100 to-emerald-200 rounded-2xl overflow-hidden relative">
+                <Image
                   src="https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=400&fit=crop&crop=center"
                   alt="Wildlife research"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 400px"
+                  className="object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>
             <div className="space-y-4 mt-8">
-              <div className="aspect-square bg-gradient-to-br from-green-100 to-teal-200 rounded-2xl overflow-hidden">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-green-100 to-teal-200 rounded-2xl overflow-hidden relative">
+                <Image
                   src="https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&h=400&fit=crop&crop=center"
                   alt="Education program"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 400px"
+                  className="object-cover"
+                  loading="lazy"
                 />
               </div>
-              <div className="aspect-square bg-gradient-to-br from-lime-100 to-green-200 rounded-2xl overflow-hidden">
-                <img
+              <div className="aspect-square bg-gradient-to-br from-lime-100 to-green-200 rounded-2xl overflow-hidden relative">
+                <Image
                   src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&h=400&fit=crop&crop=center"
                   alt="Conservation success"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 50vw, 400px"
+                  className="object-cover"
+                  loading="lazy"
                 />
               </div>
             </div>
@@ -206,11 +226,14 @@ export function StatsSection() {
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="aspect-[5/1] bg-gradient-to-r from-emerald-500 to-green-600">
-            <img
+          <div className="aspect-[5/1] bg-gradient-to-r from-emerald-500 to-green-600 relative">
+            <Image
               src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&h=400&fit=crop&crop=center"
               alt="Conservation impact"
-              className="w-full h-full object-cover mix-blend-overlay"
+              fill
+              sizes="100vw"
+              className="object-cover mix-blend-overlay"
+              loading="lazy"
             />
           </div>
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../lib/useAuth";
 import { dashboardApi, DashboardStats } from "../lib/api-client";
 import {
@@ -38,6 +39,7 @@ type ActivityItem = {
 
 export function Dashboard() {
   const { user } = useAuth();
+  const router = useRouter();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -204,7 +206,7 @@ export function Dashboard() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
               {/* Modern Dashboard Button */}
               <Button
-                onClick={() => (window.location.href = "/dashboard/modern")}
+                onClick={() => router.push("/dashboard/modern")}
                 variant="outline"
                 className="flex items-center justify-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600 w-full sm:w-auto"
               >
@@ -215,9 +217,7 @@ export function Dashboard() {
 
               {/* Data-Driven Dashboard Button */}
               <Button
-                onClick={() =>
-                  (window.location.href = "/dashboard/data-driven")
-                }
+                onClick={() => router.push("/dashboard/data-driven")}
                 variant="outline"
                 className="flex items-center justify-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600 w-full sm:w-auto"
               >
@@ -228,9 +228,7 @@ export function Dashboard() {
 
               {/* Tamankehati Dashboard Button */}
               <Button
-                onClick={() =>
-                  (window.location.href = "/dashboard/tamankehati")
-                }
+                onClick={() => router.push("/dashboard/tamankehati")}
                 variant="outline"
                 className="flex items-center justify-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600 w-full sm:w-auto"
               >

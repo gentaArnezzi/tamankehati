@@ -8,8 +8,8 @@ export const metadata: Metadata = {
   description: "Jelajahi taman-taman keanekaragaman hayati Indonesia",
 };
 
-export const revalidate = 0; // Disable cache temporarily
-export const dynamic = "force-dynamic"; // Force dynamic rendering
+// ISR - Regenerate every 5 minutes for fresher data
+export const revalidate = 300;
 
 type TamanPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

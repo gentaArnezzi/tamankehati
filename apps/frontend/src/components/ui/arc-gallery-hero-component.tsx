@@ -31,16 +31,25 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
   cardSizeSm = 80,
   className = "",
 }) => {
+  // Use consistent initial values for SSR - default to large screen
   const [dimensions, setDimensions] = useState({
     radius: radiusLg,
     cardSize: cardSizeLg,
     containerHeight: radiusLg * 1.5,
   });
   const [isVisible, setIsVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
 
-  // Effect to handle responsive resizing of the arc and cards
+  // Set mounted flag after hydration
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // Effect to handle responsive resizing of the arc and cards - only after mount
+  useEffect(() => {
+    if (!isMounted) return;
+
     const handleResize = () => {
       const width = window.innerWidth;
       const viewportHeight = window.innerHeight;
@@ -70,7 +79,7 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
     handleResize(); // Set initial size
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, [radiusLg, radiusMd, radiusSm, cardSizeLg, cardSizeMd, cardSizeSm]);
+  }, [isMounted, radiusLg, radiusMd, radiusSm, cardSizeLg, cardSizeMd, cardSizeSm]);
 
   // Intersection Observer to trigger animation when section is visible
   useEffect(() => {
@@ -142,20 +151,21 @@ export const ArcGalleryHero: React.FC<ArcGalleryHeroProps> = ({
             return (
               <div
                 key={i}
-                className={`absolute ${isVisible ? "animate-slide-in-from-left" : ""}`}
+                className={`absolute ${isVisible && isMounted ? "animate-slide-in-from-left" : ""}`}
                 style={{
-                  width: dimensions.cardSize,
-                  height: dimensions.cardSize,
+                  width: `${dimensions.cardSize}px`,
+                  height: `${dimensions.cardSize}px`,
                   left: clampedLeft,
                   bottom: `${y}px`,
-                  animationDelay: isVisible ? `${i * 200}ms` : "0ms",
-                  opacity: isVisible ? undefined : 0,
-                  transform: isVisible
-                    ? undefined
+                  animationDelay: isVisible && isMounted ? `${i * 200}ms` : "0ms",
+                  opacity: isVisible && isMounted ? 1 : 0,
+                  transform: isVisible && isMounted
+                    ? "translate(-50%, 50%) scale(1)"
                     : "translate(calc(-50% - 100px), 50%) scale(0.8)",
                   zIndex: count - i,
                   maxWidth: '100vw',
                 }}
+                suppressHydrationWarning
               >
                 <div
                   className="rounded-3xl shadow-2xl overflow-hidden ring-2 ring-white/20 bg-white/10 transition-all duration-300 hover:scale-125 hover:shadow-3xl hover:ring-4 hover:ring-white/40 hover:z-[15] cursor-pointer group pointer-events-auto"

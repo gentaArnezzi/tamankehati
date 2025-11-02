@@ -58,7 +58,7 @@ export function FAQSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl font-light text-gray-900 mb-4 sm:mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6"
           >
             Pertanyaan yang Sering Diajukan
           </motion.h2>
@@ -66,13 +66,13 @@ export function FAQSection() {
             initial={{ width: 0 }}
             animate={isInView ? { width: "6rem" } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"
+            className="h-0.5 bg-emerald-500 mx-auto rounded-full mb-6 sm:mb-8"
           />
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-gray-500 px-4"
+            className="text-slate-500 px-4"
             style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan
@@ -88,13 +88,13 @@ export function FAQSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-300"
+                className="bg-white rounded-xl border border-slate-100 overflow-hidden hover:border-slate-200 transition-all duration-300"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
                   className="w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
-                  <h3 className="font-medium text-gray-900 pr-4" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
+                  <h3 className="font-medium text-slate-700 pr-4" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
                     {faq.question}
                   </h3>
                   <motion.svg
@@ -135,8 +135,8 @@ export function FAQSection() {
                             delay: 0.1,
                             ease: "easeOut"
                           }}
-                          className="text-gray-600 leading-relaxed" 
-                          style={{ fontSize: 'clamp(1rem, 1.3vw, 1.375rem)' }}
+                          className="text-slate-500 leading-relaxed" 
+                          style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
                         >
                           {faq.answer}
                         </motion.p>

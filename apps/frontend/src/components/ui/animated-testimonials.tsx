@@ -23,13 +23,20 @@ export const AnimatedTestimonials = ({
   className?: string;
 }) => {
   const [active, setActive] = useState(0);
-  const [isDesktop, setIsDesktop] = useState(
-    typeof window !== 'undefined' ? window.innerWidth >= 1024 : false
-  );
+  // Use consistent initial value for SSR - default to false (mobile)
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.3 });
 
+  // Set mounted flag after hydration
   useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
     const checkDesktop = () => {
       setIsDesktop(window.innerWidth >= 1024);
     };
@@ -37,7 +44,7 @@ export const AnimatedTestimonials = ({
     checkDesktop();
     window.addEventListener('resize', checkDesktop);
     return () => window.removeEventListener('resize', checkDesktop);
-  }, []);
+  }, [isMounted]);
 
   const handleNext = () => {
     setActive((prev) => (prev + 1) % testimonials.length);
@@ -70,18 +77,22 @@ export const AnimatedTestimonials = ({
       <div 
         className="relative flex flex-col lg:flex-row gap-6 lg:gap-0 items-center z-0"
         style={{
-          flexDirection: isDesktop ? 'row' : 'column',
+          flexDirection: isMounted && isDesktop ? 'row' : 'column',
         }}
+        suppressHydrationWarning
       >
         {/* Left: Stacked Images - Slide from left */}
         <motion.div
           className="w-full lg:w-1/2 lg:pl-6"
           style={{
-            width: isDesktop ? '50%' : '100%',
+            width: isMounted && isDesktop ? '50%' : '100%',
+            opacity: isMounted ? undefined : 0,
+            transform: isMounted ? undefined : 'translateX(-100px)',
           }}
           initial={{ opacity: 0, x: -100 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          animate={isInView && isMounted ? { opacity: 1, x: 0 } : { opacity: 0, x: -100 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
+          suppressHydrationWarning
         >
           <div className="relative h-[250px] sm:h-[300px] lg:h-[450px] w-full">
             <AnimatePresence>
@@ -134,11 +145,13 @@ export const AnimatedTestimonials = ({
         <motion.div
           className="w-full lg:w-1/2 flex justify-between flex-col py-4 lg:pl-12 lg:pr-6 mt-4 sm:mt-6 lg:mt-8"
           style={{
-            width: isDesktop ? '50%' : '100%',
+            width: isMounted && isDesktop ? '50%' : '100%',
+            flexDirection: isMounted && isDesktop ? 'row' : 'column',
           }}
           initial={{ opacity: 0, x: 100 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          animate={isInView && isMounted ? { opacity: 1, x: 0 } : { opacity: 0, x: 100 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          suppressHydrationWarning
         >
           <motion.div
             key={active}

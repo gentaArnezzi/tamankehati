@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import HomePageClient from "./HomePageClient";
+import { getPublicStats, getLatestArticles, getGalleryHighlights, getTamanList } from "../../lib/api/public";
 
 export const metadata: Metadata = {
   title: "Portal Keanekaragaman Hayati Indonesia",
@@ -20,8 +21,35 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
+// ISR - Regenerate every 5 minutes for fresher homepage data
+export const revalidate = 300;
 
-export default function HomePage() {
-  return <HomePageClient />;
+export default async function HomePage() {
+  // Fetch all homepage data in parallel on the server for faster initial load
+  const [stats, articles, gallery, parks] = await Promise.allSettled([
+    getPublicStats(),
+    getLatestArticles(6),
+    getGalleryHighlights(6),
+    getTamanList({ limit: 100, offset: 0 }).catch(() => ({ items: [], total: 0, limit: 100, offset: 0, has_next: false, has_prev: false })),
+  ]);
+
+  // Extract results with fallbacks
+  const statsData = stats.status === "fulfilled" ? stats.value : {
+    total_flora: 0,
+    total_fauna: 0,
+    total_taman: 0,
+  };
+  
+  const articlesData = articles.status === "fulfilled" ? articles.value : [];
+  const galleryData = gallery.status === "fulfilled" ? gallery.value : [];
+  const parksData = parks.status === "fulfilled" ? parks.value.items || [] : [];
+
+  return (
+    <HomePageClient
+      initialStats={statsData}
+      initialArticles={articlesData}
+      initialGallery={galleryData}
+      initialParks={parksData}
+    />
+  );
 }

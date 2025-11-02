@@ -1,11 +1,18 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { motion, useInView } from "framer-motion";
-import { fetchStats, StatsData } from "../../../lib/api/stats";
 import { Leaf, PawPrint, MapPin } from "lucide-react";
 
-export function MinimalStatsSection() {
+interface MinimalStatsSectionProps {
+  initialStats?: {
+    total_flora: number;
+    total_fauna: number;
+    total_taman: number;
+  };
+}
+
+export const MinimalStatsSection = memo(function MinimalStatsSection({ initialStats }: MinimalStatsSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
 
@@ -15,38 +22,25 @@ export function MinimalStatsSection() {
     parks: 0,
   });
 
-  const [targets, setTargets] = useState({
-    flora: 320,
-    fauna: 180,
-    parks: 52,
-  });
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // Fetch stats data on component mount
-  useEffect(() => {
-    const loadStats = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const statsData = await fetchStats();
-        setTargets({
-          flora: statsData.total_flora,
-          fauna: statsData.total_fauna,
-          parks: statsData.total_taman,
-        });
-      } catch (err) {
-        console.error("Error loading stats:", err);
-        setError("Gagal memuat data statistik");
-        // Keep default targets if API fails
-      } finally {
-        setLoading(false);
-      }
+  // Use initialStats from server if available, otherwise use defaults
+  const targets = useMemo(() => {
+    if (initialStats) {
+      return {
+        flora: initialStats.total_flora,
+        fauna: initialStats.total_fauna,
+        parks: initialStats.total_taman,
+      };
+    }
+    // Fallback defaults
+    return {
+      flora: 320,
+      fauna: 180,
+      parks: 52,
     };
+  }, [initialStats]);
 
-    loadStats();
-  }, []);
+  // No loading state if we have initialStats from server
+  const loading = false;
 
   // Animation effect when in view
   useEffect(() => {
@@ -117,7 +111,7 @@ export function MinimalStatsSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-4 sm:mb-6"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6"
           >
             Data & Statistik
           </motion.h2>
@@ -148,65 +142,49 @@ export function MinimalStatsSection() {
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             {stats.map((stat, index) => {
               const IconComponent = stat.icon;
               return (
                 <motion.div
                   key={index}
-                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                  animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ 
-                    duration: 0.6, 
-                    delay: index * 0.15,
-                    ease: [0.4, 0, 0.2, 1]
+                    duration: 0.5, 
+                    delay: index * 0.1,
+                    ease: "easeOut"
                   }}
-                  whileHover={{ 
-                    y: -8, 
-                    scale: 1.02,
-                    transition: { duration: 0.2 }
-                  }}
-                  className="group relative"
+                  className="group"
                 >
-                  <div className={`bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 shadow-lg hover:shadow-xl transition-all duration-300 border border-slate-100 ${stat.bgColor}/30 h-full`}>
-                    {/* Icon with gradient background */}
-                    <div className={`inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl ${stat.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className={`w-8 h-8 sm:w-10 sm:h-10 ${stat.iconColor}`} />
+                  <div className="bg-white rounded-xl p-8 sm:p-10 border border-slate-100 hover:border-slate-200 transition-all duration-300 h-full flex flex-col">
+                    {/* Icon - Minimal */}
+                    <div className={`inline-flex items-center justify-center w-12 h-12 rounded-lg ${stat.bgColor} mb-8 group-hover:scale-105 transition-transform duration-300`}>
+                      <IconComponent className={`w-6 h-6 ${stat.iconColor}`} />
                     </div>
 
                     {/* Value */}
-                    <div className="mb-4">
+                    <div className="mb-6">
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={isInView ? { opacity: 1 } : {}}
-                        transition={{ duration: 0.6, delay: 0.5 + index * 0.15 }}
-                        className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-slate-900 mb-2"
+                        transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
+                        className="text-5xl sm:text-6xl md:text-7xl font-light text-slate-900 mb-3 tracking-tight"
                       >
                         {stat.value}
-                        <span className={`text-2xl sm:text-3xl ${stat.iconColor} ml-1`}>+</span>
+                        <span className={`text-2xl sm:text-3xl font-light ${stat.iconColor} ml-1`}>+</span>
                       </motion.div>
                     </div>
 
                     {/* Label */}
-                    <h3 className={`font-semibold text-slate-800 mb-2 ${stat.iconColor} group-hover:${stat.iconColor} transition-colors`} style={{ fontSize: 'clamp(1.125rem, 1.8vw, 1.75rem)' }}>
+                    <h3 className={`font-medium text-slate-700 mb-2 ${stat.iconColor} transition-colors`} style={{ fontSize: 'clamp(1.125rem, 1.8vw, 1.5rem)' }}>
                       {stat.label}
                     </h3>
 
                     {/* Description */}
-                    <p className="text-slate-500 text-sm sm:text-base" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.125rem)' }}>
+                    <p className="text-slate-400 text-sm" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
                       {stat.description}
                     </p>
-
-                    {/* Decorative gradient line */}
-                    {stat.color === "emerald" && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-emerald-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl sm:rounded-b-3xl" />
-                    )}
-                    {stat.color === "amber" && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl sm:rounded-b-3xl" />
-                    )}
-                    {stat.color === "blue" && (
-                      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-2xl sm:rounded-b-3xl" />
-                    )}
                   </div>
                 </motion.div>
               );
@@ -214,21 +192,16 @@ export function MinimalStatsSection() {
           </div>
         )}
 
-        {/* Decorative Divider */}
+        {/* Minimal Divider */}
         <motion.div
           initial={{ scaleX: 0, opacity: 0 }}
           animate={isInView ? { scaleX: 1, opacity: 1 } : {}}
-          transition={{ duration: 1.2, delay: 0.8, ease: "easeInOut" }}
-          className="relative mt-12 sm:mt-16 md:mt-20"
+          transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
+          className="mt-16 sm:mt-20"
         >
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 via-emerald-200 to-transparent" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-white px-4">
-              <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-lg" />
-            </div>
-          </div>
+          <div className="h-px bg-slate-100 max-w-2xl mx-auto" />
         </motion.div>
       </div>
     </section>
   );
-}
+});

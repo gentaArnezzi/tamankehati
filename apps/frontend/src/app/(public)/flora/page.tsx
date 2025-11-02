@@ -9,7 +9,8 @@ export const metadata: Metadata = {
     "Telusuri basis data flora Indonesia dengan filter taksonomi, status IUCN, dan sebaran wilayah untuk mendukung riset dan edukasi.",
 };
 
-export const revalidate = 3600;
+// ISR - Regenerate every 5 minutes for fresher data
+export const revalidate = 300;
 
 type FloraPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

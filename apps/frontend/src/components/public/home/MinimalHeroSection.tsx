@@ -105,6 +105,7 @@ export function MinimalHeroSection() {
           >
             <Link
               href="/flora"
+              prefetch={true}
               className="group inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 lg:py-4 xl:py-5 bg-white text-gray-900 rounded-lg hover:bg-white/90 transition-all shadow-lg text-sm sm:text-base md:text-lg lg:text-3xl xl:text-4xl"
             >
               Jelajahi Flora
@@ -112,12 +113,14 @@ export function MinimalHeroSection() {
             </Link>
             <Link
               href="/fauna"
+              prefetch={true}
               className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 lg:py-4 xl:py-5 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-sm sm:text-base md:text-lg lg:text-3xl xl:text-4xl"
             >
               Jelajahi Fauna
             </Link>
             <Link
               href="/taman"
+              prefetch={true}
               className="inline-flex items-center gap-2 px-4 sm:px-6 lg:px-8 xl:px-10 py-2.5 sm:py-3 lg:py-4 xl:py-5 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-sm sm:text-base md:text-lg lg:text-3xl xl:text-4xl"
             >
               Peta Taman

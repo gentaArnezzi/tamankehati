@@ -42,24 +42,31 @@ export default async function TamanDetailPage({
 }: TamanDetailPageProps) {
   try {
     const { id } = await params;
-    const [taman, parkStats] = await Promise.all([
-      getTamanDetail(id),
-      getParkStats(parseInt(id)).catch(() => null), // Fetch real stats from stats endpoint
+    
+    // Fetch taman detail first - this is critical
+    const taman = await getTamanDetail(id);
+    
+    // Fetch park stats and related articles in parallel (non-blocking, will use taman.statistik if fails)
+    const [parkStats, relatedArticles] = await Promise.allSettled([
+      getParkStats(parseInt(id)), // Will return fallback stats if endpoint unavailable
+      getArtikelPage({
+        search: taman.name,
+        limit: 4,
+        offset: 0,
+      }),
     ]);
 
-    const relatedArticles = await getArtikelPage({
-      search: taman.name,
-      limit: 4,
-      offset: 0,
-    }).catch(() => null);
-
+    // Extract results from Promise.allSettled
+    const parkStatsResult = parkStats.status === "fulfilled" ? parkStats.value : null;
+    const relatedArticlesResult = relatedArticles.status === "fulfilled" ? relatedArticles.value : null;
+    
     const enrichedTaman = {
       ...taman,
-      artikel_terkait: relatedArticles?.items ?? [],
+      artikel_terkait: relatedArticlesResult?.items ?? [],
       statistik: {
-        flora: parkStats?.total_flora ?? taman.statistik?.flora ?? 0,
-        fauna: parkStats?.total_fauna ?? taman.statistik?.fauna ?? 0,
-        kegiatan: parkStats?.total_artikel ?? 0, // Using total_artikel field for activities count
+        flora: parkStatsResult?.total_flora ?? taman.statistik?.flora ?? 0,
+        fauna: parkStatsResult?.total_fauna ?? taman.statistik?.fauna ?? 0,
+        kegiatan: parkStatsResult?.total_artikel ?? 0, // Using total_artikel field for activities count
         galeri: 0, // Gallery stats not available in current API
       },
     };
@@ -88,7 +95,9 @@ export default async function TamanDetailPage({
       </>
     );
   } catch (error) {
-    console.error("Error loading taman details:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("Error loading taman details:", error);
+    }
     notFound();
   }
 }

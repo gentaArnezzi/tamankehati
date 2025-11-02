@@ -36,6 +36,7 @@ export function EntityCard({
         <Link
           href={href}
           className="relative block h-40 w-56 flex-shrink-0 overflow-hidden"
+          prefetch={true}
         >
           <ImageWithFallback
             src={image}
@@ -64,6 +65,7 @@ export function EntityCard({
               <Link
                 href={href}
                 className="hover:text-emerald-600 transition-colors focus:outline-none"
+                prefetch={true}
               >
                 {title}
               </Link>
@@ -121,6 +123,7 @@ export function EntityCard({
           <Link
             href={href}
             className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 transition hover:text-emerald-700 hover:gap-2"
+            prefetch={true}
           >
             Lihat detail
             <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">
@@ -141,7 +144,11 @@ export function EntityCard({
   return (
     <article className="flex h-full flex-col overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition hover:shadow-lg hover:border-emerald-200 focus-within:outline focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-emerald-500">
       {/* Image Section */}
-      <Link href={href} className="relative block h-48 w-full overflow-hidden">
+      <Link 
+        href={href} 
+        className="relative block h-48 w-full overflow-hidden"
+        prefetch={true}
+      >
         <ImageWithFallback
           src={image}
           alt={title || "Gambar entitas"}
@@ -169,6 +176,7 @@ export function EntityCard({
             <Link
               href={href}
               className="hover:text-emerald-600 transition-colors focus:outline-none"
+              prefetch={true}
             >
               {title}
             </Link>
@@ -226,6 +234,7 @@ export function EntityCard({
         <Link
           href={href}
           className="mt-auto inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 transition hover:text-emerald-700 hover:gap-2"
+          prefetch={true}
         >
           Lihat detail
           <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none">

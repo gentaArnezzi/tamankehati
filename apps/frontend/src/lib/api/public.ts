@@ -75,7 +75,11 @@ const createFetcher =
   ) =>
   async (path: string, params?: SearchParams) => {
     const url = `${API_BASE_URL}${path}${buildQuery(params)}`;
-    console.log("[SSR] Fetching from:", url);
+    
+    // Only log in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("[SSR] Fetching from:", url);
+    }
 
     try {
       const response = await fetch(url, {
@@ -83,27 +87,52 @@ const createFetcher =
           "Content-Type": "application/json",
         },
         next: {
-          revalidate: options?.revalidate ?? 3600,
+          revalidate: options?.revalidate ?? 300, // Default 5 minutes instead of 1 hour for faster updates
         },
       });
 
       if (!response.ok) {
-        console.error(
-          `[SSR] Fetch failed: ${response.status} ${response.statusText}`,
-        );
+        // Don't throw for 405 (Method Not Allowed) or 404 - handle gracefully
+        if (response.status === 405 || response.status === 404) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn(
+              `[SSR] Endpoint not available: ${response.status} ${response.statusText} for ${path}`,
+            );
+          }
+          // Return a default empty response based on schema
+          // This will be handled by the calling function
+          throw new Error(`Endpoint not available (${response.status})`);
+        }
+        
+        if (process.env.NODE_ENV === "development") {
+          console.error(
+            `[SSR] Fetch failed: ${response.status} ${response.statusText} for ${path}`,
+          );
+        }
         throw new Error(`Gagal memuat data dari ${path} (${response.status})`);
       }
 
       const json = await response.json();
-      console.log(
-        "[SSR] Data received:",
-        JSON.stringify(json).substring(0, 200),
-      );
+      
+      // Only log in development
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          "[SSR] Data received:",
+          JSON.stringify(json).substring(0, 200),
+        );
+      }
+      
       const parsed = schema.parse(json);
-      console.log("[SSR] Schema parsed successfully");
+      
+      if (process.env.NODE_ENV === "development") {
+        console.log("[SSR] Schema parsed successfully");
+      }
+      
       return parsed;
     } catch (error) {
-      console.error("[SSR] Error in createFetcher:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("[SSR] Error in createFetcher:", error);
+      }
       throw error;
     }
   };
@@ -114,14 +143,44 @@ const fetchPaginated = <T extends z.ZodTypeAny>(
 ) => createFetcher(PaginatedResponseSchema(schema), { revalidate });
 
 export const getPublicStats = cache(async (): Promise<PublicStats> => {
-  const fetcher = createFetcher(PublicStatsSchema, { revalidate: 300 });
+  const fetcher = createFetcher(PublicStatsSchema, { revalidate: 600 }); // Cache for 10 minutes
   return fetcher("/api/public/stats/");
 });
 
 export const getParkStats = cache(
   async (parkId: number): Promise<PublicStats> => {
-    const fetcher = createFetcher(PublicStatsSchema, { revalidate: 300 });
-    return fetcher(`/api/public/stats/park/${parkId}/`);
+    try {
+      const fetcher = createFetcher(PublicStatsSchema, { revalidate: 300 });
+      // Try the endpoint - if 405 or any error, return fallback
+      try {
+        return await fetcher(`/api/public/stats/park/${parkId}`);
+      } catch (error: any) {
+        // If it's a 405 or other error, return fallback stats silently
+        if (error?.message?.includes("405") || error?.message?.includes("Method Not Allowed")) {
+          if (process.env.NODE_ENV === "development") {
+            console.warn(`[SSR] Park stats endpoint not available (405) for park ${parkId}, using fallback`);
+          }
+          return {
+            total_flora: 0,
+            total_fauna: 0,
+            total_taman: 0,
+            total_artikel: 0,
+          };
+        }
+        throw error; // Re-throw if it's a different error
+      }
+    } catch (error: any) {
+      // If endpoint doesn't exist or returns error, return fallback stats
+      if (process.env.NODE_ENV === "development") {
+        console.warn(`[SSR] Park stats endpoint error for park ${parkId}:`, error?.message || error);
+      }
+      return {
+        total_flora: 0,
+        total_fauna: 0,
+        total_taman: 0,
+        total_artikel: 0,
+      };
+    }
   },
 );
 
@@ -143,20 +202,21 @@ export const getAvailableRegions = cache(
 );
 
 export const getLatestArticles = cache(async (): Promise<ArtikelPublic[]> => {
-  const fetcher = fetchPaginated(ArtikelPublicSchema, 600);
+  const fetcher = fetchPaginated(ArtikelPublicSchema, 300); // Shorter cache for fresher data
   const data = await fetcher("/api/public/artikel/", { limit: 3, offset: 0 });
-  return data.items;
+  return data.items || [];
 });
 
 export const getGalleryHighlights = cache(
   async (limit = 8): Promise<GalleryItem[]> => {
-    const fetcher = createFetcher(GalleryPaginatedSchema, { revalidate: 900 });
+    const fetcher = createFetcher(GalleryPaginatedSchema, { revalidate: 300 }); // Shorter cache
     const data = await fetcher("/api/public/galeri/", { limit, offset: 0 });
-    return data.items;
+    return data.items || [];
   },
 );
 
 // Main Taman functions
+// Optimize cache key with params for better cache hits
 export const getTamanList = cache(async (params: SearchParams = {}) => {
   // Map frontend parameters to backend parameters
   const backendParams: SearchParams = {};
@@ -168,14 +228,16 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
   if (params.offset) backendParams.offset = params.offset;
 
   const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
-  console.log("[SSR] Fetching taman data from:", url);
+  if (process.env.NODE_ENV === "development") {
+    console.log("[SSR] Fetching taman data from:", url);
+  }
 
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
     },
     next: {
-      revalidate: 0, // Disable cache to get fresh data with gambar_utama
+      revalidate: 300, // Cache for 5 minutes - much faster than 0
     },
   });
 
@@ -189,10 +251,12 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
   }
 
   const data = await response.json();
-  console.log(
-    "[SSR] Parks data received:",
-    JSON.stringify(data).substring(0, 200),
-  );
+  if (process.env.NODE_ENV === "development") {
+    console.log(
+      "[SSR] Parks data received:",
+      JSON.stringify(data).substring(0, 200),
+    );
+  }
 
   // The backend now returns a proper paginated response with TamanPaginatedSchema format
   return TamanPaginatedSchema.parse(data);
@@ -202,7 +266,7 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
 export const getTamanPage = getTamanList;
 
 export const getTamanDetail = cache(async (id: string) => {
-  const fetcher = createFetcher(TamanDetailSchema);
+  const fetcher = createFetcher(TamanDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
   return fetcher(`/api/public/parks/${id}`);
 });
 
@@ -211,13 +275,13 @@ export const getParkList = getTamanList;
 export const getParkPage = getTamanPage;
 export const getParkDetail = getTamanDetail;
 
-export const getFloraList = async (params: SearchParams = {}) => {
-  const fetcher = createFetcher(FloraPaginatedSchema, { revalidate: 0 }); // No cache for testing
+export const getFloraList = cache(async (params: SearchParams = {}) => {
+  const fetcher = createFetcher(FloraPaginatedSchema, { revalidate: 300 }); // Cache for 5 minutes
   return fetcher("/api/public/flora/", params);
-};
+});
 
 export const getFloraDetail = cache(async (id: string) => {
-  const fetcher = createFetcher(FloraDetailSchema);
+  const fetcher = createFetcher(FloraDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
   return fetcher(`/api/public/flora/${id}`);
 });
 
@@ -227,7 +291,7 @@ export const getFaunaList = cache(async (params: SearchParams = {}) => {
 });
 
 export const getFaunaDetail = cache(async (id: string) => {
-  const fetcher = createFetcher(FaunaDetailSchema);
+  const fetcher = createFetcher(FaunaDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
   return fetcher(`/api/public/fauna/${id}`);
 });
 

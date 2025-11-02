@@ -24,16 +24,16 @@ export function Footer() {
             <Link href="/" className="inline-block mb-4 sm:mb-6">
               <Logo size="lg" />
             </Link>
-                <p className="text-slate-600 leading-relaxed max-w-md" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
+                <p className="text-slate-500 leading-relaxed max-w-md" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
               Portal nasional untuk data flora, fauna, dan taman konservasi
               Indonesia. Memperkuat riset, edukasi, dan aksi lapangan
               keanekaragaman hayati.
             </p>
             <div className="mt-4 sm:mt-6">
-                  <p className="text-slate-500 mb-1" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>Kontak</p>
+                  <p className="text-slate-500 mb-1" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>Kontak</p>
                   <a
                     href="mailto:info@tamankehati.id"
-                    className="text-slate-700 hover:text-emerald-600 transition-colors break-all" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}
+                    className="text-slate-600 hover:text-emerald-600 transition-colors break-all" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
               >
                 info@tamankehati.id
               </a>
@@ -42,7 +42,7 @@ export function Footer() {
 
           {/* Navigation Links */}
           <div className="lg:col-span-3">
-            <h3 className="font-medium text-slate-900 mb-3 sm:mb-4" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
+            <h3 className="font-medium text-slate-700 mb-3 sm:mb-4" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
               Navigasi
             </h3>
             <ul className="space-y-2 sm:space-y-3">
@@ -50,8 +50,8 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-slate-600 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
-                    style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}
+                    className="text-slate-500 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
+                    style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
                   >
                     {item.label}
                   </Link>
@@ -62,7 +62,7 @@ export function Footer() {
 
           {/* Support Links */}
           <div className="lg:col-span-4">
-            <h3 className="font-medium text-slate-900 mb-3 sm:mb-4" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
+            <h3 className="font-medium text-slate-700 mb-3 sm:mb-4" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
               Dukungan
             </h3>
             <ul className="space-y-2 sm:space-y-3">
@@ -70,8 +70,8 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-slate-600 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
-                    style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}
+                    className="text-slate-500 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
+                    style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
                   >
                     {item.label}
                   </Link>
@@ -84,21 +84,21 @@ export function Footer() {
         {/* Footer Bottom */}
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-slate-200">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-slate-500 text-center sm:text-left" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
+                <p className="text-slate-400 text-center sm:text-left text-sm" style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}>
               © {new Date().getFullYear()} Taman Kehati. Semua hak dilindungi.
             </p>
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-end">
               <Link
                 href="/kebijakan-privasi"
-                className="text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
-                style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}
+                className="text-slate-400 hover:text-slate-600 transition-colors min-h-[44px] flex items-center text-sm"
+                style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
               >
                 Kebijakan Privasi
               </Link>
               <Link
                 href="/ketentuan"
-                className="text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
-                style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}
+                className="text-slate-400 hover:text-slate-600 transition-colors min-h-[44px] flex items-center text-sm"
+                style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
               >
                 Ketentuan
               </Link>

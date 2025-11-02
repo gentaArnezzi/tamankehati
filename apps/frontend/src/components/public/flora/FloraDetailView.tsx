@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { type FloraDetail } from "../../../types/flora";
 import { Badge } from "../../ui/badge";
 import { EntityCard } from "../cards/EntityCard";
@@ -19,7 +19,7 @@ import {
 } from "../../ui/breadcrumb";
 import { ImageWithFallback } from "../../ui/image-with-fallback";
 
-// Dynamically import LeafletMap with SSR disabled to avoid "window is not defined" error
+// Dynamically import LeafletMap with SSR disabled and lazy loading for better performance
 const LeafletMap = dynamic(
   () => import("../map/LeafletMap").then((mod) => mod.LeafletMap),
   {
@@ -31,6 +31,55 @@ const LeafletMap = dynamic(
     ),
   },
 );
+
+// Lazy load LeafletMap only when it comes into viewport
+function LazyLeafletMap({ markers, title }: { markers: any[]; title: string }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const mapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(mapRef.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={mapRef} className="space-y-4">
+      <h3 className="text-xl font-medium text-slate-900">
+        Sebaran Geografis
+      </h3>
+      {isVisible ? (
+        <LeafletMap
+          height="320px"
+          markers={markers}
+          scrollWheelZoom={false}
+          zoom={8}
+          ariaLabel={`Peta sebaran ${title}`}
+        />
+      ) : (
+        <div className="w-full h-[320px] bg-slate-100 rounded-lg animate-pulse flex items-center justify-center">
+          <p className="text-slate-500 text-sm">Memuat peta...</p>
+        </div>
+      )}
+      <p className="text-xs text-slate-500">
+        Koordinat yang ditampilkan bersifat indikatif untuk tujuan
+        visualisasi.
+      </p>
+    </div>
+  );
+}
 
 type FloraDetailViewProps = {
   flora: FloraDetail;
@@ -44,7 +93,8 @@ type GalleryImage = {
   created_at?: string;
 };
 
-const taxonomyEntries = (flora: FloraDetail) =>
+// Memoized taxonomy entries calculation
+const getTaxonomyEntries = (flora: FloraDetail) =>
   [
     { label: "Nama ilmiah", value: flora.nama_ilmiah },
     { label: "Nama umum", value: flora.nama_umum },
@@ -59,32 +109,43 @@ const taxonomyEntries = (flora: FloraDetail) =>
 export function FloraDetailView({ flora }: FloraDetailViewProps) {
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
+  
+  // Memoize taxonomy entries to avoid recalculation on every render
+  const taxonomyEntries = useMemo(() => getTaxonomyEntries(flora), [flora]);
 
+  // Defer gallery loading to improve initial page load
   useEffect(() => {
+    // Use requestIdleCallback to defer gallery fetch until browser is idle
     const fetchGalleryImages = async () => {
       try {
-        // Fetch directly from backend API
         const response = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/flora/${flora.id}/gallery`,
         );
         if (response.ok) {
           const data = await response.json();
-          console.log("Gallery data fetched:", data);
           setGalleryImages(data.gallery_images || []);
-        } else {
-          console.warn("Gallery fetch failed:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching gallery images:", error);
+        // Silently fail - gallery is not critical for initial render
       } finally {
         setLoadingGallery(false);
       }
     };
 
-    fetchGalleryImages();
+    // Delay gallery fetch to improve initial render performance
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(() => {
+        fetchGalleryImages();
+      }, { timeout: 2000 });
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(() => {
+        fetchGalleryImages();
+      }, 500);
+    }
   }, [flora.id]);
 
-  const jsonLd = {
+  const jsonLd = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "Taxon",
     name: flora.nama_ilmiah,
@@ -94,15 +155,15 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
     habitat: flora.habitat,
     conservationStatus: flora.status_iucn,
     geographicDistribution: flora.sebaran,
-  };
+  }), [flora]);
 
   return (
-    <div className="space-y-0 pb-12 bg-white">
+    <div className="space-y-0 pb-12 bg-white w-full overflow-x-hidden">
       <JsonLd data={jsonLd} />
 
       {/* Hero Section - Full Width with Breadcrumb Overlay */}
-      <section className="relative -mx-6 md:-mx-8 lg:-mx-12">
-        <div className="relative h-[400px] w-full md:h-[500px] lg:h-[600px]">
+      <section className="relative w-full">
+        <div className="relative h-[400px] w-full md:h-[500px] lg:h-[600px] max-w-full overflow-hidden">
           <ImageWithFallback
             src={flora.gambar_utama}
             alt={flora.nama_ilmiah}
@@ -201,8 +262,8 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
       </section>
 
       {/* Content Section */}
-      <div className="px-6 md:px-8 lg:px-12">
-        <section className="bg-white mt-12">
+      <div className="w-full max-w-full overflow-x-hidden">
+        <section className="bg-white mt-12 px-4 sm:px-6 md:px-8 lg:px-12">
           <div className="container mx-auto max-w-7xl py-12">
             <div className="grid gap-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
               <article className="space-y-8">
@@ -258,6 +319,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -285,6 +347,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -312,6 +375,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -339,6 +403,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
+                              loading="lazy"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -467,31 +532,19 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                   </div>
                 ) : null}
 
-                {/* Peta Geografis */}
+                {/* Peta Geografis - Lazy loaded */}
                 {flora.koordinat && (
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-medium text-slate-900">
-                      Sebaran Geografis
-                    </h3>
-                    <LeafletMap
-                      height="320px"
-                      markers={[
-                        {
-                          id: flora.id,
-                          position: [flora.koordinat.lat, flora.koordinat.lng],
-                          title: flora.nama_ilmiah,
-                          description: flora.wilayah,
-                        },
-                      ]}
-                      scrollWheelZoom={false}
-                      zoom={8}
-                      ariaLabel={`Peta sebaran ${flora.nama_ilmiah}`}
-                    />
-                    <p className="text-xs text-slate-500">
-                      Koordinat yang ditampilkan bersifat indikatif untuk tujuan
-                      visualisasi.
-                    </p>
-                  </div>
+                  <LazyLeafletMap
+                    markers={[
+                      {
+                        id: flora.id,
+                        position: [flora.koordinat.lat, flora.koordinat.lng],
+                        title: flora.nama_ilmiah,
+                        description: flora.wilayah,
+                      },
+                    ]}
+                    title={flora.nama_ilmiah}
+                  />
                 )}
               </article>
 
@@ -501,7 +554,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     Taksonomi
                   </h2>
                   <dl className="mt-4 space-y-3 text-sm text-slate-700">
-                    {taxonomyEntries(flora).map((entry) => (
+                    {taxonomyEntries.map((entry) => (
                       <div
                         key={entry.label}
                         className="flex justify-between gap-4"
@@ -614,27 +667,29 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
 
         {/* Gallery Section */}
         {!loadingGallery && galleryImages.length > 0 && (
-          <section className="space-y-6 mt-12">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-light text-slate-900">
-                  Galeri Foto
-                </h2>
-                <p className="mt-1 text-sm text-slate-600">
-                  Koleksi {galleryImages.length} foto untuk{" "}
-                  <span className="italic">{flora.nama_ilmiah}</span>
-                </p>
-              </div>
-              <Badge
-                variant="outline"
-                className="hidden sm:inline-flex border-slate-200 text-slate-700"
-              >
-                {galleryImages.length}{" "}
-                {galleryImages.length === 1 ? "Foto" : "Foto"}
-              </Badge>
-            </div>
+          <section className="bg-white mt-12 px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="container mx-auto max-w-7xl py-12">
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-light text-slate-900">
+                      Galeri Foto
+                    </h2>
+                    <p className="mt-1 text-sm text-slate-600">
+                      Koleksi {galleryImages.length} foto untuk{" "}
+                      <span className="italic">{flora.nama_ilmiah}</span>
+                    </p>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="hidden sm:inline-flex border-slate-200 text-slate-700"
+                  >
+                    {galleryImages.length}{" "}
+                    {galleryImages.length === 1 ? "Foto" : "Foto"}
+                  </Badge>
+                </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {galleryImages.map((image, index) => (
                 <div
                   key={image.id}
@@ -651,6 +706,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       fill
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      loading="lazy"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute top-3 right-3">
@@ -682,22 +738,26 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     )}
                   </div>
                 </div>
-              ))}
+                ))}
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {loadingGallery && (
-          <section className="space-y-6 mt-12">
-            <div>
-              <h2 className="text-2xl font-light text-slate-900">
-                Galeri Foto
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Memuat galeri foto...
-              </p>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <section className="bg-white mt-12 px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="container mx-auto max-w-7xl py-12">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-light text-slate-900">
+                    Galeri Foto
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Memuat galeri foto...
+                  </p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="animate-pulse">
                   <div className="aspect-square bg-slate-200 rounded-xl" />
@@ -706,24 +766,28 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="h-3 bg-slate-200 rounded w-1/2" />
                   </div>
                 </div>
-              ))}
+                ))}
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {/* Empty Gallery State */}
         {!loadingGallery && galleryImages.length === 0 && (
-          <section className="space-y-6 mt-12">
-            <div>
-              <h2 className="text-2xl font-light text-slate-900">
-                Galeri Foto
-              </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Koleksi foto untuk{" "}
-                <span className="italic">{flora.nama_ilmiah}</span>
-              </p>
-            </div>
-            <div className="rounded-xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+          <section className="bg-white mt-12 px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="container mx-auto max-w-7xl py-12">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-light text-slate-900">
+                    Galeri Foto
+                  </h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Koleksi foto untuk{" "}
+                    <span className="italic">{flora.nama_ilmiah}</span>
+                  </p>
+                </div>
+                <div className="rounded-xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
               <svg
                 className="mx-auto h-12 w-12 text-slate-400"
                 fill="none"
@@ -744,23 +808,27 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
               <p className="mt-2 text-sm text-slate-500">
                 Galeri foto untuk spesies ini belum tersedia atau masih dalam
                 proses persetujuan.
-              </p>
+                  </p>
+                </div>
+              </div>
             </div>
           </section>
         )}
 
         {flora.konten_terkait?.length ? (
-          <section className="space-y-6 mt-12">
-            <div>
-              <h2 className="text-2xl font-light text-slate-900">
-                Spesies Terkait
-              </h2>
-              <p className="text-sm text-slate-600">
-                Temukan spesies dengan karakteristik serupa untuk memperluas
-                konteks taksonomi dan konservasi.
-              </p>
-            </div>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <section className="bg-white mt-12 px-4 sm:px-6 md:px-8 lg:px-12">
+            <div className="container mx-auto max-w-7xl py-12">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-light text-slate-900">
+                    Spesies Terkait
+                  </h2>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Temukan spesies dengan karakteristik serupa untuk memperluas
+                    konteks taksonomi dan konservasi.
+                  </p>
+                </div>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {flora.konten_terkait.map((related) => (
                 <EntityCard
                   key={related.id}
@@ -769,7 +837,9 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                   subtitle={related.nama_umum ?? ""}
                   image={related.gambar_utama}
                 />
-              ))}
+                ))}
+                </div>
+              </div>
             </div>
           </section>
         ) : null}

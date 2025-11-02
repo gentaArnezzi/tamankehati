@@ -10,7 +10,8 @@ export const metadata: Metadata = {
     "Baca artikel edukasi, berita konservasi, dan riset terbaru seputar keanekaragaman hayati Indonesia.",
 };
 
-export const revalidate = 1800;
+// ISR - Regenerate every 5 minutes for fresher articles
+export const revalidate = 300;
 
 type ArtikelPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

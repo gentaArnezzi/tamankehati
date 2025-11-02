@@ -37,10 +37,10 @@ export function MinimalNewsletterSection() {
                 <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto">
                   <Check className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-light text-white">
+                <h3 className="text-xl sm:text-2xl md:text-2xl lg:text-3xl font-light text-white">
                   Terima kasih telah berlangganan
                 </h3>
-                <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-400">
+                <p className="text-sm sm:text-base md:text-lg text-gray-400" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
                   Kami akan mengirimkan update terbaru ke email Anda
                 </p>
               </div>
@@ -49,7 +49,7 @@ export function MinimalNewsletterSection() {
                 <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-white mb-4 sm:mb-6">
                   Dapatkan Update Terbaru
                 </h2>
-                <div className="w-16 sm:w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"></div>
+                <div className="w-16 sm:w-24 h-0.5 bg-emerald-500 mx-auto rounded-full mb-6 sm:mb-8"></div>
                 <p className="text-gray-400 mb-6 sm:mb-8 max-w-2xl mx-auto px-4" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
                   Berlangganan newsletter untuk mendapatkan informasi terbaru
                   tentang spesies, penelitian, dan konservasi
