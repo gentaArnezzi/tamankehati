@@ -524,6 +524,26 @@ export function CollapsibleDashboardLayout({
               </div>
             )}
 
+            {/* Collapse/Expand Sidebar Button */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="relative flex h-11 w-full items-center rounded-md transition-all duration-200 text-gray-900 hover:bg-gray-50 hover:text-gray-900"
+              title={sidebarOpen ? "Minimize Sidebar" : "Expand Sidebar"}
+            >
+              <div className="grid h-full w-12 place-content-center">
+                {sidebarOpen ? (
+                  <ChevronsRight className="h-4 w-4" />
+                ) : (
+                  <ChevronsRight className="h-4 w-4 rotate-180" />
+                )}
+              </div>
+              {sidebarOpen && (
+                <span className="text-sm font-medium">
+                  Minimize
+                </span>
+              )}
+            </button>
+
             {/* Settings Button */}
             {sidebarOpen && (
               <button
@@ -580,7 +600,7 @@ export function CollapsibleDashboardLayout({
                     sidebarOpen ? "opacity-100" : "opacity-0"
                   }`}
                 >
-                  Sembunyikan
+                  {sidebarOpen ? "Minimize" : "Expand"}
                 </span>
               )}
             </div>
@@ -592,18 +612,34 @@ export function CollapsibleDashboardLayout({
           {/* Header */}
           <div className="sticky top-0 z-10 bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between gap-4">
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? (
-                  <X className="w-5 h-5 text-gray-900" />
-                ) : (
-                  <Menu className="w-5 h-5 text-gray-900" />
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                {/* Desktop Sidebar Toggle Button */}
+                <button
+                  onClick={() => setSidebarOpen(!sidebarOpen)}
+                  className="hidden lg:flex p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Toggle sidebar"
+                  title={sidebarOpen ? "Minimize Sidebar" : "Expand Sidebar"}
+                >
+                  {sidebarOpen ? (
+                    <ChevronsRight className="w-5 h-5 text-gray-900" />
+                  ) : (
+                    <ChevronsRight className="w-5 h-5 text-gray-900 rotate-180" />
+                  )}
+                </button>
+
+                {/* Mobile Menu Button */}
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  className="lg:hidden p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                  aria-label="Toggle menu"
+                >
+                  {mobileMenuOpen ? (
+                    <X className="w-5 h-5 text-gray-900" />
+                  ) : (
+                    <Menu className="w-5 h-5 text-gray-900" />
+                  )}
+                </button>
+              </div>
 
               <div className="flex-1 min-w-0">
                 <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
