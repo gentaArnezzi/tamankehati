@@ -4,29 +4,13 @@ __pycache__/
 *$py.class
 *.so
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
-
-# Virtual environments
+dist/
+build/
 venv/
 env/
 ENV/
-env.bak/
-venv.bak/
+.venv/
 
 # IDE
 .vscode/
@@ -35,63 +19,47 @@ venv.bak/
 *.swo
 *~
 
-# OS
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
 # Logs
 *.log
 logs/
+server.log
+backend.log
 
 # Database
 *.db
 *.sqlite
 *.sqlite3
 
-# Environment files
+# Environment
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
-.tox/
-.nox/
+
+# Uploads (will be mounted as volume)
+uploads/
+!uploads/.gitkeep
+
+# Alembic
+alembic/versions/*.pyc
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
 
 # Documentation
-docs/
 *.md
-README*
+!README.md
 
 # Git
 .git/
 .gitignore
 
-# Docker
-Dockerfile*
-docker-compose*
-.dockerignore
-
-# Development files
-test.txt
-frontend.log
-openapi.json
-next-env.d.ts
-tsconfig.tsbuildinfo
-
-# Archive and old scripts
-archive/
-old_scripts/
-
-# Uploads (keep structure but not content)
-uploads/*
-!uploads/.gitkeep
+# OS
+.DS_Store
+Thumbs.db

@@ -537,7 +537,15 @@ async def debug_current_user(
     """
     Debug endpoint: Get current user info with park details.
     Helps diagnose park assignment issues.
+    Only available in development mode.
     """
+    import os
+    if os.getenv("ENVIRONMENT") == "production" or os.getenv("DEBUG", "false").lower() == "false":
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Not found"}
+        )
     from domains.parks.models import Park
     
     # Get user's assigned park if they have one

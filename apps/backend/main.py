@@ -472,7 +472,17 @@ async def serve_upload_file(file_path: str, request: Request):
 
 @app.get("/debug-cors")
 async def debug_cors():
+    """
+    Debug endpoint for CORS configuration.
+    Only available in development mode.
+    """
     import os
+    if os.getenv("ENVIRONMENT") == "production" or os.getenv("DEBUG", "false").lower() == "false":
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "Not found"}
+        )
     env_origins = os.getenv("CORS_ALLOW_ORIGINS")
     return {
         "env_origins": env_origins,

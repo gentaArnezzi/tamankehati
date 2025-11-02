@@ -1,0 +1,72 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+archive/
+!README.md
+
+# Docker
+docker-compose*.yml
+Dockerfile
+.dockerignore
+docker-dev.sh
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+.DS_Store?
+
+# Logs
+*.log
+logs/
+
+# Old scripts
+old_scripts/
+
+# Node modules (handled by frontend Dockerfile)
+node_modules/
+
+# Python cache (handled by backend Dockerfile)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+
+# Test files
+tests/
+test_*.py
+*_test.py
+
+# Coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+

@@ -1,45 +1,37 @@
 #!/bin/bash
+# Production startup script for backend
+# Runs migrations and initializes admin before starting server
 
-# Script untuk menjalankan backend dengan benar menggunakan venv
-# Usage: ./start.sh
+set -e
 
-# Colors
-GREEN='\033[0;32m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+echo "🚀 Starting Taman Kehati Backend..."
 
-echo -e "${BLUE}🚀 Starting Taman Kehati Backend...${NC}"
+# Wait for database to be ready (simple retry with delay)
+echo "⏳ Waiting for database..."
+sleep 5  # Give database time to start
+for i in {1..15}; do
+  if python -c "from psycopg2 import connect; from os import getenv; connect(getenv('DATABASE_URL_SYNC', 'postgresql://kehati_user:kehati_password@postgres:5432/kehati_db'))" 2>/dev/null; then
+    echo "✅ Database connection successful!"
+    break
+  fi
+  echo "   Attempt $i/15: Database not ready, waiting 2 seconds..."
+  sleep 2
+done
 
-# Get script directory
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-cd "$SCRIPT_DIR"
+echo "✅ Database is ready!"
 
-# Check if venv exists
-if [ ! -d "venv" ]; then
-    echo "❌ Virtual environment not found! Please create it first:"
-    echo "   python3 -m venv venv"
-    exit 1
-fi
+# Run migrations
+echo "📦 Running database migrations..."
+alembic upgrade head || {
+  echo "⚠️  Migration failed, but continuing..."
+}
 
-# Activate venv
-echo -e "${GREEN}✓${NC} Activating virtual environment..."
-source venv/bin/activate
+# Initialize admin user
+echo "👤 Initializing admin user..."
+python init_admin.py || {
+  echo "⚠️  Admin initialization failed, but continuing..."
+}
 
-# Check if greenlet is installed
-if ! python -c "import greenlet" 2>/dev/null; then
-    echo "⚠️  Installing missing dependency: greenlet"
-    pip install --trusted-host pypi.org --trusted-host pypi.python.org --trusted-host files.pythonhosted.org greenlet
-fi
-
-# Display Python info
-echo -e "${GREEN}✓${NC} Python: $(which python)"
-echo -e "${GREEN}✓${NC} Version: $(python --version)"
-
-# Run uvicorn
-echo -e "${BLUE}🌐 Starting server on http://0.0.0.0:8000${NC}"
-echo -e "${BLUE}📚 API Docs: http://localhost:8000/docs${NC}"
-echo ""
-
-# Use python -m uvicorn to ensure using venv's Python
-python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-
+# Start server
+echo "🎯 Starting backend server..."
+exec "$@"

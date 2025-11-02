@@ -16,9 +16,12 @@ cd tamankehati_21
 # Copy environment variables
 cp env.example .env
 
-# Start with Docker
+# Start with Docker (Recommended)
 chmod +x docker-dev.sh
 ./docker-dev.sh start
+
+# Or using Makefile
+make up
 ```
 
 **Access the application:**
@@ -56,6 +59,12 @@ chmod +x docker-dev.sh
 
 ## 📚 Documentation
 
+### For Clients (Deployment):
+👉 **START HERE**: [`docs/client/QUICK_START_CLIENT.md`](docs/client/QUICK_START_CLIENT.md)
+
+All client deployment documentation: [`docs/client/`](docs/client/)
+
+### For Developers:
 Comprehensive documentation is available in the [`docs/`](docs/) directory:
 
 ### Getting Started
@@ -109,7 +118,29 @@ Comprehensive documentation is available in the [`docs/`](docs/) directory:
 ./docker-dev.sh clean    # Clean up (removes data)
 ```
 
-### Direct Docker Compose
+### Production Deployment (for Client)
+
+```bash
+# Build production images
+docker-compose -f docker-compose.prod.yml build
+
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# View logs
+docker-compose -f docker-compose.prod.yml logs -f
+
+# Check status
+docker-compose -f docker-compose.prod.yml ps
+```
+
+📚 **Client Documentation:**
+- Quick Start: [`docs/client/QUICK_START_CLIENT.md`](docs/client/QUICK_START_CLIENT.md)
+- Full Guide: [`docs/client/CLIENT_DEPLOYMENT_GUIDE.md`](docs/client/CLIENT_DEPLOYMENT_GUIDE.md)
+- Checklist: [`docs/client/DEPLOYMENT_CHECKLIST.md`](docs/client/DEPLOYMENT_CHECKLIST.md)
+- All Client Docs: [`docs/client/`](docs/client/)
+
+### Direct Docker Compose (Development)
 
 ```bash
 docker compose up -d           # Start in background

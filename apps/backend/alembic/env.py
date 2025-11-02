@@ -14,6 +14,7 @@ from core.config.env import load_env
 from core.database.base import Base
 
 # Import all models to ensure they're registered with Base.metadata
+# Only import models that have corresponding migrations
 import domains.articles.models
 import users.models
 import domains.flora.models
@@ -21,6 +22,8 @@ import domains.fauna.models
 import domains.parks.models
 import domains.galleries.models
 import domains.activities.models
+# Note: announcements, news, chat, system_settings, regions tables exist in Railway
+# but are not managed by Alembic migrations - they are handled separately
 
 config = context.config
 

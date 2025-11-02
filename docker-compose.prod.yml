@@ -2,29 +2,31 @@ services:
   # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
-    container_name: kehati-postgres
+    container_name: kehati-postgres-prod
     environment:
-      POSTGRES_DB: kehati_db
-      POSTGRES_USER: kehati_user
-      POSTGRES_PASSWORD: kehati_password
+      POSTGRES_DB: ${POSTGRES_DB:-kehati_db}
+      POSTGRES_USER: ${POSTGRES_USER:-kehati_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kehati_password}
     ports:
-      - "5433:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U kehati_user -d kehati_db"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kehati_user} -d ${POSTGRES_DB:-kehati_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - kehati-network
+    restart: unless-stopped
 
   # Redis for caching and sessions
   redis:
     image: redis:7-alpine
-    container_name: kehati-redis
+    container_name: kehati-redis-prod
+    command: redis-server --appendonly yes
     ports:
-      - "6379:6379"
+      - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -34,46 +36,52 @@ services:
       retries: 5
     networks:
       - kehati-network
+    restart: unless-stopped
 
-  # Backend API
+  # Backend API - Production
   backend:
     build:
       context: ./apps/backend
       dockerfile: Dockerfile
-      target: development
-    container_name: kehati-backend
+      target: production
+    container_name: kehati-backend-prod
     environment:
       # Database
-      DATABASE_URL: postgresql+asyncpg://kehati_user:kehati_password@postgres:5432/kehati_db
-      DATABASE_URL_SYNC: postgresql://kehati_user:kehati_password@postgres:5432/kehati_db
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
+      DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
       
       # Redis
       REDIS_URL: redis://redis:6379
       
       # Security
-      SECRET_KEY: ${SECRET_KEY:-your-secret-key-change-in-production}
+      SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
       
       # CORS
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://frontend:3000}
-      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-${CORS_ORIGINS:-http://localhost:3000,http://frontend:3000}}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-${CORS_ORIGINS:-http://localhost:3000}}
       
       # Environment
-      ENVIRONMENT: ${ENVIRONMENT:-development}
-      DEBUG: ${DEBUG:-true}
+      ENVIRONMENT: production
+      DEBUG: "false"
       
       # Upload
-      UPLOAD_DIRECTORY: ${UPLOAD_DIRECTORY:-/app/uploads}
+      UPLOAD_DIRECTORY: /app/uploads
       
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
+      
+      # Firewall (optional)
+      FIREWALL_ENABLED: ${FIREWALL_ENABLED:-false}
+      FIREWALL_MODE: ${FIREWALL_MODE:-blacklist}
+      IP_WHITELIST: ${IP_WHITELIST:-}
+      IP_BLACKLIST: ${IP_BLACKLIST:-}
+      FIREWALL_BYPASS_PATHS: ${FIREWALL_BYPASS_PATHS:-/health,/healthz,/api/health}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
-      - ./apps/backend:/app
-      - /app/__pycache__
       - backend_uploads:/app/uploads
     depends_on:
       postgres:
@@ -88,28 +96,25 @@ services:
       start_period: 40s
     networks:
       - kehati-network
+    restart: unless-stopped
+    # Entrypoint and command are handled by Dockerfile start.sh script
 
-  # Frontend Next.js
+  # Frontend Next.js - Production
   frontend:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
-      target: development
-    container_name: kehati-frontend
+      target: runner
+    container_name: kehati-frontend-prod
     environment:
       # API Configuration
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
-      API_BASE_URL: ${API_BASE_URL:-http://backend:8000}
       
       # Environment
-      NODE_ENV: ${NODE_ENV:-development}
-      NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED:-1}
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
     ports:
       - "${FRONTEND_PORT:-3000}:3000"
-    volumes:
-      - ./apps/frontend:/app
-      - /app/node_modules
-      - /app/.next
     depends_on:
       backend:
         condition: service_healthy
@@ -121,27 +126,7 @@ services:
       start_period: 40s
     networks:
       - kehati-network
-
-  # Database Migration Service
-  migrate:
-    build:
-      context: ./apps/backend
-      dockerfile: Dockerfile
-      target: development
-    container_name: kehati-migrate
-    environment:
-      DATABASE_URL: postgresql+asyncpg://kehati_user:kehati_password@postgres:5432/kehati_db
-      DATABASE_URL_SYNC: postgresql://kehati_user:kehati_password@postgres:5432/kehati_db
-    volumes:
-      - ./apps/backend:/app
-    command: ["alembic", "upgrade", "head"]
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - kehati-network
-    profiles:
-      - tools
+    restart: unless-stopped
 
 volumes:
   postgres_data:
@@ -154,3 +139,4 @@ volumes:
 networks:
   kehati-network:
     driver: bridge
+
