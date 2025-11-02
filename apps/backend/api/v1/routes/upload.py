@@ -268,6 +268,13 @@ async def upload_multiple_gallery_images(
                 if 'file_path' in locals() and os.path.exists(file_path):
                     os.remove(file_path)
                 continue
+        except Exception as e:
+            # Catch any other unexpected exceptions from outer try block
+            failed_files.append({
+                "filename": file.filename if hasattr(file, 'filename') and file.filename else "unknown",
+                "error": str(e)
+            })
+            continue
     
     return JSONResponse(content={
         "success": len(uploaded_files) > 0,
@@ -382,6 +389,13 @@ async def upload_activity_images(
                 if 'file_path' in locals() and os.path.exists(file_path):
                     os.remove(file_path)
                 continue
+        except Exception as e:
+            # Catch any other unexpected exceptions from outer try block
+            failed_files.append({
+                "filename": file.filename if hasattr(file, 'filename') and file.filename else "unknown",
+                "error": str(e)
+            })
+            continue
     
     return JSONResponse(content={
         "success": len(uploaded_files) > 0,
