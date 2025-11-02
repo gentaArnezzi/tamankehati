@@ -311,3 +311,6 @@ export const publicApi = {
     return mapActivity(response);
   },
 };
+
+// Also export as default for compatibility
+export default publicApi;

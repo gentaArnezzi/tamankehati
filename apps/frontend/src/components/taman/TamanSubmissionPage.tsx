@@ -59,9 +59,24 @@ import dynamic from "next/dynamic";
 
 const InteractiveMapWrapper = dynamic(
   () =>
-    import("../ui/interactive-map-wrapper").then((mod) => ({
-      default: mod.InteractiveMapWrapper,
-    })),
+    import("../ui/interactive-map-wrapper").then((mod) => {
+      if (!mod || !mod.InteractiveMapWrapper) {
+        console.error('[TamanSubmissionPage] InteractiveMapWrapper not found');
+        throw new Error('InteractiveMapWrapper not found');
+      }
+      return { default: mod.InteractiveMapWrapper };
+    }).catch((error) => {
+      console.error('[TamanSubmissionPage] Error loading InteractiveMapWrapper:', error);
+      return {
+        default: () => (
+          <div className="flex items-center justify-center h-96 border border-gray-300 rounded-lg">
+            <div className="text-center">
+              <p className="text-sm text-gray-600">Peta tidak dapat dimuat</p>
+            </div>
+          </div>
+        )
+      };
+    }),
   {
     ssr: false,
     loading: () => (

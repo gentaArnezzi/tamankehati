@@ -145,6 +145,10 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             {stats.map((stat, index) => {
               const IconComponent = stat.icon;
+              if (!IconComponent || typeof IconComponent !== 'function') {
+                console.warn(`[MinimalStatsSection] Icon component is undefined for stat: ${stat.label}`);
+                return null;
+              }
               return (
                 <motion.div
                   key={index}

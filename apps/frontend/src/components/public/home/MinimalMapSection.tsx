@@ -8,7 +8,23 @@ import dynamic from "next/dynamic";
 
 // Dynamic import to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(
-  () => import("./MapWrapper").then((mod) => mod.MapWrapper),
+  () => import("./MapWrapper").then((mod) => {
+    if (!mod || !mod.MapWrapper) {
+      console.error('[MinimalMapSection] MapWrapper not found in module');
+      throw new Error('MapWrapper component not found');
+    }
+    return { default: mod.MapWrapper };
+  }).catch((error) => {
+    console.error('[MinimalMapSection] Error loading MapWrapper:', error);
+    // Return a fallback component
+    return { 
+      default: () => (
+        <div className="aspect-square bg-gray-100 rounded-2xl flex items-center justify-center">
+          <div className="text-slate-500">Peta tidak dapat dimuat</div>
+        </div>
+      )
+    };
+  }),
   {
     ssr: false,
     loading: () => (

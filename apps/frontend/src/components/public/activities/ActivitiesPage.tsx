@@ -16,6 +16,11 @@ import {
   List,
 } from "lucide-react";
 import { publicApi } from "../../../lib/public-api-client";
+
+// Ensure publicApi is available
+if (!publicApi || typeof publicApi !== 'object') {
+  console.error('[ActivitiesPage] publicApi is not properly exported from public-api-client');
+}
 import Link from "next/link";
 import { InstantLink } from "../../ui/instant-link";
 import Image from "next/image";
@@ -83,6 +88,9 @@ export function ActivitiesPage() {
   const loadStats = async () => {
     try {
       setStatsLoading(true);
+      if (!publicApi || typeof publicApi.getStats !== 'function') {
+        throw new Error('publicApi.getStats is not available');
+      }
       const response = await publicApi.getStats();
       setStats(response as unknown as Stats);
     } catch (err) {
@@ -102,6 +110,9 @@ export function ActivitiesPage() {
   const loadParks = async () => {
     try {
       setParksLoading(true);
+      if (!publicApi || typeof publicApi.getTaman !== 'function') {
+        throw new Error('publicApi.getTaman is not available');
+      }
       const response = await publicApi.getTaman({ limit: 100 });
       console.log("Parks API Response:", response);
       console.log("Response items:", response.items);
@@ -129,6 +140,10 @@ export function ActivitiesPage() {
     try {
       setLoading(true);
       setError(null);
+
+      if (!publicApi || typeof publicApi.getActivities !== 'function') {
+        throw new Error('publicApi.getActivities is not available');
+      }
 
       const params = {
         limit: itemsPerPage,
