@@ -1,11 +1,45 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tamankehati-backend-pxnu.onrender.com',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tamankehati-21.onrender.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tamankehati-backend-zxb9.onrender.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'tamankehati-backend.onrender.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
+      },
+    ],
     domains: [
       'localhost', 
       'tamankehati-21.onrender.com', 
       'tamankehati-backend-zxb9.onrender.com',
       'tamankehati-backend.onrender.com',
+      'tamankehati-backend-pxnu.onrender.com',
       'images.unsplash.com', 
       'example.com', 
       'picsum.photos',

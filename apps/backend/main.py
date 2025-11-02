@@ -175,7 +175,8 @@ app.add_middleware(
 )
 
 # Static files for uploads - mount early to avoid conflicts
-uploads_dir = os.path.join(os.path.dirname(__file__), "uploads")
+# Use UPLOAD_DIRECTORY from env, fallback to relative path for local dev
+uploads_dir = os.getenv("UPLOAD_DIRECTORY") or os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 print(f"Uploads directory: {uploads_dir}")
 app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")

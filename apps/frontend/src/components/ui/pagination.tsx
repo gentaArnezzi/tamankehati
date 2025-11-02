@@ -9,7 +9,14 @@ function cn(...classes: Array<string | false | null | undefined>) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
+type PaginationProps = Omit<React.ComponentProps<"nav">, "currentPage" | "totalPages" | "totalItems" | "itemsPerPage"> & {
+  currentPage?: number;
+  totalPages?: number;
+  totalItems?: number;
+  itemsPerPage?: number;
+};
+
+export function Pagination({ className, currentPage, totalPages, totalItems, itemsPerPage, ...props }: PaginationProps) {
   return (
     <nav
       role="navigation"
