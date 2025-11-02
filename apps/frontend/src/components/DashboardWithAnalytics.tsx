@@ -410,11 +410,11 @@ export function DashboardWithAnalytics() {
         onValueChange={setActiveTab}
         className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4">
-          <TabsTrigger value="overview" className="text-xs sm:text-sm">Overview</TabsTrigger>
-          <TabsTrigger value="biodiversity" className="text-xs sm:text-sm">Biodiversitas</TabsTrigger>
-          <TabsTrigger value="conservation" className="text-xs sm:text-sm">Konservasi</TabsTrigger>
-          <TabsTrigger value="statistics" className="text-xs sm:text-sm">Statistik</TabsTrigger>
+        <TabsList className="flex w-full flex-wrap sm:flex-nowrap">
+          <TabsTrigger value="overview" className="text-xs sm:text-sm w-1/2 sm:w-auto">Overview</TabsTrigger>
+          <TabsTrigger value="biodiversity" className="text-xs sm:text-sm w-1/2 sm:w-auto">Biodiversitas</TabsTrigger>
+          <TabsTrigger value="conservation" className="text-xs sm:text-sm w-1/2 sm:w-auto">Konservasi</TabsTrigger>
+          <TabsTrigger value="statistics" className="text-xs sm:text-sm w-1/2 sm:w-auto">Statistik</TabsTrigger>
         </TabsList>
 
         {/* Overview Tab */}
