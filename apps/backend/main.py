@@ -396,6 +396,80 @@ async def get_fauna_simple():
 async def healthz():
     return {"ok": True}
 
+# Special endpoint to serve uploads with proper CORS headers (fixes ERR_BLOCKED_BY_ORB)
+@app.get("/uploads/{file_path:path}")
+async def serve_upload_file(file_path: str, request: Request):
+    """
+    Serve uploaded files with proper CORS and Content-Type headers.
+    Fixes ERR_BLOCKED_BY_ORB error in browsers.
+    """
+    import mimetypes
+    from starlette.responses import FileResponse
+    
+    # Construct full file path
+    file_full_path = os.path.join(uploads_dir, file_path)
+    
+    # Security: prevent path traversal
+    file_full_path = os.path.normpath(file_full_path)
+    if not file_full_path.startswith(os.path.normpath(uploads_dir)):
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=403,
+            content={"detail": "Access denied"}
+        )
+    
+    # Check if file exists
+    if not os.path.exists(file_full_path) or not os.path.isfile(file_full_path):
+        from fastapi.responses import JSONResponse
+        return JSONResponse(
+            status_code=404,
+            content={"detail": "File not found"}
+        )
+    
+    # Determine content type
+    content_type, _ = mimetypes.guess_type(file_full_path)
+    if not content_type:
+        # Default content type based on extension
+        if file_path.endswith(('.jpg', '.jpeg')):
+            content_type = 'image/jpeg'
+        elif file_path.endswith('.png'):
+            content_type = 'image/png'
+        elif file_path.endswith('.gif'):
+            content_type = 'image/gif'
+        elif file_path.endswith('.webp'):
+            content_type = 'image/webp'
+        else:
+            content_type = 'application/octet-stream'
+    
+    # Get origin from request
+    origin = request.headers.get("origin")
+    
+    # Check if origin is allowed
+    allowed_origins = allow_origins if allow_origins else []
+    is_allowed_origin = False
+    if origin:
+        if "*" in allowed_origins or origin in allowed_origins:
+            is_allowed_origin = True
+        # Also check if matches CORS regex if exists
+        import re
+        cors_regex = os.getenv("CORS_ALLOW_ORIGIN_REGEX")
+        if cors_regex and re.match(cors_regex, origin):
+            is_allowed_origin = True
+    
+    # Return file with proper headers
+    response = FileResponse(
+        file_full_path,
+        media_type=content_type,
+        headers={
+            "Access-Control-Allow-Origin": origin if is_allowed_origin else allowed_origins[0] if allowed_origins else "*",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Accept, Content-Type",
+            "Cache-Control": "public, max-age=31536000",  # Cache for 1 year
+        }
+    )
+    return response
+
 @app.get("/debug-cors")
 async def debug_cors():
     import os

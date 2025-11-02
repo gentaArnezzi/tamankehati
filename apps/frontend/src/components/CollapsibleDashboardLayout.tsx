@@ -676,13 +676,18 @@ const Logo = ({ user }: { user: User | null }) => {
 
   return (
     <Avatar
-      key={user?.profile_picture_url || "no-avatar-sidebar"}
+      key={user?.profile_picture_url || `no-avatar-sidebar-${user?.id}`}
       className="size-10 shrink-0 shadow-sm border-2 border-white"
     >
       {user?.profile_picture_url && (
         <AvatarImage
           src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
           alt={user?.nama || "Profile photo"}
+          onError={(e) => {
+            console.error("Failed to load avatar image:", user.profile_picture_url);
+            // Hide image on error, fallback will show
+            e.currentTarget.style.display = 'none';
+          }}
         />
       )}
       <AvatarFallback className="bg-gradient-to-br from-brand-600 to-brand-700 text-white font-bold text-sm">

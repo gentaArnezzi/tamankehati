@@ -45,7 +45,7 @@ import { toast } from "sonner";
 export default function SettingsPage() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout, refreshUser } = useAuth();
+  const { user, logout, refreshUser, updateUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState({
     current: false,
@@ -317,26 +317,38 @@ export default function SettingsPage() {
 
       const updatedUser = await response.json();
       console.log("📸 Photo uploaded, server response:", updatedUser);
+      console.log("📸 Profile picture URL from server:", updatedUser.profile_picture_url);
 
       toast.success("Foto profil berhasil diupload");
 
-      // Refresh user context from API (without redirect)
+      // Immediately update user context with the new profile picture URL
+      if (updatedUser.profile_picture_url && user) {
+        // Update user state immediately without waiting for refresh
+        updateUser({
+          profile_picture_url: updatedUser.profile_picture_url,
+        });
+        console.log("✅ User state updated with new profile picture URL");
+      }
+
+      // Refresh user context from API to ensure consistency
       try {
         await refreshUser();
         console.log("✅ User context refreshed after photo upload");
-        console.log("📸 Current user data:", user);
-
-        // Force re-render by reloading the page after a short delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        console.log("📸 Current user data after refresh:", user);
       } catch (refreshError) {
         console.warn("⚠️ Could not refresh user context:", refreshError);
-        // Photo upload was successful, try reloading anyway
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
+        // Continue anyway since we already updated state
       }
+
+      // Small delay to ensure state is updated before checking UI
+      setTimeout(() => {
+        // Check if photo is visible, if not reload
+        const avatarImg = document.querySelector('img[alt*="Profile photo"]') as HTMLImageElement;
+        if (!avatarImg || !avatarImg.complete || avatarImg.naturalHeight === 0) {
+          console.log("🔄 Reloading page to show new photo");
+          window.location.reload();
+        }
+      }, 1000);
     } catch (error: any) {
       console.error("Failed to upload photo:", error);
       toast.error(error.message || "Gagal mengupload foto");
@@ -399,13 +411,17 @@ export default function SettingsPage() {
             <div className="flex items-start gap-6">
               <div className="relative group">
                 <Avatar
-                  key={user?.profile_picture_url || "no-avatar"}
+                  key={user?.profile_picture_url || `no-avatar-${user?.id}`}
                   className="h-24 w-24 border-4 border-white shadow-lg"
                 >
                   {user?.profile_picture_url && (
                     <AvatarImage
                       src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
                       alt={user?.nama || "Profile photo"}
+                      onError={(e) => {
+                        console.error("Failed to load profile image:", user.profile_picture_url);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   )}
                   <AvatarFallback className="bg-gradient-to-br from-brand-600 to-brand-700 text-white font-bold text-3xl">

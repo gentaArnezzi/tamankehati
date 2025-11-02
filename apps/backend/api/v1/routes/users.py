@@ -20,7 +20,8 @@ from core.utils.timezone import get_jakarta_now
 router = APIRouter(prefix="/users")
 
 # Upload configuration
-UPLOAD_DIR = os.getenv("UPLOAD_DIR", "./uploads")
+# Use UPLOAD_DIRECTORY to match main.py static files mount
+UPLOAD_DIR = os.getenv("UPLOAD_DIRECTORY") or os.getenv("UPLOAD_DIR") or os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "uploads")
 AVATARS_DIR = os.path.join(UPLOAD_DIR, "avatars")
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
