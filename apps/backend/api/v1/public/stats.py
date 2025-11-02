@@ -80,20 +80,89 @@ async def get_park_stats(
     Get statistics for a specific park.
     """
     try:
-        # Get flora count for this park
-        flora_query = text("SELECT COUNT(*) FROM flora WHERE park_id = :park_id AND status = 'approved'")
+        # Get flora count for this park (approved and not deleted)
+        flora_query = text("""
+            SELECT COUNT(*) FROM flora 
+            WHERE park_id = :park_id 
+            AND status = 'approved' 
+            AND deleted_at IS NULL
+        """)
         flora_result = await db.execute(flora_query, {"park_id": park_id})
         total_flora = flora_result.scalar() or 0
+        
+        # Debug: log all flora for this park to help troubleshoot
+        debug_query = text("""
+            SELECT id, nama_ilmiah, status, deleted_at 
+            FROM flora 
+            WHERE park_id = :park_id
+            ORDER BY id
+        """)
+        debug_result = await db.execute(debug_query, {"park_id": park_id})
+        debug_rows = debug_result.fetchall()
+        print(f"🔍 Debug - Park {park_id} flora count breakdown:")
+        print(f"   Total flora (all status): {len(debug_rows)}")
+        approved_count = sum(1 for row in debug_rows if row[2] == 'approved' and row[3] is None)
+        print(f"   Approved & not deleted: {approved_count}")
+        print(f"   Query result: {total_flora}")
+        for row in debug_rows:
+            deleted_status = "DELETED" if row[3] else "active"
+            print(f"   - ID: {row[0]}, Nama: {row[1]}, Status: {row[2]}, {deleted_status}")
 
-        # Get fauna count for this park
-        fauna_query = text("SELECT COUNT(*) FROM fauna WHERE park_id = :park_id AND status = 'approved'")
+        # Get fauna count for this park (approved and not deleted)
+        fauna_query = text("""
+            SELECT COUNT(*) FROM fauna 
+            WHERE park_id = :park_id 
+            AND status = 'approved' 
+            AND deleted_at IS NULL
+        """)
         fauna_result = await db.execute(fauna_query, {"park_id": park_id})
         total_fauna = fauna_result.scalar() or 0
+        
+        # Debug: log all fauna for this park to help troubleshoot
+        fauna_debug_query = text("""
+            SELECT id, nama_ilmiah, status, deleted_at 
+            FROM fauna 
+            WHERE park_id = :park_id
+            ORDER BY id
+        """)
+        fauna_debug_result = await db.execute(fauna_debug_query, {"park_id": park_id})
+        fauna_debug_rows = fauna_debug_result.fetchall()
+        print(f"🔍 Debug - Park {park_id} fauna count breakdown:")
+        print(f"   Total fauna (all status): {len(fauna_debug_rows)}")
+        fauna_approved_count = sum(1 for row in fauna_debug_rows if row[2] == 'approved' and row[3] is None)
+        print(f"   Approved & not deleted: {fauna_approved_count}")
+        print(f"   Query result: {total_fauna}")
+        for row in fauna_debug_rows:
+            deleted_status = "DELETED" if row[3] else "active"
+            print(f"   - ID: {row[0]}, Nama: {row[1]}, Status: {row[2]}, {deleted_status}")
 
-        # Get activities count for this park
-        activities_query = text("SELECT COUNT(*) FROM activities WHERE park_id = :park_id AND status = 'approved'")
+        # Get activities count for this park (approved and not deleted)
+        activities_query = text("""
+            SELECT COUNT(*) FROM activities 
+            WHERE park_id = :park_id 
+            AND status = 'approved' 
+            AND deleted_at IS NULL
+        """)
         activities_result = await db.execute(activities_query, {"park_id": park_id})
         total_activities = activities_result.scalar() or 0
+        
+        # Debug: log all activities for this park to help troubleshoot
+        activities_debug_query = text("""
+            SELECT id, title, status, deleted_at 
+            FROM activities 
+            WHERE park_id = :park_id
+            ORDER BY id
+        """)
+        activities_debug_result = await db.execute(activities_debug_query, {"park_id": park_id})
+        activities_debug_rows = activities_debug_result.fetchall()
+        print(f"🔍 Debug - Park {park_id} activities count breakdown:")
+        print(f"   Total activities (all status): {len(activities_debug_rows)}")
+        activities_approved_count = sum(1 for row in activities_debug_rows if row[2] == 'approved' and row[3] is None)
+        print(f"   Approved & not deleted: {activities_approved_count}")
+        print(f"   Query result: {total_activities}")
+        for row in activities_debug_rows:
+            deleted_status = "DELETED" if row[3] else "active"
+            print(f"   - ID: {row[0]}, Title: {row[1]}, Status: {row[2]}, {deleted_status}")
 
         # Get artikel count - since articles don't have park_id, return 0 for now
         total_artikel = 0
