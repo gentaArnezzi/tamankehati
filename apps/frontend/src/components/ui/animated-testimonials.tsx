@@ -132,7 +132,7 @@ export const AnimatedTestimonials = ({
 
         {/* Right: Content - Slide from right */}
         <motion.div
-          className="w-full lg:w-1/2 flex justify-between flex-col py-4 lg:pl-12 lg:pr-6"
+          className="w-full lg:w-1/2 flex justify-between flex-col py-4 lg:pl-12 lg:pr-6 mt-4 sm:mt-6 lg:mt-8"
           style={{
             width: isDesktop ? '50%' : '100%',
           }}
@@ -159,13 +159,13 @@ export const AnimatedTestimonials = ({
               ease: "easeInOut",
             }}
           >
-            <h3 className="text-xl lg:text-2xl font-bold text-slate-900">
+            <h3 className="font-bold text-slate-900" style={{ fontSize: 'clamp(1.25rem, 2vw, 2.5rem)' }}>
               {testimonials[active].name}
             </h3>
-            <p className="text-xs lg:text-sm text-slate-600 mt-1">
+            <p className="text-slate-600 mt-1" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1.5rem)' }}>
               {testimonials[active].designation}
             </p>
-            <motion.p className="text-base lg:text-lg text-slate-600 mt-4 lg:mt-8">
+            <motion.p className="text-slate-600 mt-4 lg:mt-8" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.75rem)' }}>
               {testimonials[active].quote.split(" ").map((word, index) => (
                 <motion.span
                   key={index}

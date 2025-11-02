@@ -53,7 +53,8 @@ export function AboutSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.3 }}
-              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-3 sm:px-6 md:px-8 py-1.5 sm:py-3 md:py-4 text-sm sm:text-base md:text-lg lg:text-2xl xl:text-3xl font-light text-slate-800 mb-6 sm:mb-12 md:mb-16 shadow-sm backdrop-blur-sm"
+              className="inline-flex items-center rounded-full border border-slate-200 bg-white/95 px-3 sm:px-6 md:px-8 py-1.5 sm:py-3 md:py-4 font-light text-slate-800 mb-6 sm:mb-12 md:mb-16 shadow-sm backdrop-blur-sm"
+              style={{ fontSize: 'clamp(0.875rem, 1.5vw, 1.5rem)' }}
             >
               Selamat Datang di Taman Kehati Indonesia
             </motion.div>
@@ -63,9 +64,9 @@ export function AboutSection() {
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="max-w-4xl mx-auto px-4 sm:px-6"
+              className="max-w-4xl mx-auto px-4 sm:px-6 mt-8 sm:mt-12 md:mt-16 lg:mt-20"
             >
-              <p className="text-lg sm:text-xl md:text-2xl lg:text-4xl xl:text-6xl leading-relaxed text-slate-800 font-light tracking-wide">
+              <p className="leading-relaxed text-slate-800 font-light tracking-wide" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
                 Sebuah benteng konservasi yang didedikasikan untuk melindungi
                 dan melestarikan kekayaan flora dan fauna asli Nusantara.
                 Temukan laboratorium alam kami, tempat spesies langka dirawat

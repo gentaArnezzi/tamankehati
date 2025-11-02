@@ -72,7 +72,8 @@ export function FAQSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-base sm:text-lg md:text-xl lg:text-3xl xl:text-4xl text-gray-500 px-4"
+            className="text-gray-500 px-4"
+            style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan
             platform konservasi kami.
@@ -93,7 +94,7 @@ export function FAQSection() {
                   onClick={() => toggleFAQ(index)}
                   className="w-full px-4 sm:px-6 md:px-8 py-4 sm:py-5 md:py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors min-h-[44px]"
                 >
-                  <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-gray-900 pr-4">
+                  <h3 className="font-medium text-gray-900 pr-4" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>
                     {faq.question}
                   </h3>
                   <motion.svg
@@ -114,7 +115,7 @@ export function FAQSection() {
                 </button>
                 {openIndex === index && (
                   <div className="px-4 sm:px-6 md:px-8 pb-4 sm:pb-5 md:pb-6">
-                    <p className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-600 leading-relaxed">
+                    <p className="text-gray-600 leading-relaxed" style={{ fontSize: 'clamp(1rem, 1.3vw, 1.375rem)' }}>
                       {faq.answer}
                     </p>
                   </div>

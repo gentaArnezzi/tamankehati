@@ -127,7 +127,8 @@ export function MinimalFeaturedSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.7, delay: 0.3, ease: "easeOut" }}
-            className="text-base sm:text-lg md:text-xl lg:text-3xl xl:text-4xl text-gray-600 max-w-2xl mx-auto px-4"
+            className="text-gray-600 max-w-2xl mx-auto px-4"
+            style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}
           >
             Kenali kekayaan hayati Indonesia yang dilindungi dan dilestarikan
           </motion.p>
@@ -185,16 +186,16 @@ export function MinimalFeaturedSection() {
 
                     {/* Content */}
                     <div className="p-4 sm:p-6">
-                      <div className="text-sm sm:text-base md:text-lg lg:text-lg font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="font-medium text-emerald-600 mb-2 uppercase tracking-wide opacity-70 group-hover:opacity-100 transition-opacity duration-300" style={{ fontSize: 'clamp(0.75rem, 1vw, 1rem)' }}>
                         {feature.category}
                       </div>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300">
+                      <h3 className="font-medium text-slate-900 mb-2 group-hover:text-emerald-600 transition-colors duration-300" style={{ fontSize: 'clamp(1.25rem, 1.8vw, 2rem)' }}>
                         {feature.title}
                       </h3>
-                      <p className="text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300">
+                      <p className="text-gray-600 mb-4 group-hover:text-gray-700 transition-colors duration-300" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
                         {feature.description}
                       </p>
-                      <div className="flex items-center gap-2 text-base sm:text-lg md:text-xl lg:text-xl xl:text-2xl font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]">
+                      <div className="flex items-center gap-2 font-medium text-gray-900 group-hover:text-emerald-600 transition-all duration-300 min-h-[44px]" style={{ fontSize: 'clamp(1rem, 1.2vw, 1.25rem)' }}>
                         <span className="group-hover:font-semibold transition-all">
                           Pelajari
                         </span>
