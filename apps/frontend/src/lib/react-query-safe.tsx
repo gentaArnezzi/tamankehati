@@ -15,14 +15,20 @@ const queryClient = new QueryClient({
         if (error?.response?.status >= 400 && error?.response?.status < 500) {
           return false;
         }
-        // Retry up to 3 times for other errors
-        return failureCount < 3;
+        // Retry up to 2 times for other errors (kurangi retry untuk faster UX)
+        return failureCount < 2;
       },
-      staleTime: 5 * 60 * 1000, // 5 minutes default
-      gcTime: 10 * 60 * 1000, // 10 minutes (formerly cacheTime)
+      staleTime: 5 * 60 * 1000, // 5 minutes default - data dianggap fresh selama 5 menit
+      gcTime: 15 * 60 * 1000, // 15 minutes (formerly cacheTime) - cache data lebih lama
+      refetchOnWindowFocus: false, // Disable auto-refetch on focus untuk better UX
+      refetchOnReconnect: true, // Refetch saat reconnect untuk data fresh
+      refetchOnMount: true, // Refetch saat mount jika data stale
+      // Enable background refetch untuk silent updates
+      refetchInterval: false, // Disable auto polling by default
     },
     mutations: {
       retry: false, // Don't retry mutations by default
+      // Optimistic updates can be added per mutation
     },
   },
 });

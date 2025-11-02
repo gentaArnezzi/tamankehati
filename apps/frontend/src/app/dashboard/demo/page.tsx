@@ -74,7 +74,7 @@ import {
   Image,
   Search,
 } from "lucide-react";
-import { InteractiveMap } from "@/components/maps/InteractiveMapWithSatellite";
+// InteractiveMap removed - file deleted
 
 // Mock data untuk demo
 const mockData = {
@@ -807,8 +807,8 @@ export default function DashboardDemoPage() {
 
           {/* Geographic Tab */}
           <TabsContent value="geographic" className="space-y-4 sm:space-y-6">
-            <div className="w-full overflow-hidden">
-              <InteractiveMap />
+            <div className="w-full h-[400px] bg-slate-100 rounded-lg flex items-center justify-center">
+              <p className="text-slate-500">Map component removed for optimization</p>
             </div>
           </TabsContent>
 

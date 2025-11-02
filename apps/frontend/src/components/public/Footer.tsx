@@ -21,7 +21,7 @@ export function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16">
           {/* Brand Section */}
           <div className="lg:col-span-5">
-            <Link href="/" className="inline-block mb-4 sm:mb-6">
+            <Link href="/" prefetch={true} className="inline-block mb-4 sm:mb-6">
               <Logo size="lg" />
             </Link>
                 <p className="text-slate-500 leading-relaxed max-w-md" style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}>
@@ -50,6 +50,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    prefetch={true}
                     className="text-slate-500 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
                     style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
                   >
@@ -70,6 +71,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    prefetch={true}
                     className="text-slate-500 hover:text-emerald-600 transition-colors min-h-[44px] flex items-center"
                     style={{ fontSize: 'clamp(0.875rem, 1.2vw, 1rem)' }}
                   >
@@ -90,6 +92,7 @@ export function Footer() {
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-end">
               <Link
                 href="/kebijakan-privasi"
+                prefetch={true}
                 className="text-slate-400 hover:text-slate-600 transition-colors min-h-[44px] flex items-center text-sm"
                 style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
               >
@@ -97,6 +100,7 @@ export function Footer() {
               </Link>
               <Link
                 href="/ketentuan"
+                prefetch={true}
                 className="text-slate-400 hover:text-slate-600 transition-colors min-h-[44px] flex items-center text-sm"
                 style={{ fontSize: 'clamp(0.75rem, 1vw, 0.875rem)' }}
               >

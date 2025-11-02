@@ -182,6 +182,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                 {/* Back Button */}
                 <Link
                   href="/flora"
+                  prefetch={true}
                   className="inline-flex items-center gap-2 text-sm font-medium text-white/90 hover:text-white transition-colors backdrop-blur-sm bg-black/20 hover:bg-black/30 px-3 py-2 rounded-lg"
                 >
                   <ArrowLeft className="w-4 h-4" />
@@ -195,6 +196,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       <BreadcrumbLink asChild>
                         <Link
                           href="/"
+                          prefetch={true}
                           className="flex items-center gap-1 hover:text-white transition-colors"
                         >
                           <Home className="w-3.5 h-3.5" />
@@ -207,6 +209,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       <BreadcrumbLink asChild>
                         <Link
                           href="/flora"
+                          prefetch={true}
                           className="hover:text-white transition-colors"
                         >
                           Flora
@@ -320,6 +323,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
+                              onError={(e) => {
+                                console.warn(`Failed to load image: ${flora.gambar_daun}`);
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -348,6 +355,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
+                              onError={(e) => {
+                                console.warn(`Failed to load image: ${flora.gambar_batang}`);
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -376,6 +387,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
+                              onError={(e) => {
+                                console.warn(`Failed to load image: ${flora.gambar_bunga}`);
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -404,6 +419,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
+                              onError={(e) => {
+                                console.warn(`Failed to load image: ${flora.gambar_buah}`);
+                                e.currentTarget.style.display = 'none';
+                              }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                           </div>
@@ -584,6 +603,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                         <dd className="text-right text-slate-800">
                           <Link
                             href={`/taman/${flora.park_info.id}`}
+                            prefetch={true}
                             className="text-slate-900 hover:text-slate-600 hover:underline transition-colors font-medium"
                           >
                             {flora.park_info.name}
@@ -634,6 +654,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                     <div className="mt-4 pt-4 border-t border-slate-200">
                       <Link
                         href={`/taman/${flora.park_info.id}`}
+                        prefetch={true}
                         className="inline-flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-slate-600 hover:underline transition-colors"
                       >
                         <MapPin className="w-4 h-4" />
@@ -707,6 +728,10 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       loading="lazy"
+                      onError={(e) => {
+                        console.warn(`Failed to load gallery image: ${image.image_url}`);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <div className="absolute top-3 right-3">

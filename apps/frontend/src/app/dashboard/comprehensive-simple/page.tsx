@@ -54,6 +54,10 @@ import {
   AlertCircle,
 } from "lucide-react";
 import SimpleBiodiversityCharts from "@/components/dashboard/SimpleBiodiversityCharts";
+import { useDashboardComprehensive } from "@/lib/api/queries";
+import { useQueryClient } from "@tanstack/react-query";
+import { PageLoading } from "@/components/ui/page-loading";
+import { getDashboardPlaceholder } from "@/lib/api/query-helpers";
 
 // Mark this page as dynamic to prevent static generation
 export const dynamic = "force-dynamic";
@@ -103,13 +107,31 @@ const ComprehensiveDashboardPage: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
   const [timeRange, setTimeRange] = useState(
     searchParams.get("time_range") || "yearly",
   );
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Use React Query hook untuk data fetching dengan caching dan placeholderData
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+    refetch,
+    isFetching,
+  } = useDashboardComprehensive(timeRange, {
+    enabled: !!user && !authLoading, // Hanya fetch jika user authenticated
+    placeholderData: queryClient ? getDashboardPlaceholder(queryClient, timeRange) : undefined, // Instant load dari cache
+  });
+
+  // Handle auth errors
+  useEffect(() => {
+    if (queryError && (queryError as Error).message === "Unauthorized") {
+      logout();
+      router.push("/login");
+    }
+  }, [queryError, logout, router]);
 
   const handleNavigate = (path: string) => {
     router.push(path);
@@ -120,61 +142,18 @@ const ComprehensiveDashboardPage: React.FC = () => {
     router.push("/login");
   };
 
-  // Redirect to login if not authenticated (must be in useEffect, not during render)
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !user) {
       router.push("/login");
     }
   }, [authLoading, user, router]);
 
-  useEffect(() => {
-    // Only fetch data if user is authenticated
-    if (!authLoading && user) {
-      fetchDashboardData();
-    }
-  }, [timeRange, user, authLoading]);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem("auth_token");
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      // Use the simple comprehensive dashboard API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        },
-      );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          // Token expired, redirect to login
-          logout();
-          router.push("/login");
-          return;
-        }
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      setData(result);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      console.error("Dashboard fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
+  const fetchDashboardData = () => {
+    refetch();
   };
+
+  const error = queryError ? (queryError as Error).message : null;
 
   const timeRangeOptions = [
     { value: "daily", label: "Daily" },
@@ -185,39 +164,14 @@ const ComprehensiveDashboardPage: React.FC = () => {
     { value: "five_years", label: "5 Years" },
   ];
 
-  // Show loading spinner while checking auth
+  // Show loading spinner while checking auth (minimal, tidak blocking)
   if (authLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Memuat...</p>
-        </div>
-      </div>
-    );
+    return <PageLoading type="minimal" />;
   }
 
-  // Show loading while redirecting
+  // Show loading while redirecting (minimal, tidak blocking)
   if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Mengalihkan...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return null; // Redirect akan terjadi di useEffect
   }
 
   if (error) {
@@ -245,6 +199,20 @@ const ComprehensiveDashboardPage: React.FC = () => {
     );
   }
 
+  // Tampilkan skeleton jika loading dan tidak ada data dari cache
+  if (loading && !data) {
+    return (
+      <CollapsibleDashboardLayout
+        user={user}
+        currentPath={pathname}
+        onNavigate={handleNavigate}
+        onLogout={handleLogout}
+      >
+        <PageLoading type="page" />
+      </CollapsibleDashboardLayout>
+    );
+  }
+
   return (
     <CollapsibleDashboardLayout
       user={user}
@@ -252,6 +220,13 @@ const ComprehensiveDashboardPage: React.FC = () => {
       onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
+      {/* Overlay loading saat fetching di background */}
+      {isFetching && data && (
+        <div className="fixed top-0 left-0 right-0 h-1 bg-emerald-100 z-50">
+          <div className="h-full bg-emerald-600 animate-pulse" style={{ width: "30%" }} />
+        </div>
+      )}
+
       {/* Time Range Selector */}
       <div className="flex justify-end items-center mb-6">
         <div className="flex items-center space-x-4">
@@ -267,14 +242,18 @@ const ComprehensiveDashboardPage: React.FC = () => {
               ))}
             </SelectContent>
           </Select>
-          <Button onClick={fetchDashboardData} variant="outline">
-            Refresh
+          <Button
+            onClick={fetchDashboardData}
+            variant="outline"
+            disabled={isFetching}
+          >
+            {isFetching ? "Refreshing..." : "Refresh"}
           </Button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div>
+      <div className={isFetching && data ? "opacity-75 transition-opacity duration-200" : ""}>
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}

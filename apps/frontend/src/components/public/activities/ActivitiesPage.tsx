@@ -17,8 +17,9 @@ import {
 } from "lucide-react";
 import { publicApi } from "../../../lib/public-api-client";
 import Link from "next/link";
+import { InstantLink } from "../../ui/instant-link";
 import Image from "next/image";
-import styles from "./ActivitiesPage.module.css";
+// CSS module removed for optimization
 
 interface Activity {
   id: string;
@@ -606,9 +607,11 @@ export function ActivitiesPage() {
                 }`}
               >
                 {filteredActivities.map((activity) => (
-                  <Link
+                  <InstantLink
                     key={activity.id}
                     href={`/kegiatan/${activity.id}`}
+                    prefetchType="taman"
+                    prefetchId={activity.id}
                     className="group block"
                   >
                     <div
@@ -678,7 +681,7 @@ export function ActivitiesPage() {
                         </div>
                       </div>
                     </div>
-                  </Link>
+                  </InstantLink>
                 ))}
               </div>
 
