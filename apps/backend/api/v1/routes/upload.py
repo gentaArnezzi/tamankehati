@@ -25,6 +25,31 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 print(f"UPLOAD_DIR: {UPLOAD_DIR}")
 print(f"UPLOAD_DIR exists: {os.path.exists(UPLOAD_DIR)}")
 
+def get_base_url() -> str:
+    """
+    Get base URL for file uploads.
+    Priority: BASE_URL > API_BASE_URL > BACKEND_URL > RENDER_EXTERNAL_URL > production URL
+    """
+    return (
+        os.getenv("BASE_URL") or 
+        os.getenv("API_BASE_URL") or 
+        os.getenv("BACKEND_URL") or 
+        os.getenv("RENDER_EXTERNAL_URL") or 
+        "https://tamankehati-backend-pxnu.onrender.com"
+    )
+
+def build_file_url(filename: str) -> str:
+    """
+    Build full URL for uploaded file.
+    Returns absolute URL for production compatibility.
+    """
+    base_url = get_base_url()
+    # Remove trailing slash from base_url if exists
+    base_url = base_url.rstrip("/")
+    # Ensure filename starts with /
+    file_path = filename if filename.startswith("/") else f"/uploads/{filename}"
+    return f"{base_url}{file_path}"
+
 def is_allowed_file(filename: str) -> bool:
     """Check if file extension is allowed"""
     return Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
@@ -107,9 +132,7 @@ async def upload_gallery_image(
         print(f"File exists after save: {os.path.exists(file_path)}")
         
         # Generate full URL for frontend to access
-        # In production, this would be your CDN/storage URL
-        base_url = os.getenv("BASE_URL", "http://localhost:8000")
-        file_url = f"{base_url}/uploads/{filename}"
+        file_url = build_file_url(filename)
         
         return JSONResponse(content={
             "success": True,
@@ -244,8 +267,8 @@ async def upload_multiple_gallery_images(
                             raise ValueError(f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB")
                         await f.write(chunk)
                 
-                # Generate URL
-                file_url = f"/uploads/{filename}"
+                # Generate full URL for frontend to access
+                file_url = build_file_url(filename)
                 
                 uploaded_files.append({
                     "filename": filename,
@@ -365,8 +388,8 @@ async def upload_activity_images(
                             raise ValueError(f"File too large. Maximum size: {MAX_FILE_SIZE // (1024*1024)}MB")
                         await f.write(chunk)
                 
-                # Generate URL
-                file_url = f"/uploads/{filename}"
+                # Generate full URL for frontend to access
+                file_url = build_file_url(filename)
                 
                 uploaded_files.append({
                     "filename": filename,

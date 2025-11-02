@@ -22,8 +22,16 @@ function FloatingElement({
 }: FloatingElementProps) {
   const [scrollY, setScrollY] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Only access window on client-side to avoid hydration mismatch
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!isClient) return;
+
     const handleScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", handleScroll);
 
@@ -34,7 +42,10 @@ function FloatingElement({
       window.removeEventListener("scroll", handleScroll);
       clearTimeout(timer);
     };
-  }, [delay]);
+  }, [delay, isClient]);
+
+  // Use 0 for scrollY on server to ensure consistent initial render
+  const effectiveScrollY = isClient ? scrollY : 0;
 
   return (
     <div
@@ -42,7 +53,7 @@ function FloatingElement({
       style={{
         top: `${position.top}%`,
         left: `${position.left}%`,
-        transform: `translateY(${scrollY * speed}px)`,
+        transform: `translateY(${effectiveScrollY * speed}px)`,
       }}
     >
       <Icon

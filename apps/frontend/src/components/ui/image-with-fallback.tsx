@@ -47,9 +47,18 @@ export function ImageWithFallback({
   }
 
   // Build full URL
-  const imageUrl = src.startsWith("http")
-    ? src
-    : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`;
+  let imageUrl: string;
+  if (src.startsWith("http")) {
+    // Replace localhost:8000 with actual API URL for development/production compatibility
+    if (src.includes("localhost:8000")) {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+      imageUrl = src.replace("http://localhost:8000", apiUrl);
+    } else {
+      imageUrl = src;
+    }
+  } else {
+    imageUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`;
+  }
 
   const imageProps: any = {
     src: imageUrl,
