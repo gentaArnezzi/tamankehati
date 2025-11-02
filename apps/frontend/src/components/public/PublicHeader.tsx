@@ -104,7 +104,7 @@ export function PublicHeader() {
             <a className="transition-opacity hover:opacity-80" href="/">
               <Logo
                 size="md"
-                className={!shouldBeTransparent ? "text-slate-900" : "text-white"}
+                textColor={shouldBeTransparent ? "text-white" : "text-slate-900"}
               />
             </a>
           </div>

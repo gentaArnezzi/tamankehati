@@ -4,12 +4,14 @@ interface LogoProps {
   size?: "sm" | "md" | "lg" | "xl";
   variant?: "default" | "minimal" | "icon-only";
   className?: string;
+  textColor?: string;
 }
 
 export function Logo({
   size = "md",
   variant = "default",
   className = "",
+  textColor,
 }: LogoProps) {
   const sizeClasses = {
     sm: "h-6 w-6",
@@ -37,12 +39,24 @@ export function Logo({
     return <LogoIcon />;
   }
 
+  // Use textColor prop if provided, otherwise extract from className, otherwise use default
+  const textColorClass = textColor || 
+    (className.includes("text-white") ? "text-white" : 
+     className.includes("text-slate-900") ? "text-slate-900" : 
+     className.includes("text-slate-800") ? "text-slate-800" : 
+     "text-slate-800");
+
+  // Remove text color classes from className to avoid conflicts
+  const containerClassName = className
+    .replace(/text-(white|slate-\d+)/g, "")
+    .trim();
+
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div className={`flex items-center gap-2 ${containerClassName || ""}`}>
       <LogoIcon />
       {variant !== "minimal" && (
         <span
-          className={`font-semibold text-slate-800 ${textSizeClasses[size]}`}
+          className={`font-semibold ${textColorClass} ${textSizeClasses[size]}`}
         >
           Taman Kehati
         </span>
