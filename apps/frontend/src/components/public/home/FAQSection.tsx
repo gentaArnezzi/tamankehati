@@ -10,34 +10,44 @@ interface FAQItem {
 
 const faqData: FAQItem[] = [
   {
-    question: "Apa itu Taman Kehati?",
+    question: "Apa itu Portal Taman Kehati?",
     answer:
-      "Taman Kehati adalah kawasan konservasi yang berfungsi untuk melindungi dan melestarikan keanekaragaman hayati Indonesia. Taman ini menjadi tempat penelitian, edukasi, dan konservasi flora dan fauna endemik.",
+      "Portal Taman Kehati adalah website yang menyediakan informasi lengkap tentang keanekaragaman hayati Indonesia. Anda bisa menjelajahi data flora, fauna, dan taman konservasi di seluruh Indonesia secara gratis dan mudah.",
   },
   {
-    question: "Bagaimana cara mengakses data flora dan fauna?",
+    question: "Bagaimana cara mencari informasi tentang tanaman atau hewan?",
     answer:
-      "Anda dapat mengakses data flora dan fauna melalui menu pencarian di halaman utama. Gunakan filter untuk menyaring berdasarkan jenis, wilayah, atau status konservasi untuk menemukan informasi yang Anda butuhkan.",
+      "Gunakan kotak pencarian di bagian atas halaman. Ketik nama tanaman atau hewan yang ingin dicari, baik nama lokal maupun nama ilmiahnya. Anda juga bisa memfilter hasil pencarian berdasarkan provinsi atau status konservasi.",
   },
   {
-    question: "Apakah data yang tersedia dapat diunduh?",
+    question: "Apa itu 'Tanya Kehati'?",
     answer:
-      "Ya, sebagian data tersedia untuk diunduh dalam format yang dapat digunakan untuk penelitian dan edukasi. Silakan hubungi tim kami untuk informasi lebih lanjut tentang akses data.",
+      "'Tanya Kehati' adalah fitur chat AI yang bisa menjawab pertanyaan Anda tentang tanaman, hewan, atau taman konservasi di Indonesia. Klik ikon chat di pojok halaman, lalu ketik pertanyaan apa saja yang ingin Anda ketahui.",
   },
   {
-    question: "Bagaimana cara melaporkan temuan flora/fauna baru?",
+    question: "Bagaimana cara melihat lokasi taman konservasi?",
     answer:
-      "Anda dapat melaporkan temuan baru melalui formulir kontak yang tersedia di website. Tim ahli kami akan memverifikasi dan menambahkan data tersebut ke dalam sistem setelah konfirmasi.",
+      "Gulir ke bawah di halaman utama sampai menemukan bagian peta. Di peta interaktif, Anda bisa melihat lokasi semua taman konservasi di Indonesia. Klik titik biru pada peta untuk melihat informasi lengkap tentang taman tersebut.",
   },
   {
-    question: "Apakah ada program edukasi yang tersedia?",
+    question: "Apakah informasi yang ditampilkan bisa dipercaya?",
     answer:
-      "Ya, kami menyediakan berbagai program edukasi termasuk webinar, workshop, dan materi pembelajaran yang dapat diakses secara online maupun offline.",
+      "Ya, semua data yang ditampilkan telah diverifikasi dan diperbarui secara berkala oleh tim ahli. Informasi yang Anda lihat adalah data resmi yang akurat dan dapat dijadikan referensi.",
   },
   {
-    question: "Bagaimana cara berkontribusi dalam konservasi?",
+    question: "Bisakah saya melihat foto-foto tanaman dan hewan?",
     answer:
-      "Anda dapat berkontribusi dengan melaporkan data, berpartisipasi dalam program edukasi, atau bergabung dengan komunitas konservasi yang terdaftar di platform kami.",
+      "Tentu saja! Setelah Anda membuka halaman detail tanaman atau hewan tertentu, scroll ke bawah untuk melihat galeri foto. Anda juga bisa melihat kumpulan foto di menu 'Galeri' di bagian atas website.",
+  },
+  {
+    question: "Apakah ada informasi tentang jumlah total spesies?",
+    answer:
+      "Ya, di halaman utama terdapat ringkasan statistik yang menampilkan jumlah total spesies, spesies endemik, taman konservasi, dan kegiatan konservasi. Data ini diperbarui otomatis seiring bertambahnya informasi di database.",
+  },
+  {
+    question: "Apakah perlu mendaftar untuk menggunakan website ini?",
+    answer:
+      "Tidak perlu! Semua fitur pencarian, peta, galeri, dan 'Tanya Kehati' bisa digunakan tanpa harus membuat akun. Website ini gratis dan terbuka untuk semua orang.",
   },
 ];
 
@@ -75,8 +85,8 @@ export function FAQSection() {
             className="text-slate-500 px-4"
             style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}
           >
-            Temukan jawaban untuk pertanyaan umum tentang Taman Kehati dan
-            platform konservasi kami.
+            Temukan jawaban untuk pertanyaan umum tentang cara menggunakan website ini,
+            mencari informasi, dan menjelajahi keanekaragaman hayati Indonesia.
           </motion.p>
         </div>
 
