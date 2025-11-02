@@ -150,7 +150,37 @@ const getImageUrl = (url?: string) => {
 
 ---
 
+---
+
+## ⚠️ PRODUCTION ENVIRONMENT SETUP (IMPORTANT!)
+
+### ❌ WRONG - Current Render Setup:
+```
+UPLOAD_DIR: ./uploads
+UPLOAD_DIRECTORY: /tmp/upload  ❌ Temporary directory - files will be lost!
+```
+
+### ✅ CORRECT - Production Setup:
+```
+UPLOAD_DIRECTORY: ./uploads  ✅ Persistent directory
+# Or use absolute path that persists:
+UPLOAD_DIRECTORY: /opt/render/project/src/uploads
+```
+
+**⚠️ Critical**: `/tmp/upload` adalah temporary directory yang akan **dihapus setiap kali service restart**! Gunakan path yang persistent.
+
+### Frontend Environment Variables:
+```
+NEXT_PUBLIC_API_URL: https://tamankehati-backend-pxnu.onrender.com
+```
+
+**⚠️ Must Set**: Pastikan `NEXT_PUBLIC_API_URL` di-set di **Vercel** (atau hosting frontend) dengan nilai backend URL yang benar.
+
+---
+
 **Status**: ✅ Fixed (UPLOAD_DIRECTORY consistency)
+
+**⚠️ Action Required**: Update Render environment variables!
 
 *Fix applied: 2025-01-XX*
 

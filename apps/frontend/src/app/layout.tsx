@@ -8,7 +8,7 @@ import { Providers } from "./providers";
 export const metadata: Metadata = {
   title: "Taman Kehati",
   description: "Taman Kehati - Sistem Manajemen Taman Keanekaragaman Hayati",
-  metadataBase: new URL("http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "https://tamankehati-8x6q.vercel.app"),
   icons: {
     icon: "/logo/logo_klh.ico",
     shortcut: "/logo/logo_klh.ico",

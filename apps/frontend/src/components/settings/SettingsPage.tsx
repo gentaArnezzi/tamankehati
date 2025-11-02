@@ -410,7 +410,7 @@ export function SettingsPage() {
                   <h4 className="text-sm">Endpoint API</h4>
                   <div className="p-3 bg-gray-50 rounded border font-mono text-sm">
                     <p className="mb-1">
-                      Base URL: <code>http://localhost:8000/api/v1</code>
+                      Base URL: <code>{(process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")}/api/v1</code>
                     </p>
                     <p className="mb-1">
                       Headers: <code>Authorization: Bearer {"<API_KEY>"}</code>
@@ -432,7 +432,7 @@ export function SettingsPage() {
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
                     >
-                      http://localhost:8000/docs
+                      {(process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")}/docs
                     </a>
                   </p>
                 </div>
