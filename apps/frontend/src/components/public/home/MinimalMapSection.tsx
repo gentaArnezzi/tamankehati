@@ -134,7 +134,7 @@ export function MinimalMapSection() {
               Jelajahi Taman Konservasi
             </h2>
             <div className="w-16 sm:w-24 h-1 bg-emerald-500 rounded-full mb-4 sm:mb-6"></div>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 mb-6 sm:mb-8">
+            <p className="text-base sm:text-lg md:text-xl lg:text-3xl xl:text-4xl text-gray-600 mb-6 sm:mb-8">
               Lebih dari 70 taman konservasi tersebar di seluruh Indonesia,
               masing-masing menjaga kekayaan hayati yang unik.
             </p>
@@ -151,11 +151,11 @@ export function MinimalMapSection() {
                 >
                   <div className="flex items-center gap-2 sm:gap-3">
                     <div className="w-2 h-2 bg-emerald-500 rounded-full" />
-                    <span className="text-xl sm:text-2xl md:text-3xl font-medium text-slate-900">
+                    <span className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-slate-900">
                       {region.name}
                     </span>
                   </div>
-                  <span className="text-lg sm:text-xl md:text-2xl text-gray-500 group-hover:text-emerald-600">
+                  <span className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-500 group-hover:text-emerald-600">
                     {region.parks} Taman
                   </span>
                 </motion.div>
@@ -164,7 +164,7 @@ export function MinimalMapSection() {
 
             <Link
               href="/taman"
-              className="inline-flex items-center gap-2 text-xl sm:text-2xl md:text-3xl text-gray-900 hover:text-emerald-600 font-medium group min-h-[44px]"
+              className="inline-flex items-center gap-2 text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl text-gray-900 hover:text-emerald-600 font-medium group min-h-[44px]"
             >
               Lihat Peta Lengkap
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -214,24 +214,24 @@ export function MinimalMapSection() {
                 >
                   <div className="grid grid-cols-3 gap-3 sm:gap-6 text-center">
                     <div>
-                      <div className="text-4xl sm:text-5xl lg:text-6xl font-light text-slate-900">
+                      <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-slate-900">
                         {stats?.total_taman || parks.length || 0}
                       </div>
-                      <div className="text-lg sm:text-xl md:text-2xl text-slate-600 mt-1">Taman</div>
+                      <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-600 mt-1">Taman</div>
                     </div>
                     <div>
-                      <div className="text-4xl sm:text-5xl lg:text-6xl font-light text-slate-900">
+                      <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-slate-900">
                         5
                       </div>
-                      <div className="text-lg sm:text-xl md:text-2xl text-slate-600 mt-1">Pulau</div>
+                      <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-600 mt-1">Pulau</div>
                     </div>
                     <div>
-                      <div className="text-4xl sm:text-5xl lg:text-6xl font-light text-slate-900">
+                      <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light text-slate-900">
                         {stats
                           ? `${(stats.total_flora + stats.total_fauna).toLocaleString()}+`
                           : "500+"}
                       </div>
-                      <div className="text-lg sm:text-xl md:text-2xl text-slate-600 mt-1">Spesies</div>
+                      <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-slate-600 mt-1">Spesies</div>
                     </div>
                   </div>
                 </motion.div>

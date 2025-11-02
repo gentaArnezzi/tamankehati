@@ -24,16 +24,16 @@ export function Footer() {
             <Link href="/" className="inline-block mb-4 sm:mb-6">
               <Logo size="lg" />
             </Link>
-            <p className="text-slate-600 leading-relaxed max-w-md text-lg sm:text-xl lg:text-2xl">
+            <p className="text-slate-600 leading-relaxed max-w-md text-base sm:text-lg md:text-xl lg:text-2xl">
               Portal nasional untuk data flora, fauna, dan taman konservasi
               Indonesia. Memperkuat riset, edukasi, dan aksi lapangan
               keanekaragaman hayati.
             </p>
             <div className="mt-4 sm:mt-6">
-              <p className="text-lg sm:text-xl lg:text-2xl text-slate-500 mb-1">Kontak</p>
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 mb-1">Kontak</p>
               <a
                 href="mailto:info@tamankehati.id"
-                className="text-slate-700 hover:text-emerald-600 transition-colors text-lg sm:text-xl lg:text-2xl break-all"
+                className="text-slate-700 hover:text-emerald-600 transition-colors text-base sm:text-lg md:text-xl lg:text-2xl break-all"
               >
                 info@tamankehati.id
               </a>
@@ -42,7 +42,7 @@ export function Footer() {
 
           {/* Navigation Links */}
           <div className="lg:col-span-3">
-            <h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-slate-900 mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-slate-900 mb-3 sm:mb-4">
               Navigasi
             </h3>
             <ul className="space-y-2 sm:space-y-3">
@@ -50,7 +50,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-slate-600 hover:text-emerald-600 transition-colors text-lg sm:text-xl lg:text-2xl min-h-[44px] flex items-center"
+                    className="text-slate-600 hover:text-emerald-600 transition-colors text-base sm:text-lg md:text-xl lg:text-2xl min-h-[44px] flex items-center"
                   >
                     {item.label}
                   </Link>
@@ -61,7 +61,7 @@ export function Footer() {
 
           {/* Support Links */}
           <div className="lg:col-span-4">
-            <h3 className="text-lg sm:text-xl lg:text-2xl font-medium text-slate-900 mb-3 sm:mb-4">
+            <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-slate-900 mb-3 sm:mb-4">
               Dukungan
             </h3>
             <ul className="space-y-2 sm:space-y-3">
@@ -69,7 +69,7 @@ export function Footer() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="text-slate-600 hover:text-emerald-600 transition-colors text-lg sm:text-xl lg:text-2xl min-h-[44px] flex items-center"
+                    className="text-slate-600 hover:text-emerald-600 transition-colors text-base sm:text-lg md:text-xl lg:text-2xl min-h-[44px] flex items-center"
                   >
                     {item.label}
                   </Link>
@@ -82,19 +82,19 @@ export function Footer() {
         {/* Footer Bottom */}
         <div className="mt-8 sm:mt-12 pt-6 sm:pt-8 border-t border-slate-200">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-lg sm:text-xl lg:text-2xl text-slate-500 text-center sm:text-left">
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 text-center sm:text-left">
               © {new Date().getFullYear()} Taman Kehati. Semua hak dilindungi.
             </p>
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center sm:justify-end">
               <Link
                 href="/kebijakan-privasi"
-                className="text-lg sm:text-xl lg:text-2xl text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
+                className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
               >
                 Kebijakan Privasi
               </Link>
               <Link
                 href="/ketentuan"
-                className="text-lg sm:text-xl lg:text-2xl text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
+                className="text-base sm:text-lg md:text-xl lg:text-2xl text-slate-500 hover:text-slate-700 transition-colors min-h-[44px] flex items-center"
               >
                 Ketentuan
               </Link>

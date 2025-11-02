@@ -101,7 +101,7 @@ export function MinimalStatsSection() {
             Tentang Kehati
           </h2>
           <div className="w-16 sm:w-24 h-1 bg-emerald-500 mx-auto rounded-full mb-4 sm:mb-6"></div>
-          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-gray-600 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg md:text-xl lg:text-3xl xl:text-4xl text-gray-600 max-w-2xl mx-auto px-4">
             Transparansi penuh untuk mendukung riset dan konservasi
             berkelanjutan
           </p>
@@ -132,10 +132,10 @@ export function MinimalStatsSection() {
                       {stat.value}
                       <span className="text-2xl sm:text-3xl text-emerald-600">+</span>
                     </div>
-                    <div className="text-xl sm:text-2xl md:text-3xl font-medium text-slate-700 mb-1">
+                    <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-slate-700 mb-1">
                       {stat.label}
                     </div>
-                    <div className="text-lg sm:text-xl md:text-2xl text-gray-500">
+                    <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-500">
                       {stat.description}
                     </div>
                   </motion.div>
@@ -156,10 +156,10 @@ export function MinimalStatsSection() {
                   {stat.value}
                   <span className="text-2xl sm:text-3xl text-emerald-600">+</span>
                 </div>
-                <div className="text-xl sm:text-2xl md:text-3xl font-medium text-slate-700 mb-1">
+                <div className="text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-medium text-slate-700 mb-1">
                   {stat.label}
                 </div>
-                <div className="text-lg sm:text-xl md:text-2xl text-gray-500">{stat.description}</div>
+                <div className="text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl text-gray-500">{stat.description}</div>
               </motion.div>
             ))}
           </div>

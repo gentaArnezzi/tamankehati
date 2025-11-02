@@ -38,16 +38,16 @@ export function MinimalHeroSection() {
 
       <motion.div
         style={{ opacity, y }}
-        className="container mx-auto max-w-7xl px-6 py-16 relative z-10 mt-4"
+        className="container mx-auto max-w-7xl px-4 sm:px-6 py-12 sm:py-16 md:py-20 relative z-10 mt-2 sm:mt-4"
       >
-        <div className="max-w-4xl mx-auto text-center space-y-6">
+        <div className="max-w-4xl mx-auto text-center space-y-4 sm:space-y-6">
           {/* Minimal Badge */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-white/30 bg-white/10 backdrop-blur-md text-sm md:text-base lg:text-lg text-white">
+            <span className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-white/30 bg-white/10 backdrop-blur-md text-xs sm:text-sm md:text-base lg:text-lg text-white">
               Database Keanekaragaman Hayati Indonesia
             </span>
           </motion.div>
@@ -57,10 +57,10 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light tracking-tight text-white px-2"
           >
             Jelajahi Flora & Fauna
-            <span className="block mt-2">Nusantara</span>
+            <span className="block mt-1 sm:mt-2">Nusantara</span>
           </motion.h1>
 
           {/* Subtitle - Smaller */}
@@ -68,7 +68,7 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed"
+            className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed px-4"
           >
             Portal terpadu untuk riset biodiversitas, edukasi konservasi, dan
             data ekologi Indonesia.
@@ -80,16 +80,16 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="max-w-2xl mx-auto"
+            className="max-w-2xl mx-auto px-4"
           >
             <div className="relative group">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 sm:w-5 h-4 sm:h-5 text-gray-400" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Cari spesies, taman, atau artikel..."
-                className="w-full pl-12 pr-4 py-4 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl text-base md:text-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-lg"
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 bg-white/95 backdrop-blur-md border border-white/20 rounded-xl text-sm sm:text-base md:text-lg text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-white focus:ring-1 focus:ring-white transition-all shadow-lg"
               />
             </div>
           </motion.form>
@@ -99,24 +99,24 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="flex flex-wrap gap-4 justify-center"
+            className="flex flex-wrap gap-3 sm:gap-4 justify-center px-4"
           >
             <Link
               href="/flora"
-              className="group inline-flex items-center gap-2 px-6 py-3 bg-white text-gray-900 rounded-lg hover:bg-white/90 transition-all shadow-lg text-base md:text-lg"
+              className="group inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 bg-white text-gray-900 rounded-lg hover:bg-white/90 transition-all shadow-lg text-sm sm:text-base md:text-lg"
             >
               Jelajahi Flora
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-3 sm:w-4 h-3 sm:h-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/fauna"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-base md:text-lg"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-sm sm:text-base md:text-lg"
             >
               Jelajahi Fauna
             </Link>
             <Link
               href="/taman"
-              className="inline-flex items-center gap-2 px-6 py-3 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-base md:text-lg"
+              className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 border border-white/30 bg-white/10 backdrop-blur-md text-white rounded-lg hover:bg-white/20 transition-all text-sm sm:text-base md:text-lg"
             >
               Peta Taman
             </Link>
@@ -127,7 +127,7 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="grid grid-cols-3 gap-8 max-w-2xl mx-auto pt-8 border-t border-white/20"
+            className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 max-w-2xl mx-auto pt-6 sm:pt-8 border-t border-white/20 px-4"
           >
             {[
               { value: "500+", label: "Spesies" },
@@ -135,10 +135,10 @@ export function MinimalHeroSection() {
               { value: "145", label: "Publikasi" },
             ].map((stat, i) => (
               <div key={i} className="text-center">
-                <div className="text-2xl md:text-3xl font-semibold text-white mb-1">
+                <div className="text-xl sm:text-2xl md:text-3xl font-semibold text-white mb-1">
                   {stat.value}
                 </div>
-                <div className="text-base md:text-lg text-white/70">{stat.label}</div>
+                <div className="text-sm sm:text-base md:text-lg text-white/70">{stat.label}</div>
               </div>
             ))}
           </motion.div>
