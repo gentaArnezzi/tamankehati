@@ -201,12 +201,13 @@ async def get_park_stats(
         except Exception as debug_error:
             print(f"⚠️  Debug query error for fauna: {debug_error}")
 
-        # Get activities count for this park (approved and not deleted)
+        # Get activities count for this park (approved only)
+        # Note: activities table doesn't have deleted_at column, only rejected_at
+        # So we only filter by status = 'approved'
         activities_query = text("""
             SELECT COUNT(*) FROM activities 
             WHERE park_id = :park_id 
-            AND status = 'approved' 
-            AND deleted_at IS NULL
+            AND status = 'approved'
         """)
         activities_result = await db.execute(activities_query, {"park_id": park_id})
         total_activities = activities_result.scalar() or 0
@@ -214,7 +215,7 @@ async def get_park_stats(
         # Debug: log all activities for this park to help troubleshoot
         try:
             activities_debug_query = text("""
-                SELECT id, title, status, deleted_at 
+                SELECT id, title, status, rejected_at 
                 FROM activities 
                 WHERE park_id = :park_id
                 ORDER BY id
@@ -223,13 +224,13 @@ async def get_park_stats(
             activities_debug_rows = activities_debug_result.fetchall()
             print(f"🔍 Debug - Park {park_id} activities count breakdown:")
             print(f"   Total activities (all status): {len(activities_debug_rows)}")
-            activities_approved_count = sum(1 for row in activities_debug_rows if row[2] == 'approved' and row[3] is None)
-            print(f"   Approved & not deleted: {activities_approved_count}")
+            activities_approved_count = sum(1 for row in activities_debug_rows if row[2] == 'approved')
+            print(f"   Approved: {activities_approved_count}")
             print(f"   Query result: {total_activities}")
             for row in activities_debug_rows[:10]:  # Limit to first 10 for readability
-                deleted_status = "DELETED" if row[3] else "active"
+                rejected_status = "REJECTED" if row[3] else "active"
                 title = row[1] or "N/A"
-                print(f"   - ID: {row[0]}, Title: {title}, Status: {row[2]}, {deleted_status}")
+                print(f"   - ID: {row[0]}, Title: {title}, Status: {row[2]}, {rejected_status}")
         except Exception as debug_error:
             print(f"⚠️  Debug query error for activities: {debug_error}")
 

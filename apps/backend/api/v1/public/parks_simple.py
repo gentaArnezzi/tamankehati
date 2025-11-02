@@ -214,12 +214,14 @@ async def get_park(
             print(f"🌿 Flora count for park {park_id}: {flora_count}")
             
             # Debug: check all flora for this park regardless of status
-            debug_query = text("SELECT id, nama_ilmiah, status, deleted_at FROM flora WHERE park_id = :park_id LIMIT 5")
+            debug_query = text("SELECT id, scientific_name, status, deleted_at FROM flora WHERE park_id = :park_id LIMIT 5")
             debug_result = await db.execute(debug_query, {"park_id": park_id})
             debug_rows = debug_result.fetchall()
             print(f"🔍 Debug - All flora for park {park_id}:")
             for row in debug_rows:
-                print(f"   ID: {row[0]}, Nama: {row[1]}, Status: {row[2]}, Deleted: {row[3]}")
+                nama = row[1] or "N/A"
+                deleted = "DELETED" if row[3] else "active"
+                print(f"   ID: {row[0]}, Nama: {nama}, Status: {row[2]}, {deleted}")
         except Exception as e:
             print(f"❌ Error getting flora count for park {park_id}: {e}")
             flora_count = 0
