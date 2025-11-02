@@ -57,7 +57,7 @@ export function MinimalHeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="font-light tracking-tight text-white px-2 leading-tight"
+            className="font-bold tracking-tight text-white px-2 leading-tight"
             style={{ fontSize: 'clamp(1.875rem, 5vw, 5rem)' }}
           >
             Jelajahi Flora & Fauna
