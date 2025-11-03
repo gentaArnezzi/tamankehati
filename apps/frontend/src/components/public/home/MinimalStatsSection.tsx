@@ -50,14 +50,42 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
     fauna: 0,
     parks: 0,
   });
+  
+  const [statsData, setStatsData] = useState(initialStats);
 
-  // Use initialStats from server if available, otherwise use 0
+  // Client-side fallback fetch if initialStats is empty (all zeros)
+  useEffect(() => {
+    // Only fetch if we don't have valid stats data (all zeros indicates SSR failed)
+    if (!statsData || (statsData.total_flora === 0 && statsData.total_fauna === 0 && statsData.total_taman === 0)) {
+      const fetchStats = async () => {
+        try {
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+          const response = await fetch(`${API_URL}/api/public/stats/`);
+          if (response.ok) {
+            const data = await response.json();
+            setStatsData({
+              total_flora: data.total_flora || 0,
+              total_fauna: data.total_fauna || 0,
+              total_taman: data.total_taman || 0,
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch stats on client:", error);
+          // Keep using initialStats or zeros
+        }
+      };
+      
+      fetchStats();
+    }
+  }, []); // Only run once on mount
+
+  // Use statsData (which may be updated from client-side fetch)
   const targets = useMemo(() => {
-    if (initialStats) {
+    if (statsData) {
       return {
-        flora: initialStats.total_flora,
-        fauna: initialStats.total_fauna,
-        parks: initialStats.total_taman,
+        flora: statsData.total_flora || 0,
+        fauna: statsData.total_fauna || 0,
+        parks: statsData.total_taman || 0,
       };
     }
     // No fallback - show 0 if no data
@@ -66,7 +94,7 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
       fauna: 0,
       parks: 0,
     };
-  }, [initialStats]);
+  }, [statsData]);
 
   // Smooth counting animation with ease-out cubic easing
   useEffect(() => {

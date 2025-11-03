@@ -22,7 +22,8 @@ export const metadata: Metadata = {
 };
 
 // ISR - Regenerate every 5 minutes for fresher homepage data
-export const revalidate = 300;
+// Reduced revalidate to 60 seconds for faster updates during development
+export const revalidate = 60;
 
 export default async function HomePage() {
   // Fetch all homepage data in parallel on the server for faster initial load
@@ -38,7 +39,17 @@ export default async function HomePage() {
     total_flora: 0,
     total_fauna: 0,
     total_taman: 0,
+    total_artikel: 0,
   };
+  
+  // Debug logging in development
+  if (process.env.NODE_ENV === "development") {
+    if (stats.status === "rejected") {
+      console.error("[SSR] Failed to fetch public stats:", stats.reason);
+    } else {
+      console.log("[SSR] Public stats loaded:", statsData);
+    }
+  }
   
   const articlesData = articles.status === "fulfilled" ? articles.value : [];
   const galleryData = gallery.status === "fulfilled" ? gallery.value : [];

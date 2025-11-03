@@ -164,8 +164,44 @@ const fetchPaginated = <T extends z.ZodTypeAny>(
 ) => createFetcher(PaginatedResponseSchema(schema), { revalidate });
 
 export const getPublicStats = cache(async (): Promise<PublicStats> => {
-  const fetcher = createFetcher(PublicStatsSchema, { revalidate: 600 }); // Cache for 10 minutes
-  return fetcher("/api/public/stats/");
+  try {
+    const fetcher = createFetcher(PublicStatsSchema, { revalidate: 600 }); // Cache for 10 minutes
+    return await fetcher("/api/public/stats/");
+  } catch (error: any) {
+    // Handle errors gracefully - return fallback instead of crashing
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[SSR] Error fetching public stats, using fallback:", error?.message || error);
+    }
+    // Handle 500/502/503/504 errors gracefully
+    if (
+      error?.message?.includes("500") ||
+      error?.message?.includes("502") ||
+      error?.message?.includes("503") ||
+      error?.message?.includes("504") ||
+      error?.message?.includes("Backend service") ||
+      error?.message?.includes("unavailable")
+    ) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          "[SSR] Backend unavailable for stats endpoint, returning fallback stats",
+        );
+      }
+      // Return fallback stats
+      return {
+        total_flora: 0,
+        total_fauna: 0,
+        total_taman: 0,
+        total_artikel: 0,
+      };
+    }
+    // For other errors, also return fallback
+    return {
+      total_flora: 0,
+      total_fauna: 0,
+      total_taman: 0,
+      total_artikel: 0,
+    };
+  }
 });
 
 export const getParkStats = cache(
