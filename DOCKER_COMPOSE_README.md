@@ -12,6 +12,7 @@ Untuk development lokal dengan hot-reload dan debugging.
 
 - ✅ PostgreSQL (port 5433 - untuk avoid conflict dengan local postgres)
 - ✅ Redis
+- ✅ Ollama AI (port 11434)
 - ✅ Backend API (port 8000)
 - ✅ Frontend Next.js (port 3000)
 - ✅ Migration tool (profile: tools)
@@ -40,6 +41,7 @@ Untuk production deployment dengan Nginx reverse proxy.
 
 - ✅ PostgreSQL (internal, tidak exposed)
 - ✅ Redis (internal, tidak exposed)
+- ✅ Ollama AI (internal, tidak exposed)
 - ✅ Backend API (port 8000)
 - ✅ Frontend Next.js (port 3000)
 - ✅ Nginx Reverse Proxy (port 80)
@@ -79,7 +81,19 @@ nano .env
 docker-compose up -d
 ```
 
-3. **Run migration:**
+3. **Download Ollama model (jika perlu):**
+
+```bash
+# Download model AI (default: qwen2:1.5b)
+docker-compose exec ollama ollama pull qwen2:1.5b
+
+# List available models
+docker-compose exec ollama ollama list
+```
+
+**Note:** Untuk setup Ollama lengkap, lihat `OLLAMA_SETUP.md`
+
+4. **Run migration:**
 
 ```bash
 # Option 1: Menggunakan migrate service
@@ -182,7 +196,26 @@ docker-compose logs -f
 # View specific service
 docker-compose logs -f backend
 docker-compose logs -f postgres
+docker-compose logs -f ollama
 ```
+
+### Ollama AI Management
+
+```bash
+# Download model
+docker-compose exec ollama ollama pull qwen2:1.5b
+
+# List models
+docker-compose exec ollama ollama list
+
+# Test Ollama
+docker-compose exec backend curl http://ollama:11434/api/tags
+
+# View Ollama logs
+docker-compose logs -f ollama
+```
+
+**Note:** Untuk setup lengkap, lihat `OLLAMA_SETUP.md`
 
 ### Cleanup
 
@@ -202,9 +235,11 @@ docker system prune -a
 ## ⚠️ Important Notes
 
 1. **Development:** Port PostgreSQL adalah `5433` untuk menghindari conflict dengan PostgreSQL lokal
-2. **Production:** PostgreSQL tidak exposed ke luar untuk security (hanya accessible via Docker network)
+2. **Production:** PostgreSQL, Redis, dan Ollama tidak exposed ke luar untuk security (hanya accessible via Docker network)
 3. **Passwords:** Pastikan ganti password default di production!
 4. **Environment Variables:** Gunakan `.env` file untuk production (jangan commit ke git!)
+5. **Ollama Model:** Download model setelah container Ollama running (lihat `OLLAMA_SETUP.md`)
+6. **Ollama Resources:** Ollama membutuhkan RAM cukup (minimal 2GB untuk model kecil, 8GB+ untuk model sedang)
 
 ---
 

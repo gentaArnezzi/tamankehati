@@ -53,7 +53,15 @@ export default async function HomePage() {
   
   const articlesData = articles.status === "fulfilled" ? articles.value : [];
   const galleryData = gallery.status === "fulfilled" ? gallery.value : [];
-  const parksData = parks.status === "fulfilled" ? parks.value.items || [] : [];
+  const parksData = parks.status === "fulfilled" 
+    ? (parks.value.items || []).map((park) => ({
+        id: park.id,
+        name: park.name,
+        latitude: park.latitude?.toString(),
+        longitude: park.longitude?.toString(),
+        provinsi: park.provinsi ?? undefined,
+      }))
+    : [];
 
   return (
     <HomePageClient

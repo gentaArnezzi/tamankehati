@@ -36,16 +36,31 @@ const MapWrapper = dynamic(
   },
 );
 
-export function MinimalMapSection() {
+interface MinimalMapSectionProps {
+  initialParks?: Array<{
+    id: number;
+    name: string;
+    latitude?: string;
+    longitude?: string;
+    provinsi?: string;
+  }>;
+  initialStats?: {
+    total_flora: number;
+    total_fauna: number;
+    total_taman: number;
+  };
+}
+
+export function MinimalMapSection({ initialParks = [], initialStats }: MinimalMapSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
-  const [parks, setParks] = useState<any[]>([]);
+  const [parks, setParks] = useState<any[]>(initialParks);
   const [stats, setStats] = useState<{
     total_flora: number;
     total_fauna: number;
     total_taman: number;
-  } | null>(null);
-  const [loading, setLoading] = useState(true);
+  } | null>(initialStats || null);
+  const [loading, setLoading] = useState(!initialParks.length || !initialStats);
 
   // Calculate park counts per region based on fetched data
   const getRegionCount = (regionName: string) => {

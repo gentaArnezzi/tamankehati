@@ -1485,11 +1485,6 @@ export const activitiesApi = {
     const response = await privateClient.post<ActivityAdminResponse>(
       "/api/v1/activities/with-images",
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
     );
     return mapActivity(response);
   },
@@ -1548,11 +1543,6 @@ export const activitiesApi = {
     const response = await privateClient.put<ActivityAdminResponse>(
       `/api/v1/activities/${id}/with-images`,
       formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
     );
     return mapActivity(response);
   },

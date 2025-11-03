@@ -15,8 +15,9 @@ import type { ImageProps } from "next/image";
  */
 export function SafeImage({
   src,
+  alt = "",
   ...props
-}: Omit<ImageProps, 'src'> & { src: string | null | undefined }) {
+}: Omit<ImageProps, 'src'> & { src: string | null | undefined; alt?: string }) {
   // Normalize the URL using centralized helper
   let normalizedSrc = imageUrl(src);
   
@@ -55,6 +56,6 @@ export function SafeImage({
     normalizedSrc = "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop";
   }
   
-  return <Image src={normalizedSrc} {...props} />;
+  return <Image src={normalizedSrc} alt={alt} {...props} />;
 }
 

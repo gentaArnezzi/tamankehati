@@ -24,7 +24,7 @@ import {
   Sparkles,
   Award,
   Info,
-  Tree,
+  TreePine as Tree,
 } from "lucide-react";
 import {
   LineChart,
