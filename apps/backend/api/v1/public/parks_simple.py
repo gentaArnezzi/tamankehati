@@ -202,6 +202,24 @@ async def get_park(
         if not row:
             raise HTTPException(status_code=404, detail="Park not found")
         
+        # Debug: Check row length to prevent tuple index out of range
+        row_length = len(row) if hasattr(row, '__len__') else 0
+        expected_columns = 29
+        if row_length < expected_columns:
+            print(f"⚠️ Warning: Row has {row_length} columns, expected {expected_columns}")
+            print(f"Query selected columns: id, name, slug, status, area_ha, description, created_at, updated_at, sk_penetapan, pengelola, tipe_ekoregion, kondisi_fisik, nilai_penting, sejarah, visi, misi, nilai_dasar, provinsi, kota_kabupaten, kecamatan, desa_kelurahan, latitude, longitude, gambar_utama, submitted_by, submitted_at, approved_by, approved_at, rejected_at")
+            raise HTTPException(
+                status_code=500, 
+                detail=f"Database schema mismatch: Expected {expected_columns} columns but got {row_length}. Please check if all columns exist in parks table."
+            )
+        
+        # Safe access helper function
+        def safe_get(index, default=None):
+            try:
+                return row[index] if index < row_length else default
+            except (IndexError, TypeError):
+                return default
+        
         # Set region name to default
         region_name = "Indonesia"
         
@@ -212,16 +230,6 @@ async def get_park(
             flora_result = await db.execute(flora_query, {"park_id": park_id})
             flora_count = flora_result.scalar() or 0
             print(f"🌿 Flora count for park {park_id}: {flora_count}")
-            
-            # Debug: check all flora for this park regardless of status
-            debug_query = text("SELECT id, scientific_name, status, deleted_at FROM flora WHERE park_id = :park_id LIMIT 5")
-            debug_result = await db.execute(debug_query, {"park_id": park_id})
-            debug_rows = debug_result.fetchall()
-            print(f"🔍 Debug - All flora for park {park_id}:")
-            for row in debug_rows:
-                nama = row[1] or "N/A"
-                deleted = "DELETED" if row[3] else "active"
-                print(f"   ID: {row[0]}, Nama: {nama}, Status: {row[2]}, {deleted}")
         except Exception as e:
             print(f"❌ Error getting flora count for park {park_id}: {e}")
             flora_count = 0
@@ -237,38 +245,60 @@ async def get_park(
             print(f"❌ Error getting fauna count for park {park_id}: {e}")
             fauna_count = 0
         
+        # Safe access to datetime fields
+        def safe_datetime_str(index):
+            val = safe_get(index)
+            if val:
+                try:
+                    if hasattr(val, 'isoformat'):
+                        return val.isoformat()
+                    return str(val)
+                except:
+                    return None
+            return None
+        
+        # Safe access to float fields
+        def safe_float(index):
+            val = safe_get(index)
+            if val is not None:
+                try:
+                    return float(val)
+                except (ValueError, TypeError):
+                    return None
+            return None
+        
         return ParkDetailResponse(
-            id=row[0],
-            name=row[1],
-            slug=row[2],
-            status=row[3],
+            id=safe_get(0, 0),
+            name=safe_get(1, ""),
+            slug=safe_get(2, ""),
+            status=safe_get(3, "approved"),
             region_id=None,
             region_name=region_name,
-            area_ha=float(row[4]) if row[4] else None,
-            description=row[5],
-            sk_penetapan=row[8],         # sk_penetapan
-            pengelola=row[9],             # pengelola
-            tipe_ekoregion=row[10],       # tipe_ekoregion
-            kondisi_fisik=row[11],        # kondisi_fisik
-            nilai_penting=row[12],        # nilai_penting
-            sejarah=row[13],              # sejarah
-            visi=row[14],                 # visi
-            misi=row[15],                 # misi
-            nilai_dasar=row[16],          # nilai_dasar
-            provinsi=row[17],             # provinsi
-            kota_kabupaten=row[18],       # kota_kabupaten
-            kecamatan=row[19],            # kecamatan
-            desa_kelurahan=row[20],       # desa_kelurahan
-            latitude=float(row[21]) if row[21] else None,           # latitude
-            longitude=float(row[22]) if row[22] else None,          # longitude
-            gambar_utama=row[23],         # gambar_utama (NEW)
-            submitted_by=row[24],         # submitted_by
-            submitted_at=row[25].isoformat() if row[25] else None,  # submitted_at
-            approved_by=row[26],          # approved_by
-            approved_at=row[27].isoformat() if row[27] else None,   # approved_at
-            rejected_at=row[28].isoformat() if row[28] else None,   # rejected_at
-            created_at=row[6].isoformat() if row[6] else "",
-            updated_at=row[7].isoformat() if row[7] else "",
+            area_ha=safe_float(4),
+            description=safe_get(5),
+            sk_penetapan=safe_get(8),
+            pengelola=safe_get(9),
+            tipe_ekoregion=safe_get(10),
+            kondisi_fisik=safe_get(11),
+            nilai_penting=safe_get(12),
+            sejarah=safe_get(13),
+            visi=safe_get(14),
+            misi=safe_get(15),
+            nilai_dasar=safe_get(16),
+            provinsi=safe_get(17),
+            kota_kabupaten=safe_get(18),
+            kecamatan=safe_get(19),
+            desa_kelurahan=safe_get(20),
+            latitude=safe_float(21),
+            longitude=safe_float(22),
+            gambar_utama=safe_get(23),
+            submitted_by=safe_get(24),
+            submitted_at=safe_datetime_str(25),
+            approved_by=safe_get(26),
+            approved_at=safe_datetime_str(27),
+            rejected_at=safe_datetime_str(28),
+            created_at=safe_datetime_str(6) or "",
+            updated_at=safe_datetime_str(7) or "",
             statistik={
                 "flora": flora_count,
                 "fauna": fauna_count,
