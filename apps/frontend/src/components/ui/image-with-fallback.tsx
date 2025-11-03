@@ -49,14 +49,26 @@ export function ImageWithFallback({
 
   // Build full URL using centralized helper (this will normalize localhost:8000)
   // MUST normalize before passing to Next.js Image component
-  const normalizedImageUrl = getImageUrl(src);
+  let normalizedImageUrl = getImageUrl(src);
   
-  // Double-check: ensure no localhost URLs reach Next.js Image
+  // Triple-check: ensure no localhost URLs reach Next.js Image
   // (Next.js will throw error if localhost is not in next.config.js)
-  const finalUrl = normalizedImageUrl.includes("localhost") 
-    ? normalizedImageUrl.replace(/http:\/\/localhost:8000|https:\/\/localhost:8000|http:\/\/127\.0\.0\.1:8000/gi, 
-        process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")
-    : normalizedImageUrl;
+  // Even after imageUrl() normalization, double-check for any remaining localhost
+  if (normalizedImageUrl.includes("localhost:8000") || normalizedImageUrl.includes("127.0.0.1:8000")) {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+    // Extract path from localhost URL
+    const pathMatch = normalizedImageUrl.match(/\/uploads\/.*$/);
+    if (pathMatch) {
+      normalizedImageUrl = `${baseUrl}${pathMatch[0]}`;
+    } else {
+      // Replace localhost with base URL
+      normalizedImageUrl = normalizedImageUrl
+        .replace(/https?:\/\/localhost:8000[^\/]*/gi, baseUrl)
+        .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/gi, baseUrl);
+    }
+  }
+  
+  const finalUrl = normalizedImageUrl;
 
   const imageProps: any = {
     src: finalUrl,

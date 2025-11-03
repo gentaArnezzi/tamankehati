@@ -95,6 +95,23 @@ const createFetcher =
         // Handle specific error codes gracefully
         const status = response.status;
         
+        // For 500 errors, try to get more details from response
+        if (status === 500) {
+          let errorDetail = "";
+          try {
+            const errorText = await response.text();
+            errorDetail = errorText.substring(0, 200); // Limit to 200 chars
+            if (process.env.NODE_ENV === "development") {
+              console.error(`[SSR] Backend 500 error for ${url}:`, errorDetail);
+            }
+          } catch (e) {
+            // Ignore if we can't read the error
+          }
+          throw new Error(
+            `Backend service error (500): ${errorDetail || "Internal server error"}`,
+          );
+        }
+        
         // Don't throw for 405 (Method Not Allowed) or 404 - handle gracefully
         if (status === 405 || status === 404) {
           if (process.env.NODE_ENV === "development") {
@@ -107,8 +124,9 @@ const createFetcher =
           throw new Error(`Endpoint not available (${status})`);
         }
         
-        // Handle server errors (500, 502, 503, 504) - Internal Server Error, Bad Gateway, Service Unavailable, Gateway Timeout
-        if (status === 500 || status === 502 || status === 503 || status === 504) {
+        // Handle server errors (502, 503, 504) - Bad Gateway, Service Unavailable, Gateway Timeout
+        // Note: 500 is handled above with more detail
+        if (status === 502 || status === 503 || status === 504) {
           if (process.env.NODE_ENV === "development") {
             console.warn(
               `[SSR] Backend error: ${status} ${response.statusText} for ${path}`,

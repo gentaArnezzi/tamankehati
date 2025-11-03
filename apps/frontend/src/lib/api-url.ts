@@ -72,38 +72,98 @@ export function imageUrl(path: string | null | undefined): string {
     return "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop";
   }
   
+  const baseUrl = getApiUrl();
+  
   // CRITICAL: Check for localhost patterns FIRST (before any other checks)
   // This must happen before checking http/https to catch all localhost URLs
-  const localhostPatterns = [
-    /http:\/\/localhost:8000/gi,
-    /https:\/\/localhost:8000/gi,
-    /http:\/\/127\.0\.0\.1:8000/gi,
-    /https:\/\/127\.0\.0\.1:8000/gi,
-  ];
+  // Use more aggressive pattern matching to catch all variations
+  // Check for localhost in multiple ways to catch all cases
+  const hasLocalhost = 
+    normalizedPath.includes('localhost:8000') || 
+    normalizedPath.includes('127.0.0.1:8000') ||
+    normalizedPath.startsWith('http://localhost:8000') ||
+    normalizedPath.startsWith('https://localhost:8000') ||
+    normalizedPath.startsWith('http://127.0.0.1:8000') ||
+    normalizedPath.startsWith('https://127.0.0.1:8000');
   
-  for (const pattern of localhostPatterns) {
-    if (pattern.test(normalizedPath)) {
-      const baseUrl = getApiUrl();
+  if (hasLocalhost) {
+    // Extract path from localhost URL - multiple strategies
+    let pathOnly = '';
+    let queryString = '';
+    
+    // Strategy 1: Try regex to extract /uploads/ path
+    const uploadsRegex = /\/uploads\/[^?\s]*(?:\?[^\s]*)?/;
+    const uploadsMatch = normalizedPath.match(uploadsRegex);
+    if (uploadsMatch) {
+      const fullPath = uploadsMatch[0];
+      const queryIndex = fullPath.indexOf('?');
+      if (queryIndex !== -1) {
+        pathOnly = fullPath.substring(0, queryIndex);
+        queryString = fullPath.substring(queryIndex);
+      } else {
+        pathOnly = fullPath;
+      }
+    } else {
+      // Strategy 2: Try URL parsing
       try {
-        const urlObj = new URL(normalizedPath);
-        // Extract pathname and search params, replace host with production URL
-        return `${baseUrl}${urlObj.pathname}${urlObj.search}`;
+        const urlToParse = normalizedPath.startsWith('http') ? normalizedPath : `http://${normalizedPath}`;
+        const urlObj = new URL(urlToParse);
+        pathOnly = urlObj.pathname;
+        queryString = urlObj.search;
       } catch (e) {
-        // If URL parsing fails (invalid URL), do simple string replacement
-        const pathOnly = normalizedPath.replace(/^https?:\/\/[^\/]+/, "");
-        return `${baseUrl}${pathOnly}`;
+        // Strategy 3: Manual extraction
+        const uploadsIndex = normalizedPath.indexOf('/uploads');
+        if (uploadsIndex !== -1) {
+          const afterUploads = normalizedPath.substring(uploadsIndex);
+          const queryIndex = afterUploads.indexOf('?');
+          if (queryIndex !== -1) {
+            pathOnly = afterUploads.substring(0, queryIndex);
+            queryString = afterUploads.substring(queryIndex);
+          } else {
+            pathOnly = afterUploads;
+          }
+        } else {
+          // Strategy 4: Last resort - aggressive replacement
+          const cleaned = normalizedPath.replace(/^https?:\/\/[^\/]+/, "").replace(/^[^\/]+/, "");
+          const parts = cleaned.split('?');
+          pathOnly = parts[0];
+          queryString = parts[1] ? `?${parts[1]}` : '';
+        }
       }
     }
+    
+    // Ensure path starts with /
+    if (!pathOnly.startsWith('/')) {
+      pathOnly = '/' + pathOnly;
+    }
+    
+    // Final check: if pathOnly still contains localhost, extract again
+    if (pathOnly.includes('localhost:8000') || pathOnly.includes('127.0.0.1:8000')) {
+      const finalMatch = pathOnly.match(/\/uploads\/[^?\s]*/);
+      if (finalMatch) {
+        pathOnly = finalMatch[0];
+      }
+    }
+    
+    return `${baseUrl}${pathOnly}${queryString}`;
   }
   
   // Already a full URL (production URL)
   if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
+    // Double-check: even production URLs might have localhost embedded (shouldn't happen, but just in case)
+    if (normalizedPath.includes('localhost:8000') || normalizedPath.includes('127.0.0.1:8000')) {
+      const pathMatch = normalizedPath.match(/(\/uploads\/.*?)(?:\?|$)/);
+      if (pathMatch) {
+        return `${baseUrl}${pathMatch[1]}`;
+      }
+      return normalizedPath.replace(/https?:\/\/localhost:8000[^\/]*/, baseUrl)
+                          .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/, baseUrl);
+    }
     // Return as-is for valid production URLs
     return normalizedPath;
   }
   
   // Relative path - prepend base URL
-  const baseUrl = getApiUrl();
   const cleanPath = normalizedPath.startsWith("/") ? normalizedPath : `/${normalizedPath}`;
   return `${baseUrl}${cleanPath}`;
 }
@@ -141,3 +201,4 @@ export function normalizeUrl(url: string): string {
  * Use getApiUrl() function if you need runtime evaluation
  */
 export const API_BASE_URL = getApiUrl();
+

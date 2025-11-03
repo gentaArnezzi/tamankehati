@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import { SafeImage } from "../../ui/safe-image";
 import { Card, CardContent } from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { Skeleton } from "../../ui/skeleton";
@@ -86,8 +86,8 @@ export function ParkFlora({ parkId }: ParkFloraProps) {
           >
             <CardContent className="p-0">
               <div className="relative h-48 w-full overflow-hidden">
-                <Image
-                  src={item.gambar_utama || "/placeholder.svg"}
+                <SafeImage
+                  src={item.gambar_utama}
                   alt={item.nama_umum || item.nama_ilmiah}
                   fill
                   className="object-cover group-hover:scale-105 transition-transform duration-500"

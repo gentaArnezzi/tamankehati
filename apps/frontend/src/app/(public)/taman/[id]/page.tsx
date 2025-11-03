@@ -95,15 +95,26 @@ export default async function TamanDetailPage({
       </>
     );
   } catch (error: any) {
+    const { id: errorId } = await params;
     if (process.env.NODE_ENV === "development") {
-      console.error("Error loading taman details:", error);
+      console.error("❌ Error loading taman details:", error);
+      console.error("   Park ID:", errorId);
+      console.error("   Error message:", error?.message || error);
+      
       // Log additional context for 500 errors
       if (error?.message?.includes("500") || error?.message?.includes("Backend service error")) {
         console.error(
-          "⚠️ Backend returned 500 error - this indicates a server-side issue, not a path problem",
+          "⚠️ Backend returned 500 error - this indicates a server-side issue",
         );
         console.error("   The backend API endpoint exists but is failing internally");
-        console.error("   Check backend logs for the actual error");
+        console.error("   Error detail:", error?.message);
+        console.error("   Possible causes:");
+        console.error("   1. Database schema mismatch (tuple index out of range)");
+        console.error("   2. Missing columns in parks table");
+        console.error("   3. Data corruption in park record");
+        console.error("   Solution: Check backend logs and verify database schema");
+      } else if (error?.message?.includes("404")) {
+        console.error("⚠️ Park not found - park ID may not exist or is not approved");
       }
     }
     notFound();
