@@ -70,7 +70,10 @@ export function InteractiveOnboardingTour({
   };
 
   useEffect(() => {
+    console.log("[Tour] useEffect triggered, run=", run);
+    
     if (!run) {
+      console.log("[Tour] Tour not running, cleaning up...");
       // Clean up driver when not running
       if (driverRef.current) {
         try {
@@ -88,7 +91,7 @@ export function InteractiveOnboardingTour({
     }
 
     console.log(
-      "[Tour] useEffect run, driverRef exists:",
+      "[Tour] Tour is RUNNING! driverRef exists:",
       !!driverRef.current,
       "isInitialized:",
       isInitializedRef.current,

@@ -21,6 +21,7 @@ import {
   CircleHelp,
   Menu,
   X,
+  PlayCircle,
 } from "lucide-react";
 import type { User } from "../lib/api-client";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -168,6 +169,7 @@ export function CollapsibleDashboardLayout({
     isNewUser,
     loading: loadingNewUser,
     markTourAsCompleted,
+    resetTourStatus,
   } = useNewUserDetection();
   const navItems = buildNavItems(user?.role);
   const currentPage = resolveCurrentPage(currentPath);
@@ -310,20 +312,44 @@ export function CollapsibleDashboardLayout({
 
   // Auto-trigger onboarding tour for new users (only once)
   useEffect(() => {
+    console.log("[Tour] Auto-trigger check:", {
+      loadingNewUser,
+      isNewUser,
+      userRole: user?.role,
+      onboardingStarted: onboardingStartedRef.current,
+    });
+
     if (
       !loadingNewUser &&
-      isNewUser &&
+      isNewUser === true && // Explicit check for true
       user?.role === "regional_admin" &&
       !onboardingStartedRef.current
     ) {
+      console.log("[Tour] Conditions met, starting tour in 3.5 seconds...");
       // Delay to let user see the dashboard first before tour starts
       const timer = setTimeout(() => {
+        console.log("[Tour] Starting tour now!");
         setRunOnboarding(true);
         onboardingStartedRef.current = true; // Mark as started
       }, 3500); // 3.5 seconds delay to let user explore first
       return () => clearTimeout(timer);
     }
   }, [isNewUser, loadingNewUser, user]);
+
+  // Manual trigger tour function (can be called from button)
+  const handleStartTour = () => {
+    // Reset tour status so it can run again
+    if (user) {
+      localStorage.removeItem(`tour_completed_${user.id}`);
+      localStorage.removeItem("onboarding_current_step");
+    }
+    onboardingStartedRef.current = false;
+    // Small delay to ensure reset is complete
+    setTimeout(() => {
+      setRunOnboarding(true);
+      onboardingStartedRef.current = true;
+    }, 300);
+  };
 
   const handleOnboardingFinish = () => {
     setRunOnboarding(false);
@@ -335,10 +361,13 @@ export function CollapsibleDashboardLayout({
     <div className="flex min-h-screen w-full">
       {/* Interactive Onboarding Tour - Auto-trigger for new regional admin */}
       {/* Always render to prevent unmount/remount, logic handled by run prop */}
-      <InteractiveOnboardingTour
-        run={runOnboarding && user?.role === "regional_admin"}
-        onFinish={handleOnboardingFinish}
-      />
+      {/* Tour can run if: (1) auto-triggered for new users, OR (2) manually triggered */}
+      {user?.role === "regional_admin" && (
+        <InteractiveOnboardingTour
+          run={runOnboarding}
+          onFinish={handleOnboardingFinish}
+        />
+      )}
 
       <div className="flex w-full bg-gray-50 text-gray-900">
         {/* Mobile Menu Overlay */}
@@ -396,6 +425,19 @@ export function CollapsibleDashboardLayout({
             {userMenuOpen && sidebarOpen && (
               <div className="absolute top-full left-2 right-2 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
                 <div className="py-1">
+                  {user?.role === "regional_admin" && (
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        setMobileMenuOpen(false);
+                        handleStartTour();
+                      }}
+                      className="flex items-center gap-3 w-full px-3 py-2 text-sm text-brand-700 hover:bg-brand-50 transition-colors"
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      <span>Mulai Panduan Onboarding</span>
+                    </button>
+                  )}
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
@@ -418,7 +460,9 @@ export function CollapsibleDashboardLayout({
                     <CircleHelp className="h-4 w-4" />
                     <span>Panduan</span>
                   </button>
-                  <div className="border-t border-gray-200 my-1"></div>
+                  {user?.role === "regional_admin" && (
+                    <div className="border-t border-gray-200 my-1"></div>
+                  )}
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
