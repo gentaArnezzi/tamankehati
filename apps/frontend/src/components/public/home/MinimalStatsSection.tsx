@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useMemo, memo } from "react";
 import { motion, useInView } from "framer-motion";
-import { Leaf, PawPrint, MapPin } from "lucide-react";
+import { Leaf, PawPrint, MapPin, type LucideIcon } from "lucide-react";
 
 interface MinimalStatsSectionProps {
   initialStats?: {
@@ -11,6 +11,40 @@ interface MinimalStatsSectionProps {
     total_taman: number;
   };
 }
+
+// Define stats configuration outside component to ensure icons are always available
+const STATS_CONFIG = [
+  {
+    label: "Spesies Flora",
+    description: "Terdokumentasi",
+    icon: Leaf as LucideIcon,
+    color: "emerald",
+    gradient: "from-emerald-50 to-green-50",
+    iconColor: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    key: "flora" as const,
+  },
+  {
+    label: "Spesies Fauna",
+    description: "Teridentifikasi",
+    icon: PawPrint as LucideIcon,
+    color: "amber",
+    gradient: "from-amber-50 to-orange-50",
+    iconColor: "text-amber-600",
+    bgColor: "bg-amber-50",
+    key: "fauna" as const,
+  },
+  {
+    label: "Taman Konservasi",
+    description: "Seluruh Indonesia",
+    icon: MapPin as LucideIcon,
+    color: "blue",
+    gradient: "from-blue-50 to-cyan-50",
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-50",
+    key: "parks" as const,
+  },
+] as const;
 
 export const MinimalStatsSection = memo(function MinimalStatsSection({ initialStats }: MinimalStatsSectionProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -64,38 +98,13 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
     }
   }, [isInView, loading, targets]);
 
-  const stats = [
-    {
-      value: counts.flora,
-      label: "Spesies Flora",
-      description: "Terdokumentasi",
-      icon: Leaf,
-      color: "emerald",
-      gradient: "from-emerald-50 to-green-50",
-      iconColor: "text-emerald-600",
-      bgColor: "bg-emerald-50",
-    },
-    {
-      value: counts.fauna,
-      label: "Spesies Fauna",
-      description: "Teridentifikasi",
-      icon: PawPrint,
-      color: "amber",
-      gradient: "from-amber-50 to-orange-50",
-      iconColor: "text-amber-600",
-      bgColor: "bg-amber-50",
-    },
-    {
-      value: counts.parks,
-      label: "Taman Konservasi",
-      description: "Seluruh Indonesia",
-      icon: MapPin,
-      color: "blue",
-      gradient: "from-blue-50 to-cyan-50",
-      iconColor: "text-blue-600",
-      bgColor: "bg-blue-50",
-    },
-  ];
+  // Build stats array with current counts
+  const stats = useMemo(() => {
+    return STATS_CONFIG.map((config) => ({
+      ...config,
+      value: counts[config.key],
+    }));
+  }, [counts]);
 
   return (
     <section ref={sectionRef} className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-white to-slate-50/50">
@@ -145,13 +154,10 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
             {stats.map((stat, index) => {
               const IconComponent = stat.icon;
-              if (!IconComponent || typeof IconComponent !== 'function') {
-                console.warn(`[MinimalStatsSection] Icon component is undefined for stat: ${stat.label}`);
-                return null;
-              }
+              
               return (
                 <motion.div
-                  key={index}
+                  key={stat.key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ 
