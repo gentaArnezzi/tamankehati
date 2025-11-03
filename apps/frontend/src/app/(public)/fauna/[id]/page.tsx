@@ -68,7 +68,7 @@ export default async function FaunaDetailPage({
             id: item.id,
             nama_ilmiah: item.nama_ilmiah,
             nama_umum: item.nama_umum,
-            gambar_utama: item.gambar_utama ?? undefined,
+            gambar_utama: item.gambar_utama ? item.gambar_utama : undefined,
           })),
     };
 

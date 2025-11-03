@@ -8,6 +8,7 @@ import { type FaunaDetail } from "../../../types/fauna";
 import { Badge } from "../../ui/badge";
 import { EntityCard } from "../cards/EntityCard";
 import { JsonLd } from "../seo/JsonLd";
+import { imageUrl, apiUrl } from "../../../lib/api-url";
 import { MapPin, ArrowRight, ArrowLeft, Home } from "lucide-react";
 import {
   Breadcrumb,

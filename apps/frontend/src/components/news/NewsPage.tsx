@@ -197,13 +197,41 @@ export function NewsPage() {
     setFormOpen(true);
   };
 
-  const handleEdit = (news: News) => {
+  // Convert NewsItem to News format
+  const convertNewsItemToNews = (item: any): News => {
+    return {
+      id: item.id,
+      title: item.title,
+      content: item.content,
+      summary: item.summary,
+      slug: item.slug,
+      category: item.category as News["category"],
+      status: item.status as News["status"],
+      priority: item.priority ?? 0,
+      is_featured: item.featured ?? false,
+      is_pinned: item.pinned ?? false,
+      featured_image: item.image_url,
+      attachments: item.attachments,
+      tags: item.tags?.join(",") ?? item.tags,
+      reading_time: item.reading_time ?? 0,
+      expires_at: item.expires_at,
+      author_id: item.author?.id,
+      published_at: item.published_at,
+      view_count: item.views ?? 0,
+      created_at: item.created_at,
+      updated_at: item.updated_at,
+    };
+  };
+
+  const handleEdit = (item: any) => {
+    const news = convertNewsItemToNews(item);
     setSelectedNews(news);
     setFormMode("edit");
     setFormOpen(true);
   };
 
-  const handleView = (news: News) => {
+  const handleView = (item: any) => {
+    const news = convertNewsItemToNews(item);
     setSelectedNews(news);
     setDetailOpen(true);
   };
@@ -520,10 +548,10 @@ export function NewsPage() {
               <div className="flex justify-between items-start">
                 <div className="flex-1 space-y-3">
                   <div className="flex items-center gap-2">
-                    {item.is_pinned && (
+                    {item.pinned && (
                       <Pin className="h-4 w-4 text-blue-600" />
                     )}
-                    {item.is_featured && (
+                    {item.featured && (
                       <Star className="h-4 w-4 text-yellow-600" />
                     )}
                     <h3 className="text-lg font-semibold line-clamp-1">
@@ -531,45 +559,38 @@ export function NewsPage() {
                     </h3>
                   </div>
 
-                  {item.summary && (
-                    <p className="text-muted-foreground line-clamp-2">
-                      {item.summary}
-                    </p>
-                  )}
-
                   <div className="flex items-center gap-2 flex-wrap">
                     {getCategoryBadge(item.category)}
                     {getStatusBadge(item.status)}
-                    {getPriorityBadge(item.priority)}
-                    {item.tags && (
+                    {item.tags && item.tags.length > 0 && (
                       <div className="flex items-center gap-1">
                         <Tag className="h-3 w-3" />
                         <span className="text-xs text-muted-foreground">
-                          {item.tags.split(",").length} tag
+                          {item.tags.length} tag
                         </span>
                       </div>
                     )}
                   </div>
 
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3" />
-                      <span>Author ID: {item.author_id || "N/A"}</span>
-                    </div>
+                    {item.author && (
+                      <div className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        <span>{item.author.name || item.author.email}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <Clock className="h-3 w-3" />
                       <span>
                         {new Date(item.created_at).toLocaleDateString("id-ID")}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-3 w-3" />
-                      <span>{item.view_count} views</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <FileText className="h-3 w-3" />
-                      <span>{item.reading_time} min baca</span>
-                    </div>
+                    {item.views !== undefined && (
+                      <div className="flex items-center gap-1">
+                        <Eye className="h-3 w-3" />
+                        <span>{item.views} views</span>
+                      </div>
+                    )}
                     {item.published_at && (
                       <div className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />

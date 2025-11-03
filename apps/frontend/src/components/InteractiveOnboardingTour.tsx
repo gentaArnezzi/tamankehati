@@ -110,12 +110,16 @@ export function InteractiveOnboardingTour({
         // Custom callbacks to handle missing elements gracefully
         onPopoverRender: (popover, { config, state }) => {
           // Save current step every time popover is rendered
-          saveCurrentStep(state.activeIndex);
+          if (state.activeIndex !== undefined) {
+            saveCurrentStep(state.activeIndex);
+          }
         },
 
         onHighlighted: (element, step, options) => {
           // Save current step every time a step is highlighted
-          saveCurrentStep(options.state.activeIndex);
+          if (options.state.activeIndex !== undefined) {
+            saveCurrentStep(options.state.activeIndex);
+          }
         },
 
         steps: [
@@ -141,7 +145,6 @@ export function InteractiveOnboardingTour({
                 </p>
               </div>
             `,
-              side: "center",
               align: "center",
             },
           },
@@ -436,7 +439,6 @@ export function InteractiveOnboardingTour({
                 Selamat bekerja!
               </p>
             `,
-              side: "center",
               align: "center",
             },
           },

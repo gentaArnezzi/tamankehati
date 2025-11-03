@@ -181,17 +181,18 @@ export function FloraFormSheet({
       toast.success("Deskripsi berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI description:", error);
+      const err = error as Error & { name?: string; message?: string };
 
-      if (error.name === "AbortError") {
+      if (err.name === "AbortError") {
         toast.error(
           "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
       } else {
-        toast.error(`Gagal membuat deskripsi: ${error.message}`);
+        toast.error(`Gagal membuat deskripsi: ${err.message || "Unknown error"}`);
       }
     } finally {
       clearTimeout(timeoutId);
@@ -248,17 +249,18 @@ export function FloraFormSheet({
       toast.success("Morfologi berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI morphology:", error);
+      const err = error as Error & { name?: string; message?: string };
 
-      if (error.name === "AbortError") {
+      if (err.name === "AbortError") {
         toast.error(
           "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
       } else {
-        toast.error(`Gagal membuat morfologi: ${error.message}`);
+        toast.error(`Gagal membuat morfologi: ${err.message || "Unknown error"}`);
       }
     } finally {
       clearTimeout(timeoutId);
@@ -315,17 +317,18 @@ export function FloraFormSheet({
       toast.success("Manfaat berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI benefits:", error);
+      const err = error as Error & { name?: string; message?: string };
 
-      if (error.name === "AbortError") {
+      if (err.name === "AbortError") {
         toast.error(
           "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
       } else {
-        toast.error(`Gagal membuat manfaat: ${error.message}`);
+        toast.error(`Gagal membuat manfaat: ${err.message || "Unknown error"}`);
       }
     } finally {
       clearTimeout(timeoutId);

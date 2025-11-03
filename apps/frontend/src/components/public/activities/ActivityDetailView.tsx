@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "../../ui/badge";
+import { imageUrl } from "../../../lib/api-url";
 import {
   Calendar,
   MapPin,

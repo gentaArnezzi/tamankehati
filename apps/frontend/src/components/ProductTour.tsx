@@ -23,7 +23,6 @@ export function ProductTour({ run, onFinish }: ProductTourProps) {
             title: "🎉 Selamat Datang di Dashboard Regional Admin!",
             description:
               "Mari kami tunjukkan cara menggunakan dashboard untuk mengelola data taman, flora, fauna, dan kegiatan Anda.",
-            side: "center",
             align: "center",
           },
         },
@@ -146,7 +145,6 @@ export function ProductTour({ run, onFinish }: ProductTourProps) {
                 </p>
               </div>
             `,
-            side: "center",
             align: "center",
           },
         },

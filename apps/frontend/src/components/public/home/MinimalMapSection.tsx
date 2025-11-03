@@ -51,7 +51,8 @@ interface MinimalMapSectionProps {
   };
 }
 
-export function MinimalMapSection({ initialParks = [], initialStats }: MinimalMapSectionProps) {
+export function MinimalMapSection(props: MinimalMapSectionProps) {
+  const { initialParks = [], initialStats } = props;
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.2 });
   const [parks, setParks] = useState<any[]>(initialParks);

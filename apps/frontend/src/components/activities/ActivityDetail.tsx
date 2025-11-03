@@ -302,7 +302,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
                   <div className="flex items-center gap-2">
                     <XCircle className="h-4 w-4 text-red-600" />
                     <span className="font-medium text-red-900">
-                      {activity.rejected_by || "N/A"}
+                      {activity.rejection_reason || "Tidak ada alasan"}
                     </span>
                   </div>
                   <p className="text-sm text-red-700 mt-1">

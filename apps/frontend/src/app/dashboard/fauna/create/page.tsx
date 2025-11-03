@@ -244,17 +244,18 @@ export default function CreateFaunaPage() {
       toast.success("Deskripsi fauna berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI content:", error);
+      const err = error as Error & { name?: string; message?: string };
 
-      if (error.name === "AbortError") {
+      if (err.name === "AbortError") {
         toast.error(
           "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
       } else {
-        toast.error(`Gagal membuat deskripsi AI: ${error.message}`);
+        toast.error(`Gagal membuat deskripsi AI: ${err.message || "Unknown error"}`);
       }
     } finally {
       clearTimeout(timeoutId);

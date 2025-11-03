@@ -57,8 +57,8 @@ export default async function HomePage() {
     ? (parks.value.items || []).map((park) => ({
         id: park.id,
         name: park.name,
-        latitude: park.latitude?.toString(),
-        longitude: park.longitude?.toString(),
+        latitude: park.latitude != null ? park.latitude.toString() : undefined,
+        longitude: park.longitude != null ? park.longitude.toString() : undefined,
         provinsi: park.provinsi ?? undefined,
       }))
     : [];

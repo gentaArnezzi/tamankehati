@@ -1,4 +1,5 @@
-import { ReactLenis } from "lenis/dist/lenis-react";
+// @ts-ignore - lenis types issue
+import { ReactLenis } from "lenis/react";
 import {
   motion,
   useMotionTemplate,

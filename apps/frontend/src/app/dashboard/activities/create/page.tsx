@@ -167,10 +167,16 @@ function CreateActivityPageContent() {
     try {
       setIsSubmitting(true);
 
+      const parkId = user?.park_id || data.park_id;
+      if (!parkId) {
+        toast.error("Park ID tidak tersedia. Silakan login ulang.");
+        return;
+      }
+
       const submitData = {
         ...data,
         activity_date: date ? format(date, "yyyy-MM-dd") : data.activity_date,
-        park_id: user?.park_id || data.park_id,
+        park_id: parkId,
       };
 
       if (imageFiles.length > 0) {
