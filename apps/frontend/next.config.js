@@ -4,6 +4,20 @@ const nextConfig = {
   output: 'standalone',
   images: {
     remotePatterns: [
+      // Development - localhost support
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8000',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: '127.0.0.1',
+        port: '8000',
+        pathname: '/uploads/**',
+      },
+      // Production - Render.com domains
       {
         protocol: 'https',
         hostname: 'tamankehati-backend-pxnu.onrender.com',

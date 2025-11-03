@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 
 from core.database.session import get_session  # pastikan ini ada
-from domains.analytics.services import endemic_by_region, iucn_counts_by_region_flat, endemic_by_user
+from domains.analytics.services import endemic_by_user
 from api.v1.permissions.rbac import current_user
 from users.models import UserRole
 
