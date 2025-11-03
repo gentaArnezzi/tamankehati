@@ -553,14 +553,14 @@ export function AnnouncementForm({
                 variant="outline"
                 onClick={() => onOpenChange(false)}
                 disabled={loading}
-                className="w-full sm:w-auto text-sm"
+                className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0 text-sm"
               >
                 Batal
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full sm:w-auto text-sm"
+                className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0 text-sm"
               >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 <span className="truncate">

@@ -208,7 +208,7 @@ export function Dashboard() {
               <Button
                 onClick={() => router.push("/dashboard/modern")}
                 variant="outline"
-                className="flex items-center justify-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600 w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 border-blue-500 text-blue-700 hover:bg-blue-50 hover:text-blue-800 hover:border-blue-600 w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
               >
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Modern Dashboard</span>
@@ -219,7 +219,7 @@ export function Dashboard() {
               <Button
                 onClick={() => router.push("/dashboard/data-driven")}
                 variant="outline"
-                className="flex items-center justify-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600 w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 border-green-500 text-green-700 hover:bg-green-50 hover:text-green-800 hover:border-green-600 w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
               >
                 <Activity className="h-4 w-4" />
                 <span className="hidden sm:inline">Data Dashboard</span>
@@ -230,7 +230,7 @@ export function Dashboard() {
               <Button
                 onClick={() => router.push("/dashboard/tamankehati")}
                 variant="outline"
-                className="flex items-center justify-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600 w-full sm:w-auto"
+                className="flex items-center justify-center gap-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 hover:border-emerald-600 w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
               >
                 <TreePine className="h-4 w-4" />
                 <span className="hidden sm:inline">Tamankehati Dashboard</span>
@@ -242,7 +242,7 @@ export function Dashboard() {
                 <Button
                   onClick={() => setRunTour(true)}
                   variant="outline"
-                  className="flex items-center justify-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600 w-full sm:w-auto"
+                  className="flex items-center justify-center gap-2 border-brand-500 text-brand-700 hover:bg-brand-50 hover:text-brand-800 hover:border-brand-600 w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
                 >
                   <HelpCircle className="h-4 w-4" />
                   Panduan

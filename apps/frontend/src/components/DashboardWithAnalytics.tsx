@@ -283,7 +283,7 @@ export function DashboardWithAnalytics() {
             variant="outline" 
             onClick={handleRefresh} 
             disabled={loading}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
           >
             <RefreshCw
               className={`h-4 w-4 sm:mr-2 ${loading ? "animate-spin" : ""}`}
@@ -304,7 +304,7 @@ export function DashboardWithAnalytics() {
           </Select>
           <Button 
             onClick={() => handleExport("pdf")}
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
           >
             <Download className="h-4 w-4 sm:mr-2" />
             <span className="hidden sm:inline">Export</span>

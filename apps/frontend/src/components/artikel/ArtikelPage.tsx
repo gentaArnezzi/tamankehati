@@ -317,20 +317,25 @@ export function ArtikelPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-3xl mb-2 flex items-center gap-2">
-            <FileText className="h-8 w-8" style={{ color: "#356447" }} />
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
+            <FileText className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
             Manajemen Artikel
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             Kelola konten artikel dan berita keanekaragaman hayati
           </p>
         </div>
-        <Button onClick={handleCreate} style={{ backgroundColor: "#233c2b" }}>
-          <Plus className="mr-2 h-4 w-4" />
-          Tulis Artikel
-        </Button>
+        <div className="flex-shrink-0 sm:flex-none sm:w-auto sm:max-w-fit">
+          <Button 
+            onClick={handleCreate}
+            className="w-full sm:w-fit sm:min-w-0 sm:max-w-none sm:whitespace-nowrap bg-black hover:bg-gray-800 text-white"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tulis Artikel
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -613,7 +618,7 @@ export function ArtikelPage() {
                 >
                   Batal
                 </Button>
-                <Button type="submit" style={{ backgroundColor: "#233c2b" }}>
+                <Button type="submit" className="bg-black hover:bg-gray-800 text-white">
                   {formMode === "create"
                     ? "Simpan Artikel"
                     : "Perbarui Artikel"}

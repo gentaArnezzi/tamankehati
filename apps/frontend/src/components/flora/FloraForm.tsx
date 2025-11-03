@@ -1345,7 +1345,7 @@ export function FloraForm({
                 onClick={form.handleSubmit((data) =>
                   handleSubmit(data, "in_review"),
                 )}
-                style={{ backgroundColor: "#233c2b" }}
+                className="bg-black hover:bg-gray-800 text-white"
               >
                 {uploading || form.formState.isSubmitting
                   ? "Menyimpan..."

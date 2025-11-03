@@ -203,7 +203,7 @@ export function FloraPage() {
     <div className="space-y-4 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div>
+        <div className="flex-1 min-w-0">
           <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
             <Leaf className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
             Manajemen Flora
@@ -213,15 +213,16 @@ export function FloraPage() {
             {/* wilayah field removed from User type */}
           </p>
         </div>
-        <Button
-          onClick={handleCreate}
-          data-tour="add-flora-button"
-          style={{ backgroundColor: "#233c2b" }}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Flora
-        </Button>
+        <div className="flex-shrink-0 sm:flex-none sm:w-auto sm:max-w-fit">
+          <Button
+            onClick={handleCreate}
+            data-tour="add-flora-button"
+            className="w-full sm:w-fit sm:min-w-0 sm:max-w-none sm:whitespace-nowrap bg-black hover:bg-gray-800 text-white"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Flora
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

@@ -904,7 +904,7 @@ export function UserForm({
                 <Button
                   type="submit"
                   disabled={form.formState.isSubmitting}
-                  style={{ backgroundColor: "#233c2b" }}
+                  className="bg-black hover:bg-gray-800 text-white"
                 >
                   {form.formState.isSubmitting
                     ? "Menyimpan..."

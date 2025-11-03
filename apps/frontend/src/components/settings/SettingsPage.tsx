@@ -219,7 +219,7 @@ export function SettingsPage() {
                 <Button
                   onClick={handleSaveTheme}
                   disabled={saving}
-                  style={{ backgroundColor: "#233c2b" }}
+                  className="bg-black hover:bg-gray-800 text-white"
                 >
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
@@ -283,7 +283,7 @@ export function SettingsPage() {
                 <Button
                   onClick={handleSaveNotifications}
                   disabled={saving}
-                  style={{ backgroundColor: "#233c2b" }}
+                  className="bg-black hover:bg-gray-800 text-white"
                 >
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
@@ -358,7 +358,7 @@ export function SettingsPage() {
                 <Button
                   onClick={handleSaveSystem}
                   disabled={saving}
-                  style={{ backgroundColor: "#233c2b" }}
+                  className="bg-black hover:bg-gray-800 text-white"
                 >
                   {saving ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
