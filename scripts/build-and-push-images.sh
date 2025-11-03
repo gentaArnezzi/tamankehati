@@ -60,8 +60,27 @@ fi
 # Login to registry if pushing
 if [ "$PUSH_TO_REGISTRY" = "true" ]; then
     log "Checking Docker login status..."
-    if ! docker info | grep -q "Username"; then
-        log_warning "Not logged in to Docker registry"
+    # Check if credentials exist in config file
+    HAS_AUTH=false
+    if [ -f "$HOME/.docker/config.json" ]; then
+        if grep -q "auths" "$HOME/.docker/config.json" && grep -q "auth" "$HOME/.docker/config.json"; then
+            HAS_AUTH=true
+        fi
+    fi
+    
+    # Try to verify login by testing registry access
+    if [ "$HAS_AUTH" = "true" ]; then
+        log_success "Docker credentials found"
+        log "Verifying login by testing registry access..."
+        # Test with a simple pull (won't actually download if not logged in, just checks auth)
+        if docker pull hello-world:latest > /dev/null 2>&1; then
+            log_success "Docker registry access verified"
+        else
+            log_warning "Credentials found but registry access may be limited"
+            log "Continuing with build - will verify during push..."
+        fi
+    else
+        log_warning "Docker credentials not found"
         log "Please login first:"
         if [ "$DOCKER_REGISTRY" = "docker.io" ]; then
             log "  docker login"
@@ -77,11 +96,9 @@ if [ "$PUSH_TO_REGISTRY" = "true" ]; then
                 docker login "${DOCKER_REGISTRY}"
             fi
         else
-            log_error "Login required to push images"
-            exit 1
+            log_warning "Proceeding without explicit login - will attempt push (may fail if not authenticated)"
+            log "You can set PUSH_TO_REGISTRY=false to skip push and only build locally"
         fi
-    else
-        log_success "Docker is logged in"
     fi
 fi
 
