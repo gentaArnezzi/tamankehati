@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { parksApi } from "../../../../lib/api-client";
+import { apiUrl, imageUrl } from "../../../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -53,7 +54,7 @@ export default function TamanDetailPage() {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/entity/park/${id}`,
+        apiUrl(`/api/v1/galleries/entity/park/${id}`),
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
@@ -63,7 +64,6 @@ export default function TamanDetailPage() {
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Gallery response:", result);
         setGalleries(result.data || result.items || []);
       } else {
         console.error(
@@ -80,9 +80,7 @@ export default function TamanDetailPage() {
   };
 
   const getImageUrl = (url?: string) => {
-    if (!url) return "";
-    if (url.startsWith("http")) return url;
-    return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
+    return imageUrl(url);
   };
 
   const getStatusBadge = (status?: string) => {

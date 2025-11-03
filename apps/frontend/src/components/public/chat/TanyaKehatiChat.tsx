@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 import { Card, CardContent } from "../../ui/card";
+import { apiUrl } from "../../../lib/api-url";
 import {
   MessageCircle,
   Send,
@@ -82,10 +83,7 @@ export function TanyaKehatiChat({ isOpen, onClose }: TanyaKehatiChatProps) {
     setIsLoading(true);
 
     try {
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "https://tamankehati-backend-pxnu.onrender.com";
-      const response = await fetch(`${apiUrl}/api/public/chat/`, {
+      const response = await fetch(apiUrl("/api/public/chat/"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

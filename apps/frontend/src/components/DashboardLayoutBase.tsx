@@ -22,6 +22,7 @@ import {
 import type { User } from "../lib/api-client";
 import { ScrollArea } from "./ui/scroll-area";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { imageUrl } from "../lib/api-url";
 
 interface DashboardLayoutBaseProps {
   children: ReactNode;
@@ -210,7 +211,7 @@ export function DashboardLayoutBase({
             >
               {user?.profile_picture_url && (
                 <AvatarImage
-                  src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+                  src={imageUrl(user.profile_picture_url)}
                   alt={user?.nama || user?.display_name || "Profile photo"}
                 />
               )}
@@ -251,7 +252,7 @@ export function DashboardLayoutBase({
                 >
                   {user?.profile_picture_url && (
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+                      src={imageUrl(user.profile_picture_url)}
                       alt={user?.nama || user?.display_name || "Profile photo"}
                     />
                   )}

@@ -25,25 +25,13 @@ import {
 } from "../../ui/select";
 import Link from "next/link";
 import Image from "next/image";
+import { imageUrl as getImageUrl } from "../../../lib/api-url";
 
 const CATEGORIES = ["Artikel Edukasi", "Berita Konservasi", "Riset", "Opini"];
 
 type ArtikelExploreProps = {
   initialData: ArtikelPaginated;
   initialParams: URLSearchParams;
-};
-
-// Helper function to convert relative image URLs to absolute URLs
-const getImageUrl = (imageUrl: string | undefined) => {
-  if (!imageUrl || !imageUrl.trim()) {
-    return "https://images.unsplash.com/photo-1493815793585-d94ccbc86df0?w=800&auto=format&fit=crop";
-  }
-
-  if (imageUrl.startsWith("http")) {
-    return imageUrl;
-  }
-
-  return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${imageUrl}`;
 };
 
 export function ArtikelExplore({

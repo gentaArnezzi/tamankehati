@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { getApiUrl, imageUrl as buildImageUrl } from "../../lib/api-url";
 import { useAuth } from "../../lib/useAuth";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -141,29 +142,21 @@ export function GaleriPage() {
 
         // Convert API response to Media format
         apiData = response.items.map((item: any) => {
-          let imageUrl = item.image_url;
-
-          // Build proper URL for relative paths
-          if (imageUrl && !imageUrl.startsWith("http")) {
-            // Ensure the path starts with /
-            if (!imageUrl.startsWith("/")) {
-              imageUrl = "/" + imageUrl;
-            }
-            imageUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${imageUrl}`;
-          }
+          // Always use centralized helper to normalize URLs (handles localhost:8000)
+          let normalizedImageUrl = buildImageUrl(item.image_url);
 
           // Validate URL format
           if (
-            !imageUrl ||
-            (!imageUrl.startsWith("http") && !imageUrl.startsWith("data:"))
+            !normalizedImageUrl ||
+            (!normalizedImageUrl.startsWith("http") && !normalizedImageUrl.startsWith("data:"))
           ) {
             console.warn(
               "Invalid image URL for item:",
               item.id,
               "URL:",
-              imageUrl,
+              normalizedImageUrl,
             );
-            imageUrl =
+            normalizedImageUrl =
               "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBmb3VuZDwvdGV4dD48L3N2Zz4=";
           }
 
@@ -171,14 +164,14 @@ export function GaleriPage() {
             id: item.id,
             title: item.title,
             original_image_url: item.image_url,
-            final_url: imageUrl,
+            final_url: normalizedImageUrl,
           });
 
           return {
             id: item.id.toString(),
             judul: item.title,
             deskripsi: item.description || "",
-            url: imageUrl,
+            url: normalizedImageUrl,
             jenis: "flora", // Default, you might want to add category field
             wilayah: "Indonesia", // Region-based addressing removed - using user-based access control
             photographer: "User", // You might want to add author info
@@ -287,8 +280,7 @@ export function GaleriPage() {
 
       try {
         const response = await fetch(
-          (process.env.NEXT_PUBLIC_API_URL ||
-            "https://tamankehati-backend-pxnu.onrender.com") +
+          getApiUrl() +
             "/api/v1/upload/gallery-image",
           {
             method: "POST",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { imageUrl as buildImageUrl } from "@/lib/api-url";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -460,7 +461,7 @@ function CreateActivityPageContent() {
                     {images.map((image, index) => {
                       const isExistingImage = index < existingImages.length;
                       const imageUrl = isExistingImage
-                        ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image}`
+                        ? buildImageUrl(image)
                         : image; // For new files, image is already a blob URL
 
                       return (

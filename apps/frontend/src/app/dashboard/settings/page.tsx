@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../../lib/useAuth";
 import { useRouter, usePathname } from "next/navigation";
+import { apiUrl } from "../../../lib/api-url";
 import { CollapsibleDashboardLayout } from "../../../components/CollapsibleDashboardLayout";
 import {
   Card,
@@ -119,7 +120,7 @@ export default function SettingsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/users/me/profile`,
+        apiUrl("/api/v1/users/me/profile"),
         {
           method: "PATCH",
           headers: {
@@ -185,7 +186,7 @@ export default function SettingsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/users/me/change-password`,
+        apiUrl("/api/v1/users/me/change-password"),
         {
           method: "POST",
           headers: {

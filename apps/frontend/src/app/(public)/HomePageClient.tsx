@@ -10,56 +10,29 @@ import { LatestArticlesSection } from "../../components/public/home/LatestArticl
 import { JsonLd } from "../../components/public/seo/JsonLd";
 
 // Lazy load below-the-fold components for faster initial render
+// Simplified lazy loading to avoid production build issues
 const MinimalFeaturedSection = lazy(() =>
-  import("../../components/public/home/MinimalFeaturedSection").then((mod) => {
-    if (!mod || !mod.MinimalFeaturedSection) {
-      console.error('[HomePageClient] MinimalFeaturedSection not found');
-      throw new Error('MinimalFeaturedSection not found');
-    }
-    return { default: mod.MinimalFeaturedSection };
-  }).catch((error) => {
-    console.error('[HomePageClient] Error loading MinimalFeaturedSection:', error);
-    return { default: () => <div className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white" /> };
-  })
+  import("../../components/public/home/MinimalFeaturedSection").then((mod) => ({
+    default: mod.MinimalFeaturedSection,
+  }))
 );
 
 const MinimalMapSection = lazy(() =>
-  import("../../components/public/home/MinimalMapSection").then((mod) => {
-    if (!mod || !mod.MinimalMapSection) {
-      console.error('[HomePageClient] MinimalMapSection not found');
-      throw new Error('MinimalMapSection not found');
-    }
-    return { default: mod.MinimalMapSection };
-  }).catch((error) => {
-    console.error('[HomePageClient] Error loading MinimalMapSection:', error);
-    return { default: () => <div className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white" /> };
-  })
+  import("../../components/public/home/MinimalMapSection").then((mod) => ({
+    default: mod.MinimalMapSection,
+  }))
 );
 
 const MinimalNewsletterSection = lazy(() =>
-  import("../../components/public/home/MinimalNewsletterSection").then((mod) => {
-    if (!mod || !mod.MinimalNewsletterSection) {
-      console.error('[HomePageClient] MinimalNewsletterSection not found');
-      throw new Error('MinimalNewsletterSection not found');
-    }
-    return { default: mod.MinimalNewsletterSection };
-  }).catch((error) => {
-    console.error('[HomePageClient] Error loading MinimalNewsletterSection:', error);
-    return { default: () => <div className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white" /> };
-  })
+  import("../../components/public/home/MinimalNewsletterSection").then((mod) => ({
+    default: mod.MinimalNewsletterSection,
+  }))
 );
 
 const FAQSection = lazy(() =>
-  import("../../components/public/home/FAQSection").then((mod) => {
-    if (!mod || !mod.FAQSection) {
-      console.error('[HomePageClient] FAQSection not found');
-      throw new Error('FAQSection not found');
-    }
-    return { default: mod.FAQSection };
-  }).catch((error) => {
-    console.error('[HomePageClient] Error loading FAQSection:', error);
-    return { default: () => <div className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white" /> };
-  })
+  import("../../components/public/home/FAQSection").then((mod) => ({
+    default: mod.FAQSection,
+  }))
 );
 
 interface HomePageClientProps {

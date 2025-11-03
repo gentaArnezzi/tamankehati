@@ -5,6 +5,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { driver } from "driver.js";
 import "driver.js/dist/driver.css";
 import "../styles/onboarding-tour.css";
+import {
+  ELEMENT_WAIT_TIMEOUT_MS,
+  FORM_ELEMENT_WAIT_TIMEOUT_MS,
+  NAVIGATION_DELAY_MS,
+  ONBOARDING_CURRENT_STEP_KEY,
+} from "../lib/constants";
 
 interface InteractiveOnboardingTourProps {
   run: boolean;
@@ -14,7 +20,7 @@ interface InteractiveOnboardingTourProps {
 // Helper function to wait for element to be available
 const waitForElement = (
   selector: string,
-  timeout = 5000,
+  timeout = ELEMENT_WAIT_TIMEOUT_MS,
 ): Promise<Element | null> => {
   return new Promise((resolve) => {
     const element = document.querySelector(selector);
@@ -54,26 +60,21 @@ export function InteractiveOnboardingTour({
   const isInitializedRef = useRef(false);
   const currentStepRef = useRef(0);
   const isNavigatingRef = useRef(false); // Track if we're in the middle of programmatic navigation
-  const TOUR_STEP_KEY = "onboarding_current_step";
 
   // Save current step to localStorage
   const saveCurrentStep = (step: number) => {
     currentStepRef.current = step;
-    localStorage.setItem(TOUR_STEP_KEY, String(step));
-    console.log("[Tour] Saved step:", step);
+    localStorage.setItem(ONBOARDING_CURRENT_STEP_KEY, String(step));
   };
 
   // Get saved step from localStorage
   const getSavedStep = (): number => {
-    const saved = localStorage.getItem(TOUR_STEP_KEY);
+    const saved = localStorage.getItem(ONBOARDING_CURRENT_STEP_KEY);
     return saved ? parseInt(saved, 10) : 0;
   };
 
   useEffect(() => {
-    console.log("[Tour] useEffect triggered, run=", run);
-    
     if (!run) {
-      console.log("[Tour] Tour not running, cleaning up...");
       // Clean up driver when not running
       if (driverRef.current) {
         try {
@@ -81,21 +82,14 @@ export function InteractiveOnboardingTour({
             driverRef.current.destroy();
           }
         } catch (e) {
-          console.warn("[Tour] Error destroying driver during cleanup:", e);
+          console.error("[Tour] Error destroying driver during cleanup:", e);
         }
         driverRef.current = null;
         isInitializedRef.current = false;
       }
-      localStorage.removeItem(TOUR_STEP_KEY);
+      localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
       return;
     }
-
-    console.log(
-      "[Tour] Tour is RUNNING! driverRef exists:",
-      !!driverRef.current,
-      "isInitialized:",
-      isInitializedRef.current,
-    );
 
     // Check if we have a saved step, which means tour was in progress
     const savedStep = getSavedStep();
@@ -103,7 +97,6 @@ export function InteractiveOnboardingTour({
     // Create driver only if it doesn't exist
     if (!driverRef.current) {
       isInitializedRef.current = true;
-      console.log("[Tour] Creating new driver, savedStep:", savedStep);
 
       const driverObj = driver({
         showProgress: true,
@@ -116,18 +109,11 @@ export function InteractiveOnboardingTour({
 
         // Custom callbacks to handle missing elements gracefully
         onPopoverRender: (popover, { config, state }) => {
-          console.log("[Tour] Rendering step:", state.activeIndex);
           // Save current step every time popover is rendered
           saveCurrentStep(state.activeIndex);
         },
 
         onHighlighted: (element, step, options) => {
-          console.log(
-            "[Tour] Highlighted step:",
-            options.state.activeIndex,
-            "Element:",
-            element,
-          );
           // Save current step every time a step is highlighted
           saveCurrentStep(options.state.activeIndex);
         },
@@ -177,24 +163,20 @@ export function InteractiveOnboardingTour({
               side: "right",
               align: "start",
               onNextClick: async () => {
-                console.log("[Tour] Navigating to Taman");
                 isNavigatingRef.current = true; // Set flag before navigation
                 router.push("/dashboard/taman");
                 // Wait for the form to be available before moving to next step
-                await waitForElement('[data-tour="taman-form"]', 5000);
+                await waitForElement('[data-tour="taman-form"]', ELEMENT_WAIT_TIMEOUT_MS);
                 setTimeout(() => {
                   if (driverRef.current && typeof driverRef.current.moveNext === 'function') {
-                    console.log(
-                      "[Tour] Moving to next step after Taman navigation",
-                    );
                     try {
                       driverRef.current.moveNext();
                     } catch (e) {
-                      console.warn("[Tour] Error calling moveNext:", e);
+                      console.error("[Tour] Error calling moveNext:", e);
                     }
                     isNavigatingRef.current = false; // Clear flag after navigation completes
                   }
-                }, 300);
+                }, NAVIGATION_DELAY_MS);
               },
             },
           },
@@ -229,7 +211,7 @@ export function InteractiveOnboardingTour({
             },
             onHighlightStarted: async () => {
               // Wait for the form element to be available
-              await waitForElement('[data-tour="taman-form"]', 3000);
+              await waitForElement('[data-tour="taman-form"]', FORM_ELEMENT_WAIT_TIMEOUT_MS);
             },
           },
 
@@ -250,23 +232,19 @@ export function InteractiveOnboardingTour({
               side: "right",
               align: "start",
               onNextClick: async () => {
-                console.log("[Tour] Navigating to Flora");
                 isNavigatingRef.current = true;
                 router.push("/dashboard/taman/flora");
-                await waitForElement('[data-tour="add-flora-button"]', 5000);
+                await waitForElement('[data-tour="add-flora-button"]', ELEMENT_WAIT_TIMEOUT_MS);
                 setTimeout(() => {
                   if (driverRef.current && typeof driverRef.current.moveNext === 'function') {
-                    console.log(
-                      "[Tour] Moving to next step after Flora navigation",
-                    );
                     try {
                       driverRef.current.moveNext();
                     } catch (e) {
-                      console.warn("[Tour] Error calling moveNext:", e);
+                      console.error("[Tour] Error calling moveNext:", e);
                     }
                     isNavigatingRef.current = false;
                   }
-                }, 300);
+                }, NAVIGATION_DELAY_MS);
               },
             },
           },
@@ -296,7 +274,7 @@ export function InteractiveOnboardingTour({
               align: "center",
             },
             onHighlightStarted: async () => {
-              await waitForElement('[data-tour="add-flora-button"]', 3000);
+              await waitForElement('[data-tour="add-flora-button"]', FORM_ELEMENT_WAIT_TIMEOUT_MS);
             },
           },
 
@@ -317,23 +295,19 @@ export function InteractiveOnboardingTour({
               side: "right",
               align: "start",
               onNextClick: async () => {
-                console.log("[Tour] Navigating to Fauna");
                 isNavigatingRef.current = true;
                 router.push("/dashboard/taman/fauna");
-                await waitForElement('[data-tour="add-fauna-button"]', 5000);
+                await waitForElement('[data-tour="add-fauna-button"]', ELEMENT_WAIT_TIMEOUT_MS);
                 setTimeout(() => {
                   if (driverRef.current && typeof driverRef.current.moveNext === 'function') {
-                    console.log(
-                      "[Tour] Moving to next step after Fauna navigation",
-                    );
                     try {
                       driverRef.current.moveNext();
                     } catch (e) {
-                      console.warn("[Tour] Error calling moveNext:", e);
+                      console.error("[Tour] Error calling moveNext:", e);
                     }
                     isNavigatingRef.current = false;
                   }
-                }, 300);
+                }, NAVIGATION_DELAY_MS);
               },
             },
           },
@@ -363,7 +337,7 @@ export function InteractiveOnboardingTour({
               align: "center",
             },
             onHighlightStarted: async () => {
-              await waitForElement('[data-tour="add-fauna-button"]', 3000);
+              await waitForElement('[data-tour="add-fauna-button"]', FORM_ELEMENT_WAIT_TIMEOUT_MS);
             },
           },
 
@@ -384,23 +358,19 @@ export function InteractiveOnboardingTour({
               side: "right",
               align: "start",
               onNextClick: async () => {
-                console.log("[Tour] Navigating to Activities");
                 isNavigatingRef.current = true;
                 router.push("/dashboard/taman/activities");
-                await waitForElement('[data-tour="add-activity-button"]', 5000);
+                await waitForElement('[data-tour="add-activity-button"]', ELEMENT_WAIT_TIMEOUT_MS);
                 setTimeout(() => {
                   if (driverRef.current && typeof driverRef.current.moveNext === 'function') {
-                    console.log(
-                      "[Tour] Moving to next step after Activities navigation",
-                    );
                     try {
                       driverRef.current.moveNext();
                     } catch (e) {
-                      console.warn("[Tour] Error calling moveNext:", e);
+                      console.error("[Tour] Error calling moveNext:", e);
                     }
                     isNavigatingRef.current = false;
                   }
-                }, 300);
+                }, NAVIGATION_DELAY_MS);
               },
             },
           },
@@ -430,7 +400,7 @@ export function InteractiveOnboardingTour({
               align: "center",
             },
             onHighlightStarted: async () => {
-              await waitForElement('[data-tour="add-activity-button"]', 3000);
+              await waitForElement('[data-tour="add-activity-button"]', FORM_ELEMENT_WAIT_TIMEOUT_MS);
             },
           },
 
@@ -472,17 +442,16 @@ export function InteractiveOnboardingTour({
           },
         ],
         onDestroyed: () => {
-          console.log("[Tour] onDestroyed called");
           try {
             if (driverRef.current && typeof driverRef.current.destroy === 'function') {
               driverRef.current.destroy();
             }
           } catch (e) {
-            console.warn("[Tour] Error in onDestroyed:", e);
+            console.error("[Tour] Error in onDestroyed:", e);
           }
           driverRef.current = null;
           isInitializedRef.current = false;
-          localStorage.removeItem(TOUR_STEP_KEY);
+          localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
           onFinish();
         },
         onCloseClick: () => {
@@ -490,17 +459,16 @@ export function InteractiveOnboardingTour({
             "Apakah Anda yakin ingin menutup tutorial? Anda dapat menjalankan ulang tutorial dari menu Panduan.",
           );
           if (confirmed && driverRef.current) {
-            console.log("[Tour] User closed tour");
             try {
               if (typeof driverRef.current.destroy === 'function') {
                 driverRef.current.destroy();
               }
             } catch (e) {
-              console.warn("[Tour] Error destroying driver:", e);
+              console.error("[Tour] Error destroying driver:", e);
             }
             driverRef.current = null;
             isInitializedRef.current = false;
-            localStorage.removeItem(TOUR_STEP_KEY);
+            localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
             onFinish();
           }
         },
@@ -517,12 +485,9 @@ export function InteractiveOnboardingTour({
       driverRef.current = driverObj;
 
       // Start the tour from saved step (or beginning if no saved step)
-      console.log("[Tour] Starting tour from step:", savedStep);
       try {
         if (typeof driverObj.drive === 'function') {
           driverObj.drive(savedStep);
-        } else {
-          console.warn("[Tour] drive method is not available");
         }
       } catch (e) {
         console.error("[Tour] Error starting tour:", e);
@@ -530,40 +495,28 @@ export function InteractiveOnboardingTour({
     } else if (driverRef.current && savedStep > 0 && !isNavigatingRef.current) {
       // Driver exists but we're on a different page - ensure we're at the right step
       // Only do this if we're not in the middle of programmatic navigation
-      console.log(
-        "[Tour] Driver exists, checking if we need to move to step:",
-        savedStep,
-      );
       let currentStep = 0;
       try {
         if (driverRef.current && typeof driverRef.current.getActiveIndex === 'function') {
           currentStep = driverRef.current.getActiveIndex() ?? 0;
         }
       } catch (e) {
-        console.warn("[Tour] Error getting active index:", e);
+        console.error("[Tour] Error getting active index:", e);
       }
       
       if (currentStep !== savedStep) {
-        console.log(
-          "[Tour] Moving to saved step:",
-          savedStep,
-          "from current:",
-          currentStep,
-        );
         // Try to move to the saved step
         setTimeout(() => {
           if (driverRef.current && !isNavigatingRef.current) {
             try {
               if (typeof driverRef.current.drive === 'function') {
                 driverRef.current.drive(savedStep);
-              } else {
-                console.warn("[Tour] drive method is not available");
               }
             } catch (e) {
-              console.warn("[Tour] Error moving to saved step:", e);
+              console.error("[Tour] Error moving to saved step:", e);
             }
           }
-        }, 300);
+        }, NAVIGATION_DELAY_MS);
       }
     }
 

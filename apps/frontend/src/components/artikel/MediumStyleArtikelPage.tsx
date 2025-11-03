@@ -25,6 +25,7 @@ import {
 import { toast } from "sonner";
 import { useAuth } from "../../lib/useAuth";
 import { sanitizeHtmlRich } from "../../utils/sanitizeHtml";
+import { imageUrl as buildImageUrl } from "../../lib/api-url";
 
 interface MediumStyleArtikelPageProps {
   articleId?: string;
@@ -341,11 +342,9 @@ export function MediumStyleArtikelPage({
       .replace(/^> (.*$)/gm, "<blockquote>$1</blockquote>")
       .replace(/`(.*?)`/g, "<code>$1</code>")
       .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, url) => {
-        // Handle relative URLs by prepending API URL
-        const imageUrl = url.startsWith("http")
-          ? url
-          : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
-        return `<img src="${imageUrl}" alt="${alt}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
+        // Handle relative URLs by prepending API URL - use centralized helper
+        const processedUrl = buildImageUrl(url);
+        return `<img src="${processedUrl}" alt="${alt}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
       })
       .replace(/\n/g, "<br>");
     // Sanitize HTML to prevent XSS

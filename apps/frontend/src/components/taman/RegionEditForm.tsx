@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { apiUrl } from "../../lib/api-url";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -69,7 +70,7 @@ export function RegionEditForm({
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/crud/regions/${regionToEdit.id}/`,
+        apiUrl(`/api/v1/crud/regions/${regionToEdit.id}/`),
         {
           method: "PUT",
           headers: {

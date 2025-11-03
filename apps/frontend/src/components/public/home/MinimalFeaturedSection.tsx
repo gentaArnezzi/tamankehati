@@ -6,6 +6,7 @@ import { ArrowRight, Loader2 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { fetchFeaturedItems, FeaturedItem } from "../../../lib/api/featured";
+import { imageUrl } from "../../../lib/api-url";
 
 interface MinimalFeaturedSectionProps {
   initialFeatures?: FeaturedItem[];
@@ -123,12 +124,19 @@ export const MinimalFeaturedSection = memo(function MinimalFeaturedSection({ ini
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
                       <Image
-                        src={feature.image || "/placeholder-image.jpg"}
+                        src={feature.image ? imageUrl(feature.image) : "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop"}
                         alt={feature.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 400px"
                         className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                         loading="lazy"
+                        onError={(e) => {
+                          // Fallback to unsplash if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          if (!target.src.includes('unsplash.com')) {
+                            target.src = "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop";
+                          }
+                        }}
                       />
                     </div>
 

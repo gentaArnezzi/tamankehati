@@ -30,6 +30,15 @@ import { useNotifications } from "../hooks/useNotifications";
 import { useRouter } from "next/navigation";
 import { InteractiveOnboardingTour } from "./InteractiveOnboardingTour";
 import { useNewUserDetection } from "../hooks/useNewUserDetection";
+import { apiUrl, imageUrl } from "../lib/api-url";
+import {
+  TOUR_DELAY_MS,
+  TOUR_RESET_DELAY_MS,
+  PENDING_APPROVAL_POLL_INTERVAL_MS,
+  AUTH_TOKEN_KEY,
+  TOUR_COMPLETED_KEY_PREFIX,
+  ONBOARDING_CURRENT_STEP_KEY,
+} from "../lib/constants";
 
 interface CollapsibleDashboardLayoutProps {
   children: ReactNode;
@@ -192,42 +201,29 @@ export function CollapsibleDashboardLayout({
   // const testPendingCount = 5; // For testing only
 
   useEffect(() => {
-    // Only fetch for super_admin
-    if (user?.role !== "super_admin") {
-      console.log(
-        "⚠️ Not super_admin, skipping pending count fetch. Role:",
-        user?.role,
-      );
-      return;
-    }
-
-    const fetchPendingCount = async () => {
-      try {
-        const token = localStorage.getItem("auth_token");
-        if (!token) {
-          console.log("⚠️ No auth token found");
+        // Only fetch for super_admin
+        if (user?.role !== "super_admin") {
           return;
         }
 
-        console.log("🔄 Fetching pending approval counts...");
+        const fetchPendingCount = async () => {
+          try {
+            const token = localStorage.getItem(AUTH_TOKEN_KEY);
+            if (!token) {
+              return;
+            }
 
         // ✅ Use unified approvals endpoint that returns counts for all entities
-        const apiUrl =
-          process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com";
-        const response = await fetch(`${apiUrl}/api/v1/approvals`, {
+        const response = await fetch(apiUrl("/api/v1/approvals"), {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        console.log("📡 API response status:", response.status);
-
         if (!response.ok) {
-          console.error("❌ API error:", response.status, response.statusText);
+          console.error("Failed to fetch pending approval count:", response.status, response.statusText);
           return;
         }
 
         const data = await response.json();
-        console.log("📊 Fetched approval data:", data);
 
         // The API returns { items: [...], total: X, counts: {...} }
         const counts = data.counts || {};
@@ -248,26 +244,16 @@ export function CollapsibleDashboardLayout({
           artikelCount +
           galeriCount;
 
-        console.log("✅ Pending counts:", {
-          flora: floraCount,
-          fauna: faunaCount,
-          taman: tamanCount,
-          kegiatan: kegiatanCount,
-          artikel: artikelCount,
-          galeri: galeriCount,
-          total: total,
-        });
-
         setPendingApprovalCount(total);
       } catch (error) {
-        console.error("❌ Failed to fetch pending approval count:", error);
+        console.error("Failed to fetch pending approval count:", error);
       }
     };
 
     fetchPendingCount();
 
     // Refresh count every 30 seconds
-    const interval = setInterval(fetchPendingCount, 30000);
+    const interval = setInterval(fetchPendingCount, PENDING_APPROVAL_POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [user?.role]);
 
@@ -312,26 +298,17 @@ export function CollapsibleDashboardLayout({
 
   // Auto-trigger onboarding tour for new users (only once)
   useEffect(() => {
-    console.log("[Tour] Auto-trigger check:", {
-      loadingNewUser,
-      isNewUser,
-      userRole: user?.role,
-      onboardingStarted: onboardingStartedRef.current,
-    });
-
     if (
       !loadingNewUser &&
       isNewUser === true && // Explicit check for true
       user?.role === "regional_admin" &&
       !onboardingStartedRef.current
     ) {
-      console.log("[Tour] Conditions met, starting tour in 3.5 seconds...");
       // Delay to let user see the dashboard first before tour starts
       const timer = setTimeout(() => {
-        console.log("[Tour] Starting tour now!");
         setRunOnboarding(true);
         onboardingStartedRef.current = true; // Mark as started
-      }, 3500); // 3.5 seconds delay to let user explore first
+      }, TOUR_DELAY_MS);
       return () => clearTimeout(timer);
     }
   }, [isNewUser, loadingNewUser, user]);
@@ -340,15 +317,15 @@ export function CollapsibleDashboardLayout({
   const handleStartTour = () => {
     // Reset tour status so it can run again
     if (user) {
-      localStorage.removeItem(`tour_completed_${user.id}`);
-      localStorage.removeItem("onboarding_current_step");
+      localStorage.removeItem(`${TOUR_COMPLETED_KEY_PREFIX}${user.id}`);
+      localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
     }
     onboardingStartedRef.current = false;
     // Small delay to ensure reset is complete
     setTimeout(() => {
       setRunOnboarding(true);
       onboardingStartedRef.current = true;
-    }, 300);
+    }, TOUR_RESET_DELAY_MS);
   };
 
   const handleOnboardingFinish = () => {
@@ -725,7 +702,7 @@ const Logo = ({ user }: { user: User | null }) => {
     >
       {user?.profile_picture_url && (
         <AvatarImage
-          src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+          src={imageUrl(user.profile_picture_url || undefined)}
           alt={user?.nama || "Profile photo"}
           onError={(e) => {
             console.error("Failed to load avatar image:", user.profile_picture_url);

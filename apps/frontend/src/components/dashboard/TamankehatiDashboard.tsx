@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { apiUrl } from "@/lib/api-url";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -130,7 +131,7 @@ const TamankehatiDashboard: React.FC<TamankehatiDashboardProps> = ({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/dashboard-modern/?time_range=${timeRange}`,
+        apiUrl(`/api/v1/dashboard-modern/?time_range=${timeRange}`),
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -8,6 +8,7 @@ import { type GalleryPaginated } from "../../../types/gallery";
 import { MasonryGrid } from "./MasonryGrid";
 import { FacetFilters } from "../filters/FacetFilters";
 import { Button } from "../../ui/button";
+import { imageUrl } from "../../../lib/api-url";
 
 const JENIS_OPTIONS = ["Flora", "Fauna", "Taman", "Konservasi", "Lingkungan"];
 const WILAYAH_OPTIONS = [
@@ -180,9 +181,7 @@ export function GalleryExplore({
                     >
                       <div className="relative h-48 w-full overflow-hidden">
                         <img
-                          src={
-                            item.thumbnail || item.url || "/hero/forest.webp"
-                          }
+                          src={imageUrl(item.thumbnail || item.url || "/hero/forest.webp")}
                           alt={item.judul}
                           className="h-full w-full object-cover transition duration-500 hover:scale-105"
                         />

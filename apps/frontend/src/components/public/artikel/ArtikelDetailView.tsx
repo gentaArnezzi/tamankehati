@@ -13,6 +13,7 @@ import { type ArtikelDetail } from "../../../types/articles";
 import { type ArtikelPublic } from "../../../types/public";
 import { JsonLd } from "../seo/JsonLd";
 import { sanitizeHtmlRich } from "../../../utils/sanitizeHtml";
+import { imageUrl } from "../../../lib/api-url";
 
 type ArtikelDetailViewProps = {
   artikel: ArtikelDetail;
@@ -67,9 +68,7 @@ export function ArtikelDetailView({
 }: ArtikelDetailViewProps) {
   const heroImage =
     artikel.gambar_cover && artikel.gambar_cover.trim()
-      ? artikel.gambar_cover.startsWith("http")
-        ? artikel.gambar_cover
-        : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${artikel.gambar_cover}`
+      ? imageUrl(artikel.gambar_cover)
       : "https://images.unsplash.com/photo-1493815793585-d94ccbc86df0?w=1600&auto=format&fit=crop";
 
   const kategori = artikel.kategori;

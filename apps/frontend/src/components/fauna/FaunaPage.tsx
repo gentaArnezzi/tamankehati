@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { getApiUrl, imageUrl } from "../../lib/api-url";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -229,8 +230,7 @@ export function FaunaPage() {
     setLoadingGalleries(true);
     try {
       const response = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+        getApiUrl() +
           "/api/v1/galleries/entity/fauna/" +
           faunaId,
         {
@@ -470,8 +470,7 @@ export function FaunaPage() {
       formData.append("file", fileToUpload);
 
       const response = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+        getApiUrl() +
           "/api/v1/upload/gallery-image",
         {
           method: "POST",
@@ -508,8 +507,7 @@ export function FaunaPage() {
       });
 
       const response = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+        getApiUrl() +
           "/api/v1/upload/multiple-gallery-images",
         {
           method: "POST",
@@ -1387,13 +1385,7 @@ export function FaunaPage() {
                           return (
                             <div key={gallery.id} className="relative group">
                               <img
-                                src={
-                                  gallery.image_url?.startsWith("http")
-                                    ? gallery.image_url
-                                    : (process.env.NEXT_PUBLIC_API_URL ||
-                                        "https://tamankehati-backend-pxnu.onrender.com") +
-                                      (gallery.image_url || "/placeholder.png")
-                                }
+                                src={imageUrl(gallery.image_url)}
                                 alt={gallery.title}
                                 className={
                                   "w-full h-24 object-cover rounded border " +

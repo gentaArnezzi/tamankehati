@@ -1,6 +1,7 @@
 "use client";
 
 import { FloraPublic, FaunaPublic, TamanPublic } from "../../types/public";
+import { imageUrl } from "../api-url";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
@@ -42,8 +43,7 @@ export async function fetchFeaturedFlora(
       description:
         item.deskripsi?.substring(0, 100) ||
         `Spesies ${item.famili || "flora"} ${item.is_endemic ? "endemik Indonesia" : "yang dilindungi"}`,
-      image:
-        item.gambar_utama ||
+      image: item.gambar_utama ? imageUrl(item.gambar_utama) :
         "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop",
       link: `/flora/${item.id}`,
     }));
@@ -80,8 +80,7 @@ export async function fetchFeaturedFauna(
       description:
         item.deskripsi?.substring(0, 100) ||
         `Spesies ${item.famili || "fauna"} ${item.is_endemic ? "endemik Indonesia" : "yang dilindungi"}`,
-      image:
-        item.gambar_utama ||
+      image: item.gambar_utama ? imageUrl(item.gambar_utama) :
         "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop",
       link: `/fauna/${item.id}`,
     }));
@@ -109,8 +108,7 @@ export async function fetchFeaturedParks(
       title: item.name,
       description:
         item.description || `Taman nasional di ${item.provinsi || "Indonesia"}`,
-      image:
-        item.gambar_utama ||
+      image: item.gambar_utama ? imageUrl(item.gambar_utama) :
         "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&h=400&fit=crop",
       link: `/taman/${item.id}`,
     }));

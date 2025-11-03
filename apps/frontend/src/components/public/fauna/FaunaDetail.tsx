@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Badge } from "../../ui/badge";
 import { publicApi } from "../../../lib/public-api-client";
+import { imageUrl } from "../../../lib/api-url";
 
 interface Fauna {
   id: string;
@@ -79,9 +80,7 @@ export function FaunaDetail({ id }: FaunaDetailProps) {
         <img
           src={
             fauna.gambar_utama
-              ? fauna.gambar_utama.startsWith("http")
-                ? fauna.gambar_utama
-                : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${fauna.gambar_utama}`
+              ? imageUrl(fauna.gambar_utama)
               : "https://images.unsplash.com/photo-1535931735360-24c79a9f4d26?w=1200"
           }
           alt={fauna.nama_spesies}

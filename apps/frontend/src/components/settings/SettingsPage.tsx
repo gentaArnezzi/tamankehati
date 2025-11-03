@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
 import { Settings, Palette, Bell, Key, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "../ui/separator";
+import { getApiUrl } from "../../lib/api-url";
 
 export function SettingsPage() {
   const [saving, setSaving] = useState(false);
@@ -410,7 +411,7 @@ export function SettingsPage() {
                   <h4 className="text-sm">Endpoint API</h4>
                   <div className="p-3 bg-gray-50 rounded border font-mono text-sm">
                     <p className="mb-1">
-                      Base URL: <code>{(process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")}/api/v1</code>
+                      Base URL: <code>{getApiUrl()}/api/v1</code>
                     </p>
                     <p className="mb-1">
                       Headers: <code>Authorization: Bearer {"<API_KEY>"}</code>
@@ -423,16 +424,12 @@ export function SettingsPage() {
                   <p className="text-sm text-muted-foreground">
                     Akses dokumentasi API lengkap di{" "}
                     <a
-                      href={
-                        (process.env.NEXT_PUBLIC_API_URL ||
-                          "https://tamankehati-backend-pxnu.onrender.com") +
-                        "/docs"
-                      }
+                      href={`${getApiUrl()}/docs`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-blue-600 hover:underline"
                     >
-                      {(process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")}/docs
+                      {getApiUrl()}/docs
                     </a>
                   </p>
                 </div>

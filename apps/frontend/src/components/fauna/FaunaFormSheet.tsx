@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { imageUrl } from "../../lib/api-url";
 import { FormSheet, FormSection } from "../ui/form-sheet";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -315,11 +316,7 @@ export function FaunaFormSheet({
           {formData.gambar_utama && (
             <div className="mt-2 rounded-lg border p-2">
               <img
-                src={
-                  formData.gambar_utama.startsWith("http")
-                    ? formData.gambar_utama
-                    : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${formData.gambar_utama}`
-                }
+                src={imageUrl(formData.gambar_utama)}
                 alt="Preview"
                 className="h-32 w-full object-cover rounded"
                 onError={(e) => {

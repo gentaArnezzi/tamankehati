@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiUrl } from "../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -138,7 +139,7 @@ export function PublicNews({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/public?${params}`,
+        apiUrl(`/api/v1/news/public?${params}`),
       );
 
       if (!response.ok) {

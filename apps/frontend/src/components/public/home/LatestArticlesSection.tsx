@@ -6,6 +6,7 @@ import { ArrowRight, Calendar } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { type ArtikelPublic } from "../../../types/public";
+import { imageUrl } from "../../../lib/api-url";
 
 interface LatestArticlesSectionProps {
   initialArticles?: ArtikelPublic[];
@@ -113,7 +114,7 @@ export const LatestArticlesSection = memo(function LatestArticlesSection({
                       {article.gambar_cover && (
                         <div className="relative aspect-[16/9] overflow-hidden bg-gray-50">
                           <Image
-                            src={article.gambar_cover}
+                            src={imageUrl(article.gambar_cover)}
                             alt={article.judul}
                             fill
                             sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 400px"

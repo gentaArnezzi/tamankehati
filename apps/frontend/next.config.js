@@ -5,12 +5,6 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/uploads/**',
-      },
-      {
         protocol: 'https',
         hostname: 'tamankehati-backend-pxnu.onrender.com',
         pathname: '/uploads/**',
@@ -36,18 +30,7 @@ const nextConfig = {
         pathname: '/**',
       },
     ],
-    domains: [
-      'localhost', 
-      'tamankehati-21.onrender.com', 
-      'tamankehati-backend-zxb9.onrender.com',
-      'tamankehati-backend.onrender.com',
-      'tamankehati-backend-pxnu.onrender.com',
-      'images.unsplash.com', 
-      'example.com', 
-      'picsum.photos',
-      'chatgpt.com',
-      'cdn.prod.website-files.com'
-    ],
+    // domains is deprecated, using remotePatterns above instead
   },
   typescript: {
     ignoreBuildErrors: true,

@@ -23,6 +23,7 @@ import {
 } from "../ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { useState } from "react";
+import { imageUrl } from "../../lib/api-url";
 
 interface UserTableProps {
   data: User[];
@@ -212,7 +213,7 @@ export function UserTable({
                     >
                       {user.profile_picture_url && (
                         <AvatarImage
-                          src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${user.profile_picture_url}`}
+                          src={imageUrl(user.profile_picture_url)}
                           alt={user.nama || "User avatar"}
                         />
                       )}

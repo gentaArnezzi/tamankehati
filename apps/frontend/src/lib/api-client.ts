@@ -1,14 +1,14 @@
 "use client";
 
 import { HttpClient, PaginatedResponse } from "./http-client";
+import { getApiUrl } from "./api-url";
+import {
+  AUTH_TOKEN_KEY,
+  AUTH_USER_KEY,
+  AUTH_EMAIL_KEY,
+} from "./constants";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  "https://tamankehati-backend-pxnu.onrender.com";
-console.log("API_BASE_URL:", API_BASE_URL);
-const AUTH_TOKEN_KEY = "auth_token";
-const AUTH_USER_KEY = "auth_user";
-const AUTH_EMAIL_KEY = "auth_email";
+const API_BASE_URL = getApiUrl();
 
 const privateClient = new HttpClient(API_BASE_URL, {
   getAuthToken: () => {

@@ -8,25 +8,13 @@ import { type TamanPaginated } from "../../../types/taman";
 import { EntityCard } from "../cards/EntityCard";
 import { FacetFilters } from "../filters/FacetFilters";
 import { Pagination } from "../../ui/pagination";
+import { imageUrl } from "../../../lib/api-url";
 
 const ITEMS_PER_PAGE = 12;
 
-// Helper to get full image URL
+// Helper to get full image URL using centralized helper
 const getImageUrl = (url?: string | null) => {
-  if (!url) return null;
-  
-  // If URL already starts with http, check if it's localhost:8000 and replace it
-  if (url.startsWith("http")) {
-    // Replace localhost:8000 with actual API URL for development/production compatibility
-    if (url.includes("localhost:8000")) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
-      return url.replace("http://localhost:8000", apiUrl);
-    }
-    return url;
-  }
-  
-  // If relative URL, prepend API URL
-  return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
+  return imageUrl(url);
 };
 const PROVINSI_OPTIONS = [
   "Aceh",

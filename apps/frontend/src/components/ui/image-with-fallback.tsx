@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { imageUrl as getImageUrl } from "../../lib/api-url";
 
 type ImageWithFallbackProps = {
   src?: string | null;
@@ -46,27 +47,23 @@ export function ImageWithFallback({
     );
   }
 
-  // Build full URL
-  let imageUrl: string;
-  if (src.startsWith("http")) {
-    // Replace localhost:8000 with actual API URL for development/production compatibility
-    if (src.includes("localhost:8000")) {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
-      imageUrl = src.replace("http://localhost:8000", apiUrl);
-    } else {
-      imageUrl = src;
-    }
-  } else {
-    imageUrl = `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${src}`;
-  }
+  // Build full URL using centralized helper (this will normalize localhost:8000)
+  // MUST normalize before passing to Next.js Image component
+  const normalizedImageUrl = getImageUrl(src);
+  
+  // Double-check: ensure no localhost URLs reach Next.js Image
+  // (Next.js will throw error if localhost is not in next.config.js)
+  const finalUrl = normalizedImageUrl.includes("localhost") 
+    ? normalizedImageUrl.replace(/http:\/\/localhost:8000|https:\/\/localhost:8000|http:\/\/127\.0\.0\.1:8000/gi, 
+        process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com")
+    : normalizedImageUrl;
 
   const imageProps: any = {
-    src: imageUrl,
+    src: finalUrl,
     alt,
     className,
     sizes,
     onError: () => {
-      console.warn(`Image failed to load: ${imageUrl}`);
       setImageError(true);
     },
     // Skip Next.js optimization for external images that might fail

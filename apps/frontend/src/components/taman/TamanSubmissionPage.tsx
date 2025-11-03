@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useAuth } from "../../lib/useAuth";
 import { parksApi, Park } from "../../lib/api-client";
+import { apiUrl } from "../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -353,7 +354,7 @@ export function TamanSubmissionPage() {
       formDataUpload.append("file", file);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
+        apiUrl("/api/v1/upload/gallery-image"),
         {
           method: "POST",
           headers: {
@@ -478,7 +479,7 @@ export function TamanSubmissionPage() {
         };
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/`,
+          apiUrl("/api/v1/galleries/"),
           {
             method: "POST",
             headers: {
@@ -505,7 +506,7 @@ export function TamanSubmissionPage() {
         if (result.id && shouldSubmitForReview) {
           try {
             const submitResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/${result.id}/submit`,
+              apiUrl(`/api/v1/galleries/${result.id}/submit`),
               {
                 method: "POST",
                 headers: {
@@ -745,7 +746,7 @@ export function TamanSubmissionPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/parks/${parkId}/submit`,
+        apiUrl(`/api/v1/parks/${parkId}/submit`),
         {
           method: "POST",
           headers: {

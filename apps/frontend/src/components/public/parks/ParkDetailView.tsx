@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "../../ui/badge";
+import { apiUrl, imageUrl } from "../../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -80,19 +81,14 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
     try {
       setLoadingGallery(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/entity/park/${park.id}`,
+        apiUrl(`/api/v1/galleries/entity/park/${park.id}`),
       );
 
       if (response.ok) {
         const result = await response.json();
-        console.log("Gallery response:", result);
         setGalleries(result.data || result.items || []);
       } else {
-        console.error(
-          "Gallery load failed:",
-          response.status,
-          response.statusText,
-        );
+        console.error("Gallery load failed:", response.status, response.statusText);
       }
     } catch (error) {
       console.error("Failed to load galleries:", error);
@@ -101,21 +97,9 @@ export function ParkDetailView({ park }: ParkDetailViewProps) {
     }
   };
 
+  // Use centralized imageUrl helper
   const getImageUrl = (url?: string) => {
-    if (!url) return "";
-    
-    // If URL already starts with http, check if it's localhost:8000 and replace it
-    if (url.startsWith("http")) {
-      // Replace localhost:8000 with actual API URL for development/production compatibility
-      if (url.includes("localhost:8000")) {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
-        return url.replace("http://localhost:8000", apiUrl);
-      }
-      return url;
-    }
-    
-    // If relative URL, prepend API URL
-    return `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${url}`;
+    return imageUrl(url);
   };
 
   // Use stats from park data directly

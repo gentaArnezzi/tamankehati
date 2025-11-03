@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
+import { apiUrl } from "../../../lib/api-url";
 
 // Dynamic import to avoid SSR issues with Leaflet
 const MapWrapper = dynamic(
@@ -105,10 +106,10 @@ export function MinimalMapSection() {
         // Fetch parks and stats data in parallel
         const [parksResponse, statsResponse] = await Promise.all([
           fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/parks?limit=100`,
+            apiUrl("/api/public/parks?limit=100"),
           ),
           fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/stats/`,
+            apiUrl("/api/public/stats/"),
           ),
         ]);
 

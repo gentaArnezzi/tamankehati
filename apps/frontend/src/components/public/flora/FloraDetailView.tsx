@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { type FloraDetail } from "../../../types/flora";
 import { Badge } from "../../ui/badge";
+import { apiUrl, imageUrl } from "../../../lib/api-url";
 import { EntityCard } from "../cards/EntityCard";
 import { JsonLd } from "../seo/JsonLd";
 import { MapPin, ArrowRight, ArrowLeft, Home } from "lucide-react";
@@ -119,7 +120,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
     const fetchGalleryImages = async () => {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/public/flora/${flora.id}/gallery`,
+          apiUrl(`/api/public/flora/${flora.id}/gallery`),
         );
         if (response.ok) {
           const data = await response.json();
@@ -313,11 +314,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                         <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                           <div className="aspect-square relative overflow-hidden bg-slate-100">
                             <Image
-                              src={
-                                flora.gambar_daun.startsWith("http")
-                                  ? flora.gambar_daun
-                                  : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${flora.gambar_daun}`
-                              }
+                              src={imageUrl(flora.gambar_daun)}
                               alt={`Pertelaan daun ${flora.nama_ilmiah}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -345,18 +342,13 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                         <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                           <div className="aspect-square relative overflow-hidden bg-slate-100">
                             <Image
-                              src={
-                                flora.gambar_batang.startsWith("http")
-                                  ? flora.gambar_batang
-                                  : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${flora.gambar_batang}`
-                              }
+                              src={imageUrl(flora.gambar_batang)}
                               alt={`Batang dan percabangan ${flora.nama_ilmiah}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
                               onError={(e) => {
-                                console.warn(`Failed to load image: ${flora.gambar_batang}`);
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
@@ -377,18 +369,13 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                         <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                           <div className="aspect-square relative overflow-hidden bg-slate-100">
                             <Image
-                              src={
-                                flora.gambar_bunga.startsWith("http")
-                                  ? flora.gambar_bunga
-                                  : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${flora.gambar_bunga}`
-                              }
+                              src={imageUrl(flora.gambar_bunga)}
                               alt={`Bunga ${flora.nama_ilmiah}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
                               onError={(e) => {
-                                console.warn(`Failed to load image: ${flora.gambar_bunga}`);
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
@@ -409,18 +396,13 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                         <div className="group relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all hover:shadow-md">
                           <div className="aspect-square relative overflow-hidden bg-slate-100">
                             <Image
-                              src={
-                                flora.gambar_buah.startsWith("http")
-                                  ? flora.gambar_buah
-                                  : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${flora.gambar_buah}`
-                              }
+                              src={imageUrl(flora.gambar_buah)}
                               alt={`Buah ${flora.nama_ilmiah}`}
                               fill
                               className="object-cover transition-transform duration-300 group-hover:scale-110"
                               sizes="(max-width: 768px) 50vw, 25vw"
                               loading="lazy"
                               onError={(e) => {
-                                console.warn(`Failed to load image: ${flora.gambar_buah}`);
                                 e.currentTarget.style.display = 'none';
                               }}
                             />
@@ -719,9 +701,7 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                   <div className="aspect-square relative overflow-hidden bg-slate-100">
                     <Image
                       src={
-                        image.image_url.startsWith("http")
-                          ? image.image_url
-                          : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image.image_url}`
+                        imageUrl(image.image_url)
                       }
                       alt={image.title}
                       fill
@@ -729,7 +709,6 @@ export function FloraDetailView({ flora }: FloraDetailViewProps) {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       loading="lazy"
                       onError={(e) => {
-                        console.warn(`Failed to load gallery image: ${image.image_url}`);
                         e.currentTarget.style.display = 'none';
                       }}
                     />

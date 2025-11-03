@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { imageUrl } from "../../../lib/api-url";
 import { cn } from "../../ui/utils";
 import type { GalleryItem } from "../../../types/gallery";
 
@@ -12,12 +13,13 @@ export function MasonryGrid({ items, onSelect, className }: MasonryGridProps) {
   return (
     <div className={cn("columns-1 gap-4 sm:columns-2 lg:columns-3", className)}>
       {items.map((item) => {
-        const imageSrc =
+        const rawImageSrc =
           item.thumbnail && item.thumbnail.trim()
             ? item.thumbnail
             : item.url && item.url.trim()
               ? item.url
               : "/hero/forest.webp";
+        const imageSrc = imageUrl(rawImageSrc);
         return (
           <figure
             key={item.id}

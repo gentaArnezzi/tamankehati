@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useEffect, useState } from "react";
 import { Flora } from "../../lib/api-client";
+import { getApiUrl, imageUrl as buildImageUrl } from "../../lib/api-url";
 import {
   Dialog,
   DialogContent,
@@ -88,8 +89,7 @@ export function FloraForm({
 }: FloraFormProps) {
   const { user } = useAuth();
   const base =
-    process.env.NEXT_PUBLIC_API_URL ||
-    "https://tamankehati-backend-pxnu.onrender.com";
+    getApiUrl();
   // Removed zone-related state as we now use park_id
 
   // File upload states
@@ -968,12 +968,8 @@ export function FloraForm({
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {existingGalleries.map((gallery) => {
                       // Safe image URL handling
-                      const imageUrl = gallery.image_url
-                        ? gallery.image_url.startsWith("http")
-                          ? gallery.image_url
-                          : (process.env.NEXT_PUBLIC_API_URL ||
-                              "https://tamankehati-backend-pxnu.onrender.com") +
-                            gallery.image_url
+                      const galleryImageUrl = gallery.image_url
+                        ? buildImageUrl(gallery.image_url)
                         : "/placeholder-image.png"; // Fallback image
 
                       const isMarkedForDeletion = galleriesToDelete.has(
@@ -997,7 +993,7 @@ export function FloraForm({
                             }
                           >
                             <img
-                              src={imageUrl}
+                              src={galleryImageUrl}
                               alt={gallery.title || "Gallery image"}
                               className={
                                 "w-full h-24 object-cover rounded" +

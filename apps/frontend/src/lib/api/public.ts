@@ -107,16 +107,22 @@ const createFetcher =
           throw new Error(`Endpoint not available (${status})`);
         }
         
-        // Handle server errors (502, 503, 504) - Bad Gateway, Service Unavailable, Gateway Timeout
-        if (status === 502 || status === 503 || status === 504) {
+        // Handle server errors (500, 502, 503, 504) - Internal Server Error, Bad Gateway, Service Unavailable, Gateway Timeout
+        if (status === 500 || status === 502 || status === 503 || status === 504) {
           if (process.env.NODE_ENV === "development") {
             console.warn(
-              `[SSR] Backend unavailable: ${status} ${response.statusText} for ${path}`,
+              `[SSR] Backend error: ${status} ${response.statusText} for ${path}`,
             );
+            // Try to get error details from response body
+            try {
+              const errorBody = await response.text();
+              console.warn(`[SSR] Error response body:`, errorBody.substring(0, 200));
+            } catch (e) {
+              // Ignore if we can't read the body
+            }
           }
-          // Try to return empty/default response instead of throwing
-          // This allows the page to render with empty data instead of crashing
-          throw new Error(`Backend service unavailable (${status})`);
+          // Throw error that includes status code for proper handling upstream
+          throw new Error(`Backend service error (${status})`);
         }
         
         if (process.env.NODE_ENV === "development") {
@@ -317,8 +323,25 @@ export const getTamanList = cache(async (params: SearchParams = {}) => {
 export const getTamanPage = getTamanList;
 
 export const getTamanDetail = cache(async (id: string) => {
-  const fetcher = createFetcher(TamanDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
-  return fetcher(`/api/public/parks/${id}`);
+  try {
+    const fetcher = createFetcher(TamanDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
+    return await fetcher(`/api/public/parks/${id}`);
+  } catch (error: any) {
+    // Handle 500 errors gracefully - backend might have issues with specific parks
+    if (
+      error?.message?.includes("500") ||
+      error?.message?.includes("Backend service error")
+    ) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          `[SSR] Backend error fetching park ${id}, this may be a backend issue`,
+        );
+      }
+      // Re-throw to trigger 404 page
+      throw error;
+    }
+    throw error;
+  }
 });
 
 // Keep Park functions for backward compatibility

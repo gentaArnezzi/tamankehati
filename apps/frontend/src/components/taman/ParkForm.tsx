@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { apiUrl } from "../../lib/api-url";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
@@ -156,7 +157,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
   const loadRegions = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/crud/regions/`,
+        apiUrl("/api/v1/crud/regions/"),
       );
       if (!response.ok) {
         throw new Error("Gagal memuat regions");
@@ -205,7 +206,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
       formDataUpload.append("file", fileToUpload);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
+        apiUrl("/api/v1/upload/gallery-image"),
         {
           method: "POST",
           headers: {
@@ -330,7 +331,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         };
 
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/`,
+          apiUrl("/api/v1/galleries/"),
           {
             method: "POST",
             headers: {
@@ -357,7 +358,7 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         if (result.id && shouldSubmitForReview) {
           try {
             const submitResponse = await fetch(
-              `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/galleries/${result.id}/submit`,
+              apiUrl(`/api/v1/galleries/${result.id}/submit`),
               {
                 method: "POST",
                 headers: {
@@ -432,10 +433,9 @@ export function ParkForm({ onSuccess, onCancel }: ParkFormProps) {
         status: submitStatus, // Set status based on button clicked
       };
 
-      console.log("Park data to submit:", dataToSubmit);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/parks/`,
+        apiUrl("/api/v1/parks/"),
         {
           method: "POST",
           headers: {

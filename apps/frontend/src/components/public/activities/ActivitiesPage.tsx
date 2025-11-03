@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { imageUrl } from "../../../lib/api-url";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Skeleton } from "../../ui/skeleton";
@@ -645,7 +646,7 @@ export function ActivitiesPage() {
                         <img
                           src={
                             activity.images && activity.images.length > 0
-                              ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${activity.images[0]}`
+                              ? imageUrl(activity.images[0])
                               : "/placeholder.svg"
                           }
                           alt={activity.title}

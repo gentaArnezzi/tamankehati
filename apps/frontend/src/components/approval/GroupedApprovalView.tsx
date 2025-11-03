@@ -18,6 +18,7 @@ import {
   CardTitle,
   CardDescription,
 } from "../ui/card";
+import { imageUrl } from "../../lib/api-url";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { toast } from "sonner";
@@ -499,11 +500,7 @@ export function GroupedApprovalView() {
                               Foto Taman
                             </h4>
                             <img
-                              src={
-                                park.gambar_utama.startsWith("http")
-                                  ? park.gambar_utama
-                                  : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${park.gambar_utama}`
-                              }
+                              src={imageUrl(park.gambar_utama)}
                               alt={park.name}
                               className="w-full h-64 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
                               onError={(e) => {

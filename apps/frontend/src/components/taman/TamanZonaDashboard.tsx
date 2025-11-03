@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useAuth } from "../../lib/useAuth";
 import { parksApi, Park } from "../../lib/api-client";
+import { apiUrl } from "../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -138,10 +139,8 @@ export function TamanZonaDashboard() {
         return;
       }
 
-      console.log("Submit park:", parkId, "with token length:", token.length);
-
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/parks/${parkId}/submit`,
+        apiUrl(`/api/v1/parks/${parkId}/submit`),
         {
           method: "POST",
           headers: {

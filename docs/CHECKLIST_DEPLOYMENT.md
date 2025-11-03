@@ -405,8 +405,96 @@ Selamat! Aplikasi Anda sudah live:
 
 ---
 
-**Last Updated:** 2025-10-29
-**Version:** 1.0.0
+## 🐧 Ubuntu Server Deployment (Docker Compose)
+
+### Prerequisites
+- [ ] Ubuntu 20.04+ installed
+- [ ] Docker Engine installed
+- [ ] Docker Compose plugin installed
+- [ ] Server IP address obtained
+- [ ] Root or sudo access available
+
+### Server Preparation
+- [ ] System updated (`sudo apt update && sudo apt upgrade`)
+- [ ] Docker installed and running (`docker --version`)
+- [ ] Firewall configured (UFW) - ports 80, 3000, 8000 opened (if needed)
+- [ ] Application files copied to server (e.g., `/opt/tamankehati`)
+
+### Environment Configuration
+- [ ] Copied `env.production.example` to `.env`
+- [ ] Updated `SERVER_IP` with actual server IP address
+- [ ] Generated new `SECRET_KEY` (32+ characters)
+- [ ] Set strong `POSTGRES_PASSWORD`
+- [ ] Updated `CORS_ORIGINS` with server IP (format: `http://YOUR_SERVER_IP:3000,http://YOUR_SERVER_IP:80`)
+- [ ] Updated `NEXT_PUBLIC_API_URL` with server IP (format: `http://YOUR_SERVER_IP:8000` or `http://YOUR_SERVER_IP/api`)
+- [ ] Set `ENVIRONMENT=production`
+- [ ] Set `DEBUG=false`
+- [ ] Set `ADMIN_EMAIL` and `ADMIN_PASSWORD`
+- [ ] Created required directories: `backups/` and `logs/`
+
+### Docker Build & Deployment
+- [ ] Built production images: `docker compose -f docker-compose.prod.yml build`
+- [ ] Started all services: `docker compose -f docker-compose.prod.yml up -d`
+- [ ] Verified all containers running: `docker compose -f docker-compose.prod.yml ps`
+- [ ] Checked logs for errors: `docker compose -f docker-compose.prod.yml logs`
+
+### Service Verification
+- [ ] Backend health check: `curl http://YOUR_SERVER_IP:8000/health`
+- [ ] Frontend accessible: `curl http://YOUR_SERVER_IP:3000`
+- [ ] Nginx health check (if using): `curl http://YOUR_SERVER_IP/health`
+- [ ] Database connection: `docker compose -f docker-compose.prod.yml exec postgres pg_isready`
+- [ ] Redis connection: `docker compose -f docker-compose.prod.yml exec redis redis-cli ping`
+- [ ] Ran verification script: `./scripts/verify-deployment.sh`
+
+### Database Setup
+- [ ] Migrations ran successfully (check backend logs)
+- [ ] Admin user created (check backend logs for "Admin Created")
+- [ ] Verified admin login works
+
+### Security Hardening
+- [ ] Database port NOT exposed externally (ports commented in docker-compose.prod.yml)
+- [ ] Redis port NOT exposed externally (ports commented in docker-compose.prod.yml)
+- [ ] Strong passwords set (SECRET_KEY, POSTGRES_PASSWORD, ADMIN_PASSWORD)
+- [ ] CORS_ORIGINS restricted to server IP only
+- [ ] Firewall enabled (UFW)
+- [ ] .env file NOT committed to git
+
+### Backup Configuration
+- [ ] Backup script executable: `chmod +x scripts/backup-database.sh`
+- [ ] Tested backup manually: `./scripts/backup-database.sh`
+- [ ] Cron job created for daily backups (optional but recommended)
+- [ ] Backup directory exists: `./backups/`
+
+### Nginx Setup (Optional but Recommended)
+- [ ] Nginx configuration created: `deploy-package/nginx/conf.d/default.conf`
+- [ ] Nginx service added to docker-compose.prod.yml
+- [ ] Nginx accessible on port 80
+- [ ] Backend routes through `/api/*` via Nginx
+- [ ] Frontend routes through `/` via Nginx
+
+### Post-Deployment
+- [ ] Application accessible via browser: `http://YOUR_SERVER_IP:3000` or `http://YOUR_SERVER_IP`
+- [ ] Admin login successful
+- [ ] Can create/view flora/fauna
+- [ ] Image uploads working
+- [ ] Database backups working
+- [ ] Logs accessible and readable
+
+### Documentation
+- [ ] Read [Ubuntu Server Deployment Guide](./deployment/ubuntu-server-deployment.md)
+- [ ] Read [Ubuntu Server Operations Guide](./deployment/ubuntu-server-operations.md)
+- [ ] Bookmarked important commands
+
+### Troubleshooting Resources
+- [ ] Know how to view logs: `docker compose -f docker-compose.prod.yml logs -f`
+- [ ] Know how to restart services: `docker compose -f docker-compose.prod.yml restart`
+- [ ] Know how to access container shells: `docker compose -f docker-compose.prod.yml exec [service] bash`
+- [ ] Backup/restore procedures documented
+
+---
+
+**Last Updated:** 2025-01-02
+**Version:** 2.0.0 (Added Ubuntu Server Deployment Section)
 
 Good luck! 🚀
 

@@ -2,6 +2,12 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../lib/useAuth";
+import { apiUrl } from "../lib/api-url";
+import {
+  AUTH_TOKEN_KEY,
+  TOUR_COMPLETED_KEY_PREFIX,
+  ONBOARDING_CURRENT_STEP_KEY,
+} from "../lib/constants";
 
 export function useNewUserDetection() {
   const { user } = useAuth();
@@ -16,7 +22,9 @@ export function useNewUserDetection() {
     }
 
     // Check if tour has been completed before
-    const tourCompleted = localStorage.getItem(`tour_completed_${user.id}`);
+    const tourCompleted = localStorage.getItem(
+      `${TOUR_COMPLETED_KEY_PREFIX}${user.id}`
+    );
     if (tourCompleted) {
       setIsNewUser(false);
       setLoading(false);
@@ -24,13 +32,10 @@ export function useNewUserDetection() {
     }
 
     try {
-      const token = localStorage.getItem("auth_token");
-      const apiUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "https://tamankehati-backend-pxnu.onrender.com";
+      const token = localStorage.getItem(AUTH_TOKEN_KEY);
 
       // Check if user has any parks
-      const response = await fetch(`${apiUrl}/api/v1/parks?submitted_by=me`, {
+      const response = await fetch(apiUrl("/api/v1/parks?submitted_by=me"), {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
@@ -54,13 +59,6 @@ export function useNewUserDetection() {
         parks = data.data;
       }
 
-      console.log("[Tour] User parks check:", {
-        userId: user.id,
-        parksCount: parks.length,
-        isNewUser: parks.length === 0,
-        responseData: data
-      });
-
       // User is new if they have no parks
       setIsNewUser(parks.length === 0);
     } catch (error) {
@@ -77,15 +75,18 @@ export function useNewUserDetection() {
 
   const markTourAsCompleted = () => {
     if (user) {
-      localStorage.setItem(`tour_completed_${user.id}`, "true");
+      localStorage.setItem(
+        `${TOUR_COMPLETED_KEY_PREFIX}${user.id}`,
+        "true"
+      );
       setIsNewUser(false);
     }
   };
 
   const resetTourStatus = () => {
     if (user) {
-      localStorage.removeItem(`tour_completed_${user.id}`);
-      localStorage.removeItem("onboarding_current_step");
+      localStorage.removeItem(`${TOUR_COMPLETED_KEY_PREFIX}${user.id}`);
+      localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
       // Reset state and re-check
       setIsNewUser(null);
       setLoading(true);

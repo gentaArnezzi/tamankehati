@@ -7,6 +7,7 @@ import { Send, Bot, User, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { publicApi } from "@/lib/public-api-client";
 import Image from "next/image";
+import { apiUrl } from "@/lib/api-url";
 
 interface Message {
   id: string;

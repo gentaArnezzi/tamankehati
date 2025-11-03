@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { imageUrl } from "../../../lib/api-url";
 import {
   Card,
   CardContent,
@@ -201,7 +202,7 @@ export function ParkActivities({ parkId, parkName }: ParkActivitiesProps) {
                       <img
                         src={
                           activity.images && activity.images.length > 0
-                            ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${activity.images[0]}`
+                            ? imageUrl(activity.images[0])
                             : "/placeholder.svg"
                         }
                         alt={activity.title}

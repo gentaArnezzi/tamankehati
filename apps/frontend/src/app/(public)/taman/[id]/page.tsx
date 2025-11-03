@@ -94,9 +94,17 @@ export default async function TamanDetailPage({
         <ParkDetailView park={enrichedTaman} />
       </>
     );
-  } catch (error) {
+  } catch (error: any) {
     if (process.env.NODE_ENV === "development") {
       console.error("Error loading taman details:", error);
+      // Log additional context for 500 errors
+      if (error?.message?.includes("500") || error?.message?.includes("Backend service error")) {
+        console.error(
+          "⚠️ Backend returned 500 error - this indicates a server-side issue, not a path problem",
+        );
+        console.error("   The backend API endpoint exists but is failing internally");
+        console.error("   Check backend logs for the actual error");
+      }
     }
     notFound();
   }

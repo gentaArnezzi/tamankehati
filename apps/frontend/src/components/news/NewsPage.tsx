@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { apiUrl } from "../../lib/api-url";
 import { useAuth } from "../../lib/useAuth";
 import { useNewsList } from "../../lib/api/queries";
 import { useQueryClient } from "@tanstack/react-query";
@@ -211,8 +212,8 @@ export function NewsPage() {
     try {
       const url =
         formMode === "create"
-          ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/`
-          : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${formData.id}`;
+          ? apiUrl("/api/v1/news/")
+          : apiUrl(`/api/v1/news/${formData.id}`);
 
       const method = formMode === "create" ? "POST" : "PUT";
 
@@ -248,7 +249,7 @@ export function NewsPage() {
   const handleDelete = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}`,
+        apiUrl(`/api/v1/news/${id}`),
         {
           method: "DELETE",
           headers: {
@@ -273,7 +274,7 @@ export function NewsPage() {
   const handlePublish = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}/publish`,
+        apiUrl(`/api/v1/news/${id}/publish`),
         {
           method: "POST",
           headers: {
@@ -298,7 +299,7 @@ export function NewsPage() {
   const handleArchive = async (id: number) => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/${id}/archive`,
+        apiUrl(`/api/v1/news/${id}/archive`),
         {
           method: "POST",
           headers: {
