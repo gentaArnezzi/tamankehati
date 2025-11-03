@@ -52,6 +52,8 @@ eggs/
 .eggs/
 lib/
 lib64/
+# Exception: Allow apps/frontend/src/lib/ (source code, not Python lib/)
+!apps/frontend/src/lib/
 parts/
 sdist/
 var/
