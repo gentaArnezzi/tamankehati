@@ -34,6 +34,7 @@ import {
 } from "../ui/select";
 import { ArrowLeft, Save, Eye, AlertCircle, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeHtmlRich } from "../../utils/sanitizeHtml";
 import { useAuth } from "../../lib/useAuth";
 
 const artikelSchema = z.object({
@@ -187,7 +188,7 @@ export function ArtikelCreatePage() {
             <div className="prose max-w-none">
               <div
                 dangerouslySetInnerHTML={{
-                  __html: formData.konten.replace(/\n/g, "<br>"),
+                  __html: sanitizeHtmlRich(formData.konten.replace(/\n/g, "<br>")),
                 }}
               />
             </div>

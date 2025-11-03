@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/useAuth";
+import { sanitizeHtmlRich } from "../../utils/sanitizeHtml";
 
 interface MediumStyleArtikelPageProps {
   articleId?: string;
@@ -331,7 +332,7 @@ export function MediumStyleArtikelPage({
 
   const renderContent = (text: string) => {
     // Convert markdown to HTML for display
-    return text
+    const html = text
       .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
       .replace(/\*(.*?)\*/g, "<em>$1</em>")
       .replace(/^## (.*$)/gm, "<h2>$1</h2>")
@@ -347,6 +348,8 @@ export function MediumStyleArtikelPage({
         return `<img src="${imageUrl}" alt="${alt}" style="max-width: 100%; height: auto; margin: 10px 0; border-radius: 8px;" />`;
       })
       .replace(/\n/g, "<br>");
+    // Sanitize HTML to prevent XSS
+    return sanitizeHtmlRich(html);
   };
 
   // Show loading state when fetching article data

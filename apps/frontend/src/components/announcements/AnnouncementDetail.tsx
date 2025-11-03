@@ -29,6 +29,7 @@ import {
   Paperclip,
 } from "lucide-react";
 import { Announcement } from "./AnnouncementsPage";
+import { sanitizeHtmlRich } from "../../utils/sanitizeHtml";
 
 interface AnnouncementDetailProps {
   open: boolean;
@@ -226,7 +227,7 @@ export function AnnouncementDetail({
             <CardContent>
               <div
                 className="prose prose-slate max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
-                dangerouslySetInnerHTML={{ __html: announcement.content }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(announcement.content) }}
               />
             </CardContent>
           </Card>

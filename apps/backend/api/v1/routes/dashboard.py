@@ -23,26 +23,32 @@ async def get_dashboard(
     
     try:
         # Filter by user for Regional Admin
-        user_filter = ""
-        filter_params = {}
+        # ✅ SECURITY FIX: Use parameterized query instead of f-string to prevent SQL injection
         if user.role == "regional_admin":
-            user_filter = "AND submitted_by = :user_id"
+            pending_sql = text("""
+                SELECT 
+                    (SELECT COUNT(*) FROM flora WHERE status = 'in_review' AND deleted_at IS NULL AND submitted_by = :user_id) +
+                    (SELECT COUNT(*) FROM fauna WHERE status = 'in_review' AND deleted_at IS NULL AND submitted_by = :user_id) +
+                    (SELECT COUNT(*) FROM parks WHERE status = 'in_review' AND deleted_at IS NULL AND submitted_by = :user_id) +
+                    (SELECT COUNT(*) FROM activities WHERE status = 'in_review' AND deleted_at IS NULL AND submitted_by = :user_id) as total_pending
+            """)
             filter_params = {"user_id": user.id}
+        else:
+            # Super Admin: all data
+            pending_sql = text("""
+                SELECT 
+                    (SELECT COUNT(*) FROM flora WHERE status = 'in_review' AND deleted_at IS NULL) +
+                    (SELECT COUNT(*) FROM fauna WHERE status = 'in_review' AND deleted_at IS NULL) +
+                    (SELECT COUNT(*) FROM parks WHERE status = 'in_review' AND deleted_at IS NULL) +
+                    (SELECT COUNT(*) FROM activities WHERE status = 'in_review' AND deleted_at IS NULL) as total_pending
+            """)
+            filter_params = {}
         
         # Get real statistics from database
         # ✅ Count pending approvals = 'in_review' ONLY (NOT draft!)
         # ✅ EXCLUDE deleted data (deleted_at IS NULL)
         # Draft tidak dihitung sebagai pending approval
-        # Regional Admin: only their submitted data
-        # Super Admin: all data
-        pending_sql = f"""
-            SELECT 
-                (SELECT COUNT(*) FROM flora WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
-                (SELECT COUNT(*) FROM fauna WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
-                (SELECT COUNT(*) FROM parks WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) +
-                (SELECT COUNT(*) FROM activities WHERE status = 'in_review' AND deleted_at IS NULL {user_filter}) as total_pending
-        """
-        pending_result = await db.execute(text(pending_sql), filter_params)
+        pending_result = await db.execute(pending_sql, filter_params)
         pending_approvals = pending_result.scalar() or 0
         
         # Count users (Super Admin only, Regional Admin sees 0)

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { sanitizeHtmlRich } from "../../utils/sanitizeHtml";
 import {
   Card,
   CardContent,
@@ -299,7 +300,7 @@ export function RegionalAnnouncementsPage() {
                 {/* Content Preview */}
                 <div
                   className="text-sm sm:text-base text-gray-700 line-clamp-3 prose prose-sm max-w-none prose-headings:text-gray-900 prose-p:text-gray-800"
-                  dangerouslySetInnerHTML={{ __html: announcement.content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(announcement.content) }}
                 />
 
                 {/* Metadata */}
@@ -362,7 +363,7 @@ export function RegionalAnnouncementsPage() {
               <div
                 className="prose prose-sm sm:prose-base max-w-none prose-headings:text-gray-900 prose-p:text-gray-800 prose-li:text-gray-800 prose-a:text-blue-600"
                 dangerouslySetInnerHTML={{
-                  __html: selectedAnnouncement.content,
+                  __html: sanitizeHtmlRich(selectedAnnouncement.content),
                 }}
               />
 

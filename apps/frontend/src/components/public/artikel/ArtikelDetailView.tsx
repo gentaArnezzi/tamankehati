@@ -12,6 +12,7 @@ import {
 import { type ArtikelDetail } from "../../../types/articles";
 import { type ArtikelPublic } from "../../../types/public";
 import { JsonLd } from "../seo/JsonLd";
+import { sanitizeHtmlRich } from "../../../utils/sanitizeHtml";
 
 type ArtikelDetailViewProps = {
   artikel: ArtikelDetail;
@@ -93,7 +94,7 @@ export function ArtikelDetailView({
     contentNode = (
       <div
         className="prose prose-slate max-w-none mt-6 prose-headings:text-slate-900 prose-a:text-emerald-600"
-        dangerouslySetInnerHTML={{ __html: processed.html }}
+        dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(processed.html) }}
       />
     );
   } else {
