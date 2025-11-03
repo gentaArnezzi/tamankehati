@@ -6,6 +6,7 @@ import { MinimalHeroSection } from "../../components/public/home/MinimalHeroSect
 import { AboutSection } from "../../components/public/home/AboutSection";
 import { AboutTamanSection } from "../../components/public/home/AboutTamanSection";
 import { MinimalStatsSection } from "../../components/public/home/MinimalStatsSection";
+import { LatestArticlesSection } from "../../components/public/home/LatestArticlesSection";
 import { JsonLd } from "../../components/public/seo/JsonLd";
 
 // Lazy load below-the-fold components for faster initial render
@@ -129,6 +130,9 @@ const HomePageClient = memo(function HomePageClient({
 
       {/* Stats Dashboard */}
       <MinimalStatsSection initialStats={initialStats} />
+
+      {/* Latest Articles - Only renders if articles exist */}
+      <LatestArticlesSection initialArticles={initialArticles} />
 
       {/* Featured Species - Lazy loaded */}
       <Suspense fallback={<div className="py-12 sm:py-16 md:py-20 lg:py-24 bg-white" />}>

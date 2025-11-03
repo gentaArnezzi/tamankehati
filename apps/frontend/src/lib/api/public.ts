@@ -216,10 +216,10 @@ export const getAvailableRegions = cache(
   },
 );
 
-export const getLatestArticles = cache(async (): Promise<ArtikelPublic[]> => {
+export const getLatestArticles = cache(async (limit: number = 6): Promise<ArtikelPublic[]> => {
   try {
     const fetcher = fetchPaginated(ArtikelPublicSchema, 300); // Shorter cache for fresher data
-    const data = await fetcher("/api/public/artikel/", { limit: 3, offset: 0 });
+    const data = await fetcher("/api/public/artikel/", { limit, offset: 0 });
     return data.items || [];
   } catch (error: any) {
     // Handle 502/503/504 errors gracefully
