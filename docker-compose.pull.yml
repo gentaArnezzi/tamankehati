@@ -1,0 +1,164 @@
+# Docker Compose for Server Deployment (Pull Images from Registry)
+# This file is used on the server to pull pre-built images from Docker registry
+# Server does NOT need source code - only this file and .env configuration
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: kehati-postgres-prod
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-kehati_db}
+      POSTGRES_USER: ${POSTGRES_USER:-kehati_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kehati_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backups:/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kehati_user} -d ${POSTGRES_DB:-kehati_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kehati-network
+    restart: unless-stopped
+
+  # Redis for caching and sessions
+  redis:
+    image: redis:7-alpine
+    container_name: kehati-redis-prod
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - kehati-network
+    restart: unless-stopped
+
+  # Backend API - Pull from registry
+  backend:
+    # Replace YOUR_DOCKER_USERNAME with your Docker Hub username or registry URL
+    # Example: docker.io/yourusername/tamankehati-backend:latest
+    # Or: registry.example.com/tamankehati-backend:latest
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
+    container_name: kehati-backend-prod
+    environment:
+      # Database
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
+      DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # Security
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
+      
+      # CORS
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-${CORS_ORIGINS:-http://localhost:3000}}
+      
+      # Environment
+      ENVIRONMENT: production
+      DEBUG: "false"
+      
+      # Upload
+      UPLOAD_DIRECTORY: /app/uploads
+      
+      # Logging
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      LOG_FORMAT: ${LOG_FORMAT:-json}
+      
+      # Firewall (optional)
+      FIREWALL_ENABLED: ${FIREWALL_ENABLED:-false}
+      FIREWALL_MODE: ${FIREWALL_MODE:-blacklist}
+      IP_WHITELIST: ${IP_WHITELIST:-}
+      IP_BLACKLIST: ${IP_BLACKLIST:-}
+      FIREWALL_BYPASS_PATHS: ${FIREWALL_BYPASS_PATHS:-/health,/healthz,/api/health}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - kehati-network
+    restart: unless-stopped
+
+  # Frontend Next.js - Pull from registry
+  frontend:
+    # Replace YOUR_DOCKER_USERNAME with your Docker Hub username or registry URL
+    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
+    container_name: kehati-frontend-prod
+    environment:
+      # API Configuration
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://YOUR_SERVER_IP:8000}
+      
+      # Environment
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: 1
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - kehati-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: kehati-nginx-prod
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./deploy-package/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./deploy-package/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - kehati-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  kehati-network:
+    driver: bridge
+
