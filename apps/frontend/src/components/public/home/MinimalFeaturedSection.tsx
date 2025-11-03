@@ -36,77 +36,14 @@ export const MinimalFeaturedSection = memo(function MinimalFeaturedSection({ ini
         if (data && data.length > 0) {
           setFeatures(data);
         } else {
-          // If no data from API, use fallback
-          console.warn("No featured items from API, using fallback data");
-          setFeatures([
-            {
-              id: 1,
-              category: "Flora",
-              title: "Rafflesia Arnoldii",
-              description:
-                "Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter",
-              image:
-                "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop",
-              link: "/flora",
-            },
-            {
-              id: 2,
-              category: "Flora",
-              title: "Anggrek Hitam",
-              description:
-                "Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka",
-              image:
-                "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop",
-              link: "/flora",
-            },
-            {
-              id: 3,
-              category: "Fauna",
-              title: "Orangutan Sumatera",
-              description:
-                "Primata langka dengan DNA 97% mirip manusia, terancam punah",
-              image:
-                "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop",
-              link: "/fauna",
-            },
-          ]);
+          // If no data from API, show empty state
+          console.warn("No featured items from API");
+          setFeatures([]);
         }
       } catch (err) {
         console.error("Error loading featured items:", err);
         setError("Gagal memuat data spesies unggulan");
-        // Fallback to default data if API fails (only species, no parks)
-        setFeatures([
-          {
-            id: 1,
-            category: "Flora",
-            title: "Rafflesia Arnoldii",
-            description:
-              "Bunga terbesar di dunia, endemik Sumatera dengan diameter hingga 1 meter",
-            image:
-              "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop",
-            link: "/flora",
-          },
-          {
-            id: 2,
-            category: "Flora",
-            title: "Anggrek Hitam",
-            description:
-              "Anggrek endemik Kalimantan dengan kelopak berwarna hitam yang langka",
-            image:
-              "https://images.unsplash.com/photo-1490750967868-88aa4486c946?w=600&h=400&fit=crop",
-            link: "/flora",
-          },
-          {
-            id: 3,
-            category: "Fauna",
-            title: "Orangutan Sumatera",
-            description:
-              "Primata langka dengan DNA 97% mirip manusia, terancam punah",
-            image:
-              "https://images.unsplash.com/photo-1551739440-5dd934d3a94a?w=600&h=400&fit=crop",
-            link: "/fauna",
-          },
-        ]);
+        setFeatures([]);
       } finally {
         setLoading(false);
       }
@@ -153,10 +90,16 @@ export const MinimalFeaturedSection = memo(function MinimalFeaturedSection({ ini
               <span>Memuat spesies unggulan...</span>
             </div>
           </div>
-        ) : error ? (
+        ) : error || features.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-red-600 mb-4">{error}</p>
-            <p className="text-gray-500 text-sm">Menampilkan data contoh</p>
+            {error ? (
+              <>
+                <p className="text-red-600 mb-4">{error}</p>
+                <p className="text-gray-500 text-sm">Tidak ada data tersedia</p>
+              </>
+            ) : (
+              <p className="text-gray-500">Belum ada spesies unggulan tersedia</p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 sm:gap-12">
@@ -180,7 +123,7 @@ export const MinimalFeaturedSection = memo(function MinimalFeaturedSection({ ini
                     {/* Image */}
                     <div className="relative aspect-[4/3] overflow-hidden bg-gray-50">
                       <Image
-                        src={feature.image || "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?w=600&h=400&fit=crop"}
+                        src={feature.image || "/placeholder-image.jpg"}
                         alt={feature.title}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1280px) 33vw, 400px"

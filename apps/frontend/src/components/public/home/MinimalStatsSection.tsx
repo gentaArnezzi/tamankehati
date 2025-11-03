@@ -22,7 +22,7 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
     parks: 0,
   });
 
-  // Use initialStats from server if available, otherwise use defaults
+  // Use initialStats from server if available, otherwise use 0
   const targets = useMemo(() => {
     if (initialStats) {
       return {
@@ -31,11 +31,11 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
         parks: initialStats.total_taman,
       };
     }
-    // Fallback defaults
+    // No fallback - show 0 if no data
     return {
-      flora: 320,
-      fauna: 180,
-      parks: 52,
+      flora: 0,
+      fauna: 0,
+      parks: 0,
     };
   }, [initialStats]);
 
