@@ -241,6 +241,52 @@ docker compose -f docker-compose.prod.yml logs -f frontend
 docker compose -f docker-compose.prod.yml logs -f postgres
 ```
 
+## Step 3.5: Setup Ollama (Optional - for AI functionality)
+
+If you want to use AI features (chatbot, AI-powered analysis), you need to install Ollama:
+
+### Option A: Install Ollama Directly on Server
+
+```bash
+# Run automated setup script
+sudo ./scripts/setup-ollama.sh
+
+# Or manual installation
+curl -fsSL https://ollama.com/install.sh | sh
+sudo systemctl enable ollama
+sudo systemctl start ollama
+
+# Download model
+ollama pull qwen2:1.5b
+```
+
+**Update .env:**
+```bash
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=qwen2:1.5b
+```
+
+### Option B: Use Docker (Already in docker-compose.prod.yml)
+
+Ollama service is already configured in `docker-compose.prod.yml`. Just start it:
+
+```bash
+# Start Ollama container
+docker compose -f docker-compose.prod.yml up -d ollama
+
+# Download model (from inside container or host)
+docker compose -f docker-compose.prod.yml exec ollama ollama pull qwen2:1.5b
+```
+
+**Update .env:**
+```bash
+# For Docker network, use service name
+OLLAMA_URL=http://ollama:11434
+OLLAMA_MODEL=qwen2:1.5b
+```
+
+See [Ollama Setup Guide](./ollama-setup.md) for detailed instructions.
+
 ## Step 4: Verification
 
 ### 4.1 Run Verification Script

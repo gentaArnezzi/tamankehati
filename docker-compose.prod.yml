@@ -83,6 +83,10 @@ services:
       IP_WHITELIST: ${IP_WHITELIST:-}
       IP_BLACKLIST: ${IP_BLACKLIST:-}
       FIREWALL_BYPASS_PATHS: ${FIREWALL_BYPASS_PATHS:-/health,/healthz,/api/health}
+      
+      # Ollama Configuration (for AI functionality)
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
@@ -135,6 +139,34 @@ services:
       - kehati-network
     restart: unless-stopped
 
+  # Ollama LLM Service (Optional - for AI functionality)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kehati-ollama-prod
+    volumes:
+      - ollama_data:/root/.ollama
+    # Security: Ollama not exposed externally by default
+    # Uncomment port if you need external access to Ollama
+    # ports:
+    #   - "${OLLAMA_PORT:-11434}:11434"
+    networks:
+      - kehati-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Optional: GPU support (uncomment if server has NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
@@ -148,6 +180,8 @@ services:
       backend:
         condition: service_healthy
       frontend:
+        condition: service_healthy
+      ollama:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
@@ -165,6 +199,8 @@ volumes:
   redis_data:
     driver: local
   backend_uploads:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:

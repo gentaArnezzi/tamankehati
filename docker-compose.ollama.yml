@@ -1,0 +1,45 @@
+# Docker Compose with Ollama Service
+# Add this to your docker-compose.prod.yml or use separately
+
+services:
+  # Ollama LLM Service
+  ollama:
+    image: ollama/ollama:latest
+    container_name: kehati-ollama-prod
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      # Expose Ollama API (optional - can be internal only)
+      - "${OLLAMA_PORT:-11434}:11434"
+    networks:
+      - kehati-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    # Optional: GPU support (uncomment if server has NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    environment:
+      # Optional: Set custom host
+      # OLLAMA_HOST: 0.0.0.0:11434
+      # Optional: Allow origins (for CORS if needed)
+      # OLLAMA_ORIGINS: "*"
+
+volumes:
+  ollama_data:
+    driver: local
+
+networks:
+  kehati-network:
+    external: true
+    # Or remove 'external: true' if using with docker-compose.prod.yml
+
