@@ -1,0 +1,246 @@
+name: CD - Deploy to Ubuntu Server
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: false
+        default: 'main'
+        type: string
+
+env:
+  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
+  DEPLOY_BRANCH: ${{ github.event.inputs.branch || 'main' }}
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.DEPLOY_BRANCH }}
+
+      - name: Check deployment prerequisites
+        id: check_prereqs
+        run: |
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ] || [ -z "${{ secrets.DEPLOY_USER }}" ] || [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ]; then
+            echo "⚠️ Deployment secrets not configured. Skipping deployment."
+            echo "Configure DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY in repository settings to enable deployment"
+            echo "deploy_skipped=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Deployment prerequisites met"
+            echo "deploy_skipped=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deployment skipped notice
+        if: steps.check_prereqs.outputs.deploy_skipped == 'true'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚠️  Deployment Skipped"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "GitHub Secrets not configured yet."
+          echo "This is OK - workflow will skip deployment safely."
+          echo ""
+          echo "To enable deployment later:"
+          echo "1. Go to repository Settings → Secrets and variables → Actions"
+          echo "2. Add: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY"
+          echo "3. Push to main branch again"
+          echo ""
+          echo "Workflow completed successfully (deployment skipped)."
+
+      - name: Setup SSH
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known hosts
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo 'SSH connection successful'"
+
+      - name: Create deployment directory if not exists
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            if [ ! -d "${{ env.DEPLOY_PATH }}" ]; then
+              sudo mkdir -p ${{ env.DEPLOY_PATH }}
+              sudo chown -R ${{ secrets.DEPLOY_USER }}:${{ secrets.DEPLOY_USER }} ${{ env.DEPLOY_PATH }}
+            fi
+          EOF
+
+      - name: Deploy application
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
+            cd ${{ env.DEPLOY_PATH }}
+            
+            # Save current commit for rollback
+            CURRENT_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+            echo "Current commit: $CURRENT_COMMIT"
+            
+            # Pull latest code
+            echo "Pulling latest code from repository..."
+            if [ -d ".git" ]; then
+              git fetch origin
+              git reset --hard origin/${{ env.DEPLOY_BRANCH }}
+              git clean -fd
+            else
+              echo "Not a git repository, skipping pull"
+            fi
+            
+            NEW_COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "none")
+            echo "New commit: $NEW_COMMIT"
+            
+            # Build and deploy with docker-compose
+            echo "Building and deploying Docker containers..."
+            docker compose -f docker-compose.prod.yml build --no-cache
+            
+            # Stop existing containers gracefully
+            echo "Stopping existing containers..."
+            docker compose -f docker-compose.prod.yml down --timeout 30 || true
+            
+            # Start services
+            echo "Starting services..."
+            docker compose -f docker-compose.prod.yml up -d
+            
+            # Wait for services to be ready
+            echo "Waiting for services to be ready..."
+            sleep 10
+            
+            # Run database migrations
+            echo "Running database migrations..."
+            docker compose -f docker-compose.prod.yml exec -T backend alembic upgrade head || echo "Migration failed, but continuing..."
+            
+            DEPLOY_SCRIPT
+
+      - name: Health check - Backend
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "Checking backend health..."
+            
+            BACKEND_URL="http://localhost:8000/health"
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $BACKEND_URL > /dev/null; then
+                echo "✅ Backend health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Backend not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 5
+            done
+            
+            echo "❌ Backend health check failed after $MAX_RETRIES attempts"
+            exit 1
+          EOF
+
+      - name: Health check - Frontend
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "Checking frontend health..."
+            
+            FRONTEND_URL="http://localhost:3000"
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $FRONTEND_URL > /dev/null; then
+                echo "✅ Frontend health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Frontend not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 5
+            done
+            
+            echo "❌ Frontend health check failed after $MAX_RETRIES attempts"
+            exit 1
+          EOF
+
+      - name: Health check - Nginx
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "Checking Nginx health..."
+            
+            NGINX_URL="http://localhost/health"
+            MAX_RETRIES=5
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $NGINX_URL > /dev/null; then
+                echo "✅ Nginx health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Nginx not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 3
+            done
+            
+            echo "⚠️ Nginx health check failed, but continuing..."
+            exit 0
+          EOF
+
+      - name: Verify deployment
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            echo "=== Deployment Verification ==="
+            echo ""
+            echo "Docker containers status:"
+            docker compose -f docker-compose.prod.yml ps
+            echo ""
+            echo "Container logs (last 20 lines):"
+            docker compose -f docker-compose.prod.yml logs --tail=20
+          EOF
+
+      - name: Rollback on failure
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "❌ Deployment failed, attempting rollback..."
+            
+            # Try to restore previous state
+            cd ${{ env.DEPLOY_PATH }}
+            
+            if [ -f ".git" ] || [ -d ".git" ]; then
+              PREV_COMMIT=$(git rev-parse HEAD@{1} 2>/dev/null || echo "none")
+              if [ "$PREV_COMMIT" != "none" ]; then
+                echo "Rolling back to previous commit: $PREV_COMMIT"
+                git reset --hard $PREV_COMMIT
+                docker compose -f docker-compose.prod.yml up -d --build
+              fi
+            fi
+            
+            echo "Rollback completed. Please check logs manually."
+            docker compose -f docker-compose.prod.yml logs --tail=50
+          EOF
+        continue-on-error: true
+

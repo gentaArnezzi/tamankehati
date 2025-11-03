@@ -4,6 +4,20 @@
 
 A comprehensive platform for managing biodiversity data, park information, and environmental monitoring built with modern web technologies.
 
+## 🔄 CI/CD Status
+
+[![CI - Tests & Linting](https://github.com/gentaArnezzi/tamankehati/actions/workflows/ci.yml/badge.svg)](https://github.com/gentaArnezzi/tamankehati/actions/workflows/ci.yml)
+[![CD - Deploy to Ubuntu Server](https://github.com/gentaArnezzi/tamankehati/actions/workflows/deploy.yml/badge.svg)](https://github.com/gentaArnezzi/tamankehati/actions/workflows/deploy.yml)
+[![Docker Build Test](https://github.com/gentaArnezzi/tamankehati/actions/workflows/docker-build-test.yml/badge.svg)](https://github.com/gentaArnezzi/tamankehati/actions/workflows/docker-build-test.yml)
+
+### Automated Workflows
+
+- **CI Pipeline**: Automated testing, linting, and build verification on every push and pull request
+- **CD Pipeline**: Automated deployment to Ubuntu server on push to `main` branch
+- **Docker Build**: Automated Docker image build verification
+
+See [CI/CD Setup Documentation](docs/deployment/ubuntu-server-deployment.md#cicd-setup-automated-deployment) for configuration details.
+
 ## 🚀 Quick Start
 
 Get up and running in under 5 minutes:
@@ -222,7 +236,32 @@ tamankehati_21/
 
 ### Production
 
-See [Production Deployment Guide](docs/deployment/production.md) for detailed instructions.
+#### Automated Deployment (Recommended)
+
+The project includes automated CI/CD pipelines using GitHub Actions:
+
+- **Automatic Testing**: Runs on every push and pull request
+- **Automatic Deployment**: Deploys to Ubuntu server on push to `main` branch
+- **Health Checks**: Automatically verifies services after deployment
+- **Rollback**: Automatic rollback on deployment failure
+
+**Setup CI/CD:**
+1. Configure GitHub Secrets (see [CI/CD Setup](docs/deployment/ubuntu-server-deployment.md#cicd-setup-automated-deployment))
+2. Push to `main` branch to trigger automatic deployment
+
+**Manual Deployment:**
+
+```bash
+# On the server
+cd /opt/tamankehati
+./scripts/deploy-to-server.sh
+```
+
+See [Ubuntu Server Deployment Guide](docs/deployment/ubuntu-server-deployment.md) for complete setup instructions.
+
+#### Production Deployment Guide
+
+See [Production Deployment Guide](docs/deployment/production.md) for detailed manual deployment instructions.
 
 ## 🤝 Contributing
 

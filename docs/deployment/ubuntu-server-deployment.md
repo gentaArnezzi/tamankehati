@@ -420,6 +420,164 @@ gunzip < backups/kehati_db_backup_20250102_020000.sql.gz | \
 - [ ] Regular backups configured
 - [ ] .env file not committed to version control
 
+## CI/CD Setup (Automated Deployment)
+
+Taman Kehati includes GitHub Actions workflows for automated testing, linting, and deployment.
+
+### Prerequisites for CI/CD
+
+1. **GitHub Repository** - Code must be in a GitHub repository
+2. **SSH Access to Server** - Server must be accessible via SSH
+3. **GitHub Secrets** - Configure required secrets in repository settings
+
+### Setting Up GitHub Secrets
+
+Go to your GitHub repository → Settings → Secrets and variables → Actions, and add:
+
+1. **DEPLOY_HOST** - Your Ubuntu server IP address or hostname
+   ```
+   Example: 192.168.1.100 or server.example.com
+   ```
+
+2. **DEPLOY_USER** - SSH username for server access
+   ```
+   Example: ubuntu or tamankehati
+   ```
+
+3. **DEPLOY_SSH_KEY** - Private SSH key for server authentication
+   ```bash
+   # Generate SSH key pair if you don't have one
+   ssh-keygen -t ed25519 -C "github-actions-deploy" -f ~/.ssh/github_actions_deploy
+   
+   # Copy public key to server
+   ssh-copy-id -i ~/.ssh/github_actions_deploy.pub user@your-server-ip
+   
+   # Copy private key content to GitHub Secret
+   cat ~/.ssh/github_actions_deploy
+   # (Copy the entire output including -----BEGIN and -----END lines)
+   ```
+
+4. **DEPLOY_PATH** (Optional) - Deployment path on server (default: `/opt/tamankehati`)
+   ```
+   Example: /opt/tamankehati
+   ```
+
+5. **DEPLOY_BRANCH** (Optional) - Branch to deploy (default: `main`)
+   ```
+   Example: main
+   ```
+
+### Server Setup for CI/CD
+
+1. **Ensure Git is initialized on server:**
+   ```bash
+   cd /opt/tamankehati
+   if [ ! -d ".git" ]; then
+     git init
+     git remote add origin https://github.com/your-username/tamankehati.git
+     git checkout -b main
+   fi
+   ```
+
+2. **Configure SSH access:**
+   - Add GitHub Actions public key to `~/.ssh/authorized_keys`
+   - Ensure user has permission to run Docker commands:
+     ```bash
+     sudo usermod -aG docker $USER
+     ```
+
+3. **Verify deployment path permissions:**
+   ```bash
+   sudo chown -R $USER:$USER /opt/tamankehati
+   ```
+
+### How CI/CD Works
+
+#### 1. CI Workflow (Continuous Integration)
+- **Trigger:** Every push and pull request
+- **Jobs:**
+  - Backend tests (pytest)
+  - Backend linting (black, flake8, isort, mypy)
+  - Frontend linting (ESLint, Prettier)
+  - Frontend type checking (TypeScript)
+  - Build verification (Docker images)
+
+#### 2. CD Workflow (Continuous Deployment)
+- **Trigger:** Push to `main` branch
+- **Steps:**
+  1. SSH to Ubuntu server
+  2. Pull latest code from repository
+  3. Build Docker images
+  4. Stop existing containers
+  5. Start new containers
+  6. Run database migrations
+  7. Health checks (backend, frontend, nginx)
+  8. Automatic rollback on failure
+
+#### 3. Docker Build Test Workflow
+- **Trigger:** Changes to Dockerfiles or docker-compose files
+- **Purpose:** Verify Docker images can be built successfully
+
+### Manual Deployment
+
+You can also deploy manually using the deployment script:
+
+```bash
+# On the server
+cd /opt/tamankehati
+./scripts/deploy-to-server.sh
+
+# With options
+./scripts/deploy-to-server.sh --branch main --skip-build
+```
+
+Available options:
+- `--branch BRANCH` - Branch to deploy (default: main)
+- `--path PATH` - Deployment path (default: /opt/tamankehati)
+- `--skip-pull` - Skip git pull
+- `--skip-build` - Skip Docker build
+- `--skip-migration` - Skip database migrations
+- `--no-health-check` - Skip health checks
+- `--dry-run` - Show what would be done without executing
+
+### Monitoring Deployments
+
+1. **GitHub Actions:**
+   - Go to repository → Actions tab
+   - View workflow runs and logs
+
+2. **Server Logs:**
+   ```bash
+   docker compose -f docker-compose.prod.yml logs -f
+   ```
+
+3. **Verification Script:**
+   ```bash
+   ./scripts/verify-deployment.sh
+   ```
+
+### Troubleshooting CI/CD
+
+**Deployment fails:**
+1. Check GitHub Actions logs for error messages
+2. Verify SSH connection: `ssh user@server`
+3. Check Docker permissions: `docker ps`
+4. Verify deployment path exists and is writable
+
+**Health checks fail:**
+1. Check service logs: `docker compose -f docker-compose.prod.yml logs`
+2. Verify services are running: `docker compose -f docker-compose.prod.yml ps`
+3. Test health endpoints manually:
+   ```bash
+   curl http://localhost:8000/health
+   curl http://localhost:3000
+   ```
+
+**SSH connection fails:**
+1. Verify SSH key is correctly added to GitHub Secrets
+2. Test SSH connection manually
+3. Check server firewall allows SSH (port 22)
+
 ## Next Steps
 
 1. **Configure SSL/HTTPS** (when you have domain)

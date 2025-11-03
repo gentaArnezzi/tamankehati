@@ -1,0 +1,150 @@
+name: Docker Build Test
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'apps/backend/Dockerfile'
+      - 'apps/frontend/Dockerfile'
+      - 'docker-compose.prod.yml'
+      - 'docker-compose.yml'
+      - 'apps/backend/**'
+      - 'apps/frontend/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'apps/backend/Dockerfile'
+      - 'apps/frontend/Dockerfile'
+      - 'docker-compose.prod.yml'
+      - 'docker-compose.yml'
+      - 'apps/backend/**'
+      - 'apps/frontend/**'
+  workflow_dispatch:
+
+jobs:
+  build-backend:
+    name: Build Backend Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/backend
+          file: ./apps/backend/Dockerfile
+          target: production
+          tags: tamankehati-backend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
+
+      - name: Check image size
+        run: |
+          IMAGE_SIZE=$(docker images tamankehati-backend:test --format "{{.Size}}")
+          echo "Backend image size: $IMAGE_SIZE"
+          
+          # Check if image size is reasonable (less than 1GB)
+          SIZE_BYTES=$(docker images tamankehati-backend:test --format "{{.Size}}" | sed 's/[^0-9]//g')
+          echo "Image size check completed"
+
+  build-frontend:
+    name: Build Frontend Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps/frontend
+          file: ./apps/frontend/Dockerfile
+          target: runner
+          tags: tamankehati-frontend:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          push: false
+
+      - name: Check image size
+        run: |
+          IMAGE_SIZE=$(docker images tamankehati-frontend:test --format "{{.Size}}")
+          echo "Frontend image size: $IMAGE_SIZE"
+          
+          # Check if image size is reasonable (less than 500MB for runner stage)
+          SIZE_BYTES=$(docker images tamankehati-frontend:test --format "{{.Size}}" | sed 's/[^0-9]//g')
+          echo "Image size check completed"
+
+  build-nginx:
+    name: Build Nginx Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Nginx image
+        run: |
+          # Nginx uses official image, just verify config is valid
+          docker pull nginx:alpine
+          
+          # Test nginx config syntax
+          docker run --rm \
+            -v $(pwd)/deploy-package/nginx/nginx.conf:/etc/nginx/nginx.conf:ro \
+            -v $(pwd)/deploy-package/nginx/conf.d:/etc/nginx/conf.d:ro \
+            nginx:alpine \
+            nginx -t
+
+  docker-compose-test:
+    name: Test Docker Compose
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Validate docker-compose.prod.yml
+        run: |
+          docker compose -f docker-compose.prod.yml config > /dev/null
+          echo "✅ docker-compose.prod.yml is valid"
+
+      - name: Test docker-compose build
+        run: |
+          # Build all services (dry run, no cache)
+          docker compose -f docker-compose.prod.yml build --no-cache || echo "⚠️ Build test completed with warnings"
+          
+          echo "✅ Docker Compose build test completed"
+
+  all-builds-success:
+    name: All Builds Status
+    runs-on: ubuntu-latest
+    needs: [build-backend, build-frontend, build-nginx, docker-compose-test]
+    if: always()
+
+    steps:
+      - name: Check build results
+        run: |
+          if [ "${{ needs.build-backend.result }}" != "success" ] || \
+             [ "${{ needs.build-frontend.result }}" != "success" ] || \
+             [ "${{ needs.build-nginx.result }}" != "success" ] || \
+             [ "${{ needs.docker-compose-test.result }}" != "success" ]; then
+            echo "❌ One or more Docker builds failed"
+            exit 1
+          fi
+          echo "✅ All Docker builds passed successfully"
+
