@@ -51,10 +51,38 @@ Comprehensive security checklist for Ubuntu server deployment.
   - NO "localhost" in production (unless internal access only)
   - Format: `http://YOUR_SERVER_IP:3000,http://YOUR_SERVER_IP:80`
 
-- [ ] **Firewall (UFW)** - Enabled on Ubuntu server
+- [ ] **Firewall (UFW)** - Enabled with proper rules
   ```bash
+  # Set default policies
+  sudo ufw default deny incoming
+  sudo ufw default allow outgoing
+  
+  # Allow required ports
+  sudo ufw allow 22/tcp    # SSH (CRITICAL)
+  sudo ufw allow 80/tcp    # HTTP (Nginx)
+  sudo ufw allow 443/tcp   # HTTPS (for future SSL)
+  
+  # Enable firewall
   sudo ufw enable
-  sudo ufw status
+  sudo ufw status verbose
+  
+  # Verify ports 8000, 3000, 5432, 6379 are NOT open
+  sudo ufw status | grep -E "8000|3000|5432|6379" && echo "❌ Unsafe ports exposed!" || echo "✅ Safe ports only"
+  ```
+  
+  **Required ports:**
+  - ✅ Port 22 (SSH) - Required
+  - ✅ Port 80 (HTTP) - Nginx reverse proxy
+  - ✅ Port 443 (HTTPS) - For SSL/TLS
+  - ❌ Port 8000 - Should NOT be public (internal only)
+  - ❌ Port 3000 - Should NOT be public (internal only)
+  - ❌ Port 5432 - Should NOT be public (PostgreSQL)
+  - ❌ Port 6379 - Should NOT be public (Redis)
+  
+  **Quick Setup:**
+  ```bash
+  # Use automated script
+  sudo ./scripts/setup-firewall.sh
   ```
 
 ### File Permissions

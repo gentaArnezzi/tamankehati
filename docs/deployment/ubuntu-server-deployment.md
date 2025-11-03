@@ -52,20 +52,57 @@ docker --version
 docker compose version
 ```
 
-### 1.3 Configure Firewall (Optional but Recommended)
+### 1.3 Configure Firewall (CRITICAL - Required for Security)
+
+**IMPORTANT:** Configure firewall BEFORE deploying to prevent unauthorized access.
+
 ```bash
-# Allow HTTP (port 80)
+# Set default policies (deny all incoming, allow all outgoing)
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+
+# Allow SSH (CRITICAL - must be first to avoid lockout!)
+sudo ufw allow 22/tcp
+# Alternative: Allow from specific IP only (more secure)
+# sudo ufw allow from YOUR_IP_ADDRESS to any port 22
+
+# Allow HTTP (port 80) - For Nginx reverse proxy
 sudo ufw allow 80/tcp
 
-# Allow backend direct access (optional, if not using Nginx)
-sudo ufw allow 8000/tcp
+# Allow HTTPS (port 443) - For future SSL/TLS setup
+sudo ufw allow 443/tcp
 
-# Allow frontend direct access (optional, if not using Nginx)
-sudo ufw allow 3000/tcp
+# Note: Ports 8000 and 3000 should NOT be opened publicly
+# They are only accessible via Nginx reverse proxy on port 80
+# If you need direct access (for testing only), you can temporarily allow:
+# sudo ufw allow 8000/tcp  # Backend direct access (NOT recommended for production)
+# sudo ufw allow 3000/tcp  # Frontend direct access (NOT recommended for production)
 
 # Enable firewall
 sudo ufw enable
-sudo ufw status
+
+# Verify firewall status
+sudo ufw status verbose
+
+# Check firewall rules
+sudo ufw status numbered
+```
+
+**Firewall Rules Summary:**
+- ✅ **Port 22 (SSH)** - Required for server access
+- ✅ **Port 80 (HTTP)** - For Nginx reverse proxy
+- ✅ **Port 443 (HTTPS)** - For future SSL/TLS setup
+- ❌ **Port 8000 (Backend)** - Should NOT be public (internal only via Docker network)
+- ❌ **Port 3000 (Frontend)** - Should NOT be public (internal only via Docker network)
+- ❌ **Port 5432 (PostgreSQL)** - Should NOT be public (internal only)
+- ❌ **Port 6379 (Redis)** - Should NOT be public (internal only)
+
+**Security Note:** If you need to access backend/frontend directly for debugging, use SSH tunnel instead:
+```bash
+# SSH tunnel to access backend (from your local machine)
+ssh -L 8000:localhost:8000 user@server-ip
+
+# Then access http://localhost:8000 on your local machine
 ```
 
 ### 1.4 Get Server IP Address
