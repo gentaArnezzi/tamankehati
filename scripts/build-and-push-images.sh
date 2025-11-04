@@ -57,6 +57,11 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
+# Setup Docker Buildx if not exists
+log "Setting up Docker Buildx..."
+docker buildx version > /dev/null 2>&1 || docker buildx install
+docker buildx create --use --name tamankehati-builder 2>/dev/null || docker buildx use tamankehati-builder || true
+
 # Login to registry if pushing
 if [ "$PUSH_TO_REGISTRY" = "true" ]; then
     log "Checking Docker login status..."
@@ -103,12 +108,15 @@ if [ "$PUSH_TO_REGISTRY" = "true" ]; then
 fi
 
 # Build Backend Image
-log "Building backend image..."
+log "Building backend image for linux/amd64..."
 log "  Image: ${BACKEND_IMAGE}"
-docker build \
+log "  Platform: linux/amd64"
+docker buildx build \
+    --platform linux/amd64 \
     -f apps/backend/Dockerfile \
     -t "${BACKEND_IMAGE}" \
     --target production \
+    --load \
     apps/backend
 
 if [ $? -eq 0 ]; then
@@ -119,12 +127,16 @@ else
 fi
 
 # Build Frontend Image
-log "Building frontend image..."
+log "Building frontend image for linux/amd64..."
 log "  Image: ${FRONTEND_IMAGE}"
-docker build \
+log "  Platform: linux/amd64"
+docker buildx build \
+    --platform linux/amd64 \
     -f apps/frontend/Dockerfile \
     -t "${FRONTEND_IMAGE}" \
     --target runner \
+    --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8000}" \
+    --load \
     apps/frontend
 
 if [ $? -eq 0 ]; then
@@ -136,10 +148,16 @@ fi
 
 # Push images to registry
 if [ "$PUSH_TO_REGISTRY" = "true" ]; then
-    log "Pushing images to registry..."
+    log "Pushing images to registry (linux/amd64)..."
     
     log "Pushing backend image..."
-    docker push "${BACKEND_IMAGE}"
+    docker buildx build \
+        --platform linux/amd64 \
+        -f apps/backend/Dockerfile \
+        -t "${BACKEND_IMAGE}" \
+        --target production \
+        --push \
+        apps/backend
     if [ $? -eq 0 ]; then
         log_success "Backend image pushed successfully"
     else
@@ -148,7 +166,14 @@ if [ "$PUSH_TO_REGISTRY" = "true" ]; then
     fi
     
     log "Pushing frontend image..."
-    docker push "${FRONTEND_IMAGE}"
+    docker buildx build \
+        --platform linux/amd64 \
+        -f apps/frontend/Dockerfile \
+        -t "${FRONTEND_IMAGE}" \
+        --target runner \
+        --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8000}" \
+        --push \
+        apps/frontend
     if [ $? -eq 0 ]; then
         log_success "Frontend image pushed successfully"
     else
