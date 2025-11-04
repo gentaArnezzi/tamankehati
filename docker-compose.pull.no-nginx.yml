@@ -42,6 +42,7 @@ services:
   # Backend API - Pull from registry
   backend:
     image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
+    platform: linux/amd64
     container_name: tamankehati-backend-prod
     environment:
       # Database
@@ -96,6 +97,7 @@ services:
   # Frontend Next.js - Pull from registry
   frontend:
     image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
+    platform: linux/amd64
     container_name: tamankehati-frontend-prod
     environment:
       # API Configuration
