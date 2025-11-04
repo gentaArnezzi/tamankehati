@@ -799,13 +799,13 @@ export function ApprovedParkDetails({
                   <div>
                     <Label>Lokasi Administratif *</Label>
                     <IndonesiaRegionSelector
-                      initialData={{
-                        provinsi: editData.provinsi,
-                        kota_kabupaten: editData.kota_kabupaten,
-                        kecamatan: editData.kecamatan,
-                        desa_kelurahan: editData.desa_kelurahan,
+                      initialValues={{
+                        provinsi: editData.provinsi || "",
+                        kota_kabupaten: editData.kota_kabupaten || "",
+                        kecamatan: editData.kecamatan || "",
+                        desa_kelurahan: editData.desa_kelurahan || "",
                       }}
-                      onChange={handleRegionChange}
+                      onRegionChange={handleRegionChange}
                     />
                   </div>
 

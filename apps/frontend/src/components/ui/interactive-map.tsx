@@ -31,10 +31,8 @@ const Marker = dynamic(
 const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
-const useMapEvents = dynamic(
-  () => import("react-leaflet").then((mod) => mod.useMapEvents),
-  { ssr: false },
-);
+// useMapEvents is a hook, not a component - cannot use dynamic import
+// It will be imported inside the component where it's used
 
 interface InteractiveMapProps {
   latitude?: number | null;
@@ -53,28 +51,28 @@ interface MapClickHandlerProps {
 // Dynamic MapClickHandler component
 const MapClickHandler = dynamic(
   () => {
-    return Promise.resolve(function MapClickHandlerComponent({
-      onMapClick,
-      initialLat,
-      initialLng,
-    }: MapClickHandlerProps) {
-      const [position, setPosition] = useState<[number, number] | null>(
-        initialLat && initialLng ? [initialLat, initialLng] : null,
-      );
+    return import("react-leaflet").then((mod) => {
+      const { useMapEvents, Marker } = mod;
+      
+      return function MapClickHandlerComponent({
+        onMapClick,
+        initialLat,
+        initialLng,
+      }: MapClickHandlerProps) {
+        const [position, setPosition] = useState<[number, number] | null>(
+          initialLat && initialLng ? [initialLat, initialLng] : null,
+        );
 
-      // Dynamic import untuk react-leaflet hooks
-      const useMapEvents = require("react-leaflet").useMapEvents;
-      const Marker = require("react-leaflet").Marker;
+        useMapEvents({
+          click: (e: any) => {
+            const { lat, lng } = e.latlng;
+            setPosition([lat, lng]);
+            onMapClick(lat, lng);
+          },
+        });
 
-      useMapEvents({
-        click: (e: any) => {
-          const { lat, lng } = e.latlng;
-          setPosition([lat, lng]);
-          onMapClick(lat, lng);
-        },
-      });
-
-      return position ? <Marker position={position} /> : null;
+        return position ? <Marker position={position} /> : null;
+      };
     });
   },
   { ssr: false },

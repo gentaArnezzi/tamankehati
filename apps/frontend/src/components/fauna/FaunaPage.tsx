@@ -277,7 +277,7 @@ export function FaunaPage() {
       return;
     }
 
-    setGalleriesToDelete((prev) => new Set([...prev, galleryId]));
+    setGalleriesToDelete((prev) => new Set(Array.from(prev).concat([galleryId])));
     console.log("Fauna Gallery marked for deletion:", galleryId);
   };
 

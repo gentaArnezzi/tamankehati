@@ -876,7 +876,7 @@ const TamankehatiDashboard: React.FC<TamankehatiDashboardProps> = ({
                               `${name}: ${value.toFixed(1)}%`
                             }
                           >
-                            {approvalData.map((entry, index) => (
+                            {approvalData.map((entry: { color: string; value: number; name: string }, index: number) => (
                               <Cell key={`cell-${index}`} fill={entry.color} />
                             ))}
                           </Pie>

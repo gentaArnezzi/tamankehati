@@ -63,7 +63,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    ignoreDuringBuilds: false,
+    dirs: ['.'],
   },
   // Optimasi untuk development
   experimental: {

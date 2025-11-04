@@ -240,7 +240,7 @@ export function FloraForm({
     }
 
     // Mark for deletion (will be deleted on form submit)
-    setGalleriesToDelete((prev) => new Set([...prev, galleryId]));
+    setGalleriesToDelete((prev) => new Set(Array.from(prev).concat([galleryId])));
     console.log("Gallery marked for deletion:", galleryId);
   };
 

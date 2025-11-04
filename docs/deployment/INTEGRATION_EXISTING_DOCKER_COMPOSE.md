@@ -9,15 +9,18 @@ Panduan untuk deploy aplikasi Taman Kehati di server yang sudah punya Docker Com
 **Dari `~/dasmap_prod/docker-compose.yml`:**
 
 ### Ports yang Sudah Digunakan:
+
 - ✅ **Port 80** → Service `go` (nginx di container)
 - ✅ **Port 443** → Service `go` (nginx di container)
 - ✅ **Port 5432** → Database PostgreSQL (exposed)
 
 ### Network:
+
 - ✅ Network: `go-net` (subnet: 172.27.0.0/16)
 - ✅ Service `go` menggunakan `network_mode: host`
 
 ### Volumes:
+
 - ✅ `db_1_data` → PostgreSQL data
 - ✅ Volume mounts untuk aplikasi dasmap/amilna
 
@@ -26,6 +29,7 @@ Panduan untuk deploy aplikasi Taman Kehati di server yang sudah punya Docker Com
 ## 🎯 Strategy untuk Taman Kehati
 
 ### Prinsip:
+
 1. ✅ **Port 80/443** → Tetap untuk service `go` (tidak kita gunakan)
 2. ✅ **Port 3000** → Frontend Taman Kehati (expose)
 3. ✅ **Port 8000** → Backend Taman Kehati (expose)
@@ -37,12 +41,14 @@ Panduan untuk deploy aplikasi Taman Kehati di server yang sudah punya Docker Com
 ## 📦 Step 0: Copy Files ke Server
 
 **Di Local Machine:**
+
 ```bash
 cd /Users/irgyaarnezzi/Desktop/tamankehati_new
 scp deployment-package.tar.gz ubuntu@server-ip:/tmp/
 ```
 
 **Di Server:**
+
 ```bash
 # SSH ke server
 ssh ubuntu@server-ip
@@ -60,6 +66,7 @@ ls -la
 ```
 
 **Expected files:**
+
 - `docker-compose.pull.no-nginx.yml`
 - `env.production.example`
 - `deploy-package/nginx/server-nginx-example.conf`
@@ -70,6 +77,7 @@ ls -la
 ## 📝 Step 1: Setup Environment Variables
 
 **Di Server:**
+
 ```bash
 cd ~/dasmap_prod/apps/tamankehati
 cp env.production.example .env
@@ -77,6 +85,7 @@ nano .env
 ```
 
 **Update values (lihat Step 5 untuk detail lengkap):**
+
 ```bash
 SERVER_IP=YOUR_SERVER_IP
 DOCKER_USERNAME=arnezzi
@@ -91,6 +100,7 @@ ADMIN_PASSWORD=STRONG_ADMIN_PASSWORD
 ```
 
 **Generate SECRET_KEY:**
+
 ```bash
 python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
@@ -100,11 +110,13 @@ python3 -c "import secrets; print(secrets.token_urlsafe(32))"
 ## 📝 Step 2: Deploy Taman Kehati
 
 ### Lokasi:
+
 ```bash
 cd ~/dasmap_prod/apps/tamankehati
 ```
 
 ### Deploy tanpa Nginx container:
+
 ```bash
 # Deploy containers (tanpa Nginx container)
 docker compose -f docker-compose.pull.no-nginx.yml up -d
@@ -114,6 +126,7 @@ docker compose -f docker-compose.pull.no-nginx.yml ps
 ```
 
 **Containers yang akan running:**
+
 - `tamankehati-postgres-prod` (port internal, tidak exposed)
 - `tamankehati-redis-prod` (port internal, tidak exposed)
 - `tamankehati-backend-prod` (port 8000 exposed)
@@ -131,12 +144,14 @@ docker compose -f docker-compose.pull.no-nginx.yml ps
 **Nginx config ada di:** `~/dasmap_prod/apps/nginx/sites-enabled/`
 
 **Buat file baru:**
+
 ```bash
 cd ~/dasmap_prod/apps/nginx/sites-enabled
 sudo nano tamankehati.conf
 ```
 
 **Isi:**
+
 ```nginx
 # Taman Kehati Application
 server {
@@ -185,6 +200,7 @@ server {
 ```
 
 **Reload Nginx di service `go`:**
+
 ```bash
 # Restart service go untuk reload Nginx config
 cd ~/dasmap_prod
@@ -202,6 +218,7 @@ sudo nano dasmap.co.id  # atau file config yang sudah ada
 ```
 
 **Tambahkan server block baru di file yang sama:**
+
 ```nginx
 # Existing config untuk dasmap.co.id
 server {
@@ -219,6 +236,7 @@ server {
 ```
 
 **Reload:**
+
 ```bash
 cd ~/dasmap_prod
 docker compose restart go
@@ -242,6 +260,7 @@ docker compose restart go
 4. Wait for DNS propagation (5-60 minutes)
 
 **Verify DNS:**
+
 ```bash
 dig tamankehati.dasmap.co.id +short
 # Should return YOUR_SERVER_IP
@@ -251,34 +270,173 @@ dig tamankehati.dasmap.co.id +short
 
 ## 🔍 Step 5: Verify Ports
 
-### Check Ports yang Sudah Digunakan:
+### Cara Mengecek Port yang Sudah Digunakan:
+
+#### **Method 1: Menggunakan `netstat` (Linux)**
 
 ```bash
 # Check port 80 (harus digunakan oleh service go)
 sudo netstat -tulpn | grep :80
+
+# Check port 443
+sudo netstat -tulpn | grep :443
+
+# Check port 5432 (PostgreSQL)
+sudo netstat -tulpn | grep :5432
 
 # Check port 3000 (harus kosong atau digunakan oleh Taman Kehati)
 sudo netstat -tulpn | grep :3000
 
 # Check port 8000 (harus kosong atau digunakan oleh Taman Kehati)
 sudo netstat -tulpn | grep :8000
+
+# Check semua port yang listening
+sudo netstat -tulpn | grep LISTEN
+```
+
+#### **Method 2: Menggunakan `ss` (Modern, lebih cepat)**
+
+```bash
+# Check port 80
+sudo ss -tulpn | grep :80
+
+# Check port 443
+sudo ss -tulpn | grep :443
+
+# Check port 5432
+sudo ss -tulpn | grep :5432
+
+# Check semua port yang listening
+sudo ss -tulpn | grep LISTEN
+```
+
+#### **Method 3: Menggunakan `lsof` (Linux/macOS)**
+
+```bash
+# Check port 80
+sudo lsof -i :80
+
+# Check port 443
+sudo lsof -i :443
+
+# Check port 5432
+sudo lsof -i :5432
+
+# Check port 3000
+sudo lsof -i :3000
+
+# Check port 8000
+sudo lsof -i :8000
+```
+
+#### **Method 4: Mengecek Docker Containers**
+
+```bash
+# Lihat semua container yang running dan port mereka
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+
+# Atau lebih detail
+docker ps -a
+
+# Check port mapping dari docker-compose
+cd ~/dasmap_prod
+docker compose ps
+```
+
+#### **Method 5: Mengecek di Docker Compose File**
+
+```bash
+# Buka file docker-compose.yml
+cd ~/dasmap_prod
+cat docker-compose.yml | grep -A 5 "ports:"
+
+# Atau gunakan grep untuk mencari port mappings
+grep -r "ports:" docker-compose.yml
+```
+
+#### **Method 6: Menggunakan `fuser` (Linux)**
+
+```bash
+# Check port 80
+sudo fuser 80/tcp
+
+# Check port 443
+sudo fuser 443/tcp
+
+# Check port 5432
+sudo fuser 5432/tcp
+```
+
+#### **Method 7: Script Lengkap untuk Check Semua Port**
+
+```bash
+# Buat script untuk check semua port penting
+cat > check_ports.sh << 'EOF'
+#!/bin/bash
+echo "=== Checking Important Ports ==="
+echo ""
+echo "Port 80 (HTTP):"
+sudo netstat -tulpn | grep :80 || echo "Port 80 is free"
+echo ""
+echo "Port 443 (HTTPS):"
+sudo netstat -tulpn | grep :443 || echo "Port 443 is free"
+echo ""
+echo "Port 5432 (PostgreSQL):"
+sudo netstat -tulpn | grep :5432 || echo "Port 5432 is free"
+echo ""
+echo "Port 3000 (Frontend):"
+sudo netstat -tulpn | grep :3000 || echo "Port 3000 is free"
+echo ""
+echo "Port 8000 (Backend):"
+sudo netstat -tulpn | grep :8000 || echo "Port 8000 is free"
+echo ""
+echo "=== Docker Containers ==="
+docker ps --format "table {{.Names}}\t{{.Ports}}"
+EOF
+
+chmod +x check_ports.sh
+./check_ports.sh
+```
+
+**Expected Output:**
+
+```
+Port 80 (HTTP):
+tcp6       0      0 :::80                   :::*                    LISTEN      12345/nginx
+
+Port 443 (HTTPS):
+tcp6       0      0 :::443                  :::*                    LISTEN      12345/nginx
+
+Port 5432 (PostgreSQL):
+tcp        0      0 0.0.0.0:5432            0.0.0.0:*               LISTEN      6789/postgres
+
+Port 3000 (Frontend):
+(empty - port is free)
+
+Port 8000 (Backend):
+(empty - port is free)
 ```
 
 **Expected:**
+
 - Port 80: Used by service `go` (nginx)
-- Port 3000: Used by `tamankehati-frontend-prod`
-- Port 8000: Used by `tamankehati-backend-prod`
+- Port 443: Used by service `go` (nginx)
+- Port 5432: Used by PostgreSQL database
+- Port 3000: Free (untuk Taman Kehati Frontend)
+- Port 8000: Free (untuk Taman Kehati Backend)
 
 ---
 
 ## 🔒 Step 6: Network Isolation
 
 ### Taman Kehati Network:
+
 - ✅ Network: `tamankehati-network` (terpisah dari `go-net`)
 - ✅ Tidak akan konflik dengan aplikasi lain
 - ✅ Database dan Redis isolated
 
 ### Verify Networks:
+
 ```bash
 # List all networks
 docker network ls
@@ -300,6 +458,7 @@ nano .env
 ```
 
 **Update:**
+
 ```bash
 # Domain
 DOMAIN=tamankehati.dasmap.co.id
@@ -317,6 +476,7 @@ POSTGRES_PASSWORD=STRONG_PASSWORD_HERE
 ```
 
 **Restart:**
+
 ```bash
 docker compose -f docker-compose.pull.no-nginx.yml restart backend frontend
 ```
@@ -342,27 +502,30 @@ sudo certbot certonly --nginx -d tamankehati.dasmap.co.id
 **Atau jika Certbot tidak bisa akses Nginx di container, setup manual:**
 
 1. Generate certificate:
+
    ```bash
    sudo certbot certonly --standalone -d tamankehati.dasmap.co.id
    ```
 
 2. Update Nginx config di service `go`:
+
    ```nginx
    server {
        listen 443 ssl http2;
        server_name tamankehati.dasmap.co.id;
-       
+
        ssl_certificate /etc/letsencrypt/live/tamankehati.dasmap.co.id/fullchain.pem;
        ssl_certificate_key /etc/letsencrypt/live/tamankehati.dasmap.co.id/privkey.pem;
-       
+
        # ... location blocks
    }
    ```
 
 3. Mount SSL certificates di service `go` (update docker-compose.yml):
+
    ```yaml
    volumes:
-     - /etc/letsencrypt:/etc/letsencrypt:ro  # Add this
+     - /etc/letsencrypt:/etc/letsencrypt:ro # Add this
      # ... other volumes
    ```
 
@@ -388,9 +551,7 @@ sudo certbot certonly --nginx -d tamankehati.dasmap.co.id
 </nav>
 
 <!-- Button -->
-<a href="https://tamankehati.dasmap.co.id" class="btn">
-  Kunjungi Taman Kehati
-</a>
+<a href="https://tamankehati.dasmap.co.id" class="btn"> Kunjungi Taman Kehati </a>
 
 <!-- Footer -->
 <footer>
@@ -485,9 +646,11 @@ curl http://tamankehati.dasmap.co.id  # Jika DNS sudah setup
 ## 🆘 Troubleshooting
 
 Jika mengalami masalah, lihat panduan troubleshooting lengkap:
+
 - `docs/deployment/TROUBLESHOOTING.md` - Panduan troubleshooting lengkap
 
 **Common issues:**
+
 - Containers tidak starting → Check logs dan port conflicts
 - Nginx tidak routing → Check config dan restart service go
 - Database connection failed → Check credentials dan network
@@ -505,4 +668,3 @@ Jika mengalami masalah, lihat panduan troubleshooting lengkap:
 ---
 
 **Last Updated:** 2025-11-04
-

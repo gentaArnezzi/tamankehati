@@ -80,6 +80,7 @@
     "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.6",
+    "prettier": "^3.2.5",
     "tailwindcss": "^4.1.15",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "5.9.3"
@@ -88,7 +89,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "ESLINT_NO_DEV_ERRORS=true next lint --max-warnings=0",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
     "test": "jest",

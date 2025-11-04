@@ -704,11 +704,12 @@ export function TamanSubmissionPage() {
         // CREATE new draft park - always as draft first
         const result = await parksApi.create({ ...parkData, status: "draft" });
         console.log("Taman create result:", result);
-        createdParkId = result.id ? parseInt(result.id) : null;
+        createdParkId = result.id ? (typeof result.id === 'string' ? parseInt(result.id) : result.id) : null;
 
         // If user clicked "Submit untuk Review", call submit endpoint
         if (submitStatus === "in_review" && result.id) {
-          await handleSubmitPark(parseInt(result.id));
+          const parkId = typeof result.id === 'string' ? parseInt(result.id) : result.id;
+          await handleSubmitPark(parkId);
           toast.success("Taman berhasil dibuat dan diajukan untuk review!");
           setSuccess("Taman berhasil diajukan untuk review!");
         } else {
@@ -735,7 +736,8 @@ export function TamanSubmissionPage() {
     }
   };
 
-  const handleSubmitPark = async (parkId: number) => {
+  const handleSubmitPark = async (parkId: string | number) => {
+    const parkIdNum = typeof parkId === 'string' ? parseInt(parkId) : parkId;
     try {
       const token = localStorage.getItem("auth_token");
 
@@ -746,7 +748,7 @@ export function TamanSubmissionPage() {
       }
 
       const response = await fetch(
-        apiUrl(`/api/v1/parks/${parkId}/submit`),
+        apiUrl(`/api/v1/parks/${String(parkIdNum)}/submit`),
         {
           method: "POST",
           headers: {
@@ -1048,7 +1050,7 @@ export function TamanSubmissionPage() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => handleSubmitPark(park.id)}
+                              onClick={() => handleSubmitPark(String(park.id))}
                               title="Kirim untuk Review"
                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200"
                             >
@@ -2135,7 +2137,7 @@ export function TamanSubmissionPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleSubmitPark(park.id)}
+                              onClick={() => handleSubmitPark(String(park.id))}
                               title="Kirim untuk Review"
                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >

@@ -115,7 +115,7 @@ export function GroupedApprovalView() {
     }
 
     try {
-      setProcessingGroups(new Set([...processingGroups, parkId]));
+      setProcessingGroups(new Set(Array.from(processingGroups).concat([parkId])));
 
       const result = await approvalsApi.bulkApprove(parkId);
 
@@ -210,7 +210,7 @@ export function GroupedApprovalView() {
     }
 
     try {
-      setProcessingParks(new Set([...processingParks, parkId]));
+      setProcessingParks(new Set(Array.from(processingParks).concat([parkId])));
       await parksApprovalApi.approve(parkId);
       toast.success(`✅ Taman "${parkName}" berhasil disetujui`);
       await loadGroupedData();
@@ -231,7 +231,7 @@ export function GroupedApprovalView() {
     if (!reason) return;
 
     try {
-      setProcessingParks(new Set([...processingParks, parkId]));
+      setProcessingParks(new Set(Array.from(processingParks).concat([parkId])));
       await parksApprovalApi.reject(parkId, reason);
       toast.success(`❌ Taman "${parkName}" ditolak`);
       await loadGroupedData();
