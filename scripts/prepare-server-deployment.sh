@@ -58,6 +58,10 @@ if [ -f "deploy-package/nginx/server-nginx-example.conf" ]; then
     cp deploy-package/nginx/server-nginx-example.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
     log_success "✓ deploy-package/nginx/server-nginx-example.conf"
 fi
+if [ -f "deploy-package/nginx/tamankehati-server.conf" ]; then
+    cp deploy-package/nginx/tamankehati-server.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
+    log_success "✓ deploy-package/nginx/tamankehati-server.conf"
+fi
 
 # 4. Deployment scripts (optional but useful)
 mkdir -p "$DEPLOYMENT_DIR/scripts"
@@ -66,9 +70,32 @@ if [ -f "scripts/verify-deployment.sh" ]; then
     log_success "✓ scripts/verify-deployment.sh"
 fi
 if [ -f "scripts/backup-database.sh" ]; then
-    cp scripts/backup-database.sh "$DEPLOYMENT_DIR/scripts/"
-    log_success "✓ scripts/backup-database.sh"
-fi
+        cp scripts/backup-database.sh "$DEPLOYMENT_DIR/scripts/"
+        log_success "✓ scripts/backup-database.sh"
+    fi
+    if [ -f "scripts/check-ports.sh" ]; then
+        cp scripts/check-ports.sh "$DEPLOYMENT_DIR/scripts/"
+        log_success "✓ scripts/check-ports.sh"
+    fi
+    if [ -f "docs/deployment/CHECK_EXISTING_APPS.md" ]; then
+        mkdir -p "$DEPLOYMENT_DIR/docs"
+        cp docs/deployment/CHECK_EXISTING_APPS.md "$DEPLOYMENT_DIR/docs/"
+        log_success "✓ docs/CHECK_EXISTING_APPS.md"
+    fi
+    if [ -f "docs/deployment/SERVER_SETUP_ANALYSIS.md" ]; then
+        mkdir -p "$DEPLOYMENT_DIR/docs"
+        cp docs/deployment/SERVER_SETUP_ANALYSIS.md "$DEPLOYMENT_DIR/docs/"
+        log_success "✓ docs/SERVER_SETUP_ANALYSIS.md"
+    fi
+    if [ -f "deploy-package/nginx/tamankehati-container-go.conf" ]; then
+        cp deploy-package/nginx/tamankehati-container-go.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
+        log_success "✓ deploy-package/nginx/tamankehati-container-go.conf"
+    fi
+    if [ -f "docs/deployment/DEPLOYMENT_STEPS_FINAL.md" ]; then
+        mkdir -p "$DEPLOYMENT_DIR/docs"
+        cp docs/deployment/DEPLOYMENT_STEPS_FINAL.md "$DEPLOYMENT_DIR/docs/"
+        log_success "✓ docs/DEPLOYMENT_STEPS_FINAL.md"
+    fi
 
 # 5. Create README for deployment
 cat > "$DEPLOYMENT_DIR/README.md" << 'EOF'

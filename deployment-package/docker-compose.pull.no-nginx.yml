@@ -148,4 +148,8 @@ volumes:
 networks:
   tamankehati-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16  # Explicit subnet to avoid conflict with dasmap_prod_go-net (172.27.0.0/16)
+          gateway: 172.28.0.1
 
