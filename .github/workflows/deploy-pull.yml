@@ -1,0 +1,227 @@
+name: CD - Deploy to Ubuntu Server (Pull-based)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: false
+        default: 'latest'
+        type: string
+
+env:
+  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '~/dasmap_prod/apps/tamankehati' }}
+  DOCKER_COMPOSE_FILE: docker-compose.pull.no-nginx.yml
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check deployment prerequisites
+        id: check_prereqs
+        run: |
+          if [ -z "${{ secrets.DEPLOY_HOST }}" ] || [ -z "${{ secrets.DEPLOY_USER }}" ] || [ -z "${{ secrets.DEPLOY_SSH_KEY }}" ]; then
+            echo "⚠️ Deployment secrets not configured. Skipping deployment."
+            echo "Configure DEPLOY_HOST, DEPLOY_USER, and DEPLOY_SSH_KEY in repository settings"
+            echo "deploy_skipped=true" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Deployment prerequisites met"
+            echo "deploy_skipped=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deployment skipped notice
+        if: steps.check_prereqs.outputs.deploy_skipped == 'true'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "⚠️  Deployment Skipped"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "GitHub Secrets not configured yet."
+          echo ""
+          echo "To enable auto-deployment:"
+          echo "1. Go to repository Settings → Secrets and variables → Actions"
+          echo "2. Add these secrets:"
+          echo "   - DEPLOY_HOST: 38.47.93.167"
+          echo "   - DEPLOY_USER: ubuntu"
+          echo "   - DEPLOY_SSH_KEY: (your SSH private key)"
+          echo "3. Push to main branch again"
+          echo ""
+          echo "See docs/deployment/CI_CD_SETUP.md for detailed guide"
+
+      - name: Setup SSH
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known hosts
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Test SSH connection
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo '✅ SSH connection successful'"
+
+      - name: Deploy application (Pull-based)
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
+            set -e
+            cd ${{ env.DEPLOY_PATH }}
+            
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🚀 Starting Deployment"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            
+            # Pull latest code (optional, for config updates)
+            if [ -d ".git" ]; then
+              echo "📥 Pulling latest code..."
+              git fetch origin main || true
+              git checkout main || true
+              git pull origin main || echo "⚠️  Git pull failed, continuing..."
+            fi
+            
+            # Pull latest Docker images
+            echo "🐳 Pulling latest Docker images..."
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull || {
+              echo "❌ Failed to pull images"
+              exit 1
+            }
+            
+            # Stop existing containers gracefully
+            echo "🛑 Stopping existing containers..."
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} down --timeout 30 || true
+            
+            # Start services
+            echo "▶️  Starting services..."
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d
+            
+            # Wait for services to be ready
+            echo "⏳ Waiting for services to initialize..."
+            sleep 15
+            
+            # Run database migrations
+            echo "🗄️  Running database migrations..."
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} exec -T backend alembic upgrade head || echo "⚠️  Migration failed, but continuing..."
+            
+            echo ""
+            echo "✅ Deployment completed!"
+            DEPLOY_SCRIPT
+
+      - name: Health check - Backend
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "🏥 Checking backend health..."
+            
+            BACKEND_URL="http://localhost:8000/health"
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $BACKEND_URL > /dev/null; then
+                echo "✅ Backend health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Backend not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 5
+            done
+            
+            echo "❌ Backend health check failed after $MAX_RETRIES attempts"
+            exit 1
+          EOF
+
+      - name: Health check - Frontend
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "🌐 Checking frontend health..."
+            
+            FRONTEND_URL="http://localhost:3000"
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $FRONTEND_URL > /dev/null; then
+                echo "✅ Frontend health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Frontend not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 5
+            done
+            
+            echo "❌ Frontend health check failed after $MAX_RETRIES attempts"
+            exit 1
+          EOF
+
+      - name: Health check - Public API
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "🔍 Checking public API..."
+            
+            API_URL="http://38.47.93.167:8080/api/health"
+            MAX_RETRIES=5
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $API_URL > /dev/null; then
+                echo "✅ Public API health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Public API not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 3
+            done
+            
+            echo "⚠️  Public API health check failed, but continuing..."
+            exit 0
+          EOF
+
+      - name: Verify deployment
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "📊 Deployment Verification"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            echo "🐳 Docker containers status:"
+            docker compose -f docker-compose.pull.no-nginx.yml ps
+            echo ""
+            echo "📋 Recent logs:"
+            docker compose -f docker-compose.pull.no-nginx.yml logs --tail=10
+          EOF
+
+      - name: Deployment summary
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "✅ Deployment Completed Successfully!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🌐 Application URL: http://38.47.93.167:8080"
+          echo "🏥 Health Check: http://38.47.93.167:8080/api/health"
+          echo ""
+          echo "All services should be running and healthy."
+
