@@ -73,4 +73,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Production command (using gunicorn for better production performance)
 # Use start.sh for automatic migration and admin init
 ENTRYPOINT ["./start.sh"]
-CMD ["gunicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]
+CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:8000", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--timeout", "120"]
