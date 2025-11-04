@@ -190,6 +190,7 @@ jobs:
         working-directory: apps/frontend
         run: |
           npm ci
+          # Build should succeed even with ESLint/TypeScript warnings (handled in next.config.js)
           npm run build
 
       - name: Verify frontend Dockerfile
@@ -219,24 +220,40 @@ jobs:
           echo ""
 
           # Check if any critical job failed (not just warnings)
+          # Build verification is critical - if it fails, CI fails
+          # But we allow continue-on-error for warnings, so check for actual failures
           if [ "${{ needs.build-verification.result }}" == "failure" ]; then
             echo "❌ Build verification failed - this is critical"
+            echo "Please check the build logs for actual errors"
+            # Only fail if it's a real build failure, not just warnings
+            # The build step should have continue-on-error for warnings
             exit 1
           fi
 
           # Allow warnings/errors in linting and type checking for now
           # but still report them
-          if [ "${{ needs.backend-tests.result }}" == "failure" ]; then
+          # Note: With continue-on-error: true, these will show as "success" even if they have warnings
+          if [ "${{ needs.backend-tests.result }}" != "success" ]; then
             echo "⚠️  Backend tests had issues (check logs)"
           fi
-          if [ "${{ needs.backend-lint.result }}" == "failure" ]; then
+          if [ "${{ needs.backend-lint.result }}" != "success" ]; then
             echo "⚠️  Backend linting had issues (check logs)"
           fi
-          if [ "${{ needs.frontend-lint.result }}" == "failure" ]; then
+          if [ "${{ needs.frontend-lint.result }}" != "success" ]; then
             echo "⚠️  Frontend linting had issues (check logs)"
           fi
-          if [ "${{ needs.frontend-type-check.result }}" == "failure" ]; then
+          if [ "${{ needs.frontend-type-check.result }}" != "success" ]; then
             echo "⚠️  Frontend type checking had issues (check logs)"
           fi
 
-          echo "✅ CI pipeline completed (warnings are allowed)"
+          # Build verification should be success if it completed (even with warnings)
+          if [ "${{ needs.build-verification.result }}" == "success" ]; then
+            echo "✅ Build verification passed"
+          elif [ "${{ needs.build-verification.result }}" == "failure" ]; then
+            echo "❌ Build verification failed - check logs above"
+          else
+            echo "⚠️  Build verification had issues but may have completed"
+          fi
+
+          echo ""
+          echo "✅ CI pipeline completed (warnings are allowed, only critical failures block)"

@@ -480,7 +480,6 @@ export function InteractiveOnboardingTour({
         nextBtnText: "Selanjutnya →",
         prevBtnText: "← Kembali",
         doneBtnText: "Selesai ✓",
-        closeBtnText: "Tutup",
       });
 
       // Store driver instance in ref

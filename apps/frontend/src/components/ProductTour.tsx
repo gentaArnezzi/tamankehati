@@ -162,7 +162,6 @@ export function ProductTour({ run, onFinish }: ProductTourProps) {
       nextBtnText: "Selanjutnya",
       prevBtnText: "Kembali",
       doneBtnText: "Selesai",
-      closeBtnText: "Tutup",
     });
 
     driverObj.drive();

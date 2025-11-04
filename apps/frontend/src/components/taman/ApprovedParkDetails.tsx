@@ -129,7 +129,7 @@ export function ApprovedParkDetails({
 
   const [editData, setEditData] = useState({
     name: park.name,
-    area_ha: park.area_ha || 0,
+    area_ha: park.area_ha ?? null,
     description: park.description || "",
     provinsi: park.provinsi || "",
     kota_kabupaten: park.kota_kabupaten || "",
@@ -144,8 +144,8 @@ export function ApprovedParkDetails({
     tipe_ekoregion: park.tipe_ekoregion || "",
     kondisi_fisik: park.kondisi_fisik || "",
     nilai_penting: park.nilai_penting || "",
-    latitude: park.latitude || null,
-    longitude: park.longitude || null,
+    latitude: park.latitude ?? null,
+    longitude: park.longitude ?? null,
   });
 
   // Load galleries when component mounts or park changes
@@ -518,7 +518,7 @@ export function ApprovedParkDetails({
 
     setEditData({
       name: park.name,
-      area_ha: park.area_ha || 0,
+      area_ha: park.area_ha ?? null,
       description: park.description || "",
       provinsi: park.provinsi || "",
       kota_kabupaten: park.kota_kabupaten || "",
@@ -533,8 +533,8 @@ export function ApprovedParkDetails({
       tipe_ekoregion: park.tipe_ekoregion || "",
       kondisi_fisik: park.kondisi_fisik || "",
       nilai_penting: park.nilai_penting || "",
-      latitude: park.latitude || null,
-      longitude: park.longitude || null,
+      latitude: park.latitude ?? null,
+      longitude: park.longitude ?? null,
     });
 
     // Reset image states
@@ -586,10 +586,10 @@ export function ApprovedParkDetails({
   };
 
   const handleRegionChange = (region: {
-    provinsi: string;
-    kota_kabupaten: string;
-    kecamatan: string;
-    desa_kelurahan: string;
+    provinsi?: string;
+    kota_kabupaten?: string;
+    kecamatan?: string;
+    desa_kelurahan?: string;
   }) => {
     setEditData((prev) => ({
       ...prev,
