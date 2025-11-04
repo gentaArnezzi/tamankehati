@@ -66,7 +66,7 @@ export function MediumStyleArtikelPage({
       formData.append("file", file);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/upload/gallery-image`,
         {
           method: "POST",
           headers: {
@@ -103,7 +103,7 @@ export function MediumStyleArtikelPage({
 
       console.log("Loading article:", articleId);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/articles/${articleId}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -184,8 +184,8 @@ export function MediumStyleArtikelPage({
 
       const url =
         mode === "edit" && articleId
-          ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/articles/${articleId}`
-          : `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/articles/`;
+          ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`
+          : `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
 
       const method = mode === "edit" ? "PUT" : "POST";
 
@@ -453,7 +453,7 @@ export function MediumStyleArtikelPage({
               featuredImage?.startsWith("http")
                 ? featuredImage
                 : featuredImage
-                  ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${featuredImage}`
+                  ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${featuredImage}`
                   : undefined
             }
             maxSize={10}

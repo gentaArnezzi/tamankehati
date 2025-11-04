@@ -91,6 +91,10 @@ if [ -f "scripts/backup-database.sh" ]; then
         cp deploy-package/nginx/tamankehati-container-go.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
         log_success "✓ deploy-package/nginx/tamankehati-container-go.conf"
     fi
+    if [ -f "deploy-package/nginx/tamankehati-container-go-port.conf" ]; then
+        cp deploy-package/nginx/tamankehati-container-go-port.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
+        log_success "✓ deploy-package/nginx/tamankehati-container-go-port.conf"
+    fi
     if [ -f "docs/deployment/DEPLOYMENT_STEPS_FINAL.md" ]; then
         mkdir -p "$DEPLOYMENT_DIR/docs"
         cp docs/deployment/DEPLOYMENT_STEPS_FINAL.md "$DEPLOYMENT_DIR/docs/"

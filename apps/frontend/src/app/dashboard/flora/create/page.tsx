@@ -110,7 +110,7 @@ export default function CreateFloraPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+          "http://38.47.93.167:8080") +
           "/api/v1/upload/gallery-image",
         {
           method: "POST",
@@ -146,7 +146,7 @@ export default function CreateFloraPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+          "http://38.47.93.167:8080") +
           "/api/v1/upload/multiple-gallery-images",
         {
           method: "POST",
@@ -217,7 +217,7 @@ export default function CreateFloraPage() {
 
       const base =
         process.env.NEXT_PUBLIC_API_URL ||
-        "https://tamankehati-backend-pxnu.onrender.com";
+        "http://38.47.93.167:8080";
 
       // Generate all three descriptions in parallel with timeout
       const [descriptionRes, morphologyRes, benefitsRes] = await Promise.all([

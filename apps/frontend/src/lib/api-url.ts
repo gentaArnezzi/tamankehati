@@ -8,7 +8,9 @@
  * but should be replaced via NEXT_PUBLIC_API_URL environment variable in production.
  */
 
-const PRODUCTION_API_URL = "https://tamankehati-backend-pxnu.onrender.com";
+// Default production API URL - should be overridden by NEXT_PUBLIC_API_URL env var
+// For Ubuntu server deployment, set NEXT_PUBLIC_API_URL in .env or build args
+const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
 
 /**
  * Get the API base URL from environment variable
@@ -32,7 +34,7 @@ export function getApiUrl(): string {
  * @example
  * ```typescript
  * const url = apiUrl("/api/v1/parks");
- * // Returns: "https://tamankehati-backend-pxnu.onrender.com/api/v1/parks"
+ * // Returns: "http://38.47.93.167:8080/api/v1/parks"
  * ```
  */
 export function apiUrl(path: string): string {
@@ -51,10 +53,10 @@ export function apiUrl(path: string): string {
  * @example
  * ```typescript
  * imageUrl("/uploads/photo.jpg")
- * // Returns: "https://tamankehati-backend-pxnu.onrender.com/uploads/photo.jpg"
+ * // Returns: "http://38.47.93.167:8080/uploads/photo.jpg"
  * 
  * imageUrl("http://localhost:8000/uploads/photo.jpg")
- * // Returns: "https://tamankehati-backend-pxnu.onrender.com/uploads/photo.jpg"
+ * // Returns: "http://38.47.93.167:8080/uploads/photo.jpg"
  * ```
  */
 export function imageUrl(path: string | null | undefined): string {

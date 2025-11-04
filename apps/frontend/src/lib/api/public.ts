@@ -40,7 +40,7 @@ import { TamanDetailSchema, TamanPaginatedSchema } from "../../types/taman";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tamankehati-backend-pxnu.onrender.com";
+  "http://38.47.93.167:8080";
 
 type PrimitiveParam = string | number | boolean;
 type SearchParams = Record<
@@ -535,7 +535,7 @@ export const getGalleryPage = cache(async (params: SearchParams = {}) => {
   if (params.offset) searchParams.set("offset", String(params.offset));
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/public/galeri/?${searchParams.toString()}`,
+    `${API_BASE_URL}/api/public/galeri/?${searchParams.toString()}`,
   );
   if (!response.ok) {
     throw new Error(

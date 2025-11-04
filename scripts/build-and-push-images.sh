@@ -130,12 +130,21 @@ fi
 log "Building frontend image for linux/amd64..."
 log "  Image: ${FRONTEND_IMAGE}"
 log "  Platform: linux/amd64"
+
+# Default API URL for production (can be overridden via NEXT_PUBLIC_API_URL env var)
+# Supports both IP and domain:
+# - IP: http://38.47.93.167:8080
+# - Domain: https://tamankehati.dasmap.co.id
+DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://38.47.93.167:8080}"
+log "  API URL: ${DEFAULT_API_URL}"
+log "  💡 Tip: Set NEXT_PUBLIC_API_URL env var to use domain instead of IP"
+
 docker buildx build \
     --platform linux/amd64 \
     -f apps/frontend/Dockerfile \
     -t "${FRONTEND_IMAGE}" \
     --target runner \
-    --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8000}" \
+    --build-arg NEXT_PUBLIC_API_URL="${DEFAULT_API_URL}" \
     --load \
     apps/frontend
 
@@ -166,12 +175,15 @@ if [ "$PUSH_TO_REGISTRY" = "true" ]; then
     fi
     
     log "Pushing frontend image..."
+    DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://38.47.93.167:8080}"
+    log "  API URL: ${DEFAULT_API_URL}"
+    log "  💡 Tip: Set NEXT_PUBLIC_API_URL env var to use domain instead of IP"
     docker buildx build \
         --platform linux/amd64 \
         -f apps/frontend/Dockerfile \
         -t "${FRONTEND_IMAGE}" \
         --target runner \
-        --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:8000}" \
+        --build-arg NEXT_PUBLIC_API_URL="${DEFAULT_API_URL}" \
         --push \
         apps/frontend
     if [ $? -eq 0 ]; then

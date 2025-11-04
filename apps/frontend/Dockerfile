@@ -36,8 +36,8 @@ ENV NODE_ENV production
 # Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Install wget for health checks
-RUN apk add --no-cache wget
+# Install wget for health checks and sharp dependencies
+RUN apk add --no-cache wget vips-dev
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -52,6 +52,13 @@ RUN chown nextjs:nodejs .next
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Install sharp in runner stage (required for Next.js image optimization in standalone mode)
+# Sharp is needed for image optimization but not included in standalone output
+# Copy package.json temporarily to install sharp
+COPY --from=builder /app/package.json ./package.json
+RUN npm install sharp --omit=dev
+RUN chown -R nextjs:nodejs node_modules
 
 # Copy public folder if exists
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public

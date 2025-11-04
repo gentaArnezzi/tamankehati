@@ -5,7 +5,7 @@ import { imageUrl } from "../api-url";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tamankehati-backend-pxnu.onrender.com";
+  "http://38.47.93.167:8080";
 
 export interface FeaturedItem {
   id: string | number;

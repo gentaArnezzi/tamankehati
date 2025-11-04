@@ -63,7 +63,7 @@ export default function NewsDetailPage() {
       setError("");
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/news/public/${params.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/news/public/${params.id}`,
       );
 
       if (!response.ok) {

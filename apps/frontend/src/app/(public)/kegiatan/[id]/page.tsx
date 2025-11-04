@@ -22,7 +22,7 @@ type ActivityDetail = {
 async function getActivityById(id: string): Promise<ActivityDetail> {
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_URL ??
-    "https://tamankehati-backend-pxnu.onrender.com";
+    "http://38.47.93.167:8080";
   const response = await fetch(`${API_BASE_URL}/api/public/activities/${id}`, {
     next: { revalidate: 60 }, // Cache for 60 seconds
   });

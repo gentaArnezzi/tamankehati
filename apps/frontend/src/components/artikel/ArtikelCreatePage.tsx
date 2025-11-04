@@ -94,7 +94,7 @@ export function ArtikelCreatePage() {
       // Create article via API
       const token = localStorage.getItem("auth_token");
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/articles/`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`,
         {
           method: "POST",
           headers: {

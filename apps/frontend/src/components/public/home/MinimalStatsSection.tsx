@@ -59,7 +59,7 @@ export const MinimalStatsSection = memo(function MinimalStatsSection({ initialSt
     if (!statsData || (statsData.total_flora === 0 && statsData.total_fauna === 0 && statsData.total_taman === 0)) {
       const fetchStats = async () => {
         try {
-          const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+          const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
           const response = await fetch(`${API_URL}/api/public/stats/`);
           if (response.ok) {
             const data = await response.json();

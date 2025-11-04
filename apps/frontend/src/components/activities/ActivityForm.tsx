@@ -373,7 +373,7 @@ export function ActivityForm({
                       {images.map((image, index) => {
                         const isExistingImage = index < existingImages.length;
                         const imageUrl = isExistingImage
-                          ? `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image}`
+                          ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${image}`
                           : image; // For new files, image is already a blob URL
 
                         return (

@@ -55,7 +55,7 @@ export function ImageWithFallback({
   // (Next.js will throw error if localhost is not in next.config.js)
   // Even after imageUrl() normalization, double-check for any remaining localhost
   if (normalizedImageUrl.includes("localhost:8000") || normalizedImageUrl.includes("127.0.0.1:8000")) {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
     // Extract path from localhost URL
     const pathMatch = normalizedImageUrl.match(/\/uploads\/.*$/);
     if (pathMatch) {

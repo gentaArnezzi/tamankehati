@@ -31,7 +31,7 @@ export function SafeImage({
     });
     
     // Force replacement
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com";
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
     
     // Extract path
     const pathMatch = normalizedSrc.match(/(\/uploads\/[^?\s]*)/);

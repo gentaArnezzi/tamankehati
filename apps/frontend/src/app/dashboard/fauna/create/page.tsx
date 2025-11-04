@@ -105,7 +105,7 @@ export default function CreateFaunaPage() {
 
       const base =
         process.env.NEXT_PUBLIC_API_URL ||
-        "https://tamankehati-backend-pxnu.onrender.com";
+        "http://38.47.93.167:8080";
       const response = await fetch(`${base}/api/v1/upload/gallery-image`, {
         method: "POST",
         headers: {
@@ -141,7 +141,7 @@ export default function CreateFaunaPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+          "http://38.47.93.167:8080") +
           "/api/v1/upload/multiple-gallery-images",
         {
           method: "POST",
@@ -212,7 +212,7 @@ export default function CreateFaunaPage() {
 
       const descriptionRes = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "https://tamankehati-backend-pxnu.onrender.com") +
+          "http://38.47.93.167:8080") +
           "/api/v1/ai/public/generate-fauna-description",
         {
           method: "POST",

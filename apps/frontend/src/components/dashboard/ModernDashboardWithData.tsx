@@ -131,7 +131,7 @@ const ModernDashboardWithData: React.FC<ModernDashboardWithDataProps> = ({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}/api/v1/dashboard-modern/?time_range=${timeRange}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/dashboard-modern/?time_range=${timeRange}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

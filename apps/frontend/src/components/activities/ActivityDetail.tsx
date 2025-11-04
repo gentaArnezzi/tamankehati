@@ -117,7 +117,7 @@ export function ActivityDetail({ activity, onClose }: ActivityDetailProps) {
               {activity.images.map((image, index) => (
                 <div key={index} className="relative group">
                   <img
-                    src={`${process.env.NEXT_PUBLIC_API_URL || "https://tamankehati-backend-pxnu.onrender.com"}${image}`}
+                    src={`${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${image}`}
                     alt={`${activity.title} - Gambar ${index + 1}`}
                     className="w-full h-48 object-cover rounded-lg border"
                   />

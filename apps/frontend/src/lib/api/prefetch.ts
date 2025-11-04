@@ -12,7 +12,7 @@ import {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tamankehati-backend-pxnu.onrender.com";
+  "http://38.47.93.167:8080";
 
 // Helper to fetch detail data
 const fetchDetail = async <T>(path: string): Promise<T | null> => {

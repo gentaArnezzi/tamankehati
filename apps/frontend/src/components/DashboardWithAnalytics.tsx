@@ -145,7 +145,7 @@ export function DashboardWithAnalytics() {
       const token = localStorage.getItem("auth_token");
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
-        "https://tamankehati-backend-pxnu.onrender.com";
+        "http://38.47.93.167:8080";
 
       const response = await fetch(
         `${apiUrl}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,

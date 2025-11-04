@@ -69,7 +69,7 @@ export default function AIFloraFaunaGenerator() {
   const [generatedBenefits, setGeneratedBenefits] = useState("");
   const base =
     process.env.NEXT_PUBLIC_API_URL ||
-    "https://tamankehati-backend-pxnu.onrender.com";
+    "http://38.47.93.167:8080";
 
   const buildAuthHeaders = () => {
     const token =
