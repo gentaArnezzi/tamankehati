@@ -34,9 +34,15 @@ mkdir -p "$DEPLOYMENT_DIR"
 # Copy essential files
 log "Copying essential files..."
 
-# 1. Docker Compose file
+# 1. Docker Compose files
 cp docker-compose.pull.yml "$DEPLOYMENT_DIR/"
 log_success "✓ docker-compose.pull.yml"
+
+# IMPORTANT: docker-compose.pull.no-nginx.yml (for server with existing Nginx)
+if [ -f "docker-compose.pull.no-nginx.yml" ]; then
+    cp docker-compose.pull.no-nginx.yml "$DEPLOYMENT_DIR/"
+    log_success "✓ docker-compose.pull.no-nginx.yml"
+fi
 
 # 2. Environment template
 cp env.production.example "$DEPLOYMENT_DIR/"
@@ -46,6 +52,12 @@ log_success "✓ env.production.example"
 mkdir -p "$DEPLOYMENT_DIR/deploy-package/nginx"
 cp -r deploy-package/nginx/* "$DEPLOYMENT_DIR/deploy-package/nginx/"
 log_success "✓ deploy-package/nginx/"
+
+# IMPORTANT: Nginx config for server (not container)
+if [ -f "deploy-package/nginx/server-nginx-example.conf" ]; then
+    cp deploy-package/nginx/server-nginx-example.conf "$DEPLOYMENT_DIR/deploy-package/nginx/"
+    log_success "✓ deploy-package/nginx/server-nginx-example.conf"
+fi
 
 # 4. Deployment scripts (optional but useful)
 mkdir -p "$DEPLOYMENT_DIR/scripts"
@@ -66,9 +78,11 @@ This package contains minimal files needed for production deployment.
 
 ## Files Included
 
-- `docker-compose.pull.yml` - Docker Compose configuration for pulling images
+- `docker-compose.pull.yml` - Docker Compose configuration for pulling images (with Nginx container)
+- `docker-compose.pull.no-nginx.yml` - Docker Compose configuration WITHOUT Nginx container (for server with existing Nginx)
 - `env.production.example` - Environment variables template
 - `deploy-package/nginx/` - Nginx reverse proxy configuration
+- `deploy-package/nginx/server-nginx-example.conf` - Nginx config template for server (not container)
 - `scripts/` - Deployment helper scripts (optional)
 
 ## Quick Start
@@ -76,8 +90,9 @@ This package contains minimal files needed for production deployment.
 1. Copy this entire folder to your server
 2. Rename `env.production.example` to `.env`
 3. Edit `.env` with your server configuration
-4. Run: `docker compose -f docker-compose.pull.yml pull`
-5. Run: `docker compose -f docker-compose.pull.yml up -d`
+4. Run: `docker compose -f docker-compose.pull.no-nginx.yml pull` (if server has existing Nginx)
+5. Run: `docker compose -f docker-compose.pull.no-nginx.yml up -d`
+6. Setup Nginx routing di server (see server-nginx-example.conf)
 
 ## Detailed Instructions
 
