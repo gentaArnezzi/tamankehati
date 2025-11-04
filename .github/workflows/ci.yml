@@ -127,11 +127,23 @@ jobs:
         run: npm ci
 
       - name: Run ESLint
-        run: npm run lint || true
+        run: |
+          if npm run lint 2>&1 | tee eslint-output.log; then
+            echo "✅ ESLint passed"
+          else
+            echo "⚠️ ESLint found issues (non-blocking)"
+            cat eslint-output.log || true
+          fi
         continue-on-error: true
 
       - name: Check Prettier formatting
-        run: npm run format:check || true
+        run: |
+          if npm run format:check 2>&1 | tee prettier-output.log; then
+            echo "✅ Prettier check passed"
+          else
+            echo "⚠️ Prettier found formatting issues (non-blocking)"
+            cat prettier-output.log || true
+          fi
         continue-on-error: true
 
   frontend-type-check:
@@ -156,7 +168,13 @@ jobs:
         run: npm ci
 
       - name: Run TypeScript type check
-        run: npm run type-check || true
+        run: |
+          if npm run type-check 2>&1 | tee typecheck-output.log; then
+            echo "✅ TypeScript type check passed"
+          else
+            echo "⚠️ TypeScript found type errors (non-blocking)"
+            cat typecheck-output.log || true
+          fi
         continue-on-error: true
 
   build-verification:
@@ -172,12 +190,16 @@ jobs:
 
       - name: Verify backend Dockerfile
         run: |
+          echo "Building backend Docker image..."
           docker build \
             --target production \
             --tag backend-test \
             -f apps/backend/Dockerfile \
-            apps/backend
-        continue-on-error: false
+            apps/backend || {
+              echo "❌ Backend Docker build failed"
+              exit 1
+            }
+          echo "✅ Backend Docker image built successfully"
 
       - name: Set up Node.js for frontend
         uses: actions/setup-node@v4
@@ -186,20 +208,40 @@ jobs:
           cache: "npm"
           cache-dependency-path: apps/frontend/package-lock.json
 
-      - name: Build frontend
+      - name: Install frontend dependencies
         working-directory: apps/frontend
         run: |
-          npm ci
-          npm run build
+          echo "Installing frontend dependencies..."
+          npm ci || {
+            echo "❌ npm ci failed"
+            exit 1
+          }
+
+      - name: Build frontend
+        working-directory: apps/frontend
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }}
+        run: |
+          echo "Building frontend..."
+          npm run build || {
+            echo "❌ Frontend build failed"
+            exit 1
+          }
+          echo "✅ Frontend build completed"
 
       - name: Verify frontend Dockerfile
         run: |
+          echo "Building frontend Docker image..."
           docker build \
             --target runner \
             --tag frontend-test \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'http://localhost:8000' }} \
             -f apps/frontend/Dockerfile \
-            apps/frontend
-        continue-on-error: false
+            apps/frontend || {
+              echo "❌ Frontend Docker build failed"
+              exit 1
+            }
+          echo "✅ Frontend Docker image built successfully"
 
   ci-success:
     name: CI Status
