@@ -25,6 +25,8 @@ env:
   NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://38.47.93.167:8080' }}
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "22.x"
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
 jobs:
   test:
@@ -111,7 +113,7 @@ jobs:
     
     steps:
       - name: Notify deployment start
-        if: secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -198,7 +200,7 @@ jobs:
           echo "📦 Tag: ${{ env.IMAGE_TAG }}"
 
       - name: Notify build success
-        if: always() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        if: always() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -212,7 +214,7 @@ jobs:
             Deploying to server...
 
       - name: Notify build failure
-        if: failure() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        if: failure() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -456,6 +458,37 @@ jobs:
           echo "🏥 Health Check: http://38.47.93.167:8080/api/health"
           echo ""
           echo "All services should be running and healthy."
+
+      - name: Notify deployment success
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          message: |
+            ✅ *Deployment Successful!*
+            
+            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
+            🌐 *Application URL:* http://38.47.93.167:8080
+            🏥 *Health Check:* http://38.47.93.167:8080/api/health
+            
+            ✅ All services are running and healthy.
+
+      - name: Notify deployment failure
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          message: |
+            ❌ *Deployment Failed*
+            
+            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
+            🔗 *Commit:* ${{ github.sha }}
+            
+            ⚠️ Deployment failed. Rollback will be attempted automatically.
+            
+            Check GitHub Actions for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
   verify-deployment:
     name: Verify Deployment
@@ -713,7 +746,7 @@ jobs:
           EOF
 
       - name: Notify rollback
-        if: steps.check_prereqs.outputs.deploy_skipped == 'false' && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != ''
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
