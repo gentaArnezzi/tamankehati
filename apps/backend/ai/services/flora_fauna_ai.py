@@ -73,7 +73,7 @@ class FloraFaunaAIService:
             "5. Status konservasi dan ancaman",
             "6. Fakta menarik atau unik",
             "",
-            "Gunakan bahasa yang informatif namun mudah dipahami. Panjang deskripsi minimal 200 kata."
+            "Gunakan bahasa yang informatif namun mudah dipahami. Panjang deskripsi sekitar 200-300 kata (singkat dan padat)."
         ]
         
         return "\n".join(prompt_parts)
@@ -108,7 +108,7 @@ class FloraFaunaAIService:
             "6. Status konservasi dan ancaman",
             "7. Fakta menarik atau unik",
             "",
-            "Gunakan bahasa yang informatif namun mudah dipahami. Panjang deskripsi minimal 200 kata."
+            "Gunakan bahasa yang informatif namun mudah dipahami. Panjang deskripsi sekitar 200-300 kata (singkat dan padat)."
         ]
         
         return "\n".join(prompt_parts)
@@ -154,7 +154,7 @@ class FloraFaunaAIService:
             "5. Buah (bentuk, warna, tekstur, cara penyebaran)",
             "6. Ciri-ciri khusus yang membedakan dari spesies lain",
             "",
-            "Gunakan terminologi botani yang tepat namun tetap dapat dipahami. Panjang deskripsi minimal 150 kata."
+            "Gunakan terminologi botani yang tepat namun tetap dapat dipahami. Panjang deskripsi sekitar 150-200 kata (singkat dan padat)."
         ]
         
         return "\n".join(prompt_parts)
@@ -199,7 +199,7 @@ class FloraFaunaAIService:
             "4. Manfaat ilmiah dan penelitian",
             "5. Potensi pengembangan dan pemanfaatan berkelanjutan",
             "",
-            "Gunakan bahasa yang informatif dan mudah dipahami. Panjang deskripsi minimal 150 kata."
+            "Gunakan bahasa yang informatif dan mudah dipahami. Panjang deskripsi sekitar 150-200 kata (singkat dan padat)."
         ]
         
         return "\n".join(prompt_parts)

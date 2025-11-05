@@ -10,25 +10,48 @@ class OllamaProvider(LLMProvider):
     async def generate(self, messages: Sequence[ChatTurn]) -> str:
         # Optimized non-streaming with reasonable timeout
         prompt = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
-        # Reduced timeout from 120 to 60 seconds for better UX
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        # Timeout based on model size: larger models need more time
+        # For llama3.1:8b and similar large models, use 180 seconds
+        # For smaller models like qwen2:1.5b, 60 seconds is enough
+        model = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
+        # Increase timeout for large models (8b+ parameters)
+        if "8b" in model.lower() or "7b" in model.lower() or "13b" in model.lower() or "14b" in model.lower():
+            timeout = 180.0  # 3 minutes for large models
+        else:
+            timeout = 60.0  # 1 minute for smaller models
+        async with httpx.AsyncClient(timeout=timeout) as client:
             try:
-                # Try chat API first
-                r = await client.post(f"{OLLAMA_URL}/api/chat", json={
+                # Optimize for qwen2:1.5b - limit output length and use faster params
+                # num_predict limits max tokens generated (faster response)
+                # For small model like qwen2:1.5b, 500 tokens is enough for 200-words description
+                chat_params = {
                     "model": OLLAMA_MODEL, 
                     "messages": [{"role": m['role'], "content": m['content']} for m in messages],
-                    "stream": False
-                })
+                    "stream": False,
+                    "options": {
+                        "num_predict": 500,  # Limit output to ~500 tokens (faster)
+                        "temperature": 0.7,  # Balanced creativity
+                        "top_p": 0.9,  # Nucleus sampling
+                    }
+                }
+                # Try chat API first
+                r = await client.post(f"{OLLAMA_URL}/api/chat", json=chat_params)
                 r.raise_for_status()
                 response = r.json()
                 return response.get("message", {}).get("content", "")
-            except Exception:
-                # Fallback to generate API
-                r = await client.post(f"{OLLAMA_URL}/api/generate", json={
+            except Exception as e:
+                # Fallback to generate API with same optimization
+                generate_params = {
                     "model": OLLAMA_MODEL, 
                     "prompt": prompt,
-                    "stream": False
-                })
+                    "stream": False,
+                    "options": {
+                        "num_predict": 500,  # Limit output length
+                        "temperature": 0.7,
+                        "top_p": 0.9,
+                    }
+                }
+                r = await client.post(f"{OLLAMA_URL}/api/generate", json=generate_params)
                 r.raise_for_status()
                 response = r.json()
                 return response.get("response", "")
