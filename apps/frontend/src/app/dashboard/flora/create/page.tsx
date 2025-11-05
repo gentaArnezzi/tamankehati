@@ -202,9 +202,11 @@ export default function CreateFloraPage() {
     setAiLoading(true);
 
     // Create AbortController for timeout
-    // Note: 3 parallel requests, each max 60s backend, so 90s frontend timeout for safety
+    // Backend timeout: 120s (small models) / 180s (large models)
+    // Frontend timeout: 190s (small models) / 240s (large models) for safety margin
+    // Since requests run in parallel, timeout is based on longest single request
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90 second timeout (3 parallel requests, each max 60s backend)
+    const timeoutId = setTimeout(() => controller.abort(), 190000); // 190 second timeout (small models: 120s backend + 70s margin)
 
     try {
       const aiData = {
@@ -287,7 +289,7 @@ export default function CreateFloraPage() {
 
       if (err.name === "AbortError") {
         toast.error(
-          "AI generation timeout (max 90 detik untuk 3 generate paralel). Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout (max 190 detik). Pastikan Ollama berjalan dan coba lagi.",
         );
       } else if (err.message?.includes("Failed to fetch")) {
         toast.error(

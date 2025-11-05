@@ -6,6 +6,7 @@ from pydantic import BaseModel
 import json
 import time
 import logging
+import httpx
 from core.database.session import get_session
 from api.v1.permissions.rbac import current_user
 from ai.services.flora_fauna_ai import FloraFaunaAIService
@@ -534,15 +535,20 @@ async def public_generate_fauna_description(request: FaunaAIGenerateRequest):
     """
     Public fauna generation without authentication for testing
     Note: This endpoint is for testing only. In production, use authenticated endpoints.
+    Includes explicit timeout handling matching backend timeout settings
     """
+    start_time = time.time()
     try:
         ai_service = FloraFaunaAIService()
         
         # Convert request to dict
         fauna_data = request.dict()
         
-        # Generate description
+        # Generate description (timeout handled by OllamaProvider: 120s small, 180s large)
         description = await ai_service.generate_fauna_description(fauna_data)
+        
+        duration = time.time() - start_time
+        logger.info("AI request duration: %.2fs for public fauna description", duration)
         
         return AIResponse(
             description=description,
@@ -550,7 +556,17 @@ async def public_generate_fauna_description(request: FaunaAIGenerateRequest):
             message="Deskripsi fauna berhasil dibuat"
         )
         
+    except httpx.TimeoutException as e:
+        duration = time.time() - start_time
+        logger.error("Timeout generating fauna description after %.2fs: %s", duration, str(e))
+        return AIResponse(
+            description="",
+            success=False,
+            message="Timeout: Generate memakan waktu terlalu lama. Silakan coba lagi atau gunakan data yang lebih lengkap."
+        )
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating fauna description after %.2fs: %s", duration, str(e))
         return AIResponse(
             description="",
             success=False,
@@ -561,15 +577,20 @@ async def public_generate_fauna_description(request: FaunaAIGenerateRequest):
 async def public_generate_flora_description(request: FloraAIGenerateRequest):
     """
     Public flora generation without authentication for testing
+    Includes explicit timeout handling matching backend timeout settings
     """
+    start_time = time.time()
     try:
         ai_service = FloraFaunaAIService()
         
         # Convert request to dict
         flora_data = request.dict()
         
-        # Generate description
+        # Generate description (timeout handled by OllamaProvider: 120s small, 180s large)
         description = await ai_service.generate_flora_description(flora_data)
+        
+        duration = time.time() - start_time
+        logger.info("AI request duration: %.2fs for public flora description", duration)
         
         return AIResponse(
             description=description,
@@ -577,7 +598,17 @@ async def public_generate_flora_description(request: FloraAIGenerateRequest):
             message="Deskripsi flora berhasil dibuat"
         )
         
+    except httpx.TimeoutException as e:
+        duration = time.time() - start_time
+        logger.error("Timeout generating flora description after %.2fs: %s", duration, str(e))
+        return AIResponse(
+            description="",
+            success=False,
+            message="Timeout: Generate memakan waktu terlalu lama. Silakan coba lagi atau gunakan data yang lebih lengkap."
+        )
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora description after %.2fs: %s", duration, str(e))
         return AIResponse(
             description="",
             success=False,
@@ -588,15 +619,20 @@ async def public_generate_flora_description(request: FloraAIGenerateRequest):
 async def public_generate_flora_morphology(request: FloraAIGenerateRequest):
     """
     Public flora morphology generation without authentication for testing
+    Includes explicit timeout handling matching backend timeout settings
     """
+    start_time = time.time()
     try:
         ai_service = FloraFaunaAIService()
         
         # Convert request to dict
         flora_data = request.dict()
         
-        # Generate morphology
+        # Generate morphology (timeout handled by OllamaProvider: 120s small, 180s large)
         morphology = await ai_service.generate_morphology_description(flora_data)
+        
+        duration = time.time() - start_time
+        logger.info("AI request duration: %.2fs for public flora morphology", duration)
         
         return AIResponse(
             description=morphology,
@@ -604,7 +640,17 @@ async def public_generate_flora_morphology(request: FloraAIGenerateRequest):
             message="Morfologi flora berhasil dibuat"
         )
         
+    except httpx.TimeoutException as e:
+        duration = time.time() - start_time
+        logger.error("Timeout generating flora morphology after %.2fs: %s", duration, str(e))
+        return AIResponse(
+            description="",
+            success=False,
+            message="Timeout: Generate memakan waktu terlalu lama. Silakan coba lagi atau gunakan data yang lebih lengkap."
+        )
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora morphology after %.2fs: %s", duration, str(e))
         return AIResponse(
             description="",
             success=False,
@@ -615,15 +661,20 @@ async def public_generate_flora_morphology(request: FloraAIGenerateRequest):
 async def public_generate_flora_benefits(request: FloraAIGenerateRequest):
     """
     Public flora benefits generation without authentication for testing
+    Includes explicit timeout handling matching backend timeout settings
     """
+    start_time = time.time()
     try:
         ai_service = FloraFaunaAIService()
         
         # Convert request to dict
         flora_data = request.dict()
         
-        # Generate benefits
+        # Generate benefits (timeout handled by OllamaProvider: 120s small, 180s large)
         benefits = await ai_service.generate_benefits_description(flora_data)
+        
+        duration = time.time() - start_time
+        logger.info("AI request duration: %.2fs for public flora benefits", duration)
         
         return AIResponse(
             description=benefits,
@@ -631,7 +682,17 @@ async def public_generate_flora_benefits(request: FloraAIGenerateRequest):
             message="Manfaat flora berhasil dibuat"
         )
         
+    except httpx.TimeoutException as e:
+        duration = time.time() - start_time
+        logger.error("Timeout generating flora benefits after %.2fs: %s", duration, str(e))
+        return AIResponse(
+            description="",
+            success=False,
+            message="Timeout: Generate memakan waktu terlalu lama. Silakan coba lagi atau gunakan data yang lebih lengkap."
+        )
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora benefits after %.2fs: %s", duration, str(e))
         return AIResponse(
             description="",
             success=False,

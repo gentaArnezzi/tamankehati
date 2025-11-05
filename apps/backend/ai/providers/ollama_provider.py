@@ -12,13 +12,13 @@ class OllamaProvider(LLMProvider):
         prompt = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
         # Timeout based on model size: larger models need more time
         # For llama3.1:8b and similar large models, use 180 seconds
-        # For smaller models like qwen2:1.5b, 60 seconds is enough
+        # For smaller models like qwen2:1.5b, 120 seconds (increased for better reliability)
         model = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
         # Increase timeout for large models (8b+ parameters)
         if "8b" in model.lower() or "7b" in model.lower() or "13b" in model.lower() or "14b" in model.lower():
             timeout = 180.0  # 3 minutes for large models
         else:
-            timeout = 60.0  # 1 minute for smaller models
+            timeout = 120.0  # 2 minutes for smaller models (increased from 60s)
         async with httpx.AsyncClient(timeout=timeout) as client:
             try:
                 # Optimize for qwen2:1.5b - limit output length and use faster params

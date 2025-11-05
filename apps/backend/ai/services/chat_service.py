@@ -57,8 +57,35 @@ async def prepare_messages_with_context(db: AsyncSession, session_id: int, *, us
             except Exception:
                 context_snippets = await keyword_retrieve(db, q, limit=5)
     if context_snippets:
-        context = "\n\n".join([f"- {t}: {s}" for t, s in context_snippets])
-        history.insert(0, {"role": "system", "content": f"You are a biodiversity assistant for Taman Kehati. Use this context if helpful:\n{context}"})
+        # Format context with metadata for better understanding
+        context_lines = []
+        for title, snippet in context_snippets:
+            context_lines.append(f"- {title}: {snippet}")
+        context = "\n\n".join(context_lines)
+        
+        # Enhanced RAG system prompt with explicit instructions
+        rag_prompt = f"""Anda adalah Tanya Kehati, asisten AI khusus untuk keanekaragaman hayati Indonesia di platform Taman Kehati.
+
+KONTEKS YANG TERSEDIA:
+{context}
+
+ATURAN PENGGUNAAN KONTEKS:
+1. Gunakan informasi dari konteks di atas untuk menjawab pertanyaan pengguna dengan akurat
+2. Jika konteks relevan dengan pertanyaan, prioritaskan informasi dari konteks tersebut
+3. Jika konteks tidak relevan atau tidak menjawab pertanyaan, beri tahu pengguna bahwa informasi spesifik tidak tersedia di database
+4. Jangan mengarang informasi yang tidak ada dalam konteks
+5. Jika ada informasi tambahan yang Anda ketahui (dari pengetahuan umum) dan relevan, Anda boleh menambahkannya, tetapi selalu sebutkan bahwa informasi tersebut dari pengetahuan umum, bukan dari database Taman Kehati
+
+FORMAT JAWABAN:
+- Gunakan bahasa Indonesia yang jelas dan mudah dipahami
+- Berikan jawaban yang informatif, akurat, dan membantu
+- Jika menggunakan informasi dari konteks, integrasikan dengan natural dalam jawaban
+- Jika informasi tidak lengkap, jelaskan apa yang tersedia dan arahkan ke sumber informasi yang lebih lengkap
+
+TUJUAN:
+Membantu pengguna memahami keanekaragaman hayati Indonesia dengan informasi yang akurat dari database Taman Kehati."""
+        
+        history.insert(0, {"role": "system", "content": rag_prompt})
     return history
 
 async def generate_reply(db: AsyncSession, session_id: int, provider: LLMProvider, *, use_tools: bool = True) -> ChatMessage:

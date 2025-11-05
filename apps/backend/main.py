@@ -88,16 +88,6 @@ app = FastAPI(
     Gunakan endpoint POST /api/v1/auth/login dengan email dan password untuk mendapatkan JWT token.
     Header yang dibutuhkan: `Authorization: Bearer <token>`
 
-    Akun yang Tersedia (seeded otomatis):
-    - admin@kehati.org (Super Admin - akses penuh ke semua region)
-      - Password: `password`
-    - kaltim.admin@kehati.org (Regional Admin KALTIM - akses region Kalimantan Timur)
-      - Password: `password`
-    - sumut.admin@kehati.org (Regional Admin SUMUT - akses region Sumatera Utara)
-      - Password: `password`
-    - test@example.com (Test Super Admin - untuk testing dan development)
-      - Password: `test`
-
     Role-Based Access Control (RBAC)
     - Super Admin: Akses penuh ke semua region dan fitur (create, update, delete, approve/reject)
     - Regional Admin: Akses terbatas ke region mereka sendiri (create, update, submit untuk review)
