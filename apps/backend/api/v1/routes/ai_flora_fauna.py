@@ -184,7 +184,8 @@ async def generate_flora_benefits(
 @router.get("/test-ollama")
 async def test_ollama_connection():
     """
-    Test Ollama connection and model availability - Fast health check
+    Test Ollama connection and model availability - Fast health check (ping only)
+    Optimized for speed: only ping, no generation test to avoid timeout
     """
     import httpx
     import os
@@ -193,9 +194,9 @@ async def test_ollama_connection():
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
     
     try:
-        # Fast health check: ping Ollama API
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            # Step 1: Check if Ollama server is running
+        # Fast health check: ping Ollama API only (no generation test)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Check if Ollama server is running and model is available
             try:
                 response = await client.get(f"{OLLAMA_URL}/api/tags")
                 if response.status_code != 200:
@@ -204,58 +205,50 @@ async def test_ollama_connection():
                         "message": f"Ollama server tidak merespons (status: {response.status_code})",
                         "error": "Server not responding"
                     }
-            except httpx.ConnectError:
-                return {
-                    "success": False,
-                    "message": "Tidak dapat terhubung ke Ollama server",
-                    "error": "Connection refused"
-                }
-            except httpx.TimeoutException:
-                return {
-                    "success": False,
-                    "message": "Ollama server timeout (tidak merespons dalam 5 detik)",
-                    "error": "Timeout"
-                }
-            
-            # Step 2: Quick generation test with very short prompt and timeout
-            try:
-                test_payload = {
-                    "model": OLLAMA_MODEL,
-                    "prompt": "Hello",
-                    "stream": False,
-                    "options": {
-                        "num_predict": 5  # Only generate 5 tokens for quick test
-                    }
-                }
-                response = await client.post(
-                    f"{OLLAMA_URL}/api/generate",
-                    json=test_payload,
-                    timeout=10.0
-                )
                 
-                if response.status_code == 200:
-                    result = response.json()
+                # Check if model is available
+                models_data = response.json()
+                models = models_data.get("models", [])
+                model_names = [m.get("name", "") for m in models]
+                
+                # Check if requested model exists
+                model_found = any(OLLAMA_MODEL in name or name in OLLAMA_MODEL for name in model_names)
+                
+                if not model_found and models:
+                    # Return success but warn about model
                     return {
                         "success": True,
-                        "message": "Koneksi Ollama berhasil",
-                        "test_response": result.get("response", "")[:50]
+                        "message": f"Ollama server berjalan, tetapi model '{OLLAMA_MODEL}' tidak ditemukan. Model tersedia: {', '.join(model_names[:3])}",
+                        "available_models": model_names[:5],
+                        "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-                else:
-                    return {
-                        "success": False,
-                        "message": f"Generate API gagal (status: {response.status_code})",
-                        "error": response.text[:200]
-                    }
+                
+                return {
+                    "success": True,
+                    "message": "Koneksi Ollama berhasil",
+                    "available_models": model_names[:5],
+                    "model_checked": OLLAMA_MODEL,
+                    "model_found": model_found
+                }
+                
+            except httpx.ConnectError as e:
+                return {
+                    "success": False,
+                    "message": f"Tidak dapat terhubung ke Ollama server di {OLLAMA_URL}",
+                    "error": "Connection refused",
+                    "suggestion": "Pastikan Ollama running dan OLLAMA_URL benar"
+                }
             except httpx.TimeoutException:
                 return {
                     "success": False,
-                    "message": "Generate test timeout (Ollama terlalu lambat)",
-                    "error": "Generation timeout"
+                    "message": "Ollama server timeout (tidak merespons dalam 10 detik)",
+                    "error": "Timeout",
+                    "suggestion": "Cek apakah Ollama server overloaded atau tidak running"
                 }
             except Exception as e:
                 return {
                     "success": False,
-                    "message": f"Generate test gagal: {str(e)}",
+                    "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
                 }
         
@@ -269,7 +262,8 @@ async def test_ollama_connection():
 @router.get("/public/test-ollama")
 async def test_ollama_connection_public():
     """
-    Test Ollama connection and model availability (public endpoint) - Fast health check
+    Test Ollama connection and model availability (public endpoint) - Fast health check (ping only)
+    Optimized for speed: only ping, no generation test to avoid timeout
     """
     import httpx
     import os
@@ -278,9 +272,9 @@ async def test_ollama_connection_public():
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
     
     try:
-        # Fast health check: ping Ollama API
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            # Step 1: Check if Ollama server is running
+        # Fast health check: ping Ollama API only (no generation test)
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            # Check if Ollama server is running and model is available
             try:
                 response = await client.get(f"{OLLAMA_URL}/api/tags")
                 if response.status_code != 200:
@@ -289,58 +283,50 @@ async def test_ollama_connection_public():
                         "message": f"Ollama server tidak merespons (status: {response.status_code})",
                         "error": "Server not responding"
                     }
-            except httpx.ConnectError:
-                return {
-                    "success": False,
-                    "message": "Tidak dapat terhubung ke Ollama server",
-                    "error": "Connection refused"
-                }
-            except httpx.TimeoutException:
-                return {
-                    "success": False,
-                    "message": "Ollama server timeout (tidak merespons dalam 5 detik)",
-                    "error": "Timeout"
-                }
-            
-            # Step 2: Quick generation test with very short prompt and timeout
-            try:
-                test_payload = {
-                    "model": OLLAMA_MODEL,
-                    "prompt": "Hello",
-                    "stream": False,
-                    "options": {
-                        "num_predict": 5  # Only generate 5 tokens for quick test
-                    }
-                }
-                response = await client.post(
-                    f"{OLLAMA_URL}/api/generate",
-                    json=test_payload,
-                    timeout=10.0
-                )
                 
-                if response.status_code == 200:
-                    result = response.json()
+                # Check if model is available
+                models_data = response.json()
+                models = models_data.get("models", [])
+                model_names = [m.get("name", "") for m in models]
+                
+                # Check if requested model exists
+                model_found = any(OLLAMA_MODEL in name or name in OLLAMA_MODEL for name in model_names)
+                
+                if not model_found and models:
+                    # Return success but warn about model
                     return {
                         "success": True,
-                        "message": "Koneksi Ollama berhasil",
-                        "test_response": result.get("response", "")[:50]
+                        "message": f"Ollama server berjalan, tetapi model '{OLLAMA_MODEL}' tidak ditemukan. Model tersedia: {', '.join(model_names[:3])}",
+                        "available_models": model_names[:5],
+                        "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-                else:
-                    return {
-                        "success": False,
-                        "message": f"Generate API gagal (status: {response.status_code})",
-                        "error": response.text[:200]
-                    }
+                
+                return {
+                    "success": True,
+                    "message": "Koneksi Ollama berhasil",
+                    "available_models": model_names[:5],
+                    "model_checked": OLLAMA_MODEL,
+                    "model_found": model_found
+                }
+                
+            except httpx.ConnectError as e:
+                return {
+                    "success": False,
+                    "message": f"Tidak dapat terhubung ke Ollama server di {OLLAMA_URL}",
+                    "error": "Connection refused",
+                    "suggestion": "Pastikan Ollama running dan OLLAMA_URL benar"
+                }
             except httpx.TimeoutException:
                 return {
                     "success": False,
-                    "message": "Generate test timeout (Ollama terlalu lambat)",
-                    "error": "Generation timeout"
+                    "message": "Ollama server timeout (tidak merespons dalam 10 detik)",
+                    "error": "Timeout",
+                    "suggestion": "Cek apakah Ollama server overloaded atau tidak running"
                 }
             except Exception as e:
                 return {
                     "success": False,
-                    "message": f"Generate test gagal: {str(e)}",
+                    "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
                 }
         

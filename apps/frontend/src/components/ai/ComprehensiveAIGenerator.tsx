@@ -182,8 +182,8 @@ export default function ComprehensiveAIGenerator() {
     setConnectionStatus("checking");
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error("Request timeout after 20 seconds"));
-    }, 20000); // 20 second timeout (backend optimized to max 15 seconds)
+      controller.abort(new Error("Request timeout after 15 seconds"));
+    }, 15000); // 15 second timeout (backend optimized - ping only, max 10 seconds)
 
     try {
       console.log("Testing Ollama connection...");
