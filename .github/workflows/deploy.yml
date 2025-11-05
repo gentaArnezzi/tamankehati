@@ -1,9 +1,9 @@
-name: CD - Deploy to Ubuntu Server
+name: CD - Deploy to Ubuntu Server (DEPRECATED - Use build-and-deploy.yml)
 
+# DISABLED - Use build-and-deploy.yml instead
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
+    # Disabled: push triggers removed to avoid conflicts
     inputs:
       branch:
         description: 'Branch to deploy'
