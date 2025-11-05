@@ -3,6 +3,7 @@ name: CI/CD - Build and Deploy
 on:
   push:
     branches: [main]
+    # Only ignore documentation and config files, not code changes
     paths-ignore:
       - 'docs/**'
       - '*.md'
