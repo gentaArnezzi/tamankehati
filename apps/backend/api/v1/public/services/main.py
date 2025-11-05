@@ -383,67 +383,138 @@ class PublicChatbotService:
             
             # Search for flora data using parameterized queries
             if any(word in message_lower for word in ['flora', 'tumbuhan', 'tanaman', 'pohon', 'bunga', 'rafflesia', 'anggrek']):
+                from sqlalchemy import func, or_
+                # Filter out test data - exclude names containing "test", "Test", "TEST", "dummy"
                 flora_stmt = select(Flora.scientific_name, Flora.local_name, Flora.description).where(
                     and_(
                         Flora.status == "approved",
-                        Flora.deleted_at.is_(None)
+                        Flora.deleted_at.is_(None),
+                        # Exclude test/dummy data
+                        or_(
+                            Flora.local_name.is_(None),
+                            and_(
+                                ~func.lower(Flora.local_name).like('%test%'),
+                                ~func.lower(Flora.local_name).like('%dummy%')
+                            )
+                        ),
+                        # Exclude empty names
+                        or_(
+                            Flora.local_name.isnot(None),
+                            Flora.scientific_name.isnot(None)
+                        )
                     )
-                ).limit(3)
+                ).order_by(Flora.created_at.desc()).limit(5)
                 
                 flora_result = await db_session.execute(flora_stmt)
                 flora_data = flora_result.fetchall()
                 if flora_data:
                     relevant_data.append("Data Flora (Tersedia di website Taman Kehati):")
                     for flora in flora_data:
-                        relevant_data.append(f"- {flora[1]} ({flora[0]})")
+                        local_name = flora[1] or flora[0] or "Flora"
+                        scientific_name = flora[0] or ""
+                        # Only include valid data
+                        if local_name and 'test' not in local_name.lower() and 'dummy' not in local_name.lower():
+                            if scientific_name:
+                                relevant_data.append(f"- {local_name} ({scientific_name})")
+                            else:
+                                relevant_data.append(f"- {local_name}")
             
             # Search for fauna data using parameterized queries
             if any(word in message_lower for word in ['fauna', 'hewan', 'satwa', 'mamalia', 'burung', 'reptil', 'ikan', 'harimau', 'orangutan', 'komodo', 'badak']):
+                from sqlalchemy import func, or_
+                # Filter out test data - exclude names containing "test", "Test", "TEST", "dummy"
                 fauna_stmt = select(Fauna.scientific_name, Fauna.local_name, Fauna.description).where(
                     and_(
                         Fauna.status == "approved",
-                        Fauna.deleted_at.is_(None)
+                        Fauna.deleted_at.is_(None),
+                        # Exclude test/dummy data
+                        or_(
+                            Fauna.local_name.is_(None),
+                            and_(
+                                ~func.lower(Fauna.local_name).like('%test%'),
+                                ~func.lower(Fauna.local_name).like('%dummy%')
+                            )
+                        ),
+                        # Exclude empty names
+                        or_(
+                            Fauna.local_name.isnot(None),
+                            Fauna.scientific_name.isnot(None)
+                        )
                     )
-                ).limit(3)
+                ).order_by(Fauna.created_at.desc()).limit(5)
                 
                 fauna_result = await db_session.execute(fauna_stmt)
                 fauna_data = fauna_result.fetchall()
                 if fauna_data:
                     relevant_data.append("Data Fauna (Tersedia di website Taman Kehati):")
                     for fauna in fauna_data:
-                        relevant_data.append(f"- {fauna[1]} ({fauna[0]})")
+                        local_name = fauna[1] or fauna[0] or "Fauna"
+                        scientific_name = fauna[0] or ""
+                        # Only include valid data
+                        if local_name and 'test' not in local_name.lower() and 'dummy' not in local_name.lower():
+                            if scientific_name:
+                                relevant_data.append(f"- {local_name} ({scientific_name})")
+                            else:
+                                relevant_data.append(f"- {local_name}")
             
             # Search for parks data using parameterized queries
             if any(word in message_lower for word in ['taman', 'konservasi', 'kawasan', 'cagar', 'suaka', 'kehati']):
+                from sqlalchemy import or_, func
+                # Filter out test data - exclude names containing "test", "Test", "TEST", "dummy", "Dummy"
                 parks_stmt = select(Park.name, Park.provinsi, Park.description).where(
                     and_(
                         Park.status == "approved",
-                        Park.deleted_at.is_(None)
+                        Park.deleted_at.is_(None),
+                        # Exclude test/dummy data
+                        ~func.lower(Park.name).like('%test%'),
+                        ~func.lower(Park.name).like('%dummy%'),
+                        ~func.lower(Park.name).like('%sample%'),
+                        # Exclude empty or invalid names
+                        Park.name.isnot(None),
+                        Park.name != '',
+                        func.length(Park.name) > 3
                     )
-                ).limit(3)
+                ).order_by(Park.created_at.desc()).limit(5)
                 
                 parks_result = await db_session.execute(parks_stmt)
                 parks_data = parks_result.fetchall()
                 if parks_data:
                     relevant_data.append("Data Taman Konservasi (Tersedia di website Taman Kehati):")
                     for park in parks_data:
-                        relevant_data.append(f"- {park[0]} di {park[1]}")
+                        park_name = park[0] or "Taman Konservasi"
+                        park_prov = park[1] or "Indonesia"
+                        # Only include valid data
+                        if park_name and len(park_name) > 3 and 'test' not in park_name.lower():
+                            relevant_data.append(f"- {park_name} di {park_prov}")
             
             # Search for articles data using parameterized queries
             if any(word in message_lower for word in ['artikel', 'berita', 'informasi', 'pengetahuan']):
+                from sqlalchemy import func
+                # Filter out test data - exclude titles containing "test", "Test", "TEST", "dummy"
                 articles_stmt = select(Article.title, Article.summary).where(
                     and_(
                         Article.status == "published",
-                        Article.deleted_at.is_(None)
+                        Article.deleted_at.is_(None),
+                        # Exclude test/dummy data
+                        ~func.lower(Article.title).like('%test%'),
+                        ~func.lower(Article.title).like('%dummy%'),
+                        ~func.lower(Article.title).like('%sample%'),
+                        # Exclude empty or invalid titles
+                        Article.title.isnot(None),
+                        Article.title != '',
+                        func.length(Article.title) > 3
                     )
-                ).limit(3)
+                ).order_by(Article.created_at.desc()).limit(5)
                 
                 articles_result = await db_session.execute(articles_stmt)
                 articles_data = articles_result.fetchall()
                 if articles_data:
                     relevant_data.append("Data Artikel (Tersedia di website Taman Kehati):")
                     for article in articles_data:
-                        relevant_data.append(f"- {article[0]}")
+                        article_title = article[0] or "Artikel"
+                        # Only include valid data
+                        if article_title and len(article_title) > 3 and 'test' not in article_title.lower():
+                            relevant_data.append(f"- {article_title}")
             
             return "\n".join(relevant_data) if relevant_data else None
             
@@ -479,17 +550,27 @@ class PublicChatbotService:
 Berdasarkan data yang tersedia di database Taman Kehati:
 {relevant_data}
 
+ATURAN PENTING:
+1. HANYA gunakan informasi yang ada dalam data di atas
+2. JANGAN membuat informasi yang tidak ada dalam data
+3. JANGAN menambahkan detail yang tidak disebutkan dalam data
+4. JANGAN menggunakan bahasa selain Indonesia atau Indonesia
+5. Jika data tidak lengkap, katakan "Data yang tersedia di website Taman Kehati: [sebutkan data yang ada]"
+6. Jika pertanyaan tentang taman konservasi di Indonesia, hanya sebutkan taman yang ada dalam data di atas
+7. JANGAN membuat nama taman, flora, atau fauna yang tidak ada dalam data
+8. JANGAN menambahkan informasi tentang "museum kesehatan global", "penyelesaian konflik", atau informasi yang tidak relevan
+9. Jawab dengan jujur jika data tidak ada - jangan mengarang
+
 Tugas Anda:
 - Gunakan data di atas untuk menjawab pertanyaan pengguna dengan informatif
-- Berikan informasi yang akurat berdasarkan data yang tersedia
+- Berikan informasi yang akurat HANYA berdasarkan data yang tersedia
 - Jika data lengkap, berikan jawaban yang komprehensif
-- Jika data tidak lengkap, jelaskan apa yang tersedia dan apa yang tidak
+- Jika data tidak lengkap, jelaskan apa yang tersedia dan arahkan ke website Taman Kehati
 - Gunakan bahasa Indonesia yang mudah dipahami
 - Bersikap ramah, informatif, dan membantu
 - Fokus pada keanekaragaman hayati Indonesia
-- JANGAN membuat informasi yang tidak ada dalam data
 
-Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang tersedia."""
+Jawablah pertanyaan dengan informatif dan bermanfaat berdasarkan data yang tersedia. JANGAN mengarang informasi."""
 
             # Prepare messages for AI
             messages: list[ChatTurn] = [
