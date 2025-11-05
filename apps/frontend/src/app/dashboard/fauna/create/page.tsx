@@ -198,7 +198,7 @@ export default function CreateFaunaPage() {
 
     // Create AbortController for timeout
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 70000); // 70 second timeout (backend max 60 seconds)
 
     try {
       const aiData = {
@@ -248,7 +248,7 @@ export default function CreateFaunaPage() {
 
       if (err.name === "AbortError") {
         toast.error(
-          "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout (max 70 detik). Pastikan Ollama berjalan dan coba lagi.",
         );
       } else if (err.message?.includes("Failed to fetch")) {
         toast.error(

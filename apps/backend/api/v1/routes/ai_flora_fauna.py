@@ -1,10 +1,16 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import Optional
 from pydantic import BaseModel
+import json
+import time
+import logging
 from core.database.session import get_session
 from api.v1.permissions.rbac import current_user
 from ai.services.flora_fauna_ai import FloraFaunaAIService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ai", tags=["AI Flora Fauna"])
 
@@ -33,11 +39,13 @@ class AIResponse(BaseModel):
 async def generate_flora_description(
     request: FloraAIGenerateRequest,
     _db: AsyncSession = Depends(get_session),
-    current_user = Depends(current_user)
+    current_user = Depends(current_user),
+    stream: bool = Query(False, description="Enable streaming response")
 ):
     """
     Generate AI description for flora based on provided data
     Only accessible by regional_admin
+    Supports streaming mode for progressive text display
     """
     # Check if user is regional_admin
     if current_user.role != 'regional_admin':
@@ -46,22 +54,59 @@ async def generate_flora_description(
             detail="AI features hanya dapat digunakan oleh Regional Admin"
         )
     
+    start_time = time.time()
+    ai_service = FloraFaunaAIService()
+    flora_data = request.dict()
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Convert request to dict
-        flora_data = request.dict()
-        
-        # Generate description
-        description = await ai_service.generate_flora_description(flora_data)
-        
-        return AIResponse(
-            description=description,
-            success=True,
-            message="Deskripsi flora berhasil dibuat"
-        )
+        if stream:
+            # Streaming mode - return progressive response
+            async def stream_generator():
+                try:
+                    prompt = ai_service._build_flora_prompt(flora_data)
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "Anda adalah ahli botani Indonesia yang berpengalaman. Tugas Anda adalah membuat deskripsi yang informatif, akurat, dan menarik tentang flora Indonesia berdasarkan data yang diberikan. Deskripsi harus dalam bahasa Indonesia yang mudah dipahami oleh masyarakat umum."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                    
+                    yield "event: start\n\n"
+                    aggregated = []
+                    
+                    async for chunk in ai_service.ollama_provider.stream(messages):
+                        aggregated.append(chunk)
+                        # Send chunk as SSE
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                    
+                    final_text = "".join(aggregated)
+                    duration = time.time() - start_time
+                    logger.info("AI request duration: %.2fs for flora description (streaming)", duration)
+                    yield f"event: done\ndata: {json.dumps({'text': final_text, 'duration': round(duration, 2)})}\n\n"
+                except Exception as e:
+                    logger.error(f"Error in streaming flora description: {str(e)}")
+                    yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        else:
+            # Non-streaming mode (backward compatible)
+            description = await ai_service.generate_flora_description(flora_data)
+            duration = time.time() - start_time
+            logger.info("AI request duration: %.2fs for flora description (non-streaming)", duration)
+            
+            return AIResponse(
+                description=description,
+                success=True,
+                message="Deskripsi flora berhasil dibuat"
+            )
         
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora description after %.2fs: %s", duration, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gagal membuat deskripsi flora: {str(e)}"
@@ -71,11 +116,13 @@ async def generate_flora_description(
 async def generate_fauna_description(
     request: FaunaAIGenerateRequest,
     _db: AsyncSession = Depends(get_session),
-    current_user = Depends(current_user)
+    current_user = Depends(current_user),
+    stream: bool = Query(False, description="Enable streaming response")
 ):
     """
     Generate AI description for fauna based on provided data
     Only accessible by regional_admin
+    Supports streaming mode for progressive text display
     """
     # Check if user is regional_admin
     if current_user.role != 'regional_admin':
@@ -84,22 +131,59 @@ async def generate_fauna_description(
             detail="AI features hanya dapat digunakan oleh Regional Admin"
         )
     
+    start_time = time.time()
+    ai_service = FloraFaunaAIService()
+    fauna_data = request.dict()
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Convert request to dict
-        fauna_data = request.dict()
-        
-        # Generate description
-        description = await ai_service.generate_fauna_description(fauna_data)
-        
-        return AIResponse(
-            description=description,
-            success=True,
-            message="Deskripsi fauna berhasil dibuat"
-        )
+        if stream:
+            # Streaming mode - return progressive response
+            async def stream_generator():
+                try:
+                    prompt = ai_service._build_fauna_prompt(fauna_data)
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "Anda adalah ahli zoologi Indonesia yang berpengalaman. Tugas Anda adalah membuat deskripsi yang informatif, akurat, dan menarik tentang fauna Indonesia berdasarkan data yang diberikan. Deskripsi harus dalam bahasa Indonesia yang mudah dipahami oleh masyarakat umum."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                    
+                    yield "event: start\n\n"
+                    aggregated = []
+                    
+                    async for chunk in ai_service.ollama_provider.stream(messages):
+                        aggregated.append(chunk)
+                        # Send chunk as SSE
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                    
+                    final_text = "".join(aggregated)
+                    duration = time.time() - start_time
+                    logger.info("AI request duration: %.2fs for fauna description (streaming)", duration)
+                    yield f"event: done\ndata: {json.dumps({'text': final_text, 'duration': round(duration, 2)})}\n\n"
+                except Exception as e:
+                    logger.error(f"Error in streaming fauna description: {str(e)}")
+                    yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        else:
+            # Non-streaming mode (backward compatible)
+            description = await ai_service.generate_fauna_description(fauna_data)
+            duration = time.time() - start_time
+            logger.info("AI request duration: %.2fs for fauna description (non-streaming)", duration)
+            
+            return AIResponse(
+                description=description,
+                success=True,
+                message="Deskripsi fauna berhasil dibuat"
+            )
         
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating fauna description after %.2fs: %s", duration, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gagal membuat deskripsi fauna: {str(e)}"
@@ -109,11 +193,13 @@ async def generate_fauna_description(
 async def generate_flora_morphology(
     request: FloraAIGenerateRequest,
     _db: AsyncSession = Depends(get_session),
-    current_user = Depends(current_user)
+    current_user = Depends(current_user),
+    stream: bool = Query(False, description="Enable streaming response")
 ):
     """
     Generate AI morphology description for flora
     Only accessible by regional_admin
+    Supports streaming mode for progressive text display
     """
     # Check if user is regional_admin
     if current_user.role != 'regional_admin':
@@ -122,22 +208,58 @@ async def generate_flora_morphology(
             detail="AI features hanya dapat digunakan oleh Regional Admin"
         )
     
+    start_time = time.time()
+    ai_service = FloraFaunaAIService()
+    flora_data = request.dict()
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Convert request to dict
-        flora_data = request.dict()
-        
-        # Generate morphology description
-        morphology = await ai_service.generate_morphology_description(flora_data)
-        
-        return AIResponse(
-            description=morphology,
-            success=True,
-            message="Deskripsi morfologi flora berhasil dibuat"
-        )
+        if stream:
+            # Streaming mode
+            async def stream_generator():
+                try:
+                    prompt = ai_service._build_morphology_prompt(flora_data)
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "Anda adalah ahli morfologi tumbuhan yang berpengalaman. Buatkan deskripsi morfologi yang detail dan akurat berdasarkan data yang diberikan."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                    
+                    yield "event: start\n\n"
+                    aggregated = []
+                    
+                    async for chunk in ai_service.ollama_provider.stream(messages):
+                        aggregated.append(chunk)
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                    
+                    final_text = "".join(aggregated)
+                    duration = time.time() - start_time
+                    logger.info("AI request duration: %.2fs for flora morphology (streaming)", duration)
+                    yield f"event: done\ndata: {json.dumps({'text': final_text, 'duration': round(duration, 2)})}\n\n"
+                except Exception as e:
+                    logger.error(f"Error in streaming flora morphology: {str(e)}")
+                    yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        else:
+            # Non-streaming mode
+            morphology = await ai_service.generate_morphology_description(flora_data)
+            duration = time.time() - start_time
+            logger.info("AI request duration: %.2fs for flora morphology (non-streaming)", duration)
+            
+            return AIResponse(
+                description=morphology,
+                success=True,
+                message="Deskripsi morfologi flora berhasil dibuat"
+            )
         
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora morphology after %.2fs: %s", duration, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gagal membuat deskripsi morfologi flora: {str(e)}"
@@ -147,11 +269,13 @@ async def generate_flora_morphology(
 async def generate_flora_benefits(
     request: FloraAIGenerateRequest,
     _db: AsyncSession = Depends(get_session),
-    current_user = Depends(current_user)
+    current_user = Depends(current_user),
+    stream: bool = Query(False, description="Enable streaming response")
 ):
     """
     Generate AI benefits description for flora
     Only accessible by regional_admin
+    Supports streaming mode for progressive text display
     """
     # Check if user is regional_admin
     if current_user.role != 'regional_admin':
@@ -160,22 +284,58 @@ async def generate_flora_benefits(
             detail="AI features hanya dapat digunakan oleh Regional Admin"
         )
     
+    start_time = time.time()
+    ai_service = FloraFaunaAIService()
+    flora_data = request.dict()
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Convert request to dict
-        flora_data = request.dict()
-        
-        # Generate benefits description
-        benefits = await ai_service.generate_benefits_description(flora_data)
-        
-        return AIResponse(
-            description=benefits,
-            success=True,
-            message="Deskripsi manfaat flora berhasil dibuat"
-        )
+        if stream:
+            # Streaming mode
+            async def stream_generator():
+                try:
+                    prompt = ai_service._build_benefits_prompt(flora_data)
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": "Anda adalah ahli etnobotani Indonesia yang berpengalaman. Buatkan deskripsi tentang manfaat dan kegunaan tumbuhan berdasarkan data yang diberikan."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ]
+                    
+                    yield "event: start\n\n"
+                    aggregated = []
+                    
+                    async for chunk in ai_service.ollama_provider.stream(messages):
+                        aggregated.append(chunk)
+                        yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                    
+                    final_text = "".join(aggregated)
+                    duration = time.time() - start_time
+                    logger.info("AI request duration: %.2fs for flora benefits (streaming)", duration)
+                    yield f"event: done\ndata: {json.dumps({'text': final_text, 'duration': round(duration, 2)})}\n\n"
+                except Exception as e:
+                    logger.error(f"Error in streaming flora benefits: {str(e)}")
+                    yield f"event: error\ndata: {json.dumps({'error': str(e)})}\n\n"
+            
+            return StreamingResponse(stream_generator(), media_type="text/event-stream")
+        else:
+            # Non-streaming mode
+            benefits = await ai_service.generate_benefits_description(flora_data)
+            duration = time.time() - start_time
+            logger.info("AI request duration: %.2fs for flora benefits (non-streaming)", duration)
+            
+            return AIResponse(
+                description=benefits,
+                success=True,
+                message="Deskripsi manfaat flora berhasil dibuat"
+            )
         
     except Exception as e:
+        duration = time.time() - start_time
+        logger.error("Error generating flora benefits after %.2fs: %s", duration, str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Gagal membuat deskripsi manfaat flora: {str(e)}"
@@ -222,10 +382,10 @@ async def test_ollama_connection():
                         "available_models": model_names[:5],
                         "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-                
-                return {
-                    "success": True,
-                    "message": "Koneksi Ollama berhasil",
+        
+        return {
+            "success": True,
+            "message": "Koneksi Ollama berhasil",
                     "available_models": model_names[:5],
                     "model_checked": OLLAMA_MODEL,
                     "model_found": model_found
@@ -250,7 +410,7 @@ async def test_ollama_connection():
                     "success": False,
                     "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
-                }
+        }
         
     except Exception as e:
         return {
@@ -300,10 +460,10 @@ async def test_ollama_connection_public():
                         "available_models": model_names[:5],
                         "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-                
-                return {
-                    "success": True,
-                    "message": "Koneksi Ollama berhasil",
+        
+        return {
+            "success": True,
+            "message": "Koneksi Ollama berhasil",
                     "available_models": model_names[:5],
                     "model_checked": OLLAMA_MODEL,
                     "model_found": model_found
@@ -328,7 +488,7 @@ async def test_ollama_connection_public():
                     "success": False,
                     "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
-                }
+        }
         
     except Exception as e:
         return {

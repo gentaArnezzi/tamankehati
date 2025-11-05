@@ -49,6 +49,8 @@ export function FloraFormSheet({
   const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [aiLoading, setAiLoading] = useState(false);
+  const [aiTimer, setAiTimer] = useState(0);
+  const [streamingText, setStreamingText] = useState("");
   const base =
     getApiUrl();
   const [formData, setFormData] = useState({
@@ -131,6 +133,127 @@ export function FloraFormSheet({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Timer effect for AI generation
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null;
+    if (aiLoading) {
+      setAiTimer(0);
+      interval = setInterval(() => {
+        setAiTimer((t) => t + 1);
+      }, 1000);
+    } else {
+      setAiTimer(0);
+      setStreamingText("");
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [aiLoading]);
+
+  // Helper: Streaming fetch with retry
+  const fetchWithStreamingRetry = async (
+    endpoint: string,
+    aiData: any,
+    maxRetries: number = 1
+  ): Promise<string> => {
+    let lastError: Error | null = null;
+    
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 70000);
+        
+        try {
+          const response = await fetch(`${endpoint}?stream=true`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(aiData),
+            signal: controller.signal,
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          // Handle streaming response
+          const reader = response.body?.getReader();
+          const decoder = new TextDecoder();
+          let accumulatedText = "";
+
+          if (!reader) {
+            throw new Error("Response body is not readable");
+          }
+
+          setStreamingText("");
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const lines = chunk.split("\n");
+
+            for (const line of lines) {
+              if (!line.trim()) continue;
+
+              if (line.startsWith("event: ")) {
+                const eventType = line.substring(7).trim();
+                if (eventType === "start") {
+                  setStreamingText("");
+                } else if (eventType === "done") {
+                  // Parse final data
+                  continue;
+                } else if (eventType === "error") {
+                  continue;
+                }
+              } else if (line.startsWith("data: ")) {
+                try {
+                  const data = JSON.parse(line.substring(6));
+                  if (data.chunk) {
+                    accumulatedText += data.chunk;
+                    setStreamingText(accumulatedText);
+                  } else if (data.text) {
+                    // Final text
+                    accumulatedText = data.text;
+                    setStreamingText(accumulatedText);
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+
+          clearTimeout(timeoutId);
+          return accumulatedText;
+        } catch (error) {
+          clearTimeout(timeoutId);
+          
+          if (error instanceof Error && error.name === "AbortError") {
+            if (attempt < maxRetries) {
+              // Wait 1 second before retry
+              await new Promise((r) => setTimeout(r, 1000));
+              continue;
+            }
+            throw new Error("Request timeout after 70 seconds");
+          }
+          throw error;
+        }
+      } catch (error) {
+        lastError = error as Error;
+        if (attempt < maxRetries) {
+          // Wait 1 second before retry
+          await new Promise((r) => setTimeout(r, 1000));
+          continue;
+        }
+      }
+    }
+
+    throw lastError || new Error("Failed after retries");
+  };
+
   // AI Functions
   const generateAIDescription = async () => {
     if (user?.role !== "regional_admin") {
@@ -139,10 +262,7 @@ export function FloraFormSheet({
     }
 
     setAiLoading(true);
-
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    setStreamingText("");
 
     try {
       const aiData = {
@@ -154,40 +274,26 @@ export function FloraFormSheet({
         iucn_status: formData.status_iucn || "",
       };
 
-      const response = await fetch(
+      const description = await fetchWithStreamingRetry(
         `${base}/api/v1/ai/public/generate-flora-description`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        },
+        aiData
       );
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate description (${response.status})`);
-      }
-
-      const result = await response.json();
-
-      // Validate that we got actual content
-      if (!result.description) {
+      if (!description || !description.trim()) {
         throw new Error("AI tidak menghasilkan konten yang valid");
       }
 
-      setFormData((prev) => ({ ...prev, deskripsi: result.description }));
+      setFormData((prev) => ({ ...prev, deskripsi: description }));
       toast.success("Deskripsi berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI description:", error);
       const err = error as Error & { name?: string; message?: string };
 
-      if (err.name === "AbortError") {
+      if (err.message?.includes("timeout") || err.name === "AbortError") {
         toast.error(
-          "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout (max 70 detik). Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (err.message?.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
@@ -195,8 +301,8 @@ export function FloraFormSheet({
         toast.error(`Gagal membuat deskripsi: ${err.message || "Unknown error"}`);
       }
     } finally {
-      clearTimeout(timeoutId);
       setAiLoading(false);
+      setStreamingText("");
     }
   };
 
@@ -207,10 +313,7 @@ export function FloraFormSheet({
     }
 
     setAiLoading(true);
-
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    setStreamingText("");
 
     try {
       const aiData = {
@@ -222,40 +325,26 @@ export function FloraFormSheet({
         iucn_status: formData.status_iucn || "",
       };
 
-      const response = await fetch(
+      const morphology = await fetchWithStreamingRetry(
         `${base}/api/v1/ai/public/generate-flora-morphology`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        },
+        aiData
       );
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate morphology (${response.status})`);
-      }
-
-      const result = await response.json();
-
-      // Validate that we got actual content
-      if (!result.description) {
+      if (!morphology || !morphology.trim()) {
         throw new Error("AI tidak menghasilkan konten yang valid");
       }
 
-      setFormData((prev) => ({ ...prev, morfologi: result.description }));
+      setFormData((prev) => ({ ...prev, morfologi: morphology }));
       toast.success("Morfologi berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI morphology:", error);
       const err = error as Error & { name?: string; message?: string };
 
-      if (err.name === "AbortError") {
+      if (err.message?.includes("timeout") || err.name === "AbortError") {
         toast.error(
-          "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout (max 70 detik). Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (err.message?.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
@@ -263,8 +352,8 @@ export function FloraFormSheet({
         toast.error(`Gagal membuat morfologi: ${err.message || "Unknown error"}`);
       }
     } finally {
-      clearTimeout(timeoutId);
       setAiLoading(false);
+      setStreamingText("");
     }
   };
 
@@ -275,10 +364,7 @@ export function FloraFormSheet({
     }
 
     setAiLoading(true);
-
-    // Create AbortController for timeout
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    setStreamingText("");
 
     try {
       const aiData = {
@@ -290,40 +376,26 @@ export function FloraFormSheet({
         iucn_status: formData.status_iucn || "",
       };
 
-      const response = await fetch(
+      const benefits = await fetchWithStreamingRetry(
         `${base}/api/v1/ai/public/generate-flora-benefits`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        },
+        aiData
       );
 
-      if (!response.ok) {
-        throw new Error(`Failed to generate benefits (${response.status})`);
-      }
-
-      const result = await response.json();
-
-      // Validate that we got actual content
-      if (!result.description) {
+      if (!benefits || !benefits.trim()) {
         throw new Error("AI tidak menghasilkan konten yang valid");
       }
 
-      setFormData((prev) => ({ ...prev, manfaat: result.description }));
+      setFormData((prev) => ({ ...prev, manfaat: benefits }));
       toast.success("Manfaat berhasil dibuat dengan AI!");
     } catch (error) {
       console.error("Error generating AI benefits:", error);
       const err = error as Error & { name?: string; message?: string };
 
-      if (err.name === "AbortError") {
+      if (err.message?.includes("timeout") || err.name === "AbortError") {
         toast.error(
-          "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout (max 70 detik). Pastikan Ollama berjalan dan coba lagi.",
         );
-      } else if (err.message?.includes("Failed to fetch")) {
+      } else if (err.message?.includes("Failed to fetch") || err.message?.includes("fetch")) {
         toast.error(
           "Tidak dapat terhubung ke AI service. Pastikan backend berjalan.",
         );
@@ -331,8 +403,8 @@ export function FloraFormSheet({
         toast.error(`Gagal membuat manfaat: ${err.message || "Unknown error"}`);
       }
     } finally {
-      clearTimeout(timeoutId);
       setAiLoading(false);
+      setStreamingText("");
     }
   };
 
@@ -427,12 +499,18 @@ export function FloraFormSheet({
               </Button>
             )}
           </div>
+          {aiLoading && (
+            <p className="text-xs text-gray-400">
+              AI generating... {aiTimer}s
+            </p>
+          )}
           <Textarea
             id="deskripsi"
             placeholder="Deskripsikan flora secara umum..."
-            value={formData.deskripsi}
+            value={streamingText || formData.deskripsi}
             onChange={(e) => handleChange("deskripsi", e.target.value)}
             rows={4}
+            disabled={aiLoading && !!streamingText}
           />
         </div>
 
@@ -457,12 +535,18 @@ export function FloraFormSheet({
               </Button>
             )}
           </div>
+          {aiLoading && (
+            <p className="text-xs text-gray-400">
+              AI generating... {aiTimer}s
+            </p>
+          )}
           <Textarea
             id="morfologi"
             placeholder="Deskripsikan ciri morfologi (bentuk, ukuran, warna, dll)..."
-            value={formData.morfologi}
+            value={streamingText || formData.morfologi}
             onChange={(e) => handleChange("morfologi", e.target.value)}
             rows={4}
+            disabled={aiLoading && !!streamingText}
           />
         </div>
 
@@ -487,12 +571,18 @@ export function FloraFormSheet({
               </Button>
             )}
           </div>
+          {aiLoading && (
+            <p className="text-xs text-gray-400">
+              AI generating... {aiTimer}s
+            </p>
+          )}
           <Textarea
             id="manfaat"
             placeholder="Deskripsikan manfaat flora (ekologi, ekonomi, medis, dll)..."
-            value={formData.manfaat}
+            value={streamingText || formData.manfaat}
             onChange={(e) => handleChange("manfaat", e.target.value)}
             rows={4}
+            disabled={aiLoading && !!streamingText}
           />
         </div>
       </FormSection>
