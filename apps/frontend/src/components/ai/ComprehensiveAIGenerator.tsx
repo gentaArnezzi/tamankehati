@@ -182,8 +182,8 @@ export default function ComprehensiveAIGenerator() {
     setConnectionStatus("checking");
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error("Request timeout after 30 seconds"));
-    }, 30000); // 30 second timeout (increased for Ollama)
+      controller.abort(new Error("Request timeout after 20 seconds"));
+    }, 20000); // 20 second timeout (backend optimized to max 15 seconds)
 
     try {
       console.log("Testing Ollama connection...");
@@ -214,7 +214,7 @@ export default function ComprehensiveAIGenerator() {
       console.error("Connection error:", error);
       setConnectionStatus("error");
       if (error instanceof Error && error.name === "AbortError") {
-        toast.error("Timeout: Ollama tidak merespons dalam 30 detik");
+        toast.error("Timeout: Ollama tidak merespons dalam 20 detik");
       } else {
         toast.error(
           "Gagal terhubung ke Ollama: " +
@@ -230,6 +230,11 @@ export default function ComprehensiveAIGenerator() {
     type: "description" | "morphology" | "benefits",
   ) => {
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error("Request timeout after 70 seconds"));
+    }, 70000); // 70 second timeout (backend max 60 seconds)
+
     try {
       const endpoint =
         type === "description"
@@ -263,7 +268,12 @@ export default function ComprehensiveAIGenerator() {
         method: "POST",
         headers,
         body: JSON.stringify(floraFaunaData),
+        signal: controller.signal,
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
 
@@ -283,14 +293,24 @@ export default function ComprehensiveAIGenerator() {
         toast.error(result.message || "Gagal membuat deskripsi");
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat generate deskripsi");
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.error("Timeout: Generate memakan waktu terlalu lama (max 70 detik)");
+      } else {
+        toast.error("Terjadi kesalahan saat generate deskripsi: " + (error instanceof Error ? error.message : "Unknown error"));
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
   const generateArticle = async () => {
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error("Request timeout after 70 seconds"));
+    }, 70000); // 70 second timeout (backend max 60 seconds)
+
     try {
       // Get auth token
       const token = localStorage.getItem("auth_token");
@@ -309,8 +329,13 @@ export default function ComprehensiveAIGenerator() {
           method: "POST",
           headers,
           body: JSON.stringify(articleData),
+          signal: controller.signal,
         },
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result: ArticleResponse = await response.json();
       setGeneratedArticle(result);
@@ -321,14 +346,24 @@ export default function ComprehensiveAIGenerator() {
         toast.error(result.message || "Gagal membuat artikel");
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat generate artikel");
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.error("Timeout: Generate artikel memakan waktu terlalu lama (max 70 detik)");
+      } else {
+        toast.error("Terjadi kesalahan saat generate artikel: " + (error instanceof Error ? error.message : "Unknown error"));
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
 
   const generateNews = async () => {
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error("Request timeout after 70 seconds"));
+    }, 70000); // 70 second timeout (backend max 60 seconds)
+
     try {
       // Get auth token
       const token = localStorage.getItem("auth_token");
@@ -347,8 +382,13 @@ export default function ComprehensiveAIGenerator() {
           method: "POST",
           headers,
           body: JSON.stringify(newsData),
+          signal: controller.signal,
         },
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result: NewsResponse = await response.json();
       setGeneratedNews(result);
@@ -359,8 +399,13 @@ export default function ComprehensiveAIGenerator() {
         toast.error(result.message || "Gagal membuat berita");
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat generate berita");
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.error("Timeout: Generate berita memakan waktu terlalu lama (max 70 detik)");
+      } else {
+        toast.error("Terjadi kesalahan saat generate berita: " + (error instanceof Error ? error.message : "Unknown error"));
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -372,6 +417,11 @@ export default function ComprehensiveAIGenerator() {
     }
 
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error("Request timeout after 30 seconds"));
+    }, 30000); // 30 second timeout for CSV preview
+
     try {
       const formData = new FormData();
       formData.append("file", csvFile);
@@ -385,8 +435,13 @@ export default function ComprehensiveAIGenerator() {
         {
           method: "POST",
           body: formData,
+          signal: controller.signal,
         },
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result = await response.json();
 
@@ -399,8 +454,13 @@ export default function ComprehensiveAIGenerator() {
         toast.error(result.message || "Gagal membuat preview mapping");
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat membuat preview");
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.error("Timeout: Preview CSV memakan waktu terlalu lama (max 30 detik)");
+      } else {
+        toast.error("Terjadi kesalahan saat membuat preview: " + (error instanceof Error ? error.message : "Unknown error"));
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };
@@ -412,6 +472,11 @@ export default function ComprehensiveAIGenerator() {
     }
 
     setLoading(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      controller.abort(new Error("Request timeout after 60 seconds"));
+    }, 60000); // 60 second timeout for CSV extraction (could be large file)
+
     try {
       const formData = new FormData();
       formData.append("file", csvFile);
@@ -433,8 +498,13 @@ export default function ComprehensiveAIGenerator() {
           method: "POST",
           headers,
           body: formData,
+          signal: controller.signal,
         },
       );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const result: CSVExtractionResponse = await response.json();
       setCsvExtraction(result);
@@ -451,8 +521,13 @@ export default function ComprehensiveAIGenerator() {
         toast.error(result.message || "Gagal mengekstrak data CSV");
       }
     } catch (error) {
-      toast.error("Terjadi kesalahan saat upload CSV");
+      if (error instanceof Error && error.name === "AbortError") {
+        toast.error("Timeout: Upload CSV memakan waktu terlalu lama (max 60 detik)");
+      } else {
+        toast.error("Terjadi kesalahan saat upload CSV: " + (error instanceof Error ? error.message : "Unknown error"));
+      }
     } finally {
+      clearTimeout(timeoutId);
       setLoading(false);
     }
   };

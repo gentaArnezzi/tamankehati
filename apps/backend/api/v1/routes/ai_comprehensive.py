@@ -79,24 +79,41 @@ async def generate_article(
     try:
         ai_service = ComprehensiveAIService()
         
-        # Convert request to dict
-        article_data = request.dict()
+        # Convert request to dict with safe defaults
+        article_data = request.dict(exclude_unset=True)
+        
+        # Ensure required fields have defaults
+        if not article_data.get('topic'):
+            article_data['topic'] = 'Keanekaragaman Hayati Indonesia'
         
         # Generate article content
         result = await ai_service.generate_article_content(article_data)
         
+        # Validate result has required keys
+        if not result or "title" not in result or "content" not in result:
+            raise ValueError("AI service returned invalid result format")
+        
         return ArticleAIResponse(
-            title=result["title"],
-            summary=result["summary"],
-            content=result["content"],
+            title=result.get("title", "Artikel Keanekaragaman Hayati"),
+            summary=result.get("summary", result.get("content", "")[:300]),
+            content=result.get("content", ""),
             success=True,
             message="Artikel berhasil dibuat"
         )
         
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Error validasi: {str(e)}"
+        ) from e
     except Exception as e:
+        import traceback
+        error_detail = str(e)
+        print(f"Error in generate_article: {error_detail}")
+        print(traceback.format_exc())
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Gagal membuat artikel: {str(e)}"
+            detail=f"Gagal membuat artikel: {error_detail}"
         ) from e
 
 # ==================== NEWS GENERATION ====================

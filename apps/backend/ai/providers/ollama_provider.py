@@ -8,9 +8,10 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
 
 class OllamaProvider(LLMProvider):
     async def generate(self, messages: Sequence[ChatTurn]) -> str:
-        # Fallback non-streaming
+        # Optimized non-streaming with reasonable timeout
         prompt = "\n".join([f"{m['role']}: {m['content']}" for m in messages])
-        async with httpx.AsyncClient(timeout=120) as client:
+        # Reduced timeout from 120 to 60 seconds for better UX
+        async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 # Try chat API first
                 r = await client.post(f"{OLLAMA_URL}/api/chat", json={
