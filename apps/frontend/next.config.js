@@ -17,7 +17,14 @@ const nextConfig = {
         port: '8000',
         pathname: '/uploads/**',
       },
-      // Production - Render.com domains
+      // Production - Server IP (Ubuntu server)
+      {
+        protocol: 'http',
+        hostname: '38.47.93.167',
+        port: '8080',
+        pathname: '/uploads/**',
+      },
+      // Production - Render.com domains (legacy support)
       {
         protocol: 'https',
         hostname: 'tamankehati-backend-pxnu.onrender.com',

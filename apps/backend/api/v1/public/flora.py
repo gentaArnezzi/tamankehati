@@ -11,14 +11,22 @@ from api.v1.serializers.public import FloraPublicOut, FloraPublicListResponse
 router = APIRouter()
 
 def _build_image_url(image_path: str, request: Optional[Request] = None) -> str:
-    """Build full URL for image path"""
+    """
+    Build full URL for image path.
+    Priority: BASE_URL > API_BASE_URL > BACKEND_URL > request URL
+    Returns relative path if no base URL found (frontend will handle it).
+    """
     if not image_path:
         return ""
     if image_path.startswith('http'):
         return image_path
     
-    # Use environment variable if available, otherwise try to detect from request
-    base_url = os.getenv("API_BASE_URL") or os.getenv("BACKEND_URL")
+    # Use environment variable if available (priority order)
+    base_url = (
+        os.getenv("BASE_URL") or 
+        os.getenv("API_BASE_URL") or 
+        os.getenv("BACKEND_URL")
+    )
     
     if not base_url and request:
         # Try to get base URL from request
@@ -30,9 +38,10 @@ def _build_image_url(image_path: str, request: Optional[Request] = None) -> str:
         else:
             base_url = f"{scheme}://{host}"
     
-    # Fallback to production URL or localhost for development
+    # If still no base_url, return relative path (frontend will prepend API URL)
     if not base_url:
-        base_url = os.getenv("RENDER_EXTERNAL_URL") or "https://tamankehati-backend-pxnu.onrender.com"
+        # Return relative path - frontend will handle it
+        return image_path
     
     return f"{base_url}{image_path}"
 

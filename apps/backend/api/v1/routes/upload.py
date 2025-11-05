@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Request
+from typing import List, Optional
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database.session import get_session
@@ -25,25 +25,49 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 print(f"UPLOAD_DIR: {UPLOAD_DIR}")
 print(f"UPLOAD_DIR exists: {os.path.exists(UPLOAD_DIR)}")
 
-def get_base_url() -> str:
+def get_base_url(request: Optional[Request] = None) -> str:
     """
     Get base URL for file uploads.
-    Priority: BASE_URL > API_BASE_URL > BACKEND_URL > RENDER_EXTERNAL_URL > production URL
+    Priority: BASE_URL > API_BASE_URL > BACKEND_URL > request URL
+    Returns empty string if no base URL found (frontend will handle relative URLs).
     """
-    return (
+    # Try environment variables first (priority order)
+    base_url = (
         os.getenv("BASE_URL") or 
         os.getenv("API_BASE_URL") or 
-        os.getenv("BACKEND_URL") or 
-        os.getenv("RENDER_EXTERNAL_URL") or 
-        "https://tamankehati-backend-pxnu.onrender.com"
+        os.getenv("BACKEND_URL")
     )
+    
+    # If no env var, try to get from request
+    if not base_url and request:
+        scheme = request.url.scheme
+        host = request.url.hostname
+        port = request.url.port
+        if port and port not in [80, 443]:
+            base_url = f"{scheme}://{host}:{port}"
+        else:
+            base_url = f"{scheme}://{host}"
+    
+    # If still no base_url, return empty string (frontend will handle relative URLs)
+    if not base_url:
+        # Log warning but don't fail - frontend will handle relative URLs
+        print("WARNING: No BASE_URL configured. Image URLs will be relative.")
+        return ""
+    
+    return base_url
 
-def build_file_url(filename: str) -> str:
+def build_file_url(filename: str, request: Optional[Request] = None) -> str:
     """
     Build full URL for uploaded file.
     Returns absolute URL for production compatibility.
     """
-    base_url = get_base_url()
+    base_url = get_base_url(request)
+    
+    # If no base_url, return relative path (frontend will prepend API URL)
+    if not base_url:
+        file_path = filename if filename.startswith("/") else f"/uploads/{filename}"
+        return file_path
+    
     # Remove trailing slash from base_url if exists
     base_url = base_url.rstrip("/")
     # Ensure filename starts with /
@@ -63,6 +87,7 @@ def generate_filename(original_filename: str) -> str:
 
 @router.post("/gallery-image")
 async def upload_gallery_image(
+    request: Request,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_session),
     user: User = Depends(current_user)
@@ -132,7 +157,7 @@ async def upload_gallery_image(
         print(f"File exists after save: {os.path.exists(file_path)}")
         
         # Generate full URL for frontend to access
-        file_url = build_file_url(filename)
+        file_url = build_file_url(filename, request)
         
         return JSONResponse(content={
             "success": True,
@@ -188,6 +213,7 @@ async def delete_gallery_image(
 
 @router.post("/multiple-gallery-images")
 async def upload_multiple_gallery_images(
+    request: Request,
     files: List[UploadFile] = File(...),
     db: AsyncSession = Depends(get_session),
     user: User = Depends(current_user)
@@ -268,7 +294,7 @@ async def upload_multiple_gallery_images(
                         await f.write(chunk)
                 
                 # Generate full URL for frontend to access
-                file_url = build_file_url(filename)
+                file_url = build_file_url(filename, request)
                 
                 uploaded_files.append({
                     "filename": filename,
@@ -310,6 +336,7 @@ async def upload_multiple_gallery_images(
 
 @router.post("/activity-images")
 async def upload_activity_images(
+    request: Request,
     files: List[UploadFile] = File(...),
     db: AsyncSession = Depends(get_session),
     user: User = Depends(current_user)
@@ -389,7 +416,7 @@ async def upload_activity_images(
                         await f.write(chunk)
                 
                 # Generate full URL for frontend to access
-                file_url = build_file_url(filename)
+                file_url = build_file_url(filename, request)
                 
                 uploaded_files.append({
                     "filename": filename,

@@ -68,6 +68,11 @@ services:
       # Upload
       UPLOAD_DIRECTORY: /app/uploads
       
+      # Image URL Configuration (for image upload fix)
+      BASE_URL: ${BASE_URL:-}
+      API_BASE_URL: ${API_BASE_URL:-}
+      BACKEND_URL: ${BACKEND_URL:-}
+      
       # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
