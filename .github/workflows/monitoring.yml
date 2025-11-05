@@ -1,0 +1,146 @@
+name: System Monitoring
+
+on:
+  schedule:
+    # Health check every 10 minutes
+    - cron: "*/10 * * * *"
+    # Daily success notification at 7 AM WIB (00:00 UTC = 7 AM WIB)
+    - cron: "0 0 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  API_URL: "http://38.47.93.167:8080"
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+jobs:
+  health-check:
+    name: Health Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    steps:
+      - name: Check API Health
+        id: health_check
+        run: |
+          echo "🔍 Checking system health..."
+          
+          # Check basic health endpoint
+          HEALTH_URL="${{ env.API_URL }}/health"
+          HEALTH_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 10 "$HEALTH_URL" || echo -e "\n000")
+          HEALTH_BODY=$(echo "$HEALTH_RESPONSE" | head -n -1)
+          HEALTH_CODE=$(echo "$HEALTH_RESPONSE" | tail -n 1)
+          
+          echo "Health endpoint response code: $HEALTH_CODE"
+          
+          # Check detailed health endpoint
+          DETAILED_URL="${{ env.API_URL }}/health/detailed"
+          DETAILED_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 15 "$DETAILED_URL" || echo -e "\n000")
+          DETAILED_BODY=$(echo "$DETAILED_RESPONSE" | head -n -1)
+          DETAILED_CODE=$(echo "$DETAILED_RESPONSE" | tail -n 1)
+          
+          echo "Detailed health endpoint response code: $DETAILED_CODE"
+          
+          # Determine overall status
+          if [ "$HEALTH_CODE" = "200" ] && [ "$DETAILED_CODE" = "200" ]; then
+            echo "✅ System is healthy"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+            echo "health_code=$HEALTH_CODE" >> $GITHUB_OUTPUT
+            echo "detailed_code=$DETAILED_CODE" >> $GITHUB_OUTPUT
+            
+            # Extract status from detailed response if available
+            DETAILED_STATUS=$(echo "$DETAILED_BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+            echo "detailed_status=$DETAILED_STATUS" >> $GITHUB_OUTPUT
+          else
+            echo "❌ System health check failed"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            echo "health_code=$HEALTH_CODE" >> $GITHUB_OUTPUT
+            echo "detailed_code=$DETAILED_CODE" >> $GITHUB_OUTPUT
+            echo "health_body<<EOF" >> $GITHUB_OUTPUT
+            echo "$HEALTH_BODY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "detailed_body<<EOF" >> $GITHUB_OUTPUT
+            echo "$DETAILED_BODY" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Notify on failure
+        if: failure() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
+          message: |
+            🚨 <b>SYSTEM HEALTH CHECK FAILED</b>
+            
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
+            
+            ⚠️ <b>Status:</b> System Unhealthy
+            
+            🔍 <b>Health Endpoint:</b> HTTP ${{ steps.health_check.outputs.health_code }}
+            🔍 <b>Detailed Endpoint:</b> HTTP ${{ steps.health_check.outputs.detailed_code }}
+            
+            🌐 <b>API URL:</b> ${{ env.API_URL }}
+            
+            ⏰ <b>Time:</b> $(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+            
+            💡 <b>Action Required:</b> Please check server status and logs immediately.
+            
+            #monitoring #alert #system-down
+
+  daily-success-notification:
+    name: Daily Success Notification
+    runs-on: ubuntu-latest
+    # Only run on the daily schedule (7 AM WIB = 00:00 UTC)
+    if: github.event.schedule == '0 0 * * *'
+    
+    steps:
+      - name: Check API Health
+        id: health_check
+        run: |
+          echo "🔍 Running daily health check..."
+          
+          HEALTH_URL="${{ env.API_URL }}/health"
+          HEALTH_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 "$HEALTH_URL" || echo "000")
+          
+          if [ "$HEALTH_CODE" = "200" ]; then
+            echo "✅ System is healthy"
+            echo "status=healthy" >> $GITHUB_OUTPUT
+          else
+            echo "❌ System health check failed"
+            echo "status=unhealthy" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Get timestamp
+        id: timestamp
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+      - name: Send daily success notification
+        if: steps.health_check.outputs.status == 'healthy' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
+          message: |
+            ✅ <b>DAILY HEALTH REPORT</b>
+            
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
+            
+            🟢 <b>Status:</b> System Healthy
+            
+            🌐 <b>API URL:</b> ${{ env.API_URL }}
+            
+            ⏰ <b>Time:</b> ${{ steps.timestamp.outputs.timestamp }}
+            
+            📊 <b>Report:</b> All systems operational. System is running normally.
+            
+            💡 <b>Next Check:</b> Automated monitoring continues every 10 minutes.
+            
+            #monitoring #daily-report #system-healthy
+
