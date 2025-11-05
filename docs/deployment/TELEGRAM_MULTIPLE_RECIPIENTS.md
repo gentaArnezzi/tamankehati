@@ -38,11 +38,27 @@ Panduan untuk mengirim notifikasi ke beberapa orang/teman.
 2. Bot akan reply dengan informasi grup, termasuk Chat ID
 3. Chat ID grup biasanya negatif (contoh: `-1001234567890`)
 
-**Method 2: Pakai API**
-1. Kirim pesan apapun di grup (bisa dari bot atau anggota lain)
-2. Buka browser: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
-3. Cari `"chat":{"id":-1001234567890}` - ini Chat ID grup
-4. Copy angka tersebut (biasanya negatif)
+**Method 2: Pakai API (Paling Mudah)**
+1. Pastikan bot sudah di-add ke grup
+2. Kirim pesan apapun di grup (atau biarkan bot di-add)
+3. Buka browser: `https://api.telegram.org/bot<YOUR_BOT_TOKEN>/getUpdates`
+4. Cari `"chat":{"id":-5018129194}` - ini Chat ID grup
+   - Look for `"type":"group"` dalam JSON
+   - Chat ID grup selalu **negatif** (contoh: `-5018129194`)
+5. Copy angka tersebut (termasuk tanda minus)
+
+**Contoh JSON Response:**
+```json
+{
+  "my_chat_member": {
+    "chat": {
+      "id": -5018129194,  ← INI CHAT ID GRUP
+      "title": "Taman Kehati CI/CD",
+      "type": "group"
+    }
+  }
+}
+```
 
 #### 4. Update GitHub Secret
 
