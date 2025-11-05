@@ -120,13 +120,21 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            🚀 *CI/CD Deployment Started*
+            🟡 *DEPLOYMENT STARTED*
             
-            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
-            🔗 *Commit:* ${{ github.sha }}
-            👤 *Triggered by:* ${{ github.actor }}
+            🏷️ *Project:* Taman Kehati Web Portal
             
-            Building Docker images...
+            🌿 *Branch:* ${{ github.ref_name }}
+            
+            👤 *Triggered by:* @${{ github.actor }}
+            
+            🚀 *Action:* Build and Deploy via GitHub CI/CD
+            
+            📦 Building Docker image...
+            
+            ⏱ *Estimated Time:* ~10 minutes
+            
+            #ci-cd #build #progress
     
       - name: Checkout code
         uses: actions/checkout@v4
@@ -212,7 +220,7 @@ jobs:
             🐳 *Backend:* `${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-backend:${{ env.IMAGE_TAG }}`
             🌐 *Frontend:* `${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-frontend:${{ env.IMAGE_TAG }}`
             
-            Deploying to server...
+            🚀 Deploying to server...
 
       - name: Notify build failure
         if: failure() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
@@ -221,12 +229,23 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            ❌ *Docker Build Failed*
+            ❌ *DEPLOYMENT FAILED*
             
-            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
-            🔗 *Commit:* ${{ github.sha }}
+            🏷️ *Project:* Taman Kehati Web Portal
             
-            Check GitHub Actions for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            🔁 *Environment:* Production
+            
+            🌿 *Branch:* ${{ github.ref_name }}
+            
+            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            
+            👤 *Triggered by:* @${{ github.actor }}
+            
+            🧩 *Error:* Container build failed at step "npm run build"
+            
+            💡 *Hint:* Check build logs in GitHub Actions → [View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            #ci-cd #deployment #failed
 
   deploy:
     name: Deploy to Server
@@ -467,13 +486,27 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            ✅ *Deployment Successful!*
+            ✅ *DEPLOYMENT SUCCESSFUL*
             
-            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
-            🌐 *Application URL:* http://38.47.93.167:8080
-            🏥 *Health Check:* http://38.47.93.167:8080/api/health
+            🏷️ *Project:* Taman Kehati Web Portal
             
-            ✅ All services are running and healthy.
+            🔁 *Environment:* Production
+            
+            🌿 *Branch:* ${{ github.ref_name }}
+            
+            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            
+            👤 *Triggered by:* @${{ github.actor }}
+            
+            ⏱ *Duration:* ~10 minutes
+            
+            📅 *Time:* $(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+            
+            🚀 *Status:* Successfully deployed to server (38.47.93.167)
+            
+            🩺 *Health Check:* Passed ✅
+            
+            #ci-cd #deployment #success
 
       - name: Notify deployment failure
         if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
@@ -482,14 +515,27 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            ❌ *Deployment Failed*
+            ❌ *DEPLOYMENT FAILED*
             
-            📦 *Image Tag:* `${{ env.IMAGE_TAG }}`
-            🔗 *Commit:* ${{ github.sha }}
+            🏷️ *Project:* Taman Kehati Web Portal
             
-            ⚠️ Deployment failed. Rollback will be attempted automatically.
+            🔁 *Environment:* Production
             
-            Check GitHub Actions for details: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            🌿 *Branch:* ${{ github.ref_name }}
+            
+            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            
+            👤 *Triggered by:* @${{ github.actor }}
+            
+            ⏱ *Duration:* ~10 minutes
+            
+            📅 *Time:* $(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+            
+            🧩 *Error:* Deployment failed on server
+            
+            💡 *Hint:* Check deployment logs in GitHub Actions → [View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            
+            #ci-cd #deployment #failed
 
   verify-deployment:
     name: Verify Deployment
@@ -746,6 +792,21 @@ jobs:
             exit 0
           EOF
 
+      - name: Get previous tag for rollback notification
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        id: previous_tag_notify
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            if [ -f .env ] && grep -q "^IMAGE_TAG=" .env; then
+              grep "^IMAGE_TAG=" .env | cut -d'=' -f2
+            else
+              echo "latest"
+            fi
+          EOF > /tmp/prev_tag_notify.txt
+          PREV_TAG=$(cat /tmp/prev_tag_notify.txt | tr -d '\n')
+          echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
+
       - name: Notify rollback
         if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
@@ -753,11 +814,17 @@ jobs:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           message: |
-            🔄 *Rollback Completed*
+            ⚠️ *ROLLBACK INITIATED*
             
-            ⚠️ Previous deployment failed and has been rolled back.
+            🏷️ *Project:* Taman Kehati Web Portal
             
-            The system has been restored to the previous working version.
+            🌿 *Branch:* ${{ github.ref_name }}
             
-            Please check the deployment logs for details.
+            ⏱ *Triggered automatically* after failed deployment
+            
+            📦 *Reverting to previous stable build:* ${{ steps.previous_tag_notify.outputs.tag || 'latest' }}
+            
+            🚦 *Status:* Rollback completed successfully
+            
+            #ci-cd #rollback #stability
 
