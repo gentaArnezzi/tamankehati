@@ -127,20 +127,40 @@ services:
     restart: unless-stopped
 
   # Ollama LLM Service (Optional)
+  # Auto pre-loads model on container start to prevent timeout
   ollama:
     image: ollama/ollama:latest
     container_name: tamankehati-ollama-prod
     volumes:
       - ollama_data:/root/.ollama
+    environment:
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2:1.5b}
     networks:
       - tamankehati-network
     restart: unless-stopped
+    mem_limit: 6g
+    cpus: 4.0
+    # Auto pre-load model after container start
+    entrypoint: ["/bin/sh", "-c"]
+    command: >
+      ollama serve &
+      OLLAMA_PID=$$!
+      sleep 15 &&
+      echo "Checking if model $${OLLAMA_MODEL:-qwen2:1.5b} exists..." &&
+      if ! ollama list 2>/dev/null | grep -q "$${OLLAMA_MODEL:-qwen2:1.5b}"; then
+        echo "Model not found, pulling $${OLLAMA_MODEL:-qwen2:1.5b}..." &&
+        ollama pull $${OLLAMA_MODEL:-qwen2:1.5b} || echo "Pull failed, continuing..."
+      fi &&
+      echo "Pre-loading model $${OLLAMA_MODEL:-qwen2:1.5b} to memory..." &&
+      timeout 60 ollama run $${OLLAMA_MODEL:-qwen2:1.5b} "Preload" > /dev/null 2>&1 || echo "Pre-load timeout, but continuing..." &&
+      echo "✅ Ollama ready with model pre-loaded" &&
+      wait $$OLLAMA_PID
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags > /dev/null 2>&1"]
+      interval: 60s
+      timeout: 30s
       retries: 3
-      start_period: 40s
+      start_period: 120s  # Give time for model pull and pre-load
 
 volumes:
   postgres_data:
