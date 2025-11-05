@@ -31,7 +31,7 @@ services:
         value: false
       - key: CORS_ORIGINS
         sync: false
-        # Set this to your Vercel frontend URL
+        # Set this to your frontend URL
       - key: UPLOAD_DIRECTORY
         value: /tmp/uploads
       - key: MAX_FILE_SIZE
@@ -42,7 +42,7 @@ services:
         value: json
     autoDeploy: true
 
-# NOTE: Frontend deployed to Vercel, Database deployed to Railway
+# NOTE: Database deployed to Railway
 # Free tier limitations:
 # - No disk storage (uploads stored in /tmp - ephemeral)
 # - 1 worker only
