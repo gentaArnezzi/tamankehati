@@ -232,8 +232,8 @@ export default function ComprehensiveAIGenerator() {
     setLoading(true);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error("Request timeout after 70 seconds"));
-    }, 70000); // 70 second timeout (backend max 60 seconds)
+      controller.abort(new Error("Request timeout after 190 seconds"));
+    }, 190000); // 190 second timeout (backend max 180 seconds for large models)
 
     try {
       const endpoint =
@@ -308,8 +308,8 @@ export default function ComprehensiveAIGenerator() {
     setLoading(true);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error("Request timeout after 70 seconds"));
-    }, 70000); // 70 second timeout (backend max 60 seconds)
+      controller.abort(new Error("Request timeout after 190 seconds"));
+    }, 190000); // 190 second timeout (backend max 180 seconds for large models)
 
     try {
       // Get auth token
@@ -361,8 +361,8 @@ export default function ComprehensiveAIGenerator() {
     setLoading(true);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
-      controller.abort(new Error("Request timeout after 70 seconds"));
-    }, 70000); // 70 second timeout (backend max 60 seconds)
+      controller.abort(new Error("Request timeout after 190 seconds"));
+    }, 190000); // 190 second timeout (backend max 180 seconds for large models)
 
     try {
       // Get auth token
