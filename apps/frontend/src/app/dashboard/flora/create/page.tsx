@@ -222,23 +222,37 @@ export default function CreateFloraPage() {
         process.env.NEXT_PUBLIC_API_URL ||
         "http://38.47.93.167:8080";
 
+      // Get auth token
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("auth_token") || ""
+          : "";
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = "Bearer " + token;
+      }
+
       // Generate all three descriptions in parallel with timeout
       const [descriptionRes, morphologyRes, benefitsRes] = await Promise.all([
-        fetch(base + "/api/v1/ai/public/generate-flora-description", {
+        fetch(base + "/api/v1/ai/generate-flora-description", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(aiData),
           signal: controller.signal,
         }),
-        fetch(base + "/api/v1/ai/public/generate-flora-morphology", {
+        fetch(base + "/api/v1/ai/generate-flora-morphology", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(aiData),
           signal: controller.signal,
         }),
-        fetch(base + "/api/v1/ai/public/generate-flora-benefits", {
+        fetch(base + "/api/v1/ai/generate-flora-benefits", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(aiData),
           signal: controller.signal,
         }),

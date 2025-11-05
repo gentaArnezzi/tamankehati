@@ -212,13 +212,29 @@ export default function CreateFaunaPage() {
         iucn_status: formData.status_iucn || "",
       };
 
+      const base =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "http://38.47.93.167:8080";
+
+      // Get auth token
+      const token =
+        typeof window !== "undefined"
+          ? localStorage.getItem("auth_token") || ""
+          : "";
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = "Bearer " + token;
+      }
+
       const descriptionRes = await fetch(
-        (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
-          "/api/v1/ai/public/generate-fauna-description",
+        base + "/api/v1/ai/generate-fauna-description",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(aiData),
           signal: controller.signal,
         },

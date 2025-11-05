@@ -187,11 +187,22 @@ export default function ComprehensiveAIGenerator() {
 
     try {
       console.log("Testing Ollama connection...");
+      
+      // Get auth token
+      const token = localStorage.getItem("auth_token");
+      const headers: Record<string, string> = {};
+      
+      if (token) {
+        headers["Authorization"] = "Bearer " + token;
+      }
+
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
           "http://38.47.93.167:8080") +
           "/api/v1/ai/test-ollama",
         {
+          method: "GET",
+          headers,
           signal: controller.signal,
         },
       );

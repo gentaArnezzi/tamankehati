@@ -107,8 +107,8 @@ export default function AIFloraFaunaGenerator() {
     try {
       const endpoint =
         type === "flora"
-          ? base + "/api/v1/ai/public/generate-flora-description"
-          : base + "/api/v1/ai/public/generate-fauna-description";
+          ? base + "/api/v1/ai/generate-flora-description"
+          : base + "/api/v1/ai/generate-fauna-description";
 
       const data = type === "flora" ? floraData : faunaData;
 
@@ -139,7 +139,7 @@ export default function AIFloraFaunaGenerator() {
     setLoading(true);
     try {
       const response = await fetch(
-        base + "/api/v1/ai/public/generate-flora-morphology",
+        base + "/api/v1/ai/generate-flora-morphology",
         {
           method: "POST",
           headers: buildAuthHeaders(),
@@ -168,7 +168,7 @@ export default function AIFloraFaunaGenerator() {
     setLoading(true);
     try {
       const response = await fetch(
-        base + "/api/v1/ai/public/generate-flora-benefits",
+        base + "/api/v1/ai/generate-flora-benefits",
         {
           method: "POST",
           headers: buildAuthHeaders(),
@@ -194,7 +194,10 @@ export default function AIFloraFaunaGenerator() {
   const testOllamaConnection = async () => {
     setLoading(true);
     try {
-      const response = await fetch(base + "/api/v1/ai/public/test-ollama");
+      const response = await fetch(base + "/api/v1/ai/test-ollama", {
+        method: "GET",
+        headers: buildAuthHeaders(),
+      });
       const result = await response.json();
 
       if (result.success) {

@@ -164,11 +164,23 @@ export function FloraFormSheet({
         const timeoutId = setTimeout(() => controller.abort(), 70000);
         
         try {
+          // Get auth token
+          const token =
+            typeof window !== "undefined"
+              ? localStorage.getItem("auth_token") || ""
+              : "";
+
+          const headers: Record<string, string> = {
+            "Content-Type": "application/json",
+          };
+
+          if (token) {
+            headers.Authorization = "Bearer " + token;
+          }
+
           const response = await fetch(`${endpoint}?stream=true`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers,
             body: JSON.stringify(aiData),
             signal: controller.signal,
           });
@@ -275,7 +287,7 @@ export function FloraFormSheet({
       };
 
       const description = await fetchWithStreamingRetry(
-        `${base}/api/v1/ai/public/generate-flora-description`,
+        `${base}/api/v1/ai/generate-flora-description`,
         aiData
       );
 
@@ -326,7 +338,7 @@ export function FloraFormSheet({
       };
 
       const morphology = await fetchWithStreamingRetry(
-        `${base}/api/v1/ai/public/generate-flora-morphology`,
+        `${base}/api/v1/ai/generate-flora-morphology`,
         aiData
       );
 
@@ -377,7 +389,7 @@ export function FloraFormSheet({
       };
 
       const benefits = await fetchWithStreamingRetry(
-        `${base}/api/v1/ai/public/generate-flora-benefits`,
+        `${base}/api/v1/ai/generate-flora-benefits`,
         aiData
       );
 
