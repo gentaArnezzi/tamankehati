@@ -680,30 +680,41 @@ class ComprehensiveAIService:
         """
         Generate comprehensive article content including title, summary, and full content
         """
-        prompt = self._build_article_prompt(article_data)
-        
-        messages: list[ChatTurn] = [
-            {
-                "role": "system", 
-                "content": "Anda adalah jurnalis lingkungan dan konservasi Indonesia yang berpengalaman. Tugas Anda adalah membuat artikel yang informatif, menarik, dan mudah dipahami tentang keanekaragaman hayati Indonesia. Artikel harus dalam bahasa Indonesia yang baik dan benar."
-            },
-            {
-                "role": "user",
-                "content": prompt
+        try:
+            prompt = self._build_article_prompt(article_data)
+            
+            messages: list[ChatTurn] = [
+                {
+                    "role": "system", 
+                    "content": "Anda adalah jurnalis lingkungan dan konservasi Indonesia yang berpengalaman. Tugas Anda adalah membuat artikel yang informatif, menarik, dan mudah dipahami tentang keanekaragaman hayati Indonesia. Artikel harus dalam bahasa Indonesia yang baik dan benar."
+                },
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+            
+            content = await self.ollama_provider.generate(messages)
+            
+            # Validate content is not empty
+            if not content or not content.strip():
+                raise ValueError("Ollama returned empty content")
+            
+            # Extract title and summary from content
+            title = self._extract_title_from_content(content)
+            summary = self._extract_summary_from_content(content)
+            
+            return {
+                "title": title,
+                "summary": summary,
+                "content": content
             }
-        ]
-        
-        content = await self.ollama_provider.generate(messages)
-        
-        # Extract title and summary from content
-        title = self._extract_title_from_content(content)
-        summary = self._extract_summary_from_content(content)
-        
-        return {
-            "title": title,
-            "summary": summary,
-            "content": content
-        }
+        except Exception as e:
+            # Log error for debugging
+            import traceback
+            print(f"Error in generate_article_content: {str(e)}")
+            print(traceback.format_exc())
+            raise
     
     async def generate_news_content(self, news_data: Dict[str, Any]) -> Dict[str, str]:
         """
@@ -1047,10 +1058,14 @@ class ComprehensiveAIService:
     def _build_article_prompt(self, article_data: Dict[str, Any]) -> str:
         """Build prompt for article generation"""
         
-        topic = article_data.get('topic', '')
-        category = article_data.get('category', 'Konservasi')
-        park_name = article_data.get('park_name', '')
-        key_points = article_data.get('key_points', [])
+        topic = article_data.get('topic', '') or ''
+        category = article_data.get('category', 'Konservasi') or 'Konservasi'
+        park_name = article_data.get('park_name', '') or ''
+        key_points = article_data.get('key_points', []) or []
+        
+        # Ensure key_points is a list
+        if not isinstance(key_points, list):
+            key_points = []
         
         prompt_parts = [
             "Buatkan artikel lengkap tentang keanekaragaman hayati Indonesia dengan spesifikasi berikut:",
@@ -1062,9 +1077,10 @@ class ComprehensiveAIService:
             "Poin-poin penting yang harus disertakan:"
         ]
         
-        if key_points:
+        if key_points and len(key_points) > 0:
             for i, point in enumerate(key_points, 1):
-                prompt_parts.append(f"{i}. {point}")
+                if point and str(point).strip():  # Only add non-empty points
+                    prompt_parts.append(f"{i}. {str(point).strip()}")
         else:
             prompt_parts.append("- [Tidak ada poin khusus]")
         
@@ -1115,18 +1131,44 @@ class ComprehensiveAIService:
     
     def _extract_title_from_content(self, content: str) -> str:
         """Extract title from generated content"""
-        lines = content.split('\n')
-        for line in lines:
-            if line.strip() and not line.startswith(' '):
-                return line.strip()
-        return "Artikel Keanekaragaman Hayati"
+        if not content or not content.strip():
+            return "Artikel Keanekaragaman Hayati"
+        
+        try:
+            lines = content.split('\n')
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith(' ') and len(line) > 5:
+                    # Remove common prefixes like "Judul:", "Title:", etc.
+                    for prefix in ["Judul:", "Title:", "# "]:
+                        if line.startswith(prefix):
+                            line = line[len(prefix):].strip()
+                    return line[:200]  # Limit title length
+            return "Artikel Keanekaragaman Hayati"
+        except Exception:
+            return "Artikel Keanekaragaman Hayati"
     
     def _extract_summary_from_content(self, content: str) -> str:
         """Extract summary from generated content"""
-        paragraphs = content.split('\n\n')
-        if len(paragraphs) > 1:
-            return paragraphs[1][:300] + "..." if len(paragraphs[1]) > 300 else paragraphs[1]
-        return content[:300] + "..." if len(content) > 300 else content
+        if not content or not content.strip():
+            return "Artikel tentang keanekaragaman hayati Indonesia."
+        
+        try:
+            paragraphs = content.split('\n\n')
+            if len(paragraphs) > 1:
+                summary = paragraphs[1].strip()
+                # Skip if it's too short or looks like a title
+                if len(summary) > 50:
+                    return summary[:300] + "..." if len(summary) > 300 else summary
+            
+            # Fallback: use first paragraph or first 300 chars
+            first_paragraph = content.split('\n\n')[0].strip() if content.split('\n\n') else content
+            if len(first_paragraph) > 50:
+                return first_paragraph[:300] + "..." if len(first_paragraph) > 300 else first_paragraph
+            
+            return content[:300] + "..." if len(content) > 300 else content
+        except Exception:
+            return content[:300] + "..." if len(content) > 300 else content
     
     def _extract_headline_from_content(self, content: str) -> str:
         """Extract headline from generated content"""

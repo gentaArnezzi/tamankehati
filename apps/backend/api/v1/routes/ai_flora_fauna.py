@@ -184,25 +184,80 @@ async def generate_flora_benefits(
 @router.get("/test-ollama")
 async def test_ollama_connection():
     """
-    Test Ollama connection and model availability
+    Test Ollama connection and model availability - Fast health check
     """
+    import httpx
+    import os
+    
+    OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Test with simple prompt
-        test_data = {
-            "local_name": "Pohon Jati",
-            "scientific_name": "Tectona grandis",
-            "family": "Lamiaceae"
-        }
-        
-        description = await ai_service.generate_flora_description(test_data)
-        
-        return {
-            "success": True,
-            "message": "Koneksi Ollama berhasil",
-            "test_description": description[:200] + "..." if len(description) > 200 else description
-        }
+        # Fast health check: ping Ollama API
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            # Step 1: Check if Ollama server is running
+            try:
+                response = await client.get(f"{OLLAMA_URL}/api/tags")
+                if response.status_code != 200:
+                    return {
+                        "success": False,
+                        "message": f"Ollama server tidak merespons (status: {response.status_code})",
+                        "error": "Server not responding"
+                    }
+            except httpx.ConnectError:
+                return {
+                    "success": False,
+                    "message": "Tidak dapat terhubung ke Ollama server",
+                    "error": "Connection refused"
+                }
+            except httpx.TimeoutException:
+                return {
+                    "success": False,
+                    "message": "Ollama server timeout (tidak merespons dalam 5 detik)",
+                    "error": "Timeout"
+                }
+            
+            # Step 2: Quick generation test with very short prompt and timeout
+            try:
+                test_payload = {
+                    "model": OLLAMA_MODEL,
+                    "prompt": "Hello",
+                    "stream": False,
+                    "options": {
+                        "num_predict": 5  # Only generate 5 tokens for quick test
+                    }
+                }
+                response = await client.post(
+                    f"{OLLAMA_URL}/api/generate",
+                    json=test_payload,
+                    timeout=10.0
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return {
+                        "success": True,
+                        "message": "Koneksi Ollama berhasil",
+                        "test_response": result.get("response", "")[:50]
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": f"Generate API gagal (status: {response.status_code})",
+                        "error": response.text[:200]
+                    }
+            except httpx.TimeoutException:
+                return {
+                    "success": False,
+                    "message": "Generate test timeout (Ollama terlalu lambat)",
+                    "error": "Generation timeout"
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "message": f"Generate test gagal: {str(e)}",
+                    "error": str(e)
+                }
         
     except Exception as e:
         return {
@@ -214,25 +269,80 @@ async def test_ollama_connection():
 @router.get("/public/test-ollama")
 async def test_ollama_connection_public():
     """
-    Test Ollama connection and model availability (public endpoint)
+    Test Ollama connection and model availability (public endpoint) - Fast health check
     """
+    import httpx
+    import os
+    
+    OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "qwen2:1.5b")
+    
     try:
-        ai_service = FloraFaunaAIService()
-        
-        # Test with simple prompt
-        test_data = {
-            "local_name": "Pohon Jati",
-            "scientific_name": "Tectona grandis",
-            "family": "Lamiaceae"
-        }
-        
-        description = await ai_service.generate_flora_description(test_data)
-        
-        return {
-            "success": True,
-            "message": "Koneksi Ollama berhasil",
-            "test_description": description[:200] + "..." if len(description) > 200 else description
-        }
+        # Fast health check: ping Ollama API
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            # Step 1: Check if Ollama server is running
+            try:
+                response = await client.get(f"{OLLAMA_URL}/api/tags")
+                if response.status_code != 200:
+                    return {
+                        "success": False,
+                        "message": f"Ollama server tidak merespons (status: {response.status_code})",
+                        "error": "Server not responding"
+                    }
+            except httpx.ConnectError:
+                return {
+                    "success": False,
+                    "message": "Tidak dapat terhubung ke Ollama server",
+                    "error": "Connection refused"
+                }
+            except httpx.TimeoutException:
+                return {
+                    "success": False,
+                    "message": "Ollama server timeout (tidak merespons dalam 5 detik)",
+                    "error": "Timeout"
+                }
+            
+            # Step 2: Quick generation test with very short prompt and timeout
+            try:
+                test_payload = {
+                    "model": OLLAMA_MODEL,
+                    "prompt": "Hello",
+                    "stream": False,
+                    "options": {
+                        "num_predict": 5  # Only generate 5 tokens for quick test
+                    }
+                }
+                response = await client.post(
+                    f"{OLLAMA_URL}/api/generate",
+                    json=test_payload,
+                    timeout=10.0
+                )
+                
+                if response.status_code == 200:
+                    result = response.json()
+                    return {
+                        "success": True,
+                        "message": "Koneksi Ollama berhasil",
+                        "test_response": result.get("response", "")[:50]
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": f"Generate API gagal (status: {response.status_code})",
+                        "error": response.text[:200]
+                    }
+            except httpx.TimeoutException:
+                return {
+                    "success": False,
+                    "message": "Generate test timeout (Ollama terlalu lambat)",
+                    "error": "Generation timeout"
+                }
+            except Exception as e:
+                return {
+                    "success": False,
+                    "message": f"Generate test gagal: {str(e)}",
+                    "error": str(e)
+                }
         
     except Exception as e:
         return {
