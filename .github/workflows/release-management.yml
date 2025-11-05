@@ -1,0 +1,191 @@
+name: Release Management
+
+on:
+  workflow_run:
+    workflows: ["CI/CD - Build and Deploy"]
+    types:
+      - completed
+    branches:
+      - main
+  workflow_dispatch: # Allow manual trigger
+
+env:
+  TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    # Only run if the deployment workflow succeeded
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Fetch full history for changelog
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          # Get latest tag or default to v1.0.0
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+          echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Determine next version
+        id: version
+        run: |
+          LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+          
+          # Extract version numbers (assumes format vMAJOR.MINOR.PATCH)
+          if [[ $LATEST_TAG =~ v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+            MAJOR=${BASH_REMATCH[1]}
+            MINOR=${BASH_REMATCH[2]}
+            PATCH=${BASH_REMATCH[3]}
+            
+            # Check commit messages for version type hints
+            COMMIT_MESSAGES=$(git log ${LATEST_TAG}..HEAD --pretty=format:"%s" || echo "")
+            
+            # Determine version bump type
+            if echo "$COMMIT_MESSAGES" | grep -qiE "(breaking|major|!:)"; then
+              # Major version bump
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              BUMP_TYPE="major"
+            elif echo "$COMMIT_MESSAGES" | grep -qiE "(feat|feature|add|new):"; then
+              # Minor version bump
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              BUMP_TYPE="minor"
+            else
+              # Patch version bump (default)
+              PATCH=$((PATCH + 1))
+              BUMP_TYPE="patch"
+            fi
+            
+            NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          else
+            # If tag format doesn't match, default to v1.0.1
+            NEW_VERSION="v1.0.1"
+            BUMP_TYPE="patch"
+          fi
+          
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "bump_type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+          echo "Next version: $NEW_VERSION ($BUMP_TYPE bump)"
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          LATEST_TAG="${{ steps.get_tag.outputs.latest_tag }}"
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          echo "📝 Generating changelog from $LATEST_TAG to $NEW_VERSION..."
+          
+          # Get commits since last tag
+          if [ "$LATEST_TAG" = "v1.0.0" ] && ! git rev-parse --verify "$LATEST_TAG" >/dev/null 2>&1; then
+            # If tag doesn't exist, get all commits
+            COMMITS=$(git log --pretty=format:"- %s (%h)" -20 || echo "- Initial release")
+          else
+            # Get commits since last tag
+            COMMITS=$(git log ${LATEST_TAG}..HEAD --pretty=format:"- %s (%h)" || echo "- No changes")
+          fi
+          
+          # Format changelog
+          CHANGELOG=$(cat <<EOF
+          ## $NEW_VERSION
+          
+          **Release Date:** $(date +'%Y-%m-%d')
+          **Version Type:** ${{ steps.version.outputs.bump_type }} bump
+          
+          ### Changes
+          $COMMITS
+          
+          ### Technical Details
+          - **Commit SHA:** ${{ github.sha }}
+          - **Workflow Run:** ${{ github.run_id }}
+          - **Triggered by:** @${{ github.actor }}
+          EOF
+          )
+          
+          # Save changelog to output (multiline)
+          {
+            echo 'changelog<<EOF'
+            echo "$CHANGELOG"
+            echo EOF
+          } >> $GITHUB_OUTPUT
+          
+          echo "✅ Changelog generated"
+
+      - name: Create git tag
+        id: tag
+        run: |
+          NEW_VERSION="${{ steps.version.outputs.new_version }}"
+          
+          # Create and push tag
+          git tag -a "$NEW_VERSION" -m "Release $NEW_VERSION"
+          git push origin "$NEW_VERSION"
+          
+          echo "tag=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "✅ Created and pushed tag: $NEW_VERSION"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.new_version }}
+          name: Release ${{ steps.version.outputs.new_version }}
+          body: |
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ---
+            
+            **Deployment Status:** ✅ Successfully deployed
+            
+            **Next Steps:**
+            - Monitor system health via monitoring workflow
+            - Check logs if any issues occur
+            - Rollback available if needed
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get timestamp
+        id: timestamp
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
+      - name: Notify Telegram
+        if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        uses: appleboy/telegram-action@master
+        with:
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
+          message: |
+            🎉 <b>NEW RELEASE CREATED</b>
+            
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
+            
+            📦 <b>Version:</b> ${{ steps.version.outputs.new_version }}
+            
+            📊 <b>Version Type:</b> ${{ steps.version.outputs.bump_type }} bump
+            
+            📝 <b>Changes:</b>
+            ${{ steps.changelog.outputs.changelog }}
+            
+            🔗 <b>GitHub Release:</b> <a href="https://github.com/${{ github.repository }}/releases/tag/${{ steps.version.outputs.new_version }}">View Release</a>
+            
+            👤 <b>Released by:</b> @${{ github.actor }}
+            
+            📅 <b>Time:</b> ${{ steps.timestamp.outputs.timestamp }}
+            
+            ✅ <b>Status:</b> Release created and tagged successfully
+            
+            #release #deployment #versioning
+
