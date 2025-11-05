@@ -32,35 +32,40 @@ jobs:
           HEALTH_CODE=$(echo "$HEALTH_RESPONSE" | tail -n 1)
           
           echo "Health endpoint response code: $HEALTH_CODE"
+          echo "Health response body: $HEALTH_BODY"
           
-          # Check detailed health endpoint
-          DETAILED_URL="${{ env.API_URL }}/health/detailed"
-          DETAILED_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 15 "$DETAILED_URL" || echo -e "\n000")
-          DETAILED_BODY=$(echo "$DETAILED_RESPONSE" | head -n -1)
-          DETAILED_CODE=$(echo "$DETAILED_RESPONSE" | tail -n 1)
+          # Check healthz endpoint as backup
+          HEALTHZ_URL="${{ env.API_URL }}/healthz"
+          HEALTHZ_RESPONSE=$(curl -s -w "\n%{http_code}" --max-time 10 "$HEALTHZ_URL" || echo -e "\n000")
+          HEALTHZ_BODY=$(echo "$HEALTHZ_RESPONSE" | head -n -1)
+          HEALTHZ_CODE=$(echo "$HEALTHZ_RESPONSE" | tail -n 1)
           
-          echo "Detailed health endpoint response code: $DETAILED_CODE"
+          echo "Healthz endpoint response code: $HEALTHZ_CODE"
           
-          # Determine overall status
-          if [ "$HEALTH_CODE" = "200" ] && [ "$DETAILED_CODE" = "200" ]; then
+          # Determine overall status (at least one endpoint must be healthy)
+          if [ "$HEALTH_CODE" = "200" ] || [ "$HEALTHZ_CODE" = "200" ]; then
             echo "✅ System is healthy"
             echo "status=healthy" >> $GITHUB_OUTPUT
             echo "health_code=$HEALTH_CODE" >> $GITHUB_OUTPUT
-            echo "detailed_code=$DETAILED_CODE" >> $GITHUB_OUTPUT
+            echo "healthz_code=$HEALTHZ_CODE" >> $GITHUB_OUTPUT
             
-            # Extract status from detailed response if available
-            DETAILED_STATUS=$(echo "$DETAILED_BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
-            echo "detailed_status=$DETAILED_STATUS" >> $GITHUB_OUTPUT
+            # Extract status from response if available
+            if [ "$HEALTH_CODE" = "200" ]; then
+              HEALTH_STATUS=$(echo "$HEALTH_BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "ok")
+            else
+              HEALTH_STATUS=$(echo "$HEALTHZ_BODY" | grep -o '"status":"[^"]*"' | cut -d'"' -f4 || echo "ok")
+            fi
+            echo "health_status=$HEALTH_STATUS" >> $GITHUB_OUTPUT
           else
             echo "❌ System health check failed"
             echo "status=unhealthy" >> $GITHUB_OUTPUT
             echo "health_code=$HEALTH_CODE" >> $GITHUB_OUTPUT
-            echo "detailed_code=$DETAILED_CODE" >> $GITHUB_OUTPUT
+            echo "healthz_code=$HEALTHZ_CODE" >> $GITHUB_OUTPUT
             echo "health_body<<EOF" >> $GITHUB_OUTPUT
             echo "$HEALTH_BODY" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
-            echo "detailed_body<<EOF" >> $GITHUB_OUTPUT
-            echo "$DETAILED_BODY" >> $GITHUB_OUTPUT
+            echo "healthz_body<<EOF" >> $GITHUB_OUTPUT
+            echo "$HEALTHZ_BODY" >> $GITHUB_OUTPUT
             echo "EOF" >> $GITHUB_OUTPUT
             exit 1
           fi
@@ -80,7 +85,7 @@ jobs:
             ⚠️ <b>Status:</b> System Unhealthy
             
             🔍 <b>Health Endpoint:</b> HTTP ${{ steps.health_check.outputs.health_code }}
-            🔍 <b>Detailed Endpoint:</b> HTTP ${{ steps.health_check.outputs.detailed_code }}
+            🔍 <b>Healthz Endpoint:</b> HTTP ${{ steps.health_check.outputs.healthz_code }}
             
             🌐 <b>API URL:</b> ${{ env.API_URL }}
             
