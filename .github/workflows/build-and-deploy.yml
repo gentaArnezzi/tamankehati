@@ -113,26 +113,35 @@ jobs:
     needs: test
     
     steps:
+      - name: Get start timestamp
+        id: start_time
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
       - name: Notify deployment start
         if: env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            🟡 *DEPLOYMENT STARTED*
+            🟡 <b>DEPLOYMENT STARTED</b>
             
-            🏷️ *Project:* Taman Kehati Web Portal
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
             
-            🌿 *Branch:* ${{ github.ref_name }}
+            🌿 <b>Branch:</b> ${{ github.ref_name }}
             
-            👤 *Triggered by:* @${{ github.actor }}
+            👤 <b>Triggered by:</b> @${{ github.actor }}
             
-            🚀 *Action:* Build and Deploy via GitHub CI/CD
+            🚀 <b>Action:</b> Build and Deploy via GitHub CI/CD
             
             📦 Building Docker image...
             
-            ⏱ *Estimated Time:* ~10 minutes
+            ⏱ <b>Estimated Time:</b> ~10 minutes
+            
+            📅 <b>Started:</b> ${{ steps.start_time.outputs.timestamp }}
             
             #ci-cd #build #progress
     
@@ -214,13 +223,22 @@ jobs:
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            ✅ *Docker Images Built Successfully*
+            ✅ <b>Docker Images Built Successfully</b>
             
-            🐳 *Backend:* `${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-backend:${{ env.IMAGE_TAG }}`
-            🌐 *Frontend:* `${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-frontend:${{ env.IMAGE_TAG }}`
+            🐳 <b>Backend:</b> <code>${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-backend:${{ env.IMAGE_TAG }}</code>
+            
+            🌐 <b>Frontend:</b> <code>${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-frontend:${{ env.IMAGE_TAG }}</code>
             
             🚀 Deploying to server...
+
+      - name: Get failure timestamp
+        if: failure()
+        id: failure_time
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
       - name: Notify build failure
         if: failure() && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
@@ -228,22 +246,25 @@ jobs:
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            ❌ *DEPLOYMENT FAILED*
+            ❌ <b>DEPLOYMENT FAILED</b>
             
-            🏷️ *Project:* Taman Kehati Web Portal
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
             
-            🔁 *Environment:* Production
+            🔁 <b>Environment:</b> Production
             
-            🌿 *Branch:* ${{ github.ref_name }}
+            🌿 <b>Branch:</b> ${{ github.ref_name }}
             
-            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            📦 <b>Commit:</b> ${{ github.event.head_commit.message || format('{0}', github.sha) }}
             
-            👤 *Triggered by:* @${{ github.actor }}
+            👤 <b>Triggered by:</b> @${{ github.actor }}
             
-            🧩 *Error:* Container build failed at step "npm run build"
+            📅 <b>Time:</b> ${{ steps.failure_time.outputs.timestamp }}
             
-            💡 *Hint:* Check build logs in GitHub Actions → [View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            🧩 <b>Error:</b> Container build failed at step "npm run build"
+            
+            💡 <b>Hint:</b> Check build logs in GitHub Actions → <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Logs</a>
             
             #ci-cd #deployment #failed
 
@@ -479,32 +500,40 @@ jobs:
           echo ""
           echo "All services should be running and healthy."
 
+      - name: Get deployment timestamp
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        id: deployment_time
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
       - name: Notify deployment success
         if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            ✅ *DEPLOYMENT SUCCESSFUL*
+            ✅ <b>DEPLOYMENT SUCCESSFUL</b>
             
-            🏷️ *Project:* Taman Kehati Web Portal
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
             
-            🔁 *Environment:* Production
+            🔁 <b>Environment:</b> Production
             
-            🌿 *Branch:* ${{ github.ref_name }}
+            🌿 <b>Branch:</b> ${{ github.ref_name }}
             
-            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            📦 <b>Commit:</b> ${{ github.event.head_commit.message || format('{0}', github.sha) }}
             
-            👤 *Triggered by:* @${{ github.actor }}
+            👤 <b>Triggered by:</b> @${{ github.actor }}
             
-            ⏱ *Duration:* ~10 minutes
+            ⏱ <b>Duration:</b> ~10 minutes
             
-            📅 *Time:* $(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+            📅 <b>Time:</b> ${{ steps.deployment_time.outputs.timestamp }}
             
-            🚀 *Status:* Successfully deployed to server (38.47.93.167)
+            🚀 <b>Status:</b> Successfully deployed to server (38.47.93.167)
             
-            🩺 *Health Check:* Passed ✅
+            🩺 <b>Health Check:</b> Passed ✅
             
             #ci-cd #deployment #success
 
@@ -514,26 +543,27 @@ jobs:
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            ❌ *DEPLOYMENT FAILED*
+            ❌ <b>DEPLOYMENT FAILED</b>
             
-            🏷️ *Project:* Taman Kehati Web Portal
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
             
-            🔁 *Environment:* Production
+            🔁 <b>Environment:</b> Production
             
-            🌿 *Branch:* ${{ github.ref_name }}
+            🌿 <b>Branch:</b> ${{ github.ref_name }}
             
-            📦 *Commit:* ${{ github.event.head_commit.message || format('{0}', github.sha) }}
+            📦 <b>Commit:</b> ${{ github.event.head_commit.message || format('{0}', github.sha) }}
             
-            👤 *Triggered by:* @${{ github.actor }}
+            👤 <b>Triggered by:</b> @${{ github.actor }}
             
-            ⏱ *Duration:* ~10 minutes
+            ⏱ <b>Duration:</b> ~10 minutes
             
-            📅 *Time:* $(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+            📅 <b>Time:</b> ${{ steps.deployment_time.outputs.timestamp }}
             
-            🧩 *Error:* Deployment failed on server
+            🧩 <b>Error:</b> Deployment failed on server
             
-            💡 *Hint:* Check deployment logs in GitHub Actions → [View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            💡 <b>Hint:</b> Check deployment logs in GitHub Actions → <a href="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Logs</a>
             
             #ci-cd #deployment #failed
 
@@ -807,24 +837,34 @@ jobs:
           PREV_TAG=$(cat /tmp/prev_tag_notify.txt | tr -d '\n')
           echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
 
+      - name: Get rollback timestamp
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        id: rollback_time
+        run: |
+          TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+
       - name: Notify rollback
         if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          format: html
           message: |
-            ⚠️ *ROLLBACK INITIATED*
+            ⚠️ <b>ROLLBACK INITIATED</b>
             
-            🏷️ *Project:* Taman Kehati Web Portal
+            🏷️ <b>Project:</b> Taman Kehati Web Portal
             
-            🌿 *Branch:* ${{ github.ref_name }}
+            🌿 <b>Branch:</b> ${{ github.ref_name }}
             
-            ⏱ *Triggered automatically* after failed deployment
+            ⏱ <b>Triggered automatically</b> after failed deployment
             
-            📦 *Reverting to previous stable build:* ${{ steps.previous_tag_notify.outputs.tag || 'latest' }}
+            📦 <b>Reverting to previous stable build:</b> ${{ steps.previous_tag_notify.outputs.tag || 'latest' }}
             
-            🚦 *Status:* Rollback completed successfully
+            📅 <b>Time:</b> ${{ steps.rollback_time.outputs.timestamp }}
+            
+            🚦 <b>Status:</b> Rollback completed successfully
             
             #ci-cd #rollback #stability
 
