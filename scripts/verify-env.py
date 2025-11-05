@@ -6,7 +6,7 @@ Script ini membantu validate bahwa semua environment variables
 sudah di-set dengan benar untuk deployment.
 
 Usage:
-  python verify-env.py [render|vercel|railway]
+  python verify-env.py [render|railway]
 """
 
 import sys
@@ -137,73 +137,10 @@ def verify_render_backend():
     
     # Check CORS
     cors = os.getenv("CORS_ORIGINS", "")
-    if cors and "vercel.app" in cors:
-        print_success("CORS_ORIGINS: Contains Vercel domain")
-    elif cors and "localhost" in cors:
+    if cors and "localhost" in cors:
         print_warning("CORS_ORIGINS: Contains localhost (remove for production)")
-    
-    print(f"\n{Colors.BOLD}Result:{Colors.END}")
-    if required_ok:
-        print_success("All required variables are set!")
-        return True
-    else:
-        print_error("Some required variables are missing or invalid")
-        return False
-
-
-def verify_vercel_frontend():
-    """Verify Vercel frontend environment variables"""
-    print_header("VERCEL FRONTEND - Environment Variables")
-    
-    required_vars = {
-        "NEXT_PUBLIC_API_URL": 10,
-        "NEXT_PUBLIC_APP_NAME": 3,
-        "NODE_ENV": 0,
-    }
-    
-    optional_vars = {
-        "NEXT_PUBLIC_APP_VERSION": 0,
-        "NEXT_TELEMETRY_DISABLED": 0,
-        "NEXT_PUBLIC_MAP_TILE_URL": 10,
-        "NEXT_PUBLIC_MAP_ATTRIBUTION": 5,
-        "NEXT_PUBLIC_DEFAULT_LAT": 0,
-        "NEXT_PUBLIC_DEFAULT_LNG": 0,
-        "NEXT_PUBLIC_DEFAULT_ZOOM": 0,
-        "NEXT_PUBLIC_ENABLE_AI": 0,
-        "NEXT_PUBLIC_ENABLE_MAPS": 0,
-        "NEXT_PUBLIC_ENABLE_UPLOADS": 0,
-        "NEXT_PUBLIC_ENABLE_NOTIFICATIONS": 0,
-    }
-    
-    print(f"{Colors.BOLD}Required Variables:{Colors.END}")
-    required_ok = all(check_env_var(var, True, min_len) for var, min_len in required_vars.items())
-    
-    print(f"\n{Colors.BOLD}Optional Variables:{Colors.END}")
-    optional_ok = all(check_env_var(var, False, min_len) for var, min_len in optional_vars.items())
-    
-    # Specific checks
-    print(f"\n{Colors.BOLD}Validation Checks:{Colors.END}")
-    
-    # Check API URL
-    api_url = os.getenv("NEXT_PUBLIC_API_URL", "")
-    if "onrender.com" in api_url or "render.com" in api_url:
-        print_success("NEXT_PUBLIC_API_URL: Points to Render backend")
-    elif "localhost" in api_url:
-        print_warning("NEXT_PUBLIC_API_URL: Points to localhost (update for production)")
-    elif api_url:
-        print_success(f"NEXT_PUBLIC_API_URL: Custom backend URL")
-    
-    # Check NODE_ENV
-    node_env = os.getenv("NODE_ENV", "")
-    if node_env == "production":
-        print_success("NODE_ENV: Set to production")
-    else:
-        print_warning(f"NODE_ENV: '{node_env}' (should be 'production')")
-    
-    # Check NEXT_PUBLIC_ prefix
-    print(f"\n{Colors.BOLD}Note:{Colors.END}")
-    print("All public variables must start with 'NEXT_PUBLIC_' prefix")
-    print("These variables are exposed to the browser")
+    elif cors:
+        print_success("CORS_ORIGINS: Configured")
     
     print(f"\n{Colors.BOLD}Result:{Colors.END}")
     if required_ok:
@@ -252,20 +189,18 @@ def print_usage():
 
 {Colors.BOLD}Platforms:{Colors.END}
   render     - Verify Render backend environment variables
-  vercel     - Verify Vercel frontend environment variables
   railway    - Verify Railway database connection
   all        - Check all platforms
 
 {Colors.BOLD}Examples:{Colors.END}
   python verify-env.py render
-  python verify-env.py vercel
+  python verify-env.py railway
   python verify-env.py all
 
 {Colors.BOLD}Note:{Colors.END}
 This script checks environment variables in your current shell.
 For deployment, you need to set these in:
   - Render Dashboard → Environment tab
-  - Vercel Dashboard → Settings → Environment Variables
   - Railway Dashboard → Variables tab
 """)
 
@@ -282,13 +217,10 @@ def main():
     
     if platform == "render":
         results.append(verify_render_backend())
-    elif platform == "vercel":
-        results.append(verify_vercel_frontend())
     elif platform == "railway":
         results.append(verify_railway_database())
     elif platform == "all":
         results.append(verify_render_backend())
-        results.append(verify_vercel_frontend())
         results.append(verify_railway_database())
     else:
         print_error(f"Unknown platform: {platform}")
