@@ -382,10 +382,10 @@ async def test_ollama_connection():
                         "available_models": model_names[:5],
                         "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-        
-        return {
-            "success": True,
-            "message": "Koneksi Ollama berhasil",
+                
+                return {
+                    "success": True,
+                    "message": "Koneksi Ollama berhasil",
                     "available_models": model_names[:5],
                     "model_checked": OLLAMA_MODEL,
                     "model_found": model_found
@@ -410,7 +410,7 @@ async def test_ollama_connection():
                     "success": False,
                     "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
-        }
+                }
         
     except Exception as e:
         return {
@@ -460,10 +460,10 @@ async def test_ollama_connection_public():
                         "available_models": model_names[:5],
                         "warning": f"Model {OLLAMA_MODEL} not found, but server is accessible"
                     }
-        
-        return {
-            "success": True,
-            "message": "Koneksi Ollama berhasil",
+                
+                return {
+                    "success": True,
+                    "message": "Koneksi Ollama berhasil",
                     "available_models": model_names[:5],
                     "model_checked": OLLAMA_MODEL,
                     "model_found": model_found
@@ -488,7 +488,7 @@ async def test_ollama_connection_public():
                     "success": False,
                     "message": f"Error saat cek koneksi: {str(e)}",
                     "error": str(e)
-        }
+                }
         
     except Exception as e:
         return {
