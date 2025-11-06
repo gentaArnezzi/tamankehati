@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Info } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
-export function TentangKamiHero() {
+export function IndeksHero() {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -23,8 +23,8 @@ export function TentangKamiHero() {
         }}
       >
         <Image
-          src="/hero/forest.webp"
-          alt="Taman Kehati - Konservasi Keanekaragaman Hayati Indonesia"
+          src="/home/hero.jpg"
+          alt="Indeks Kehati Indonesia - Dashboard Keanekaragaman Hayati"
           fill
           className="object-cover"
           priority
@@ -51,51 +51,49 @@ export function TentangKamiHero() {
             {/* Badge */}
             <div className="inline-block mb-8 animate-fade-in">
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-950/40 backdrop-blur-sm border border-amber-800/30 rounded-full text-amber-50 text-sm font-medium">
-                <Info className="w-4 h-4" />
-                Tentang Taman Kehati
+                <BarChart3 className="w-4 h-4" />
+                Dashboard Data Publik
               </div>
             </div>
 
             {/* Title */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight animate-slide-up">
-              <span className="block">Tentang</span>
-              <span className="block font-normal text-amber-50">Kami</span>
+              <span className="block">Indeks</span>
+              <span className="block font-normal text-amber-50">Kehati</span>
             </h1>
 
             {/* Description */}
             <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-              Platform nasional untuk menghimpun, mengelola, dan menyajikan data
-              keanekaragaman hayati dari Taman Kehati di seluruh Indonesia.
-              Mendukung konservasi, pelaporan resmi, dan akses informasi yang
-              akurat.
+              Dashboard komprehensif untuk melihat statistik, tren, dan analisis
+              data keanekaragaman hayati Indonesia dari seluruh Taman Kehati.
             </p>
 
             {/* Stats */}
             <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  Platform
-                </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Nasional
-                </div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
                   Data
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Terintegrasi
+                  Real-time
                 </div>
               </div>
 
               <div className="text-center">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  Pelaporan
+                  Analisis
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Berkala
+                  Komprehensif
+                </div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-light text-white mb-2">
+                  Transparansi
+                </div>
+                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                  Publik
                 </div>
               </div>
             </div>

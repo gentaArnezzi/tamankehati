@@ -57,18 +57,6 @@ export default function TentangKamiPage() {
           
           {/* Video Player */}
           <VideoSection />
-          
-          {/* Info: Cara upload video */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-800">
-              <strong>💡 Info:</strong> Upload video ke folder{" "}
-              <code className="bg-blue-100 px-2 py-1 rounded text-xs">
-                apps/frontend/public/videos/tentang-kami/
-              </code>
-              {" "}dengan nama file <code className="bg-blue-100 px-2 py-1 rounded text-xs">taman-kehati.mp4</code> atau{" "}
-              <code className="bg-blue-100 px-2 py-1 rounded text-xs">taman-kehati.webm</code>
-            </p>
-          </div>
         </div>
       </section>
 

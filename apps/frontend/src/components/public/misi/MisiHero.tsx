@@ -47,26 +47,26 @@ export function MisiHero() {
             </h1>
 
             <p className="text-lg md:text-xl text-amber-50 mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in delay-300">
-              Melestarikan keanekaragaman hayati Indonesia melalui teknologi,
-              kolaborasi, dan aksi nyata yang berkelanjutan untuk generasi
-              mendatang.
+              Melestarikan keanekaragaman hayati Indonesia melalui integrasi data,
+              pelaporan sistematis, dan kolaborasi antar Taman Kehati untuk
+              mendukung konservasi berkelanjutan.
             </p>
 
             {/* Mission Pillars */}
             <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-500">
               <div className="text-center">
                 <div className="text-lg font-medium text-white mb-1">
-                  Konservasi Flora
+                  Integrasi Data
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-medium text-white mb-1">
-                  Konservasi Fauna
+                  Pelaporan Berkala
                 </div>
               </div>
               <div className="text-center">
                 <div className="text-lg font-medium text-white mb-1">
-                  Ekosistem Berkelanjutan
+                  Transparansi & Akuntabilitas
                 </div>
               </div>
             </div>

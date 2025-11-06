@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { IndeksHero } from "@/components/public/indeks/IndeksHero";
 import {
   BarChart3,
   TreePine,
@@ -194,17 +195,20 @@ export default function TentangPage() {
   ];
 
   return (
-    <main className="min-h-screen bg-gray-100 pt-20">
+    <main className="min-h-screen bg-gray-100">
+      {/* Hero Section with Parallax */}
+      <IndeksHero />
+
       {/* Compact Header - Tableau Style */}
       <section className="bg-white border-b border-gray-200 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">
-                Indeks Kehati Indonesia
-              </h1>
+              <h2 className="text-2xl font-semibold text-gray-900">
+                Dashboard Data
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Dashboard Keanekaragaman Hayati
+                Statistik dan analisis keanekaragaman hayati
               </p>
             </div>
             <div className="flex items-center gap-2 text-xs text-gray-500">

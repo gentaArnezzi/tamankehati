@@ -27,7 +27,11 @@ export function PublicHeader() {
     pathname === "/fauna" ||
     pathname === "/taman" ||
     pathname === "/artikel" ||
-    pathname === "/kegiatan";
+    pathname === "/kegiatan" ||
+    pathname === "/tentang-kami" ||
+    pathname === "/indeks" ||
+    pathname === "/misi" ||
+    pathname === "/kontak";
 
   // Detect desktop vs mobile
   useEffect(() => {

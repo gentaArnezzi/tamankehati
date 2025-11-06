@@ -24,19 +24,19 @@ export function MisiCTA() {
 
   const waysToContribute = [
     {
-      title: "Menjadi Relawan",
-      description: "Bergabung dengan komunitas relawan konservasi kami",
-      action: "Daftar Sekarang",
+      title: "Input Data",
+      description: "Kontribusikan data flora, fauna, dan kegiatan konservasi dari Taman Kehati Anda",
+      action: "Akses Dashboard",
     },
     {
-      title: "Donasi",
-      description: "Dukung program konservasi dengan donasi Anda",
-      action: "Donasi Sekarang",
+      title: "Pelaporan",
+      description: "Gunakan platform untuk menyusun laporan tahunan dan lima tahunan sesuai Permen LH No 3 Tahun 2012",
+      action: "Lihat Panduan",
     },
     {
-      title: "Berbagi Data",
-      description: "Kontribusikan data flora dan fauna yang Anda temukan",
-      action: "Upload Data",
+      title: "Kolaborasi",
+      description: "Berpartisipasi dalam jejaring Taman Kehati untuk pertukaran data dan best practices",
+      action: "Hubungi Kami",
     },
   ];
 
@@ -46,11 +46,10 @@ export function MisiCTA() {
         {/* Main CTA */}
         <div className="text-center mb-20">
           <h2 className="text-3xl font-light text-gray-900 mb-6">
-            Bergabunglah dengan Misi Kami
+            Dukungan untuk Konservasi
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Mari bersama-sama melestarikan keanekaragaman hayati Indonesia untuk
-            generasi mendatang.
+            Platform ini dirancang untuk mendukung pengelolaan dan pelaporan data keanekaragaman hayati dari Taman Kehati di seluruh Indonesia.
           </p>
         </div>
 

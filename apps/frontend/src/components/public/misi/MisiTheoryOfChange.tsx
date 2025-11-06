@@ -9,60 +9,60 @@ export function MisiTheoryOfChange() {
 
   const pillars = [
     {
-      title: "Data & Teknologi",
+      title: "Pangkalan Data Terintegrasi",
       description:
-        "Menggunakan teknologi terdepan untuk dokumentasi dan analisis keanekaragaman hayati",
+        "Sistem database nasional untuk menghimpun dan mengelola data keanekaragaman hayati dari seluruh Taman Kehati",
       details: [
-        "Sistem database terintegrasi untuk flora dan fauna",
-        "Teknologi AI untuk identifikasi spesies",
-        "Platform digital untuk akses data real-time",
-        "Sistem monitoring dan pelacakan konservasi",
+        "Database terpusat untuk flora, fauna, dan ekosistem",
+        "Standar metadata dan validasi data yang konsisten",
+        "Akses data real-time untuk pengambil kebijakan",
+        "Sistem pelacakan dan audit untuk akuntabilitas",
       ],
     },
     {
-      title: "Komunitas & Kolaborasi",
+      title: "Pelaporan Sistematis",
       description:
-        "Membangun jaringan kolaborasi dengan berbagai stakeholder konservasi",
+        "Mendukung penyusunan laporan tahunan dan lima tahunan sesuai Permen LH No 3 Tahun 2012",
       details: [
-        "Kemitraan dengan universitas dan lembaga riset",
-        "Program pelatihan untuk masyarakat lokal",
-        "Platform partisipasi publik dalam konservasi",
-        "Jaringan relawan konservasi nasional",
+        "Template laporan terstruktur dan konsisten",
+        "Ekspor data siap pakai untuk dokumen resmi",
+        "Dashboard analitik untuk evaluasi program",
+        "Dukungan penyusunan laporan berkala",
       ],
     },
     {
-      title: "Dampak Global",
+      title: "Kolaborasi & Transparansi",
       description:
-        "Berkontribusi pada upaya konservasi global dan pencapaian SDGs",
+        "Membangun jejaring antar Taman Kehati dan menyediakan akses informasi publik",
       details: [
-        "Kontribusi pada target Aichi Biodiversity",
-        "Dukungan pencapaian SDG 15 (Life on Land)",
-        "Partisipasi dalam konvensi internasional",
-        "Pemodelan dampak perubahan iklim",
+        "Platform kolaborasi antar pengelola Taman Kehati",
+        "Pertukaran data dan best practices",
+        "Akses informasi publik yang transparan",
+        "Dukungan penelitian dan edukasi kehati",
       ],
     },
   ];
 
   const impactAreas = [
     {
-      title: "Target Konservasi",
+      title: "Taman Kehati",
       value: "100+",
-      description: "Taman Kehati yang dikelola",
+      description: "Taman Kehati terdata di platform",
     },
     {
-      title: "Database Spesies",
+      title: "Data Spesies",
       value: "10,000+",
-      description: "Spesies terdokumentasi",
+      description: "Spesies flora dan fauna terdokumentasi",
     },
     {
-      title: "Komunitas Aktif",
-      value: "5,000+",
-      description: "Kontributor dan relawan",
+      title: "Laporan",
+      value: "Tahunan",
+      description: "Laporan tahunan dan lima tahunan",
     },
     {
-      title: "Ekosistem Dilindungi",
-      value: "50,000+",
-      description: "Hektar kawasan konservasi",
+      title: "Akses Data",
+      value: "Publik",
+      description: "Informasi transparan dan dapat diakses",
     },
   ];
 
@@ -75,9 +75,9 @@ export function MisiTheoryOfChange() {
             Theory of Change
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Kami percaya bahwa konservasi keanekaragaman hayati memerlukan
-            pendekatan holistik yang menggabungkan teknologi, komunitas, dan
-            dampak global yang berkelanjutan.
+            Platform ini dirancang untuk memperkuat konservasi keanekaragaman hayati melalui
+            integrasi data, pelaporan sistematis, dan transparansi informasi yang
+            mendukung pengambilan keputusan dan akuntabilitas publik.
           </p>
         </div>
 
