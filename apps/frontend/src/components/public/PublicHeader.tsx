@@ -222,12 +222,24 @@ export function PublicHeader() {
                     </div>
                   </Link>
                   <Link
-                    href="/misi"
+                    href="/tentang-kami"
                     prefetch={true}
                     className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
                   >
                     <div className="font-medium text-slate-900">
                       Tentang Kami
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      Informasi tentang Taman Kehati dan pangkalan data
+                    </div>
+                  </Link>
+                  <Link
+                    href="/misi"
+                    prefetch={true}
+                    className="block px-5 py-4 text-sm text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors border-b border-slate-100"
+                  >
+                    <div className="font-medium text-slate-900">
+                      Visi & Misi
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
                       Visi, Misi dan tujuan konservasi
@@ -421,12 +433,23 @@ export function PublicHeader() {
                       </div>
                     </Link>
                     <Link
-                      href="/misi"
+                      href="/tentang-kami"
                       prefetch={true}
                       className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <div className="font-medium text-slate-900">Tentang Kami</div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        Informasi tentang Taman Kehati dan pangkalan data
+                      </div>
+                    </Link>
+                    <Link
+                      href="/misi"
+                      prefetch={true}
+                      className="block px-4 py-3 text-base text-slate-700 hover:bg-slate-50 rounded-lg transition-colors min-h-[44px] flex flex-col justify-center"
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <div className="font-medium text-slate-900">Visi & Misi</div>
                       <div className="text-xs text-slate-500 mt-0.5">
                         Visi, Misi dan tujuan konservasi
                       </div>
