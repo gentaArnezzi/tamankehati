@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { TentangKamiHero } from "@/components/public/tentang-kami/TentangKamiHero";
+import VideoSection from "@/components/public/tentang-kami/VideoSection";
 
 export const metadata: Metadata = {
   title: "Tentang Kami | Taman Kehati",
@@ -54,28 +55,19 @@ export default function TentangKamiPage() {
             </p>
           </div>
           
-          {/* Video Placeholder - Nanti bisa diganti dengan video embed */}
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-200 shadow-xl">
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-600 flex items-center justify-center">
-                  <svg
-                    className="w-10 h-10 text-white ml-1"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
-                </div>
-                <p className="text-slate-600 font-medium">
-                  Video Taman Kehati akan ditampilkan di sini
-                </p>
-                <p className="text-sm text-slate-500 mt-2">
-                  {/* Nanti bisa ditambahkan embed video YouTube/Vimeo di sini */}
-                  {/* Contoh: <iframe src="..." className="absolute inset-0 w-full h-full" /> */}
-                </p>
-              </div>
-            </div>
+          {/* Video Player */}
+          <VideoSection />
+          
+          {/* Info: Cara upload video */}
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <strong>💡 Info:</strong> Upload video ke folder{" "}
+              <code className="bg-blue-100 px-2 py-1 rounded text-xs">
+                apps/frontend/public/videos/tentang-kami/
+              </code>
+              {" "}dengan nama file <code className="bg-blue-100 px-2 py-1 rounded text-xs">taman-kehati.mp4</code> atau{" "}
+              <code className="bg-blue-100 px-2 py-1 rounded text-xs">taman-kehati.webm</code>
+            </p>
           </div>
         </div>
       </section>
