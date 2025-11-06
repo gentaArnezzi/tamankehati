@@ -89,6 +89,24 @@ export class HttpClient {
     });
 
     if (!response.ok) {
+      // Handle 401 Unauthorized (token expired/invalid)
+      if (response.status === 401) {
+        // Clear auth data
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("auth_user");
+          localStorage.removeItem("auth_email");
+          
+          // Redirect to login page
+          console.log("🔒 Token expired or invalid, redirecting to login...");
+          window.location.href = "/login";
+        }
+        
+        const error = new Error("Session expired. Please login again.");
+        (error as Error & { status?: number }).status = 401;
+        throw error;
+      }
+      
       let message = response.statusText;
       try {
         const errorData = await response.json();

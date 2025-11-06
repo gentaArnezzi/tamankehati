@@ -18,6 +18,12 @@ from core.database.session import get_session
 from users.models import User
 from domains.articles.models import UserRole
 from api.v1.permissions.rbac import current_user
+from users.services.otp_service import create_otp, verify_otp
+from users.services.email_service import send_otp_email
+from api.v1.serializers.auth import (
+    RequestOTPIn, RequestOTPOut, VerifyOTPIn, LoginWithOTPIn,
+    LoginResponse, VerifyOTPAfterPasswordIn
+)
 
 router = APIRouter(prefix="/auth")
 
@@ -133,7 +139,7 @@ async def logout(
     
     return {"message": "Successfully logged out"}
 
-@router.post("/login", response_model=TokenOut, tags=["Auth"], status_code=status.HTTP_200_OK)
+@router.post("/login", response_model=LoginResponse, tags=["Auth"], status_code=status.HTTP_200_OK)
 async def login(
     request: Request,
     response: Response,
@@ -141,10 +147,16 @@ async def login(
     db: AsyncSession = Depends(get_session)
 ):
     """
-    User login endpoint with rate limiting.
+    User login endpoint with 2FA (OTP) support.
+    
+    Flow:
+    1. Verify email and password
+    2. If password correct, generate and send OTP
+    3. Return requires_otp: true
+    4. User must verify OTP via /verify-otp-after-password to complete login
     
     Returns:
-        TokenOut: JWT token and user information
+        LoginResponse: requires_otp flag and message
     """
     # ✅ SECURITY FIX: Check rate limit
     client_ip = request.client.host if request.client else "unknown"
@@ -184,65 +196,30 @@ async def login(
                 headers={"WWW-Authenticate": "Bearer"},
             )
         
-        # Get user's primary role
-        primary_role = "user"
-        if hasattr(user, 'role') and user.role:
-            primary_role = user.role.value if hasattr(user.role, 'value') else str(user.role)
-        elif hasattr(user, 'roles') and user.roles:
-            primary_role = user.roles[0].name if hasattr(user.roles[0], 'name') else 'user'
-
-        # Ensure email is valid or use a placeholder
-        user_email = str(getattr(user, 'email', '')).strip()
-        if not user_email or '@' not in user_email:
-            # Generate a valid placeholder email if none exists
-            user_email = f"user_{user.id}@placeholder.com"
-        
-        # Ensure name is properly handled
-        user_name = str(getattr(user, 'display_name', '') or getattr(user, 'name', '') or '').strip()
-        if not user_name:
-            user_name = f"User {user.id}"
+        # Password verified! Now generate and send OTP
+        try:
+            otp = await create_otp(db, form_data.email, expiration_minutes=10)
             
-        # Create JWT token with additional user data
-        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        token_data = {
-            "sub": str(user.id),
-            "email": user_email,  # This is now guaranteed to be a valid email
-            "role": primary_role,
-            "name": user_name,  # Use the processed name
-        }
-        
-        access_token = create_access_token(
-            data=token_data,
-            expires_delta=access_token_expires
-        )
-
-        # Update last login time (if field exists)
-        if hasattr(user, 'last_login'):
-            user.last_login = datetime.now(timezone.utc)
-            await db.commit()
-            await db.refresh(user)
-
-        # Set HTTP-only cookie
-        # ✅ SECURITY FIX: Secure cookies in production
-        response.set_cookie(
-            key="access_token",
-            value=f"Bearer {access_token}",
-            httponly=True,
-            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
-            secure=os.getenv('ENV', 'production') == 'production',  # ✅ Secure in production
-            samesite="strict"  # ✅ CSRF protection
-        )
-        
-        # Return the TokenOut model response
-        return TokenOut(
-            access_token=access_token,
-            token_type="bearer",
-            user_id=user.id,
-            email=user_email,
-            role=primary_role,
-            name=user.display_name or user_email.split('@')[0],
-            profile_picture_url=user.profile_picture_url if hasattr(user, 'profile_picture_url') else None
-        )
+            # Send OTP via email
+            email_sent = await send_otp_email(form_data.email, otp.code)
+            
+            if not email_sent:
+                # Log the OTP for development (remove in production)
+                print(f"⚠️ OTP generated but email not sent. OTP for {form_data.email}: {otp.code}")
+            
+            return LoginResponse(
+                requires_otp=True,
+                message="Password verified. OTP code has been sent to your email.",
+                email=form_data.email
+            )
+        except Exception as e:
+            import traceback
+            print(f"Error creating OTP: {str(e)}")
+            print(f"Traceback: {traceback.format_exc()}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send OTP. Please try again.",
+            )
         
     except HTTPException:
         # Re-raise HTTP exceptions
@@ -258,3 +235,279 @@ async def login(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred during login. Please try again.",
         )
+
+
+@router.post("/request-otp", response_model=RequestOTPOut, tags=["Auth"], status_code=status.HTTP_200_OK)
+async def request_otp(
+    request: Request,
+    otp_request: RequestOTPIn,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Request OTP code for login.
+    
+    Returns:
+        RequestOTPOut: Confirmation message
+    """
+    # Check rate limit
+    client_ip = request.client.host if request.client else "unknown"
+    if check_rate_limit(client_ip, "request-otp"):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many OTP requests. Please try again later."
+        )
+    
+    # Check if user exists
+    stmt = select(User).where(User.email.ilike(otp_request.email))
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        # Don't reveal if user exists (security best practice)
+        # Still return success to prevent user enumeration
+        return RequestOTPOut(
+            message="If the email exists, an OTP code has been sent.",
+            expires_in_minutes=10
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive. Please contact support."
+        )
+    
+    # Create OTP
+    try:
+        otp = await create_otp(db, otp_request.email, expiration_minutes=10)
+        
+        # Send OTP via email
+        email_sent = await send_otp_email(otp_request.email, otp.code)
+        
+        if not email_sent:
+            # Log the OTP for development (remove in production)
+            print(f"⚠️ OTP generated but email not sent. OTP for {otp_request.email}: {otp.code}")
+        
+        return RequestOTPOut(
+            message="OTP code has been sent to your email.",
+            expires_in_minutes=10
+        )
+    except Exception as e:
+        import traceback
+        print(f"Error creating OTP: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send OTP. Please try again."
+        )
+
+
+@router.post("/verify-otp-after-password", response_model=TokenOut, tags=["Auth"], status_code=status.HTTP_200_OK)
+async def verify_otp_after_password(
+    request: Request,
+    response: Response,
+    verify_data: VerifyOTPAfterPasswordIn,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Verify OTP after password has been verified.
+    This completes the 2FA login process.
+    
+    Returns:
+        TokenOut: JWT token and user information
+    """
+    # Check rate limit
+    client_ip = request.client.host if request.client else "unknown"
+    if check_rate_limit(client_ip, "verify-otp-after-password"):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many verification attempts. Please try again later."
+        )
+    
+    # Verify OTP
+    otp = await verify_otp(db, verify_data.email, verify_data.otp_code)
+    
+    if not otp:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired OTP code.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Get user
+    stmt = select(User).where(User.email.ilike(verify_data.email))
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        print(f"❌ User not found for email: {verify_data.email}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or OTP code.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive. Please contact support.",
+        )
+    
+    # Get user's primary role
+    primary_role = "user"
+    if hasattr(user, 'role') and user.role:
+        primary_role = user.role.value if hasattr(user.role, 'value') else str(user.role)
+    elif hasattr(user, 'roles') and user.roles:
+        primary_role = user.roles[0].name if hasattr(user.roles[0], 'name') else 'user'
+    
+    # Ensure email is valid
+    user_email = str(getattr(user, 'email', '')).strip()
+    if not user_email or '@' not in user_email:
+        user_email = f"user_{user.id}@placeholder.com"
+    
+    # Ensure name is properly handled
+    user_name = str(getattr(user, 'display_name', '') or getattr(user, 'name', '') or '').strip()
+    if not user_name:
+        user_name = f"User {user.id}"
+    
+    # Update last login time (if field exists)
+    if hasattr(user, 'last_login'):
+        user.last_login = datetime.now(timezone.utc)
+        await db.commit()
+        await db.refresh(user)
+    
+    # Create JWT token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token_data = {
+        "sub": str(user.id),
+        "email": user_email,
+        "role": primary_role,
+        "name": user_name,
+    }
+    
+    access_token = create_access_token(
+        data=token_data,
+        expires_delta=access_token_expires
+    )
+    
+    # Set HTTP-only cookie
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        secure=os.getenv('ENV', 'production') == 'production',
+        samesite="strict"
+    )
+    
+    # Prepare response data
+    response_data = TokenOut(
+        access_token=access_token,
+        token_type="bearer",
+        user_id=user.id,
+        email=user_email,
+        role=primary_role,
+        name=user.display_name or user_email.split('@')[0],
+        profile_picture_url=user.profile_picture_url if hasattr(user, 'profile_picture_url') else None
+    )
+    
+    # Debug logging
+    print(f"✅ OTP verified for user: id={user.id}, email={user_email}, role={primary_role}")
+    print(f"📤 Response data: user_id={response_data.user_id}, role={response_data.role}, email={response_data.email}")
+    
+    return response_data
+
+
+@router.post("/login-with-otp", response_model=TokenOut, tags=["Auth"], status_code=status.HTTP_200_OK)
+async def login_with_otp(
+    request: Request,
+    response: Response,
+    login_data: LoginWithOTPIn,
+    db: AsyncSession = Depends(get_session)
+):
+    """
+    Login using OTP code instead of password (legacy endpoint, kept for backward compatibility).
+    
+    Returns:
+        TokenOut: JWT token and user information
+    """
+    # Check rate limit
+    client_ip = request.client.host if request.client else "unknown"
+    if check_rate_limit(client_ip, "login-with-otp"):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many login attempts. Please try again later."
+        )
+    
+    # Verify OTP
+    otp = await verify_otp(db, login_data.email, login_data.otp_code)
+    
+    if not otp:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired OTP code.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Get user
+    stmt = select(User).where(User.email.ilike(login_data.email))
+    result = await db.execute(stmt)
+    user = result.scalar_one_or_none()
+    
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or OTP code.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account is inactive. Please contact support.",
+        )
+    
+    # Get user's primary role
+    primary_role = "user"
+    if hasattr(user, 'role') and user.role:
+        primary_role = user.role.value if hasattr(user.role, 'value') else str(user.role)
+    elif hasattr(user, 'roles') and user.roles:
+        primary_role = user.roles[0].name if hasattr(user.roles[0], 'name') else 'user'
+    
+    # Ensure email is valid
+    user_email = str(getattr(user, 'email', '')).strip()
+    if not user_email or '@' not in user_email:
+        user_email = f"user_{user.id}@placeholder.com"
+    
+    # Ensure name is properly handled
+    user_name = str(getattr(user, 'display_name', '') or getattr(user, 'name', '') or '').strip()
+    if not user_name:
+        user_name = f"User {user.id}"
+    
+    # Create JWT token
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    token_data = {
+        "sub": str(user.id),
+        "email": user_email,
+        "role": primary_role,
+        "name": user_name,
+    }
+    
+    access_token = create_access_token(
+        data=token_data,
+        expires_delta=access_token_expires
+    )
+    
+    # Set cookie
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        secure=os.getenv("ENVIRONMENT") == "production",
+        samesite="lax",
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+    
+    return TokenOut(
+        access_token=access_token,
+        token_type="bearer"
+    )

@@ -54,6 +54,7 @@ import domains.regions.models.region  # Import from models/region.py (the active
 
 # User models
 import users.models
+import users.models_otp
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

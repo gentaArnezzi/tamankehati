@@ -143,6 +143,11 @@ export function DashboardWithAnalytics() {
       setError("");
 
       const token = localStorage.getItem("auth_token");
+      if (!token) {
+        window.location.href = "/login";
+        return;
+      }
+
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
         "http://38.47.93.167:8080";
@@ -158,12 +163,24 @@ export function DashboardWithAnalytics() {
       );
 
       if (!response.ok) {
+        // Handle 401 Unauthorized (token expired/invalid)
+        if (response.status === 401) {
+          localStorage.removeItem("auth_token");
+          localStorage.removeItem("auth_user");
+          localStorage.removeItem("auth_email");
+          window.location.href = "/login";
+          return;
+        }
         throw new Error("Failed to fetch dashboard data");
       }
 
       const dashboardData = await response.json();
       setData(dashboardData);
     } catch (err) {
+      // Don't set error if it's a redirect (401)
+      if ((err as Error & { status?: number }).status === 401) {
+        return; // Already redirected
+      }
       setError(
         err instanceof Error ? err.message : "Gagal memuat data dashboard",
       );

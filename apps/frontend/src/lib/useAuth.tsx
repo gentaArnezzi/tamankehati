@@ -64,8 +64,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authStorage.saveUser(userData);
     } catch (error) {
       console.warn("Failed to load user from API:", error);
+      
+      // Check if it's a 401 error (token expired/invalid)
+      const isUnauthorized = (error as Error & { status?: number }).status === 401;
+      
+      if (isUnauthorized) {
+        // Token expired/invalid - clear all auth data and redirect
+        console.log("🔒 Token expired or invalid, clearing auth data...");
+        localStorage.removeItem("auth_token");
+        localStorage.removeItem("auth_user");
+        localStorage.removeItem("auth_email");
+        authStorage.clearToken();
+        authStorage.clearUser();
+        authStorage.clearEmail();
+        setToken(null);
+        setUser(null);
+        
+        // Redirect to login page
+        if (typeof window !== "undefined") {
+          window.location.href = "/login";
+        }
+        return;
+      }
 
-      // ✅ FALLBACK: Try to get user data from localStorage if API fails
+      // ✅ FALLBACK: Try to get user data from localStorage if API fails (non-401 errors)
       const storedUser = localStorage.getItem("auth_user");
       if (storedUser) {
         try {
