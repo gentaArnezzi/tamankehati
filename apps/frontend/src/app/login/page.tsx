@@ -17,6 +17,8 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [scrollY, setScrollY] = useState(0);
   const [requiresOTP, setRequiresOTP] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [resendingOTP, setResendingOTP] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,6 +29,14 @@ export default function LoginPage() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Countdown timer for resend OTP
+  useEffect(() => {
+    if (resendCountdown > 0) {
+      const timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [resendCountdown]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,6 +68,7 @@ export default function LoginPage() {
       if (data.requires_otp) {
         setRequiresOTP(true);
         setError(null);
+        setResendCountdown(60); // Start 60 second countdown
         return;
       }
 
@@ -156,6 +167,47 @@ export default function LoginPage() {
       setError(err instanceof Error ? err.message : "Invalid OTP code");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (resendCountdown > 0 || resendingOTP) return;
+
+    setResendingOTP(true);
+    setError(null);
+
+    try {
+      // First, login again to get new OTP
+      const loginResponse = await fetch(
+        apiUrl("/api/v1/auth/login"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        },
+      );
+
+      if (!loginResponse.ok) {
+        const errorData = await loginResponse.json();
+        throw new Error(errorData.detail || "Failed to resend OTP");
+      }
+
+      const loginData = await loginResponse.json();
+
+      if (loginData.requires_otp) {
+        setResendCountdown(60); // Reset countdown to 60 seconds
+        setOtpCode(""); // Clear OTP input
+        setError(null);
+        // Success - OTP has been resent (message is shown via requires_otp flag)
+      } else {
+        throw new Error("Failed to request new OTP");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Gagal mengirim ulang OTP");
+    } finally {
+      setResendingOTP(false);
     }
   };
 
@@ -328,7 +380,22 @@ export default function LoginPage() {
                 {loading ? "Memverifikasi..." : "Verifikasi & Masuk"}
               </Button>
 
-              <div className="pt-4 border-t border-gray-200">
+              <div className="pt-4 border-t border-gray-200 space-y-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleResendOTP}
+                  disabled={resendCountdown > 0 || resendingOTP || loading}
+                  className="w-full text-sm text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 border-emerald-200"
+                >
+                  {resendingOTP ? (
+                    "Mengirim ulang..."
+                  ) : resendCountdown > 0 ? (
+                    `Kirim Ulang OTP (${resendCountdown}s)`
+                  ) : (
+                    "Kirim Ulang OTP"
+                  )}
+                </Button>
                 <Button
                   type="button"
                   variant="ghost"
@@ -336,6 +403,7 @@ export default function LoginPage() {
                     setRequiresOTP(false);
                     setOtpCode("");
                     setError(null);
+                    setResendCountdown(0);
                   }}
                   className="w-full text-sm text-gray-600 hover:text-gray-900"
                 >

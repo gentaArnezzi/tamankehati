@@ -32,6 +32,25 @@ async def send_otp_email(email: str, otp_code: str) -> bool:
         print("   Set SMTP_USER and SMTP_PASSWORD environment variables to enable email sending.")
         return False
     
+    # DMARC Alignment Check: For SendGrid, ensure From header matches authenticated domain
+    # If using SendGrid, SMTP_FROM must match a verified sender or authenticated domain
+    if "sendgrid" in smtp_host.lower():
+        from_domain = smtp_from.split("@")[-1] if "@" in smtp_from else ""
+        user_domain = smtp_user.split("@")[-1] if "@" in smtp_user else ""
+        
+        # Warning if From domain doesn't match user domain (might cause DMARC alignment issues)
+        if from_domain and user_domain and from_domain != user_domain:
+            print(f"⚠️ WARNING: SMTP_FROM domain ({from_domain}) differs from SMTP_USER domain ({user_domain})")
+            print(f"   This may cause DMARC alignment errors if domain is not authenticated in SendGrid.")
+            print(f"   Ensure {from_domain} is verified in SendGrid (Single Sender or Domain Authentication)")
+        
+        # If SMTP_USER is "apikey" (SendGrid API key), From must be a verified sender
+        if smtp_user == "apikey" and not smtp_from:
+            print(f"⚠️ ERROR: When using SendGrid API key, SMTP_FROM must be set to a verified sender email")
+            print(f"   Go to SendGrid Dashboard → Settings → Sender Authentication")
+            print(f"   Verify a sender email and set it as SMTP_FROM in .env")
+            return False
+    
     try:
         # Create message
         msg = MIMEMultipart("alternative")

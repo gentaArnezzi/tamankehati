@@ -83,3 +83,14 @@ body { background: var(--bg); color: var(--fg); font-family: 'Helvetica Now', sy
 .bg-background {
   background-color: hsl(var(--background));
 }
+
+/* ContentEditable placeholder */
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: #9CA3AF;
+  pointer-events: none;
+}
+
+[contenteditable][data-placeholder]:empty:focus::before {
+  color: #D1D5DB;
+}
