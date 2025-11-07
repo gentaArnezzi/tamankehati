@@ -8,7 +8,8 @@ export type MarkdownNode =
   | { type: "paragraph"; content: string[] }
   | { type: "heading"; id: string; level: number; text: string }
   | { type: "list"; items: string[] }
-  | { type: "code"; language: string | null; content: string[] };
+  | { type: "code"; language: string | null; content: string[] }
+  | { type: "image"; alt: string; url: string };
 
 export type MarkdownParseResult = {
   nodes: MarkdownNode[];
@@ -111,6 +112,19 @@ export function parseMarkdown(markdown: string): MarkdownParseResult {
     if (line.startsWith("- ")) {
       flushParagraph();
       listItems.push(line.slice(2).trim());
+      return;
+    }
+
+    // Check for image markdown: ![alt](url)
+    const imageMatch = line.match(/^!\[([^\]]*)\]\(([^)]+)\)$/);
+    if (imageMatch) {
+      flushParagraph();
+      flushList();
+      result.nodes.push({
+        type: "image",
+        alt: imageMatch[1] || "",
+        url: imageMatch[2] || "",
+      });
       return;
     }
 

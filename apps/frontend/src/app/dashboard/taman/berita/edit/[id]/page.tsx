@@ -1,14 +1,12 @@
 "use client";
 
-import React, { use } from "react";
+import React from "react";
+import { useParams } from "next/navigation";
 import { MediumStyleArtikelPage } from "../../../../../../components/artikel/MediumStyleArtikelPage";
 
-interface EditArtikelPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function EditArtikelPage({ params }: EditArtikelPageProps) {
-  const { id } = use(params);
+export default function EditArtikelPage() {
+  const params = useParams();
+  const id = params?.id as string;
 
   // Medium-style editor is full-page, no need for DashboardLayout wrapper
   return <MediumStyleArtikelPage articleId={id} mode="edit" />;

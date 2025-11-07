@@ -156,6 +156,8 @@ class ArtikelPublicBase(BaseModel):
     kategori: Optional[str]
     tanggal_publish: Optional[str]
     gambar_cover: Optional[str]
+    konten_markdown: Optional[str] = None
+    konten_html: Optional[str] = None
 
 
 class ArtikelPublicOut(ArtikelPublicBase):
@@ -166,6 +168,8 @@ class ArtikelPublicOut(ArtikelPublicBase):
     kategori: str
     tanggal_publish: str
     gambar_cover: str
+    konten_markdown: Optional[str] = None
+    konten_html: Optional[str] = None
 
     class Config:
         from_attributes = True

@@ -71,7 +71,6 @@ const resolveCurrentPage = (path: string) => {
   if (path.startsWith("/dashboard/taman/activities")) return "activities";
   if (path.startsWith("/dashboard/taman")) return "taman";
   if (path.startsWith("/dashboard/ai-demo")) return "ai-demo";
-  if (path.startsWith("/dashboard/demo")) return "demo";
   return "dashboard";
 };
 
@@ -107,12 +106,6 @@ const buildNavItems = (role?: User["role"] | null): NavItem[] => {
         icon: FileText,
         path: "/dashboard/taman/berita",
       },
-      {
-        id: "demo",
-        label: "Dashboard Demo",
-        icon: BarChart3,
-        path: "/dashboard/demo",
-      },
     ];
   }
 
@@ -143,12 +136,6 @@ const buildNavItems = (role?: User["role"] | null): NavItem[] => {
         label: "Kegiatan",
         icon: Calendar,
         path: "/dashboard/activities",
-      },
-      {
-        id: "demo",
-        label: "Dashboard Demo",
-        icon: BarChart3,
-        path: "/dashboard/demo",
       },
       {
         id: "ai-demo",
