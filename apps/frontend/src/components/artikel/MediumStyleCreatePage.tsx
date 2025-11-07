@@ -730,6 +730,7 @@ export function MediumStyleCreatePage({
   const renderBlock = (block: ContentBlock, index: number) => {
     const blockElement = blockRefs.current[block.id];
     const showMenu = activeBlockMenu === block.id;
+    const isActiveBlock = focusedBlockId === block.id;
     let menuPosition = { x: 0, y: 0 };
 
     if (blockElement && showMenu) {
@@ -747,7 +748,7 @@ export function MediumStyleCreatePage({
         ref={(el) => {
           blockRefs.current[block.id] = el;
         }}
-        className="group relative flex items-start gap-4 py-2"
+        className="group relative flex items-start py-3 pl-12"
         onMouseEnter={() => {
           // Show + button on hover
         }}
@@ -767,10 +768,10 @@ export function MediumStyleCreatePage({
           onClick={() => {
             setActiveBlockMenu(activeBlockMenu === block.id ? null : block.id);
           }}
-          className={`mt-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#1a8917] text-[#1a8917] transition-opacity hover:bg-[#1a8917] hover:text-white ${
-            activeBlockMenu === block.id
-              ? "opacity-100"
-              : "opacity-0 group-hover:opacity-100"
+          className={`absolute left-0 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-[#1a8917] text-[#1a8917] transition-all duration-200 hover:bg-[#1a8917] hover:text-white ${
+            isActiveBlock || activeBlockMenu === block.id
+              ? "opacity-100 translate-x-0 pointer-events-auto"
+              : "opacity-0 -translate-x-2 pointer-events-none"
           }`}
         >
           <Plus className="h-4 w-4" />
@@ -1082,7 +1083,7 @@ export function MediumStyleCreatePage({
       {/* Main Editor Area */}
       <main
         ref={editorContainerRef}
-        className="mx-auto max-w-[700px] px-6 py-12"
+        className="medium-article-editor mx-auto max-w-[700px] px-6 py-12"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -1113,7 +1114,7 @@ export function MediumStyleCreatePage({
         />
 
         {/* Block Editor */}
-        <div className="space-y-2">
+        <div className="space-y-4">
           {blocks.map((block, index) => renderBlock(block, index))}
         </div>
 

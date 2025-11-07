@@ -94,3 +94,8 @@ body { background: var(--bg); color: var(--fg); font-family: 'Helvetica Now', sy
 [contenteditable][data-placeholder]:empty:focus::before {
   color: #D1D5DB;
 }
+
+.medium-article-editor :focus-visible {
+  outline: none;
+  box-shadow: none;
+}
