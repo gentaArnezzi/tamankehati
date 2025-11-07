@@ -76,19 +76,22 @@ export function imageUrl(path: string | null | undefined): string {
   
   const baseUrl = getApiUrl();
   
-  // CRITICAL: Check for localhost patterns FIRST (before any other checks)
-  // This must happen before checking http/https to catch all localhost URLs
+  // CRITICAL: Check for localhost/backend patterns FIRST (before any other checks)
+  // This must happen before checking http/https to catch all internal URLs
   // Use more aggressive pattern matching to catch all variations
-  // Check for localhost in multiple ways to catch all cases
-  const hasLocalhost = 
+  // Check for localhost/backend in multiple ways to catch all cases
+  const hasInternalHost = 
     normalizedPath.includes('localhost:8000') || 
     normalizedPath.includes('127.0.0.1:8000') ||
+    normalizedPath.includes('backend:8000') ||
     normalizedPath.startsWith('http://localhost:8000') ||
     normalizedPath.startsWith('https://localhost:8000') ||
     normalizedPath.startsWith('http://127.0.0.1:8000') ||
-    normalizedPath.startsWith('https://127.0.0.1:8000');
+    normalizedPath.startsWith('https://127.0.0.1:8000') ||
+    normalizedPath.startsWith('http://backend:8000') ||
+    normalizedPath.startsWith('https://backend:8000');
   
-  if (hasLocalhost) {
+  if (hasInternalHost) {
     // Extract path from localhost URL - multiple strategies
     let pathOnly = '';
     let queryString = '';
@@ -139,8 +142,8 @@ export function imageUrl(path: string | null | undefined): string {
       pathOnly = '/' + pathOnly;
     }
     
-    // Final check: if pathOnly still contains localhost, extract again
-    if (pathOnly.includes('localhost:8000') || pathOnly.includes('127.0.0.1:8000')) {
+    // Final check: if pathOnly still contains localhost/backend, extract again
+    if (pathOnly.includes('localhost:8000') || pathOnly.includes('127.0.0.1:8000') || pathOnly.includes('backend:8000')) {
       const finalMatch = pathOnly.match(/\/uploads\/[^?\s]*/);
       if (finalMatch) {
         pathOnly = finalMatch[0];
@@ -152,14 +155,15 @@ export function imageUrl(path: string | null | undefined): string {
   
   // Already a full URL (production URL)
   if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
-    // Double-check: even production URLs might have localhost embedded (shouldn't happen, but just in case)
-    if (normalizedPath.includes('localhost:8000') || normalizedPath.includes('127.0.0.1:8000')) {
+    // Double-check: even production URLs might have localhost/backend embedded (shouldn't happen, but just in case)
+    if (normalizedPath.includes('localhost:8000') || normalizedPath.includes('127.0.0.1:8000') || normalizedPath.includes('backend:8000')) {
       const pathMatch = normalizedPath.match(/(\/uploads\/.*?)(?:\?|$)/);
       if (pathMatch) {
         return `${baseUrl}${pathMatch[1]}`;
       }
       return normalizedPath.replace(/https?:\/\/localhost:8000[^\/]*/, baseUrl)
-                          .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/, baseUrl);
+                          .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/, baseUrl)
+                          .replace(/https?:\/\/backend:8000[^\/]*/, baseUrl);
     }
     // Return as-is for valid production URLs
     return normalizedPath;
@@ -180,11 +184,13 @@ export function imageUrl(path: string | null | undefined): string {
 export function normalizeUrl(url: string): string {
   if (!url) return url;
   
-  // Replace common localhost patterns
+  // Replace common localhost/backend patterns
   const localhostPatterns = [
     /http:\/\/localhost:8000/g,
     /http:\/\/127\.0\.0\.1:8000/g,
     /https:\/\/localhost:8000/g,
+    /http:\/\/backend:8000/g,
+    /https:\/\/backend:8000/g,
   ];
   
   let normalized = url;

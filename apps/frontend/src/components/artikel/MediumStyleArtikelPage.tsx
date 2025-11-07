@@ -296,7 +296,10 @@ export function MediumStyleArtikelPage({
 
       try {
         setUploading(true);
-        const imageUrl = await uploadFile(file);
+        const uploadedUrl = await uploadFile(file);
+        
+        // Process URL to ensure it's accessible from browser (replace backend:8000, localhost, etc.)
+        const processedUrl = buildImageUrl(uploadedUrl);
 
         const textarea = document.getElementById(
           "content-editor",
@@ -305,7 +308,7 @@ export function MediumStyleArtikelPage({
 
         const start = textarea.selectionStart;
         const end = textarea.selectionEnd;
-        const imageMarkdown = `\n![${file.name}](${imageUrl})\n`;
+        const imageMarkdown = `\n![${file.name}](${processedUrl})\n`;
 
         const newContent =
           content.substring(0, start) + imageMarkdown + content.substring(end);
@@ -450,11 +453,9 @@ export function MediumStyleArtikelPage({
             }}
             selectedFile={selectedFile}
             previewUrl={
-              featuredImage?.startsWith("http")
-                ? featuredImage
-                : featuredImage
-                  ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${featuredImage}`
-                  : undefined
+              featuredImage
+                ? buildImageUrl(featuredImage)
+                : undefined
             }
             maxSize={10}
             acceptedTypes={[

@@ -15,6 +15,7 @@ import {
 } from "../../../lib/markdown";
 import { cn } from "../../ui/utils";
 import { JSX } from "react";
+import { imageUrl } from "../../../lib/api-url";
 
 type MarkdownRendererProps = {
   markdown: string;
@@ -23,8 +24,9 @@ type MarkdownRendererProps = {
 };
 
 const renderInline = (text: string, keyPrefix: string) => {
+  // Pattern to handle bold, italic, code, links, and images
   const pattern =
-    /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|\[([^\]]+)\]\(([^)]+)\))/g;
+    /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`|!\[([^\]]*)\]\(([^)]+)\)|\[([^\]]+)\]\(([^)]+)\))/g;
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
@@ -35,12 +37,15 @@ const renderInline = (text: string, keyPrefix: string) => {
       nodes.push(text.slice(lastIndex, match.index));
     }
     if (match[2]) {
+      // Bold
       nodes.push(
         <strong key={`${keyPrefix}-bold-${index}`}>{match[2]}</strong>,
       );
     } else if (match[3]) {
+      // Italic
       nodes.push(<em key={`${keyPrefix}-italic-${index}`}>{match[3]}</em>);
     } else if (match[4]) {
+      // Code
       nodes.push(
         <code
           key={`${keyPrefix}-code-${index}`}
@@ -50,13 +55,28 @@ const renderInline = (text: string, keyPrefix: string) => {
         </code>,
       );
     } else if (match[5] && match[6]) {
+      // Image markdown: ![alt](url)
+      const processedUrl = imageUrl(match[6]);
+      nodes.push(
+        <img
+          key={`${keyPrefix}-image-${index}`}
+          src={processedUrl}
+          alt={match[5] || "Article image"}
+          className="inline-block max-w-full h-auto rounded my-2"
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = "none";
+          }}
+        />,
+      );
+    } else if (match[7] && match[8]) {
+      // Link
       nodes.push(
         <Link
           key={`${keyPrefix}-link-${index}`}
-          href={match[6]}
+          href={match[8]}
           className="text-emerald-600 underline decoration-emerald-200 underline-offset-4 hover:text-emerald-500"
         >
-          {match[5]}
+          {match[7]}
         </Link>,
       );
     }
@@ -116,6 +136,23 @@ const renderNode = (node: MarkdownNode, index: number) => {
           {node.content.join("\n")}
         </pre>
       );
+    case "image": {
+      // Process URL to replace backend:8000, localhost:8000, etc. with accessible URL
+      const processedUrl = imageUrl(node.url);
+      return (
+        <div key={`image-${index}`} className="my-6">
+          <img
+            src={processedUrl}
+            alt={node.alt || "Article image"}
+            className="w-full h-auto rounded-lg shadow-md"
+            onError={(e) => {
+              // Hide broken images
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </div>
+      );
+    }
     default:
       return null;
   }

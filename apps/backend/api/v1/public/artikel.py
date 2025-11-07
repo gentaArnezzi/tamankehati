@@ -43,7 +43,9 @@ async def get_artikel(
                 excerpt=item.summary or (item.content[:100] + "..." if item.content and len(item.content) > 100 else item.content or ""),
                 kategori=item.category or "",
                 tanggal_publish=str(item.created_at) if item.created_at else "",
-                gambar_cover=item.featured_image or ""
+                gambar_cover=item.featured_image or "",
+                konten_markdown=None,  # Not needed for list view
+                konten_html=None  # Not needed for list view
             ) for item in items],
             total=total,
             limit=limit,
@@ -90,14 +92,19 @@ async def get_artikel_by_slug(
         if not item:
             raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
         
+        # Use content as konten_markdown (since articles are stored as markdown)
+        content = item.content or ""
+        
         return ArtikelPublicOut(
             id=str(item.id),
             judul=item.title or "",
             slug=item.slug or slug,
-            excerpt=item.summary or (item.content[:100] + "..." if item.content and len(item.content) > 100 else item.content or ""),
+            excerpt=item.summary or (content[:100] + "..." if content and len(content) > 100 else content or ""),
             kategori=item.category or "",
             tanggal_publish=str(item.created_at) if item.created_at else "",
-            gambar_cover=item.featured_image or ""
+            gambar_cover=item.featured_image or "",
+            konten_markdown=content,  # Return full content as markdown
+            konten_html=None  # Can be generated from markdown if needed
         )
     except HTTPException:
         raise

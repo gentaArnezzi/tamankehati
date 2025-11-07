@@ -79,14 +79,14 @@ export function ArtikelDetailView({
   let contentNode: React.ReactNode;
   let wordCount = 0;
 
-  if (artikel.konten_markdown) {
+  if (artikel.konten_markdown && artikel.konten_markdown.trim()) {
     const parsed = parseMarkdown(artikel.konten_markdown);
     headings = parsed.headings;
     wordCount = parsed.wordCount;
     contentNode = (
       <MarkdownRenderer markdown={artikel.konten_markdown} className="mt-6" />
     );
-  } else if (artikel.konten_html) {
+  } else if (artikel.konten_html && artikel.konten_html.trim()) {
     const processed = processHtmlContent(artikel.konten_html);
     headings = processed.headings;
     wordCount = processed.wordCount;
