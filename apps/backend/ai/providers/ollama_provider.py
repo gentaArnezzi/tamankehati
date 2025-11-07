@@ -32,6 +32,8 @@ class OllamaProvider(LLMProvider):
                         "num_predict": 500,  # Limit output to ~500 tokens (faster)
                         "temperature": 0.7,  # Balanced creativity
                         "top_p": 0.9,  # Nucleus sampling
+                        "num_thread": 4,  # Use 4 CPU threads for faster inference (match docker cpus: 4.0)
+                        "numa": False,  # Disable NUMA for better performance
                     }
                 }
                 # Try chat API first
@@ -49,6 +51,8 @@ class OllamaProvider(LLMProvider):
                         "num_predict": 500,  # Limit output length
                         "temperature": 0.7,
                         "top_p": 0.9,
+                        "num_thread": 4,  # Use 4 CPU threads for faster inference
+                        "numa": False,  # Disable NUMA for better performance
                     }
                 }
                 r = await client.post(f"{OLLAMA_URL}/api/generate", json=generate_params)
@@ -63,6 +67,10 @@ class OllamaProvider(LLMProvider):
             "model": OLLAMA_MODEL,
             "prompt": "\n".join([f"{m['role']}: {m['content']}" for m in messages]),
             "stream": True,
+            "options": {
+                "num_thread": 4,  # Use 4 CPU threads for faster inference (match docker cpus: 4.0)
+                "numa": False,  # Disable NUMA for better performance
+            }
         }
         async with httpx.AsyncClient(timeout=30.0) as client:
             async with client.stream("POST", f"{OLLAMA_URL}/api/generate", json=payload) as resp:

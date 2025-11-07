@@ -12,8 +12,8 @@ from pydantic import BaseModel, EmailStr, Field, validator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
-from core.auth.jwt import create_access_token
-from core.auth.config import ACCESS_TOKEN_EXPIRE_MINUTES
+from core.auth.jwt import create_access_token, create_refresh_token, decode_token
+from core.auth.config import ACCESS_TOKEN_EXPIRE_MINUTES, REFRESH_TOKEN_EXPIRE_DAYS, refresh_token_timedelta
 from core.database.session import get_session
 from users.models import User
 from domains.articles.models import UserRole
@@ -77,6 +77,7 @@ class LoginIn(BaseModel):
     
 class TokenOut(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
     user_id: int
     email: str  # Changed to regular string to avoid strict validation
@@ -130,6 +131,15 @@ async def logout(
         samesite="strict"  # ✅ CSRF protection
     )
     
+    # Clear refresh token cookie juga
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        httponly=True,
+        secure=os.getenv('ENV', 'production') == 'production',
+        samesite="strict"
+    )
+    
     # If using header-based auth, return a message to clear the token client-side
     if authorization and authorization.startswith("Bearer "):
         return {
@@ -139,11 +149,131 @@ async def logout(
     
     return {"message": "Successfully logged out"}
 
+@router.post("/refresh", response_model=TokenOut, tags=["Auth"], status_code=status.HTTP_200_OK)
+async def refresh_token_endpoint(
+    request: Request,
+    response: Response,
+    refresh_token: Optional[str] = Cookie(None),
+    refresh_token_header: Optional[str] = Header(None, alias="X-Refresh-Token"),
+    db: AsyncSession = Depends(get_session)
+):
+    """Regenerate access token menggunakan refresh token yang masih valid."""
+    token = refresh_token
+    if not token and refresh_token_header:
+        token = refresh_token_header
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token tidak ditemukan",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    try:
+        payload = decode_token(token)
+
+        if payload.get("type") != "refresh":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token yang diberikan bukan refresh token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user_id = payload.get("sub")
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token tidak valid: user ID tidak ditemukan",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        stmt = select(User).where(User.id == int(user_id))
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User tidak ditemukan",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account tidak aktif",
+            )
+
+        primary_role = "user"
+        if hasattr(user, "role") and user.role:
+            primary_role = user.role.value if hasattr(user.role, "value") else str(user.role)
+        elif hasattr(user, "roles") and user.roles:
+            primary_role = user.roles[0].name if hasattr(user.roles[0], "name") else "user"
+
+        user_email = str(getattr(user, "email", "")).strip()
+        if not user_email or "@" not in user_email:
+            user_email = f"user_{user.id}@placeholder.com"
+
+        user_name = str(getattr(user, "display_name", "") or getattr(user, "name", "") or "").strip()
+        if not user_name:
+            user_name = f"User {user.id}"
+
+        token_data = {
+            "sub": str(user.id),
+            "email": user_email,
+            "role": primary_role,
+            "name": user_name,
+        }
+
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        new_access_token = create_access_token(
+            data=token_data,
+            expires_delta=access_token_expires,
+        )
+
+        response.set_cookie(
+            key="access_token",
+            value=f"Bearer {new_access_token}",
+            httponly=True,
+            max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            secure=os.getenv("ENV", "production") == "production",
+            samesite="strict",
+        )
+
+        return TokenOut(
+            access_token=new_access_token,
+            refresh_token=token,
+            token_type="bearer",
+            user_id=user.id,
+            email=user_email,
+            role=primary_role,
+            name=user.display_name or user_email.split("@")[0],
+            profile_picture_url=user.profile_picture_url if hasattr(user, "profile_picture_url") else None,
+        )
+
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Refresh token tidak valid atau sudah expired: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        import traceback
+        print(f"Refresh token error: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Terjadi error saat refresh token. Silakan coba lagi.",
+        )
+
+
 @router.post("/login", response_model=LoginResponse, tags=["Auth"], status_code=status.HTTP_200_OK)
 async def login(
     request: Request,
-    response: Response,
-    form_data: LoginIn, 
+    form_data: LoginIn,
     db: AsyncSession = Depends(get_session)
 ):
     """
@@ -202,15 +332,15 @@ async def login(
             
             # Send OTP via email
             email_sent = await send_otp_email(form_data.email, otp.code)
-            
+
             if not email_sent:
                 # Log the OTP for development (remove in production)
                 print(f"⚠️ OTP generated but email not sent. OTP for {form_data.email}: {otp.code}")
-            
+
             return LoginResponse(
                 requires_otp=True,
                 message="Password verified. OTP code has been sent to your email.",
-                email=form_data.email
+                email=form_data.email,
             )
         except Exception as e:
             import traceback
@@ -375,45 +505,60 @@ async def verify_otp_after_password(
         await db.commit()
         await db.refresh(user)
     
-    # Create JWT token
+    # Create JWT tokens
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = refresh_token_timedelta()
+
     token_data = {
         "sub": str(user.id),
         "email": user_email,
         "role": primary_role,
         "name": user_name,
     }
-    
+
     access_token = create_access_token(
         data=token_data,
-        expires_delta=access_token_expires
+        expires_delta=access_token_expires,
     )
-    
-    # Set HTTP-only cookie
+
+    refresh_token = create_refresh_token(
+        data=token_data,
+        expires_delta=refresh_token_expires,
+    )
+
+    # Set HTTP-only cookies
     response.set_cookie(
         key="access_token",
         value=f"Bearer {access_token}",
         httponly=True,
         max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         secure=os.getenv('ENV', 'production') == 'production',
-        samesite="strict"
+        samesite="strict",
     )
-    
-    # Prepare response data
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        secure=os.getenv('ENV', 'production') == 'production',
+        samesite="strict",
+    )
+
     response_data = TokenOut(
         access_token=access_token,
+        refresh_token=refresh_token,
         token_type="bearer",
         user_id=user.id,
         email=user_email,
         role=primary_role,
         name=user.display_name or user_email.split('@')[0],
-        profile_picture_url=user.profile_picture_url if hasattr(user, 'profile_picture_url') else None
+        profile_picture_url=user.profile_picture_url if hasattr(user, 'profile_picture_url') else None,
     )
-    
-    # Debug logging
+
     print(f"✅ OTP verified for user: id={user.id}, email={user_email}, role={primary_role}")
     print(f"📤 Response data: user_id={response_data.user_id}, role={response_data.role}, email={response_data.email}")
-    
+
     return response_data
 
 
@@ -483,31 +628,51 @@ async def login_with_otp(
     if not user_name:
         user_name = f"User {user.id}"
     
-    # Create JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_token_expires = refresh_token_timedelta()
+
     token_data = {
         "sub": str(user.id),
         "email": user_email,
         "role": primary_role,
         "name": user_name,
     }
-    
+
     access_token = create_access_token(
         data=token_data,
-        expires_delta=access_token_expires
+        expires_delta=access_token_expires,
     )
-    
-    # Set cookie
+
+    refresh_token = create_refresh_token(
+        data=token_data,
+        expires_delta=refresh_token_expires,
+    )
+
     response.set_cookie(
         key="access_token",
-        value=access_token,
+        value=f"Bearer {access_token}",
         httponly=True,
-        secure=os.getenv("ENVIRONMENT") == "production",
-        samesite="lax",
-        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+        max_age=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        secure=os.getenv('ENV', 'production') == 'production',
+        samesite="strict",
     )
-    
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        max_age=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+        secure=os.getenv('ENV', 'production') == 'production',
+        samesite="strict",
+    )
+
     return TokenOut(
         access_token=access_token,
-        token_type="bearer"
+        refresh_token=refresh_token,
+        token_type="bearer",
+        user_id=user.id,
+        email=user_email,
+        role=primary_role,
+        name=user.display_name or user_email.split('@')[0],
+        profile_picture_url=user.profile_picture_url if hasattr(user, 'profile_picture_url') else None,
     )

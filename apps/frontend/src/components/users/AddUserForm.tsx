@@ -38,7 +38,7 @@ import { Loader2, UserPlus } from "lucide-react";
 const formSchema = z.object({
   nama: z.string().min(1, "Nama lengkap harus diisi"),
   email: z.string().email("Format email tidak valid"),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+  password: z.string().min(8, "Password minimal 8 karakter"),
   role: z.enum(["super_admin", "regional_admin"]),
   is_active: z.boolean(),
 });

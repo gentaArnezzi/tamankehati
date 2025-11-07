@@ -3,6 +3,7 @@
 
 from typing import Optional
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class AuthIn(BaseModel):
     email: EmailStr
@@ -10,6 +11,7 @@ class AuthIn(BaseModel):
 
 class TokenOut(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
 
 class RefreshTokenIn(BaseModel):

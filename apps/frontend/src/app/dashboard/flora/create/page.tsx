@@ -192,7 +192,7 @@ export default function CreateFloraPage() {
 
   // AI Functions
 
-  // Generate all AI content at once
+  // Generate all AI content sequentially (one by one) to avoid timeout
   const generateAllAI = async () => {
     if (user?.role !== "regional_admin") {
       toast.error("AI features hanya dapat digunakan oleh Regional Admin");
@@ -200,13 +200,6 @@ export default function CreateFloraPage() {
     }
 
     setAiLoading(true);
-
-    // Create AbortController for timeout
-    // Backend timeout: 120s (small models) / 180s (large models)
-    // Frontend timeout: 190s (small models) / 240s (large models) for safety margin
-    // Since requests run in parallel, timeout is based on longest single request
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 190000); // 190 second timeout (small models: 120s backend + 70s margin)
 
     try {
       const aiData = {
@@ -236,74 +229,126 @@ export default function CreateFloraPage() {
         headers.Authorization = "Bearer " + token;
       }
 
-      // Generate all three descriptions in parallel with timeout
-      const [descriptionRes, morphologyRes, benefitsRes] = await Promise.all([
-        fetch(base + "/api/v1/ai/generate-flora-description", {
-          method: "POST",
-          headers,
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        }),
-        fetch(base + "/api/v1/ai/generate-flora-morphology", {
-          method: "POST",
-          headers,
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        }),
-        fetch(base + "/api/v1/ai/generate-flora-benefits", {
-          method: "POST",
-          headers,
-          body: JSON.stringify(aiData),
-          signal: controller.signal,
-        }),
-      ]);
+      // Step 1: Generate Description first
+      const descriptionToastId = toast.loading("Membuat deskripsi dengan AI...");
+      const descriptionController = new AbortController();
+      const descriptionTimeout = setTimeout(() => descriptionController.abort(), 120000); // 120s timeout per request
 
-      // Check if all responses are ok
-      if (!descriptionRes.ok || !morphologyRes.ok || !benefitsRes.ok) {
-        const errorDetails = [];
-        if (!descriptionRes.ok)
-          errorDetails.push(`Deskripsi (${descriptionRes.status})`);
-        if (!morphologyRes.ok)
-          errorDetails.push(`Morfologi (${morphologyRes.status})`);
-        if (!benefitsRes.ok)
-          errorDetails.push(`Manfaat (${benefitsRes.status})`);
+      const descriptionRes = await fetch(
+        base + "/api/v1/ai/generate-flora-description",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(aiData),
+          signal: descriptionController.signal,
+        },
+      );
 
-        throw new Error(`Gagal generate: ${errorDetails.join(", ")}`);
+      clearTimeout(descriptionTimeout);
+
+      if (!descriptionRes.ok) {
+        toast.error(`Gagal membuat deskripsi (${descriptionRes.status})`, { id: descriptionToastId });
+        throw new Error(`Gagal membuat deskripsi (${descriptionRes.status})`);
       }
 
-      // Parse all responses
-      const [descriptionResult, morphologyResult, benefitsResult] =
-        await Promise.all([
-          descriptionRes.json(),
-          morphologyRes.json(),
-          benefitsRes.json(),
-        ]);
+      const descriptionResult = await descriptionRes.json();
 
-      // Validate that we got actual content
-      if (
-        !descriptionResult.description ||
-        !morphologyResult.description ||
-        !benefitsResult.description
-      ) {
-        throw new Error("AI tidak menghasilkan konten yang valid");
+      if (!descriptionResult.description) {
+        toast.error("AI tidak menghasilkan deskripsi yang valid", { id: descriptionToastId });
+        throw new Error("AI tidak menghasilkan deskripsi yang valid");
       }
 
-      // Update all fields at once
+      // Update description field
       setFormData((prev) => ({
         ...prev,
         deskripsi: descriptionResult.description,
+      }));
+
+      toast.success("Deskripsi berhasil dibuat!", { id: descriptionToastId });
+
+      // Step 2: Generate Morphology after description is done
+      const morphologyToastId = toast.loading("Membuat morfologi dengan AI...");
+      const morphologyController = new AbortController();
+      const morphologyTimeout = setTimeout(() => morphologyController.abort(), 120000);
+
+      const morphologyRes = await fetch(
+        base + "/api/v1/ai/generate-flora-morphology",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(aiData),
+          signal: morphologyController.signal,
+        },
+      );
+
+      clearTimeout(morphologyTimeout);
+
+      if (!morphologyRes.ok) {
+        toast.error(`Gagal membuat morfologi (${morphologyRes.status})`, { id: morphologyToastId });
+        throw new Error(`Gagal membuat morfologi (${morphologyRes.status})`);
+      }
+
+      const morphologyResult = await morphologyRes.json();
+
+      if (!morphologyResult.description) {
+        toast.error("AI tidak menghasilkan morfologi yang valid", { id: morphologyToastId });
+        throw new Error("AI tidak menghasilkan morfologi yang valid");
+      }
+
+      // Update morphology field
+      setFormData((prev) => ({
+        ...prev,
         morfologi: morphologyResult.description,
+      }));
+
+      toast.success("Morfologi berhasil dibuat!", { id: morphologyToastId });
+
+      // Step 3: Generate Benefits after morphology is done
+      const benefitsToastId = toast.loading("Membuat manfaat dengan AI...");
+      const benefitsController = new AbortController();
+      const benefitsTimeout = setTimeout(() => benefitsController.abort(), 120000);
+
+      const benefitsRes = await fetch(
+        base + "/api/v1/ai/generate-flora-benefits",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(aiData),
+          signal: benefitsController.signal,
+        },
+      );
+
+      clearTimeout(benefitsTimeout);
+
+      if (!benefitsRes.ok) {
+        toast.error(`Gagal membuat manfaat (${benefitsRes.status})`, { id: benefitsToastId });
+        throw new Error(`Gagal membuat manfaat (${benefitsRes.status})`);
+      }
+
+      const benefitsResult = await benefitsRes.json();
+
+      if (!benefitsResult.description) {
+        toast.error("AI tidak menghasilkan manfaat yang valid", { id: benefitsToastId });
+        throw new Error("AI tidak menghasilkan manfaat yang valid");
+      }
+
+      // Update benefits field
+      setFormData((prev) => ({
+        ...prev,
         manfaat: benefitsResult.description,
       }));
 
-      toast.success("Semua deskripsi berhasil dibuat dengan AI!");
+      toast.success("Semua deskripsi berhasil dibuat dengan AI!", { id: benefitsToastId });
     } catch (error) {
-      console.error("Error generating all AI content:", error);
+      console.error("Error generating AI content:", error);
       const err = error as Error & { name?: string; message?: string };
+
+      // Dismiss any loading toasts
+      toast.dismiss();
 
       if (err.name === "AbortError") {
         toast.error(
-          "AI generation timeout (max 190 detik). Pastikan Ollama berjalan dan coba lagi.",
+          "AI generation timeout. Pastikan Ollama berjalan dan coba lagi.",
         );
       } else if (err.message?.includes("Failed to fetch")) {
         toast.error(
@@ -313,7 +358,6 @@ export default function CreateFloraPage() {
         toast.error(`Gagal membuat deskripsi AI: ${err.message || "Unknown error"}`);
       }
     } finally {
-      clearTimeout(timeoutId);
       setAiLoading(false);
     }
   };

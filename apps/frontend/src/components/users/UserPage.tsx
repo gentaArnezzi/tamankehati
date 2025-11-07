@@ -169,7 +169,10 @@ export function UserPage() {
           password,
         });
 
-        if (selectedUser.role !== formData.role) {
+        // Compare role as strings to ensure proper comparison
+        const currentRole = String(selectedUser.role || "");
+        const newRole = String(formData.role || "");
+        if (currentRole !== newRole) {
           await userApi.updateRole(selectedUser.id, formData.role);
         }
 

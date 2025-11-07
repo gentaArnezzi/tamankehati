@@ -78,7 +78,9 @@ export function UserForm({
       nama: initialData?.nama || initialData?.display_name || "",
       email: initialData?.email || "",
       password: "",
-      role: initialData?.role || "regional_admin",
+      role: (initialData?.role === "super_admin" || initialData?.role === "regional_admin") 
+        ? initialData.role 
+        : "regional_admin",
       is_active: initialData?.is_active ?? true,
     },
   });
@@ -86,11 +88,16 @@ export function UserForm({
   // Reset form ketika initialData berubah (untuk mode edit)
   useEffect(() => {
     if (mode === "edit" && initialData) {
+      // Ensure role is a valid string value
+      const roleValue = (initialData.role === "super_admin" || initialData.role === "regional_admin")
+        ? initialData.role 
+        : "regional_admin";
+      
       form.reset({
         nama: initialData.nama || initialData.display_name || "",
         email: initialData.email || "",
         password: "", // Password selalu kosong saat edit
-        role: initialData.role || "regional_admin",
+        role: roleValue,
         is_active: initialData.is_active ?? true,
       });
     }
@@ -808,7 +815,7 @@ export function UserForm({
                       </FormControl>
                       <FormDescription>
                         {mode === "create"
-                          ? "Minimal 6 karakter"
+                          ? "Minimal 8 karakter"
                           : "Kosongkan jika tidak ingin mengubah password"}
                       </FormDescription>
                       <FormMessage />
@@ -837,7 +844,7 @@ export function UserForm({
                       </FormLabel>
                       <Select
                         onValueChange={field.onChange}
-                        value={field.value}
+                        value={field.value || ""}
                       >
                         <FormControl>
                           <SelectTrigger
@@ -850,7 +857,12 @@ export function UserForm({
                             <SelectValue placeholder="Pilih role" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent 
+                          className="!z-[102]"
+                          position="popper"
+                          sideOffset={4}
+                          style={{ zIndex: 102 }}
+                        >
                           <SelectItem value="super_admin">
                             Super Admin
                           </SelectItem>

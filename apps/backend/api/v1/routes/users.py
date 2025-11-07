@@ -11,7 +11,8 @@ from api.v1.permissions.rbac import current_user, clear_user_cache
 from users.models import User as UserModel, UserRole, User
 from users.serializers import (
     UserOut, UserCreate, UserUpdate, UserDetailOut, ParkSummary,
-    UpdateProfileRequest, ChangePasswordRequest, UpdateNotificationsRequest, NotificationPreferences
+    UpdateProfileRequest, ChangePasswordRequest, UpdateNotificationsRequest, NotificationPreferences,
+    UserRoleUpdate
 )
 from core.database.session import get_session
 from api.v1.permissions.policies import require_roles
@@ -253,12 +254,20 @@ async def create_user(
                 detail="User with this email already exists"
             )
         
+        # Validate role - ensure super_admin and regional_admin are allowed
+        role_value = user_data.role
+        if role_value not in ["super_admin", "regional_admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid role: {role_value}. Allowed roles: super_admin, regional_admin"
+            )
+        
         # Create new user with Jakarta timezone timestamps
         jakarta_time = get_jakarta_now()
         new_user = UserModel(
             email=user_data.email,
             display_name=user_data.display_name,
-            role=user_data.role,
+            role=role_value,  # Explicitly set role as string
             park_id=user_data.park_id,
             is_active=True,
             created_at=jakarta_time,
@@ -272,12 +281,15 @@ async def create_user(
         await db.commit()
         await db.refresh(new_user)
         
+        # Ensure role is returned as string
+        role_str = str(new_user.role) if new_user.role else "regional_admin"
+        
         return UserOut(
             id=new_user.id,
             email=new_user.email,
             display_name=new_user.display_name,
             full_name=new_user.full_name,
-            role=new_user.role.value if hasattr(new_user.role, 'value') else str(new_user.role),
+            role=role_str,
             park_id=new_user.park_id,
             profile_picture_url=new_user.profile_picture_url,
             is_active=new_user.is_active,
@@ -331,12 +343,15 @@ async def update_user(
         # ✅ SECURITY FIX: Clear user cache after update
         clear_user_cache(user_id)
         
+        # Ensure role is returned as string
+        role_str = str(user.role) if user.role else "regional_admin"
+        
         return UserOut(
             id=user.id,
             email=user.email,
             display_name=user.display_name,
             full_name=user.full_name,
-            role=user.role,
+            role=role_str,
             park_id=user.park_id,
             profile_picture_url=user.profile_picture_url,
             is_active=user.is_active,
@@ -446,7 +461,7 @@ async def deactivate_user(
 @router.put("/{user_id}/role", response_model=UserOut, tags=["Users"])
 async def update_user_role(
     user_id: int,
-    role_data: dict,
+    role_data: UserRoleUpdate,
     actor: UserModel = Depends(require_roles(UserRole.super_admin)),
     db: AsyncSession = Depends(get_session),
 ):
@@ -460,26 +475,37 @@ async def update_user_role(
                 detail="User not found"
             )
         
-        new_role = role_data.get('role')
-        if new_role not in ['super_admin', 'regional_admin', 'user']:
+        new_role = role_data.role
+        # Validate role - only allow super_admin and regional_admin
+        if new_role not in ['super_admin', 'regional_admin']:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid role"
+                detail=f"Invalid role: {new_role}. Allowed roles: super_admin, regional_admin"
             )
         
-        user.role = new_role
+        # Update role explicitly as string
+        user.role = str(new_role)
+        
+        # Update park_id if provided
+        if role_data.park_id is not None:
+            user.park_id = role_data.park_id
+        
+        user.updated_at = get_jakarta_now()
         await db.commit()
         await db.refresh(user)
         
         # ✅ SECURITY FIX: Clear user cache after role change
         clear_user_cache(user_id)
         
+        # Ensure role is returned as string
+        role_str = str(user.role) if user.role else "regional_admin"
+        
         return UserOut(
             id=user.id,
             email=user.email,
             display_name=user.display_name,
             full_name=user.full_name,
-            role=user.role,
+            role=role_str,
             park_id=user.park_id,
             profile_picture_url=user.profile_picture_url,
             is_active=user.is_active,

@@ -135,6 +135,11 @@ services:
       - ollama_data:/root/.ollama
     environment:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2:1.5b}
+      # Performance optimization for server
+      OLLAMA_NUM_PARALLEL: 1  # Limit concurrent requests (1 = faster per request)
+      OLLAMA_MAX_LOADED_MODELS: 1  # Keep only 1 model loaded (faster)
+      OLLAMA_KEEP_ALIVE: 10m  # Keep model in memory for 10 minutes (faster subsequent requests)
+      OLLAMA_NUM_THREAD: 4  # Use 4 CPU threads (match cpus: 4.0)
     networks:
       - tamankehati-network
     restart: unless-stopped
@@ -156,7 +161,8 @@ services:
       echo "✅ Ollama ready with model pre-loaded" &&
       wait $$OLLAMA_PID
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags > /dev/null 2>&1"]
+      # Use ollama list instead of curl (curl not available in Ollama container)
+      test: ["CMD-SHELL", "ollama list || exit 1"]
       interval: 60s
       timeout: 30s
       retries: 3
