@@ -27,6 +27,7 @@ export function PublicHeader() {
     pathname === "/fauna" ||
     pathname === "/taman" ||
     pathname === "/artikel" ||
+    pathname.startsWith("/artikel/") ||
     pathname === "/kegiatan" ||
     pathname === "/tentang-kami" ||
     pathname === "/indeks" ||

@@ -8,6 +8,7 @@ import { Badge } from "../../ui/badge";
 import { Skeleton } from "../../ui/skeleton";
 import { BookOpen, ArrowRight, Calendar } from "lucide-react";
 import { formatDate } from "../../../lib/utils";
+import { cleanArticleExcerpt } from "@/utils/text";
 
 interface Article {
   id: string;
@@ -118,7 +119,7 @@ export function ParkArticles({ parkId }: ParkArticlesProps) {
                   {article.title}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1 line-clamp-2">
-                  {article.excerpt}
+                  {cleanArticleExcerpt(article.excerpt)}
                 </p>
                 <div className="flex items-center justify-between mt-4">
                   <div className="flex items-center gap-2 text-xs text-slate-500">

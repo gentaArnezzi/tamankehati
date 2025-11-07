@@ -63,11 +63,9 @@ export default async function ArtikelDetailPage({
     };
 
     return (
-      <section className="bg-[var(--bg,#f8f7f5)] py-20">
-        <div className="container mx-auto max-w-5xl px-4">
-          <JsonLd data={jsonLd} />
-          <ArtikelDetailView artikel={artikel} related={related?.items ?? []} />
-        </div>
+      <section className="bg-[var(--bg,#f8f7f5)] pb-20">
+        <JsonLd data={jsonLd} />
+        <ArtikelDetailView artikel={artikel} related={related?.items ?? []} />
       </section>
     );
   } catch (error) {

@@ -7,6 +7,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { type ArtikelPublic } from "../../../types/public";
 import { imageUrl } from "../../../lib/api-url";
+import { cleanArticleExcerpt } from "@/utils/text";
 
 interface LatestArticlesSectionProps {
   initialArticles?: ArtikelPublic[];
@@ -159,7 +160,7 @@ export const LatestArticlesSection = memo(function LatestArticlesSection({
                           className="text-slate-500 mb-6 flex-1 text-sm leading-relaxed line-clamp-3"
                           style={{ fontSize: "clamp(0.875rem, 1.2vw, 1rem)" }}
                         >
-                          {article.excerpt}
+                          {cleanArticleExcerpt(article.excerpt)}
                         </p>
 
                         {/* Link */}
@@ -209,4 +210,3 @@ export const LatestArticlesSection = memo(function LatestArticlesSection({
     </section>
   );
 });
-

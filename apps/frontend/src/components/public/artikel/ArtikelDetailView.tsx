@@ -14,6 +14,7 @@ import { type ArtikelPublic } from "../../../types/public";
 import { JsonLd } from "../seo/JsonLd";
 import { sanitizeHtmlRich } from "../../../utils/sanitizeHtml";
 import { imageUrl } from "../../../lib/api-url";
+import { cleanArticleExcerpt } from "@/utils/text";
 
 type ArtikelDetailViewProps = {
   artikel: ArtikelDetail;
@@ -102,11 +103,15 @@ export function ArtikelDetailView({
         dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(processed.html) }}
       />
     );
-  } else {
-    wordCount = artikel.excerpt.split(/\s+/).filter(Boolean).length;
+  }
+
+  const sanitizedExcerpt = cleanArticleExcerpt(artikel.excerpt);
+
+  if (!contentNode) {
+    wordCount = sanitizedExcerpt.split(/\s+/).filter(Boolean).length;
     contentNode = (
       <p className="mt-10 text-lg leading-relaxed text-slate-700">
-        {artikel.excerpt}
+        {sanitizedExcerpt}
       </p>
     );
   }
@@ -129,7 +134,7 @@ export function ArtikelDetailView({
     "@context": "https://schema.org",
     "@type": "Article",
     headline: artikel.judul,
-    description: artikel.excerpt,
+    description: sanitizedExcerpt,
     author: artikel.penulis
       ? { "@type": "Person", name: artikel.penulis }
       : undefined,
@@ -142,21 +147,22 @@ export function ArtikelDetailView({
   return (
     <article className="space-y-16">
       <JsonLd data={jsonLd} />
-      <header className="space-y-6">
-        <div className="relative h-[420px] w-full overflow-hidden rounded-[32px] border border-slate-200 bg-slate-900/40 shadow-2xl">
+
+      <div className="relative left-1/2 w-screen -translate-x-1/2">
+        <div className="relative h-[460px] w-full overflow-hidden bg-slate-900 shadow-2xl">
           <Image
             src={heroImage}
             alt={artikel.judul}
             fill
             priority
             className="object-cover"
-            sizes="(max-width: 1024px) 100vw, 960px"
+            sizes="100vw"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/25 to-transparent" />
-          <div className="relative flex h-full flex-col justify-end gap-5 p-8 md:p-12">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent" />
+          <div className="relative mx-auto flex h-full max-w-5xl flex-col justify-end gap-5 px-4 pb-12 pt-24 text-white sm:px-6 lg:px-8">
             <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
               {kategori && (
-                <Badge className="bg-white/15 text-white" variant="default">
+                <Badge className="bg-white/20 text-white" variant="default">
                   {kategori}
                 </Badge>
               )}
@@ -173,7 +179,7 @@ export function ArtikelDetailView({
             </h1>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-base font-semibold text-white">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-base font-semibold text-white">
                 {authorInitial}
               </div>
               <div>
@@ -185,88 +191,90 @@ export function ArtikelDetailView({
             </div>
           </div>
         </div>
-      </header>
-
-      <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)] lg:gap-12">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
-            <span>Kata kunci</span>
-            {tags.length === 0 && (
-              <Badge variant="outline" className="border-slate-200 text-slate-600">
-                Konservasi
-              </Badge>
-            )}
-            {tags.map((tag) => (
-              <Badge
-                key={tag}
-                variant="outline"
-                className="border-emerald-200 text-emerald-700"
-              >
-                {tag}
-              </Badge>
-            ))}
-          </div>
-
-          {contentNode}
-        </div>
-
-        <aside className="mt-10 lg:mt-0 lg:pl-8">
-          <div className="space-y-6 lg:sticky lg:top-24">
-            <TableOfContents headings={headings} />
-            <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">
-                Bagikan tulisan
-              </h2>
-              <p className="mt-2 text-sm text-slate-600">
-                Sebarkan artikel ini agar semakin banyak orang peduli pada
-                upaya konservasi keanekaragaman hayati.
-              </p>
-              <div className="mt-4">
-                <ShareButtons
-                  title={artikel.judul}
-                  baseUrl={SITE_URL}
-                  direction="column"
-                />
-              </div>
-            </div>
-          </div>
-        </aside>
       </div>
 
-      {related.length ? (
-        <section className="space-y-6">
-          <h2 className="text-2xl font-semibold text-slate-900">
-            Artikel terkait
-          </h2>
-          <div className="grid gap-6 md:grid-cols-2">
-            {related.slice(0, 4).map((item) => (
-              <article
-                key={item.id}
-                className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:border-emerald-200"
-              >
-                <p className="text-xs uppercase tracking-wide text-emerald-600">
-                  {item.kategori}
-                </p>
-                <Link
-                  href={`/artikel/${item.slug}`}
-                  className="mt-2 block text-lg font-semibold text-slate-900 hover:text-emerald-600"
+      <div className="mx-auto max-w-5xl space-y-16 px-4 sm:px-6 lg:px-0">
+        <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)] lg:gap-12">
+          <div>
+            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
+              <span>Kata kunci</span>
+              {tags.length === 0 && (
+                <Badge variant="outline" className="border-slate-200 text-slate-600">
+                  Konservasi
+                </Badge>
+              )}
+              {tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="outline"
+                  className="border-emerald-200 text-emerald-700"
                 >
-                  {item.judul}
-                </Link>
-                <p className="mt-2 line-clamp-3 text-sm text-slate-600">
-                  {item.excerpt}
-                </p>
-                <Link
-                  href={`/artikel/${item.slug}`}
-                  className="mt-4 inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-500"
-                >
-                  Baca selengkapnya
-                </Link>
-              </article>
-            ))}
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+
+            {contentNode}
           </div>
-        </section>
-      ) : null}
+
+          <aside className="mt-10 lg:mt-0 lg:pl-8">
+            <div className="space-y-6 lg:sticky lg:top-24">
+              <TableOfContents headings={headings} />
+              <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">
+                  Bagikan tulisan
+                </h2>
+                <p className="mt-2 text-sm text-slate-600">
+                  Sebarkan artikel ini agar semakin banyak orang peduli pada
+                  upaya konservasi keanekaragaman hayati.
+                </p>
+                <div className="mt-4">
+                  <ShareButtons
+                    title={artikel.judul}
+                    baseUrl={SITE_URL}
+                    direction="column"
+                  />
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {related.length ? (
+          <section className="space-y-6">
+            <h2 className="text-2xl font-semibold text-slate-900">
+              Artikel terkait
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {related.slice(0, 4).map((item) => (
+                <article
+                  key={item.id}
+                  className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:border-emerald-200"
+                >
+                  <p className="text-xs uppercase tracking-wide text-emerald-600">
+                    {item.kategori}
+                  </p>
+                  <Link
+                    href={`/artikel/${item.slug}`}
+                    className="mt-2 block text-lg font-semibold text-slate-900 hover:text-emerald-600"
+                  >
+                    {item.judul}
+                  </Link>
+                  <p className="mt-2 line-clamp-3 text-sm text-slate-600">
+                    {cleanArticleExcerpt(item.excerpt)}
+                  </p>
+                  <Link
+                    href={`/artikel/${item.slug}`}
+                    className="mt-4 inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-500"
+                  >
+                    Baca selengkapnya
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+      </div>
     </article>
   );
 }

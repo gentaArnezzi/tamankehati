@@ -6,13 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { fetchArtikelPage } from "../../../lib/api/public-client";
 import { type ArtikelPaginated } from "../../../types/articles";
 import { trackEvent } from "../../../lib/analytics";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../../ui/card";
 import { Badge } from "../../ui/badge";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
@@ -26,8 +19,22 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { imageUrl as getImageUrl } from "../../../lib/api-url";
+import { cleanArticleExcerpt } from "@/utils/text";
 
 const CATEGORIES = ["Artikel Edukasi", "Berita Konservasi", "Riset", "Opini"];
+
+const formatPublishDate = (value?: string | null) => {
+  if (!value) return "";
+  try {
+    return new Date(value).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return value;
+  }
+};
 
 type ArtikelExploreProps = {
   initialData: ArtikelPaginated;
@@ -256,82 +263,83 @@ export function ArtikelExplore({
               </div>
             )}
 
-          {/* Results Grid */}
+          {/* Results List */}
           {allArticles.length > 0 && (
-            <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-              {allArticles.map((artikel, index) => (
-                <div
-                  key={artikel.id}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <Card className="flex h-full flex-col overflow-hidden border border-slate-200 hover:shadow-lg transition-all duration-300 bg-white">
-                    {/* Cover Image */}
-                    <div className="relative h-48 w-full overflow-hidden">
-                      <Image
-                        src={getImageUrl(artikel.gambar_cover)}
-                        alt={artikel.judul}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-300"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      <div className="absolute top-3 left-3">
-                        <Badge
-                          variant="outline"
-                          className="border-slate-200 text-slate-700 bg-white/90 backdrop-blur-sm"
-                        >
-                          {artikel.kategori}
-                        </Badge>
-                      </div>
-                    </div>
-
-                    <CardHeader className="space-y-3">
-                      <CardTitle className="text-xl text-slate-900">
+            <div className="space-y-8">
+              {allArticles.map((artikel, index) => {
+                const publishDate = formatPublishDate(artikel.tanggal_publish);
+                return (
+                  <article
+                    key={artikel.id}
+                    className="group animate-fade-in rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-xl"
+                    style={{ animationDelay: `${index * 80}ms` }}
+                  >
+                    <div className="grid gap-6 md:grid-cols-[minmax(0,3fr)_minmax(210px,1fr)] md:items-stretch">
+                      <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                          <Badge
+                            variant="outline"
+                            className="border-slate-200 bg-slate-50 text-slate-700"
+                          >
+                            {artikel.kategori}
+                          </Badge>
+                          {publishDate && (
+                            <>
+                              <span className="text-slate-300">•</span>
+                              <span className="text-slate-500 normal-case">
+                                {publishDate}
+                              </span>
+                            </>
+                          )}
+                        </div>
                         <Link
                           href={`/artikel/${artikel.slug}`}
-                          className="hover:text-slate-600 transition-colors"
+                          className="text-2xl font-semibold leading-snug text-slate-900 transition-colors hover:text-emerald-600"
                         >
                           {artikel.judul}
                         </Link>
-                      </CardTitle>
-                      <p className="text-xs text-slate-500">
-                        {new Date(artikel.tanggal_publish).toLocaleDateString(
-                          "id-ID",
-                          {
-                            day: "2-digit",
-                            month: "long",
-                            year: "numeric",
-                          },
-                        )}
-                      </p>
-                    </CardHeader>
-                    <CardContent className="flex flex-1 flex-col">
-                      <CardDescription className="flex-1 text-sm leading-relaxed text-slate-600">
-                        {artikel.excerpt}
-                      </CardDescription>
+                        <p className="text-base leading-relaxed text-slate-600 line-clamp-3 md:line-clamp-2">
+                          {cleanArticleExcerpt(artikel.excerpt)}
+                        </p>
+                        <div className="flex items-center gap-3 text-sm text-slate-500">
+                          <Link
+                            href={`/artikel/${artikel.slug}`}
+                            className="inline-flex items-center gap-2 font-semibold text-emerald-600 hover:text-emerald-500"
+                          >
+                            Baca selengkapnya
+                            <svg
+                              className="h-4 w-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                            >
+                              <path
+                                d="M5 12h14M13 6l6 6-6 6"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </Link>
+                        </div>
+                      </div>
                       <Link
                         href={`/artikel/${artikel.slug}`}
-                        className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-slate-900 hover:text-slate-600 transition-colors"
+                        className="relative block h-40 w-full overflow-hidden rounded-2xl bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-emerald-500 md:h-48"
+                        aria-label={`Buka ${artikel.judul}`}
                       >
-                        Baca selengkapnya
-                        <svg
-                          className="h-4 w-4"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                        >
-                          <path
-                            d="M5 12h14M13 6l6 6-6 6"
-                            stroke="currentColor"
-                            strokeWidth="1.5"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
+                        <Image
+                          src={getImageUrl(artikel.gambar_cover)}
+                          alt={artikel.judul}
+                          fill
+                          className="object-cover transition duration-500 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 40vw, 320px"
+                        />
                       </Link>
-                    </CardContent>
-                  </Card>
-                </div>
-              ))}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           )}
 
