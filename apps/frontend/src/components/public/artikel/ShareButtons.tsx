@@ -4,10 +4,13 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Share2, Copy, Twitter, MessageCircle } from "lucide-react";
 import { Button } from "../../ui/button";
+import { cn } from "../../ui/utils";
 
 type ShareButtonsProps = {
   title: string;
   baseUrl: string;
+  direction?: "row" | "column";
+  className?: string;
 };
 
 const buildShareUrl = (base: string, path: string) => {
@@ -15,10 +18,16 @@ const buildShareUrl = (base: string, path: string) => {
   return `${normalizedBase}${path}`;
 };
 
-export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
+export function ShareButtons({
+  title,
+  baseUrl,
+  direction = "row",
+  className,
+}: ShareButtonsProps) {
   const pathname = usePathname();
   const [copied, setCopied] = useState(false);
   const shareUrl = buildShareUrl(baseUrl, pathname ?? "/");
+  const isColumn = direction === "column";
 
   const handleShare = async () => {
     if (typeof navigator !== "undefined" && navigator.share) {
@@ -40,11 +49,17 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      className={cn(
+        "flex gap-2",
+        isColumn ? "flex-col" : "flex-wrap items-center",
+        className,
+      )}
+    >
       <Button
         type="button"
         variant="outline"
-        className="gap-2"
+        className={cn("gap-2", isColumn && "w-full justify-center")}
         onClick={handleShare}
       >
         <Share2 className="h-4 w-4" />
@@ -54,7 +69,10 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
         href={`https://twitter.com/share?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:border-emerald-200 hover:text-emerald-600"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:text-emerald-600",
+          isColumn && "w-full justify-center",
+        )}
       >
         <Twitter className="h-4 w-4" />X (Twitter)
       </a>
@@ -62,7 +80,10 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
         href={`https://wa.me/?text=${encodeURIComponent(`${title} %0A${shareUrl}`)}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:border-emerald-200 hover:text-emerald-600"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-emerald-200 hover:text-emerald-600",
+          isColumn && "w-full justify-center",
+        )}
       >
         <MessageCircle className="h-4 w-4" />
         WhatsApp
@@ -70,7 +91,10 @@ export function ShareButtons({ title, baseUrl }: ShareButtonsProps) {
       <Button
         type="button"
         variant="ghost"
-        className="gap-2 text-slate-600 hover:text-emerald-600"
+        className={cn(
+          "gap-2 text-slate-600 hover:text-emerald-600",
+          isColumn && "w-full justify-center",
+        )}
         onClick={async () => {
           if (typeof navigator === "undefined" || !navigator.clipboard) return;
           try {
