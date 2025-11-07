@@ -22,7 +22,7 @@ class AnnouncementBase(BaseModel):
 
 class AnnouncementIn(AnnouncementBase):
     """Input model for creating announcements"""
-    pass
+    status: Optional[AnnouncementStatus] = Field(AnnouncementStatus.published, description="Status of the announcement")
 
 
 class AnnouncementUpdate(BaseModel):
@@ -51,6 +51,7 @@ class AnnouncementOut(AnnouncementBase):
     view_count: int
     created_at: datetime
     updated_at: datetime
+    deleted_at: Optional[datetime] = None
     
     # Workflow fields
     submitted_by: Optional[int]
@@ -60,6 +61,10 @@ class AnnouncementOut(AnnouncementBase):
     rejected_by: Optional[int]
     rejected_at: Optional[datetime]
     rejection_reason: Optional[str]
+    
+    # Read tracking fields (for regional admin)
+    read_count: Optional[int] = 0
+    user_has_read: Optional[bool] = False
 
     class Config:
         from_attributes = True
@@ -104,3 +109,8 @@ class AnnouncementPublicListResponse(BaseModel):
     offset: int
     has_next: bool
     has_prev: bool
+
+
+class UnreadCountResponse(BaseModel):
+    """Response model for unread announcement count"""
+    count: int

@@ -99,5 +99,10 @@ class Announcement(Base):
                       onupdate=func.now(), nullable=False)
     deleted_at = Column(DateTime(timezone=True), nullable=True)  # soft delete
 
+    # Relationships
+    reads = relationship("AnnouncementRead", back_populates="announcement", lazy="select")
+    comments = relationship("AnnouncementComment", back_populates="announcement", lazy="select")
+    reactions = relationship("AnnouncementReaction", back_populates="announcement", lazy="select")
+
     def __repr__(self):
         return f"<Announcement {self.title} ({self.status})>"

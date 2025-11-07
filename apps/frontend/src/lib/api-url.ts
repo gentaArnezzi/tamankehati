@@ -83,10 +83,13 @@ export function imageUrl(path: string | null | undefined): string {
   const hasLocalhost = 
     normalizedPath.includes('localhost:8000') || 
     normalizedPath.includes('127.0.0.1:8000') ||
+    normalizedPath.includes('backend:8000') ||
     normalizedPath.startsWith('http://localhost:8000') ||
     normalizedPath.startsWith('https://localhost:8000') ||
     normalizedPath.startsWith('http://127.0.0.1:8000') ||
-    normalizedPath.startsWith('https://127.0.0.1:8000');
+    normalizedPath.startsWith('https://127.0.0.1:8000') ||
+    normalizedPath.startsWith('http://backend:8000') ||
+    normalizedPath.startsWith('https://backend:8000');
   
   if (hasLocalhost) {
     // Extract path from localhost URL - multiple strategies
@@ -139,8 +142,8 @@ export function imageUrl(path: string | null | undefined): string {
       pathOnly = '/' + pathOnly;
     }
     
-    // Final check: if pathOnly still contains localhost, extract again
-    if (pathOnly.includes('localhost:8000') || pathOnly.includes('127.0.0.1:8000')) {
+    // Final check: if pathOnly still contains localhost or backend, extract again
+    if (pathOnly.includes('localhost:8000') || pathOnly.includes('127.0.0.1:8000') || pathOnly.includes('backend:8000')) {
       const finalMatch = pathOnly.match(/\/uploads\/[^?\s]*/);
       if (finalMatch) {
         pathOnly = finalMatch[0];
@@ -152,14 +155,15 @@ export function imageUrl(path: string | null | undefined): string {
   
   // Already a full URL (production URL)
   if (normalizedPath.startsWith("http://") || normalizedPath.startsWith("https://")) {
-    // Double-check: even production URLs might have localhost embedded (shouldn't happen, but just in case)
-    if (normalizedPath.includes('localhost:8000') || normalizedPath.includes('127.0.0.1:8000')) {
+    // Double-check: even production URLs might have localhost or backend embedded (shouldn't happen, but just in case)
+    if (normalizedPath.includes('localhost:8000') || normalizedPath.includes('127.0.0.1:8000') || normalizedPath.includes('backend:8000')) {
       const pathMatch = normalizedPath.match(/(\/uploads\/.*?)(?:\?|$)/);
       if (pathMatch) {
         return `${baseUrl}${pathMatch[1]}`;
       }
       return normalizedPath.replace(/https?:\/\/localhost:8000[^\/]*/, baseUrl)
-                          .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/, baseUrl);
+                          .replace(/https?:\/\/127\.0\.0\.1:8000[^\/]*/, baseUrl)
+                          .replace(/https?:\/\/backend:8000[^\/]*/, baseUrl);
     }
     // Return as-is for valid production URLs
     return normalizedPath;

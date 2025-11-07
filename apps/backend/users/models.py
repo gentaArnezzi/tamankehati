@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 import bcrypt
 from core.database.base import Base
 from core.database.functions import jakarta_now
@@ -34,6 +35,16 @@ class User(Base):
     # articles = relationship("Article", back_populates="author", cascade="all,delete-orphan", passive_deletes=True)
     # galleries = relationship("Gallery", back_populates="author", cascade="all,delete-orphan", passive_deletes=True)
     # park = relationship("Park", back_populates="users", lazy="select")  # Temporarily disabled to avoid circular import
+    
+    # Announcement interaction relationships
+    announcement_reads = relationship("AnnouncementRead", back_populates="user", lazy="select")
+    announcement_comments = relationship(
+        "AnnouncementComment", 
+        back_populates="user", 
+        primaryjoin="User.id == AnnouncementComment.user_id",
+        lazy="select"
+    )
+    announcement_reactions = relationship("AnnouncementReaction", back_populates="user", lazy="select")
 
     @property
     def name(self):

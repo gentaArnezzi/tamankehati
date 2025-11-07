@@ -195,6 +195,7 @@ export function CollapsibleDashboardLayout({
 
   // Pending approval count for Super Admin
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0);
+  const [unreadAnnouncementCount, setUnreadAnnouncementCount] = useState(0);
 
   // 🧪 TEMPORARY: Force show badge for testing (remove after testing)
   // Uncomment line below to test badge visually
@@ -254,6 +255,42 @@ export function CollapsibleDashboardLayout({
 
     // Refresh count every 30 seconds
     const interval = setInterval(fetchPendingCount, PENDING_APPROVAL_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [user?.role]);
+
+  // Fetch unread announcement count for regional admin
+  useEffect(() => {
+    if (user?.role !== "regional_admin") {
+      return;
+    }
+
+    const fetchUnreadCount = async () => {
+      try {
+        const token = localStorage.getItem(AUTH_TOKEN_KEY);
+        if (!token) {
+          return;
+        }
+
+        const response = await fetch(apiUrl("/api/v1/announcements/unread-count"), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          console.error("Failed to fetch unread announcement count:", response.status, response.statusText);
+          return;
+        }
+
+        const data = await response.json();
+        setUnreadAnnouncementCount(data.count || 0);
+      } catch (error) {
+        console.error("Failed to fetch unread announcement count:", error);
+      }
+    };
+
+    fetchUnreadCount();
+
+    // Refresh count every 30 seconds
+    const interval = setInterval(fetchUnreadCount, 30000);
     return () => clearInterval(interval);
   }, [user?.role]);
 
@@ -532,6 +569,24 @@ export function CollapsibleDashboardLayout({
                       {item.notifs}
                     </span>
                   )}
+
+                  {/* Unread announcement badge for regional admin */}
+                  {item.id === "announcements" &&
+                    unreadAnnouncementCount > 0 &&
+                    sidebarOpen && (
+                      <span className="absolute right-3 flex h-5 min-w-[20px] px-1 items-center justify-center rounded-full bg-red-500 text-xs text-white font-bold">
+                        {unreadAnnouncementCount > 99 ? "99+" : unreadAnnouncementCount}
+                      </span>
+                    )}
+
+                  {/* Unread announcement badge for collapsed sidebar */}
+                  {item.id === "announcements" &&
+                    unreadAnnouncementCount > 0 &&
+                    !sidebarOpen && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] text-white font-bold">
+                        {unreadAnnouncementCount > 9 ? "9+" : unreadAnnouncementCount}
+                      </span>
+                    )}
                 </button>
               );
             })}

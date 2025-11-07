@@ -27,6 +27,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  useFormField,
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
@@ -40,11 +41,13 @@ import {
 import { Switch } from "../ui/switch";
 import { Calendar } from "../ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { cn } from "../../lib/utils";
 import { Announcement } from "./AnnouncementsPage";
+import { FileUpload } from "../ui/file-upload";
+import { toast } from "sonner";
 
 const announcementSchema = z.object({
   title: z
@@ -99,6 +102,11 @@ export function AnnouncementForm({
 }: AnnouncementFormProps) {
   const [loading, setLoading] = useState(false);
   const [expiresAt, setExpiresAt] = useState<Date | undefined>();
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>(
+    initialData?.featured_image
+  );
 
   const form = useForm<AnnouncementFormData>({
     resolver: zodResolver(announcementSchema),
@@ -137,6 +145,8 @@ export function AnnouncementForm({
       setExpiresAt(
         initialData.expires_at ? new Date(initialData.expires_at) : undefined,
       );
+      setPreviewUrl(initialData.featured_image || undefined);
+      setSelectedFile(null);
     } else {
       form.reset({
         title: "",
@@ -152,6 +162,8 @@ export function AnnouncementForm({
         expires_at: undefined,
       });
       setExpiresAt(undefined);
+      setPreviewUrl(undefined);
+      setSelectedFile(null);
     }
   }, [initialData, mode, form]);
 
@@ -160,6 +172,7 @@ export function AnnouncementForm({
       setLoading(true);
       await onSubmit({
         ...data,
+        id: initialData?.id, // Include ID for edit mode
         expires_at: expiresAt?.toISOString(),
       });
     } catch (error) {
@@ -173,6 +186,64 @@ export function AnnouncementForm({
     setExpiresAt(date);
     form.setValue("expires_at", date);
   };
+
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token = localStorage.getItem("auth_token");
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+
+    const response = await fetch(`${baseUrl}/api/v1/upload/gallery-image`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Upload failed: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.url;
+  };
+
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    setUploading(true);
+
+    try {
+      const imageUrl = await uploadFile(file);
+      form.setValue("featured_image", imageUrl);
+      setPreviewUrl(imageUrl);
+      toast.success("Gambar berhasil diupload");
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      toast.error("Gagal mengupload gambar");
+      setSelectedFile(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setPreviewUrl(undefined);
+    form.setValue("featured_image", "");
+  };
+
+  useEffect(() => {
+    if (initialData?.featured_image) {
+      setPreviewUrl(initialData.featured_image);
+    } else {
+      setPreviewUrl(undefined);
+    }
+    setSelectedFile(null);
+  }, [initialData?.featured_image]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -251,71 +322,77 @@ export function AnnouncementForm({
                   <FormField
                     control={form.control}
                     name="type"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Tipe *
-                        </FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="Pilih tipe pengumuman" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {ANNOUNCEMENT_TYPES.map((type) => (
-                              <SelectItem
-                                key={type.value}
-                                value={type.value}
-                                className="text-sm"
-                              >
-                                {type.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const { formItemId } = useFormField();
+                      return (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Tipe *
+                          </FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="text-sm" id={formItemId}>
+                                <SelectValue placeholder="Pilih tipe pengumuman" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ANNOUNCEMENT_TYPES.map((type) => (
+                                <SelectItem
+                                  key={type.value}
+                                  value={type.value}
+                                  className="text-sm"
+                                >
+                                  {type.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      );
+                    }}
                   />
 
                   <FormField
                     control={form.control}
                     name="priority"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-sm font-medium">
-                          Prioritas
-                        </FormLabel>
-                        <Select
-                          onValueChange={(value) =>
-                            field.onChange(parseInt(value))
-                          }
-                          value={field.value.toString()}
-                        >
-                          <FormControl>
-                            <SelectTrigger className="text-sm">
-                              <SelectValue placeholder="Pilih prioritas" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {PRIORITY_OPTIONS.map((priority) => (
-                              <SelectItem
-                                key={priority.value}
-                                value={priority.value.toString()}
-                                className="text-sm"
-                              >
-                                {priority.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage className="text-xs" />
-                      </FormItem>
-                    )}
+                    render={({ field }) => {
+                      const { formItemId } = useFormField();
+                      return (
+                        <FormItem>
+                          <FormLabel className="text-sm font-medium">
+                            Prioritas
+                          </FormLabel>
+                          <Select
+                            onValueChange={(value) =>
+                              field.onChange(parseInt(value))
+                            }
+                            value={field.value.toString()}
+                          >
+                            <FormControl>
+                              <SelectTrigger className="text-sm" id={formItemId}>
+                                <SelectValue placeholder="Pilih prioritas" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {PRIORITY_OPTIONS.map((priority) => (
+                                <SelectItem
+                                  key={priority.value}
+                                  value={priority.value.toString()}
+                                  className="text-sm"
+                                >
+                                  {priority.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      );
+                    }}
                   />
                 </CardContent>
               </Card>
@@ -380,21 +457,24 @@ export function AnnouncementForm({
                   <FormField
                     control={form.control}
                     name="expires_at"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel className="text-sm font-medium">
-                          Tanggal Kedaluwarsa
-                        </FormLabel>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal text-sm",
-                                  !expiresAt && "text-muted-foreground",
-                                )}
-                              >
+                    render={({ field }) => {
+                      const { formItemId } = useFormField();
+                      return (
+                        <FormItem className="flex flex-col">
+                          <FormLabel className="text-sm font-medium">
+                            Tanggal Kedaluwarsa
+                          </FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal text-sm",
+                                    !expiresAt && "text-muted-foreground",
+                                  )}
+                                  id={formItemId}
+                                >
                                 {expiresAt ? (
                                   format(expiresAt, "PPP", { locale: id })
                                 ) : (
@@ -422,7 +502,8 @@ export function AnnouncementForm({
                         </FormDescription>
                         <FormMessage className="text-xs" />
                       </FormItem>
-                    )}
+                      );
+                    }}
                   />
                 </CardContent>
               </Card>
@@ -484,14 +565,35 @@ export function AnnouncementForm({
                         Gambar Utama
                       </FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder="URL gambar utama (opsional)"
-                          className="text-sm"
-                          {...field}
-                        />
+                        <div className="space-y-4">
+                          <FileUpload
+                            onFileSelect={handleFileSelect}
+                            onFileRemove={handleFileRemove}
+                            selectedFile={selectedFile}
+                            previewUrl={previewUrl}
+                            maxSize={10}
+                            acceptedTypes={[
+                              "image/jpeg",
+                              "image/png",
+                              "image/gif",
+                              "image/webp",
+                            ]}
+                          />
+                          <Input
+                            placeholder="Atau masukkan URL gambar (opsional)"
+                            className="text-sm"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (e.target.value) {
+                                setPreviewUrl(e.target.value);
+                              }
+                            }}
+                          />
+                        </div>
                       </FormControl>
                       <FormDescription className="text-xs">
-                        URL gambar yang akan ditampilkan sebagai thumbnail
+                        Upload gambar atau masukkan URL gambar yang akan ditampilkan sebagai thumbnail
                       </FormDescription>
                       <FormMessage className="text-xs" />
                     </FormItem>

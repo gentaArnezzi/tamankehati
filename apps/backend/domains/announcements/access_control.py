@@ -8,7 +8,8 @@ from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 from users.models import User, UserRole
-from .enhanced_models import Announcement, AnnouncementRead, AnnouncementComment, AnnouncementReaction
+from .models import Announcement
+from .interaction_models import AnnouncementRead, AnnouncementComment, AnnouncementReaction
 
 
 class AnnouncementPermission(str, Enum):

@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, or_
-# from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload
 from core.database.session import get_session
 from domains.announcements.models import Announcement, AnnouncementStatus, AnnouncementType
+from domains.announcements.interaction_models import AnnouncementRead
 from users.models import User, UserRole
 from api.v1.permissions.rbac import current_user
 from api.v1.permissions.policies import require_roles
@@ -88,8 +89,47 @@ async def list_announcements(
     
     rows = (await db.execute(stmt)).scalars().all()
 
+    # Get read data for each announcement
+    announcement_ids = [row.id for row in rows]
+    read_data = {}
+    if announcement_ids and user.role == UserRole.regional_admin:
+        # Get read counts
+        read_count_stmt = select(
+            AnnouncementRead.announcement_id,
+            func.count().label('count')
+        ).where(
+            AnnouncementRead.announcement_id.in_(announcement_ids)
+        ).group_by(AnnouncementRead.announcement_id)
+        read_counts = (await db.execute(read_count_stmt)).all()
+        for ann_id, count in read_counts:
+            read_data[ann_id] = {"read_count": count}
+        
+        # Get user read status
+        user_read_stmt = select(AnnouncementRead.announcement_id).where(
+            and_(
+                AnnouncementRead.user_id == user.id,
+                AnnouncementRead.announcement_id.in_(announcement_ids)
+            )
+        )
+        user_read_ids = set((await db.execute(user_read_stmt)).scalars().all())
+        for ann_id in announcement_ids:
+            if ann_id not in read_data:
+                read_data[ann_id] = {"read_count": 0}
+            read_data[ann_id]["user_has_read"] = ann_id in user_read_ids
+
+    # Build response items with read data
+    items = []
+    for row in rows:
+        row_dict = {**row.__dict__}
+        if row.id in read_data:
+            row_dict.update(read_data[row.id])
+        else:
+            row_dict["read_count"] = 0
+            row_dict["user_has_read"] = False
+        items.append(AnnouncementOut.model_validate(row_dict))
+
     return AnnouncementListResponse(
-        items=[AnnouncementOut.model_validate(row) for row in rows],
+        items=items,
         total=total,
         limit=limit,
         offset=offset,
@@ -115,6 +155,9 @@ async def create_announcement(
     user: User = Depends(current_user)
 ):
     """Create a new announcement"""
+    # Use status from payload, default to published if not provided
+    announcement_status = payload.status if payload.status else AnnouncementStatus.published
+    
     announcement = Announcement(
         title=payload.title,
         content=payload.content,
@@ -129,12 +172,31 @@ async def create_announcement(
         tags=payload.tags,
         expires_at=payload.expires_at,
         author_id=user.id,
-        status=AnnouncementStatus.draft
+        status=announcement_status
     )
+    
+    # If status is published, set published_at
+    if announcement_status == AnnouncementStatus.published:
+        announcement.published_at = datetime.now(timezone.utc)
 
     db.add(announcement)
     await db.commit()
     await db.refresh(announcement)
+    
+    # Create notifications if announcement is published
+    if announcement_status == AnnouncementStatus.published:
+        try:
+            target_audience = announcement.target_audience or "all"
+            notified_count = await notify_announcement_published(
+                db=db,
+                announcement_id=announcement.id,
+                announcement_title=announcement.title,
+                target_audience=target_audience,
+                published_by=user.id
+            )
+            print(f"✅ Created {notified_count} notifications for announcement {announcement.id}")
+        except Exception as e:
+            print(f"❌ Failed to create notifications: {e}")
 
     # Emit event
     emit("announcement.created", 
@@ -146,13 +208,57 @@ async def create_announcement(
     return AnnouncementOut.model_validate(announcement)
 
 
-@router.get("/{announcement_id}", response_model=AnnouncementOut)
-async def get_announcement(
-    announcement_id: int,
+@router.get("/unread-count")
+async def get_unread_announcement_count(
     db: AsyncSession = Depends(get_session),
     user: User = Depends(current_user)
 ):
-    """Get a single announcement by ID"""
+    """Get count of unread announcements for the current user"""
+    # Only for regional admin
+    if user.role != UserRole.regional_admin:
+        return {"count": 0}
+
+    # Get all published announcements visible to user
+    stmt = select(Announcement).where(
+        and_(
+            Announcement.deleted_at.is_(None),
+            Announcement.status == AnnouncementStatus.published,
+            or_(
+                Announcement.target_audience == "regional_admin",
+                Announcement.target_audience == "all",
+                Announcement.target_audience.is_(None)
+            )
+        )
+    )
+    announcements = (await db.execute(stmt)).scalars().all()
+    announcement_ids = [ann.id for ann in announcements]
+
+    if not announcement_ids:
+        return {"count": 0}
+
+    # Get read announcement IDs for this user
+    read_stmt = select(AnnouncementRead.announcement_id).where(
+        and_(
+            AnnouncementRead.user_id == user.id,
+            AnnouncementRead.announcement_id.in_(announcement_ids)
+        )
+    )
+    read_announcement_ids = set((await db.execute(read_stmt)).scalars().all())
+
+    # Count unread
+    unread_count = len(announcement_ids) - len(read_announcement_ids)
+
+    return {"count": unread_count}
+
+
+@router.get("/{announcement_id}", response_model=AnnouncementOut)
+async def get_announcement(
+    announcement_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user)
+):
+    """Get a single announcement by ID and track read for regional admin"""
     # Check permissions
     if user.role not in [UserRole.super_admin, UserRole.regional_admin]:
         raise HTTPException(
@@ -174,7 +280,59 @@ async def get_announcement(
             detail="Announcement not found"
         )
 
-    return AnnouncementOut.model_validate(announcement)
+    # Track read for regional admin
+    if user.role == UserRole.regional_admin:
+        try:
+            # Check if read already exists
+            read_stmt = select(AnnouncementRead).where(
+                and_(
+                    AnnouncementRead.announcement_id == announcement_id,
+                    AnnouncementRead.user_id == user.id
+                )
+            )
+            existing_read = (await db.execute(read_stmt)).scalars().first()
+            
+            if not existing_read:
+                # Create new read record
+                ip_address = request.client.host if request.client else None
+                user_agent = request.headers.get("user-agent")
+                read_record = AnnouncementRead(
+                    announcement_id=announcement_id,
+                    user_id=user.id,
+                    ip_address=ip_address,
+                    user_agent=user_agent
+                )
+                db.add(read_record)
+                # Update view count
+                announcement.view_count = (announcement.view_count or 0) + 1
+                await db.commit()
+                await db.refresh(announcement)
+        except Exception as e:
+            print(f"Error tracking read: {e}")
+
+    # Get read count and user read status
+    read_count_stmt = select(func.count()).select_from(AnnouncementRead).where(
+        AnnouncementRead.announcement_id == announcement_id
+    )
+    read_count = (await db.execute(read_count_stmt)).scalar() or 0
+    
+    user_read_stmt = select(AnnouncementRead).where(
+        and_(
+            AnnouncementRead.announcement_id == announcement_id,
+            AnnouncementRead.user_id == user.id
+        )
+    )
+    user_read = (await db.execute(user_read_stmt)).scalars().first()
+    user_has_read = user_read is not None
+
+    # Build response with read data
+    announcement_dict = {
+        **announcement.__dict__,
+        "read_count": read_count,
+        "user_has_read": user_has_read,
+    }
+    
+    return AnnouncementOut.model_validate(announcement_dict)
 
 
 @router.put(
@@ -194,61 +352,81 @@ async def update_announcement(
     user: User = Depends(current_user)
 ):
     """Update an announcement"""
-    stmt = select(Announcement).where(
-        and_(
-            Announcement.id == announcement_id,
-            Announcement.deleted_at.is_(None)
-        )
-    )
-    
-    announcement = (await db.execute(stmt)).scalars().first()
-    if not announcement:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Announcement not found"
-        )
-
-    # Check if status is changing to published
-    is_being_published = (
-        payload.status == AnnouncementStatus.published and 
-        announcement.status != AnnouncementStatus.published
-    )
-
-    # Update fields
-    update_data = payload.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(announcement, field, value)
-
-    # If status is being changed to published, set published_at
-    if is_being_published:
-        announcement.published_at = datetime.now(timezone.utc)
-
-    await db.commit()
-    await db.refresh(announcement)
-
-    # Create notifications if announcement is being published
-    if is_being_published:
-        try:
-            target_audience = announcement.target_audience or "all"
-            notified_count = await notify_announcement_published(
-                db=db,
-                announcement_id=announcement.id,
-                announcement_title=announcement.title,
-                target_audience=target_audience,
-                published_by=user.id
+    try:
+        stmt = select(Announcement).where(
+            and_(
+                Announcement.id == announcement_id,
+                Announcement.deleted_at.is_(None)
             )
-            print(f"✅ Created {notified_count} notifications for announcement {announcement.id}")
+        )
+        
+        announcement = (await db.execute(stmt)).scalars().first()
+        if not announcement:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Announcement not found"
+            )
+
+        # Check if status is changing to published
+        is_being_published = (
+            payload.status == AnnouncementStatus.published and 
+            announcement.status != AnnouncementStatus.published
+        )
+
+        # Update fields
+        update_data = payload.model_dump(exclude_unset=True)
+        for field, value in update_data.items():
+            # Skip None values for optional fields (they should be set explicitly if needed)
+            if value is not None:
+                # Validate field exists on model before setting
+                if hasattr(announcement, field):
+                    setattr(announcement, field, value)
+                else:
+                    print(f"⚠️ Warning: Field '{field}' does not exist on Announcement model, skipping...")
+
+        # If status is being changed to published, set published_at
+        if is_being_published:
+            announcement.published_at = datetime.now(timezone.utc)
+
+        await db.commit()
+        await db.refresh(announcement)
+
+        # Create notifications if announcement is being published
+        if is_being_published:
+            try:
+                target_audience = announcement.target_audience or "all"
+                notified_count = await notify_announcement_published(
+                    db=db,
+                    announcement_id=announcement.id,
+                    announcement_title=announcement.title,
+                    target_audience=target_audience,
+                    published_by=user.id
+                )
+                print(f"✅ Created {notified_count} notifications for announcement {announcement.id}")
+            except Exception as e:
+                print(f"❌ Failed to create notifications: {e}")
+
+        # Emit event
+        try:
+            emit("announcement.updated", 
+                 announcement_id=announcement.id,
+                 title=announcement.title,
+                 status=announcement.status.value
+            )
         except Exception as e:
-            print(f"❌ Failed to create notifications: {e}")
+            print(f"❌ Failed to emit event: {e}")
 
-    # Emit event
-    emit("announcement.updated", 
-         announcement_id=announcement.id,
-         title=announcement.title,
-         status=announcement.status.value
-    )
-
-    return AnnouncementOut.model_validate(announcement)
+        return AnnouncementOut.model_validate(announcement)
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"❌ Error updating announcement {announcement_id}: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to update announcement: {str(e)}"
+        )
 
 
 @router.delete(
@@ -392,3 +570,66 @@ async def archive_announcement(
     )
 
     return {"ok": True, "message": "Announcement archived successfully"}
+
+
+# -------------------- READ TRACKING ROUTES --------------------
+
+@router.post("/{announcement_id}/mark-read", status_code=200)
+async def mark_announcement_read(
+    announcement_id: int,
+    request: Request,
+    db: AsyncSession = Depends(get_session),
+    user: User = Depends(current_user)
+):
+    """Mark an announcement as read by the current user"""
+    # Check permissions
+    if user.role not in [UserRole.super_admin, UserRole.regional_admin]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Insufficient permissions"
+        )
+
+    # Get announcement
+    stmt = select(Announcement).where(
+        and_(
+            Announcement.id == announcement_id,
+            Announcement.deleted_at.is_(None)
+        )
+    )
+    announcement = (await db.execute(stmt)).scalars().first()
+    if not announcement:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Announcement not found"
+        )
+
+    # Check if read already exists
+    read_stmt = select(AnnouncementRead).where(
+        and_(
+            AnnouncementRead.announcement_id == announcement_id,
+            AnnouncementRead.user_id == user.id
+        )
+    )
+    existing_read = (await db.execute(read_stmt)).scalars().first()
+    
+    if existing_read:
+        return {"ok": True, "message": "Announcement already marked as read"}
+
+    # Create new read record
+    ip_address = request.client.host if request.client else None
+    user_agent = request.headers.get("user-agent")
+    read_record = AnnouncementRead(
+        announcement_id=announcement_id,
+        user_id=user.id,
+        ip_address=ip_address,
+        user_agent=user_agent
+    )
+    db.add(read_record)
+    
+    # Update view count
+    announcement.view_count = (announcement.view_count or 0) + 1
+    
+    await db.commit()
+    await db.refresh(announcement)
+
+    return {"ok": True, "message": "Announcement marked as read"}

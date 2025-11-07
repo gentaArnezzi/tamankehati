@@ -21,8 +21,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../../../../components/ui/card";
-import { ArrowLeft, Save, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Sparkles, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { FileUpload } from "../../../../components/ui/file-upload";
 
 const announcementTypes = [
   { value: "news", label: "Berita" },
@@ -46,6 +47,9 @@ const targetAudienceOptions = [
 export default function CreateAnnouncementPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | undefined>();
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -65,7 +69,62 @@ export default function CreateAnnouncementPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const uploadFile = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const token = localStorage.getItem("auth_token");
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+
+    const response = await fetch(`${baseUrl}/api/v1/upload/gallery-image`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Upload failed: ${errorText}`);
+    }
+
+    const result = await response.json();
+    return result.url || result.image_url || result.path;
+  };
+
+  const handleFileSelect = async (file: File) => {
+    try {
+      setUploading(true);
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const preview = URL.createObjectURL(file);
+      setPreviewUrl(preview);
+
+      // Upload file
+      const imageUrl = await uploadFile(file);
+      handleChange("featured_image", imageUrl);
+      
+      toast.success("Gambar berhasil diupload");
+    } catch (error: any) {
+      console.error("Error uploading file:", error);
+      toast.error(error.message || "Gagal mengupload gambar");
+      setSelectedFile(null);
+      setPreviewUrl(undefined);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleFileRemove = () => {
+    setSelectedFile(null);
+    setPreviewUrl(undefined);
+    handleChange("featured_image", "");
+  };
+
+  const handleSubmit = async (e: React.FormEvent, submitStatus?: "draft" | "published") => {
     e.preventDefault();
 
     // Validation
@@ -84,9 +143,13 @@ export default function CreateAnnouncementPage() {
 
       const token = localStorage.getItem("auth_token");
 
+      // Determine status: use submitStatus if provided, otherwise use formData.status
+      const finalStatus = submitStatus || formData.status || "published";
+
       // Prepare payload: convert empty strings to null for optional datetime fields
       const payload = {
         ...formData,
+        status: finalStatus, // Use the determined status
         expires_at: formData.expires_at || null, // Convert empty string to null
         featured_image: formData.featured_image || null, // Convert empty string to null
       };
@@ -168,9 +231,9 @@ export default function CreateAnnouncementPage() {
             <div className="flex gap-2">
               <Button
                 variant="outline"
-                onClick={() => {
-                  handleChange("status", "draft");
-                  handleSubmit(new Event("submit") as any);
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleSubmit(e as any, "draft");
                 }}
                 disabled={isSubmitting}
               >
@@ -357,26 +420,28 @@ export default function CreateAnnouncementPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="featured_image">URL Gambar Unggulan</Label>
-                <Input
-                  id="featured_image"
-                  type="url"
-                  placeholder="https://example.com/image.jpg"
-                  value={formData.featured_image}
-                  onChange={(e) =>
-                    handleChange("featured_image", e.target.value)
-                  }
+                <Label htmlFor="featured_image">Gambar Unggulan</Label>
+                <FileUpload
+                  onFileSelect={handleFileSelect}
+                  onFileRemove={handleFileRemove}
+                  selectedFile={selectedFile}
+                  previewUrl={previewUrl || formData.featured_image}
+                  maxSize={10}
+                  acceptedTypes={["image/jpeg", "image/jpg", "image/png", "image/webp"]}
                 />
-                {formData.featured_image && (
-                  <div className="mt-2 rounded-lg border p-2">
-                    <img
-                      src={formData.featured_image}
-                      alt="Preview"
-                      className="h-48 w-full object-cover rounded"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "/placeholder-image.png";
-                      }}
+                <p className="text-xs text-muted-foreground">
+                  Upload gambar dari komputer atau masukkan URL gambar
+                </p>
+                {!selectedFile && (
+                  <div className="mt-2">
+                    <Input
+                      id="featured_image_url"
+                      type="url"
+                      placeholder="Atau masukkan URL gambar: https://example.com/image.jpg"
+                      value={formData.featured_image}
+                      onChange={(e) =>
+                        handleChange("featured_image", e.target.value)
+                      }
                     />
                   </div>
                 )}

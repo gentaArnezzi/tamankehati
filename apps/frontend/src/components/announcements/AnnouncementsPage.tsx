@@ -77,6 +77,7 @@ export interface Announcement {
   view_count: number;
   created_at: string;
   updated_at: string;
+  deleted_at?: string;
   submitted_by?: number;
   submitted_at?: string;
   approved_by?: number;
@@ -212,6 +213,11 @@ export function AnnouncementsPage() {
 
   const handleSubmit = async (formData: Partial<Announcement>) => {
     try {
+      if (formMode === "edit" && !formData.id) {
+        toast.error("ID pengumuman tidak ditemukan");
+        return;
+      }
+
       const url =
         formMode === "create"
           ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/announcements/`
@@ -219,17 +225,89 @@ export function AnnouncementsPage() {
 
       const method = formMode === "create" ? "POST" : "PUT";
 
+      // Prepare payload: only include fields that are expected by backend
+      const payload: any = {};
+
+      // Required fields
+      if (formData.title !== undefined) payload.title = formData.title;
+      if (formData.content !== undefined) payload.content = formData.content;
+      if (formData.type !== undefined) payload.type = formData.type;
+      if (formData.priority !== undefined) payload.priority = formData.priority;
+      if (formData.is_featured !== undefined) payload.is_featured = formData.is_featured;
+      if (formData.is_pinned !== undefined) payload.is_pinned = formData.is_pinned;
+
+      // Optional fields - convert empty strings to null
+      if (formData.expires_at !== undefined && formData.expires_at !== "") {
+        payload.expires_at = formData.expires_at;
+      } else if (formData.expires_at === "") {
+        payload.expires_at = null;
+      }
+      
+      if (formData.featured_image !== undefined && formData.featured_image !== "") {
+        payload.featured_image = formData.featured_image;
+      } else if (formData.featured_image === "") {
+        payload.featured_image = null;
+      }
+      
+      if (formData.summary !== undefined && formData.summary !== "") {
+        payload.summary = formData.summary;
+      } else if (formData.summary === "") {
+        payload.summary = null;
+      }
+      
+      if (formData.tags !== undefined && formData.tags !== "") {
+        payload.tags = formData.tags;
+      } else if (formData.tags === "") {
+        payload.tags = null;
+      }
+      
+      if (formData.attachments !== undefined && formData.attachments !== "") {
+        payload.attachments = formData.attachments;
+      } else if (formData.attachments === "") {
+        payload.attachments = null;
+      }
+
+      // Status field (if provided)
+      if (formData.status !== undefined) {
+        payload.status = formData.status;
+      }
+
+      // Remove id from payload (it's in the URL for PUT)
+      if (formMode === "edit") {
+        delete payload.id;
+      }
+
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("auth_token")}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
-        throw new Error("Gagal menyimpan pengumuman");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("Error response:", errorData);
+
+        // Handle different error formats
+        let errorMessage = "Gagal menyimpan pengumuman";
+
+        if (typeof errorData.detail === "string") {
+          errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          // FastAPI validation errors (array of objects)
+          errorMessage = errorData.detail
+            .map((err: any) => `${err.loc?.join(" → ") || "Error"}: ${err.msg}`)
+            .join("; ");
+        } else if (errorData.detail && typeof errorData.detail === "object") {
+          // Object error detail
+          errorMessage = JSON.stringify(errorData.detail);
+        } else if (errorData.message) {
+          errorMessage = errorData.message;
+        }
+
+        throw new Error(errorMessage);
       }
 
       toast.success(

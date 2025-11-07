@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 import domains.articles.models
 import domains.activities.models
 import domains.announcements.models
+import domains.announcements.interaction_models  # Import interaction models for relationships
 import domains.flora.models
 import domains.fauna.models
 import domains.parks.models
@@ -164,12 +165,12 @@ app.add_middleware(
     max_age=86400,                        # cache preflight 1 day
 )
 
-# Static files for uploads - mount early to avoid conflicts
+# Static files for uploads - Use endpoint handler instead of mount to support CORS
 # Use UPLOAD_DIRECTORY from env, fallback to relative path for local dev
 uploads_dir = os.getenv("UPLOAD_DIRECTORY") or os.path.join(os.path.dirname(__file__), "uploads")
 os.makedirs(uploads_dir, exist_ok=True)
 print(f"Uploads directory: {uploads_dir}")
-app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+# Note: We use endpoint handler instead of StaticFiles mount to support CORS headers
 
 # ------------------------------------------------------------------------------
 # SECURITY MIDDLEWARE (registered in proper order)
@@ -386,6 +387,32 @@ async def healthz():
     return {"ok": True}
 
 # Special endpoint to serve uploads with proper CORS headers (fixes ERR_BLOCKED_BY_ORB)
+@app.options("/uploads/{file_path:path}")
+async def options_upload_file(file_path: str, request: Request):
+    """Handle OPTIONS preflight request for uploads"""
+    origin = request.headers.get("origin")
+    allowed_origins = allow_origins if allow_origins else []
+    is_allowed_origin = False
+    if origin:
+        if "*" in allowed_origins or origin in allowed_origins:
+            is_allowed_origin = True
+        # Also check if matches CORS regex if exists
+        import re
+        cors_regex = os.getenv("CORS_ALLOW_ORIGIN_REGEX")
+        if cors_regex and re.match(cors_regex, origin):
+            is_allowed_origin = True
+    
+    return Response(
+        status_code=204,
+        headers={
+            "Access-Control-Allow-Origin": origin if is_allowed_origin else allowed_origins[0] if allowed_origins else "*",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Accept, Content-Type, Origin",
+            "Access-Control-Max-Age": "86400",
+        }
+    )
+
 @app.get("/uploads/{file_path:path}")
 async def serve_upload_file(file_path: str, request: Request):
     """
@@ -444,16 +471,27 @@ async def serve_upload_file(file_path: str, request: Request):
         cors_regex = os.getenv("CORS_ALLOW_ORIGIN_REGEX")
         if cors_regex and re.match(cors_regex, origin):
             is_allowed_origin = True
+    else:
+        # If no origin header, allow from default origins
+        is_allowed_origin = True
+    
+    # Determine CORS origin header value
+    cors_origin = "*"
+    if is_allowed_origin:
+        if origin:
+            cors_origin = origin
+        elif allowed_origins:
+            cors_origin = allowed_origins[0]
     
     # Return file with proper headers
     response = FileResponse(
         file_full_path,
         media_type=content_type,
         headers={
-            "Access-Control-Allow-Origin": origin if is_allowed_origin else allowed_origins[0] if allowed_origins else "*",
+            "Access-Control-Allow-Origin": cors_origin,
             "Access-Control-Allow-Credentials": "true",
             "Access-Control-Allow-Methods": "GET, OPTIONS",
-            "Access-Control-Allow-Headers": "Accept, Content-Type",
+            "Access-Control-Allow-Headers": "Accept, Content-Type, Origin",
             "Cache-Control": "public, max-age=31536000",  # Cache for 1 year
         }
     )
