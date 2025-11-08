@@ -1,6 +1,5 @@
 "use client";
 
-import { Card } from "../ui/card";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import {
@@ -16,6 +15,7 @@ import {
   Image as ImageIcon,
   XCircle,
 } from "lucide-react";
+import { imageUrl } from "../../lib/api-url";
 
 interface CollapsibleApprovalItemProps {
   item: any;
@@ -28,13 +28,6 @@ interface CollapsibleApprovalItemProps {
   onReject?: () => void;
 }
 
-// Helper to ensure full URL
-const getFullImageUrl = (url: string | undefined) => {
-  if (!url) return "";
-  if (url.startsWith("http")) return url;
-  return `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${url.startsWith("/") ? "" : "/"}${url}`;
-};
-
 export function CollapsibleApprovalItem({
   item,
   entityType,
@@ -45,16 +38,16 @@ export function CollapsibleApprovalItem({
   onApprove,
   onReject,
 }: CollapsibleApprovalItemProps) {
-  const borderColor = {
-    flora: "border-l-green-500",
-    fauna: "border-l-blue-500",
-    kegiatan: "border-l-purple-500",
+  const iconColor = {
+    flora: "text-green-500",
+    fauna: "text-blue-500",
+    kegiatan: "text-purple-500",
   }[entityType];
 
   const badgeColor = {
-    flora: "bg-green-100 text-green-700 border-green-300",
-    fauna: "bg-blue-100 text-blue-700 border-blue-300",
-    kegiatan: "bg-purple-100 text-purple-700 border-purple-300",
+    flora: "bg-green-50 text-green-700 border-green-200",
+    fauna: "bg-blue-50 text-blue-700 border-blue-200",
+    kegiatan: "bg-purple-50 text-purple-700 border-purple-200",
   }[entityType];
 
   const typeLabel = {
@@ -64,137 +57,137 @@ export function CollapsibleApprovalItem({
   }[entityType];
 
   return (
-    <Card
-      className={`border-l-4 ${borderColor} transition-all hover:shadow-md`}
-    >
+    <div className="bg-white border border-gray-100 rounded-lg hover:border-gray-200 transition-all duration-200">
       <Collapsible open={isExpanded} onOpenChange={onToggle}>
-        <div className="p-4">
-          {/* Header */}
-          <div className="flex items-center justify-between gap-4">
-            <CollapsibleTrigger className="flex items-center gap-3 flex-1 text-left hover:opacity-70 transition-opacity">
-              {isExpanded ? (
-                <ChevronDown className="h-5 w-5 text-gray-500 flex-shrink-0" />
-              ) : (
-                <ChevronRight className="h-5 w-5 text-gray-500 flex-shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={badgeColor}>{typeLabel}</Badge>
+        <div className="p-5">
+          {/* Header - Clean & Minimal */}
+          <div className="flex items-start justify-between gap-4">
+            <CollapsibleTrigger className="flex items-start gap-3 flex-1 text-left group">
+              <div className={`mt-0.5 ${iconColor} transition-transform ${isExpanded ? "rotate-90" : ""}`}>
+                {isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0 space-y-2">
+                {/* Badges - Subtle */}
+                <div className="flex items-center gap-2">
                   <Badge
                     variant="outline"
-                    className="bg-amber-50 text-amber-700 border-amber-300 text-xs"
+                    className={`${badgeColor} text-xs font-medium border`}
                   >
-                    {item.status === "in_review"
-                      ? "Menunggu Review"
-                      : item.status}
+                    {typeLabel}
                   </Badge>
+                  <span className="text-xs text-gray-400">#{item.entityId}</span>
                 </div>
-                <h4 className="font-semibold text-base italic truncate">
-                  {item.title}
+                
+                {/* Title - Elegant */}
+                <h4 className="text-base font-medium text-gray-900 leading-tight">
+                  {entityType === "flora" || entityType === "fauna" ? (
+                    <i className="font-normal">{item.title}</i>
+                  ) : (
+                    item.title
+                  )}
                 </h4>
-                <div className="flex gap-4 mt-1 text-xs text-muted-foreground">
-                  <span>ID: #{item.entityId}</span>
-                  <span>
-                    {item.submittedAt
-                      ? new Date(item.submittedAt).toLocaleDateString("id-ID", {
-                          day: "numeric",
-                          month: "short",
-                        })
-                      : "-"}
-                  </span>
-                </div>
+                
+                {/* Meta Info - Subtle */}
+                {item.submittedAt && (
+                  <div className="text-xs text-gray-400">
+                    {new Date(item.submittedAt).toLocaleDateString("id-ID", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </div>
+                )}
               </div>
             </CollapsibleTrigger>
 
-            <div className="flex gap-2 flex-shrink-0">
+            {/* Action Buttons - Minimal & Clean */}
+            <div className="flex items-center gap-2 flex-shrink-0">
               <Button
-                onClick={onApprove}
-                className="bg-[#356447] hover:bg-[#2d5239]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onApprove();
+                }}
                 size="sm"
+                className="h-8 px-3 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-md shadow-sm"
               >
-                <CheckCircle className="h-4 w-4 mr-1" />
+                <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
                 Setujui
               </Button>
               {onReject && (
-                <Button onClick={onReject} variant="destructive" size="sm">
-                  <XCircle className="h-4 w-4 mr-1" />
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReject();
+                  }}
+                  variant="outline"
+                  size="sm"
+                  className="h-8 px-3 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-200 rounded-md"
+                >
+                  <XCircle className="h-3.5 w-3.5 mr-1.5" />
                   Tolak
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Expanded Detail */}
+          {/* Expanded Detail - Clean Layout */}
           <CollapsibleContent>
-            <div className="mt-4 pt-4 border-t">
+            <div className="mt-5 pt-5 border-t border-gray-100">
               {isLoadingDetail ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#356447]" />
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                 </div>
               ) : detail ? (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Flora Detail */}
                   {entityType === "flora" && (
                     <>
-                      {/* Image */}
+                      {/* Main Image - Elegant */}
                       {detail.gambar_utama ? (
-                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <div className="rounded-lg overflow-hidden border border-gray-100">
                           <img
-                            src={getFullImageUrl(detail.gambar_utama)}
+                            src={imageUrl(detail.gambar_utama)}
                             alt={detail.nama_ilmiah || detail.nama_umum}
-                            className="w-full h-64 object-cover"
+                            className="w-full h-72 object-cover"
                             onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              console.error(
-                                "Failed to load main image:",
-                                detail.gambar_utama,
-                              );
-                              target.style.display = "none";
+                              (e.target as HTMLImageElement).style.display = "none";
                             }}
                           />
                         </div>
                       ) : (
-                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                          <div className="flex items-center justify-center h-64">
-                            <div className="text-center">
-                              <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                              <p className="mt-2 text-sm text-gray-500">
-                                Gambar tidak tersedia
-                              </p>
-                            </div>
+                        <div className="rounded-lg border border-gray-100 bg-gray-50 h-72 flex items-center justify-center">
+                          <div className="text-center">
+                            <ImageIcon className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                            <p className="text-sm text-gray-400">Gambar tidak tersedia</p>
                           </div>
                         </div>
                       )}
 
-                      {/* Galleries */}
+                      {/* Galleries - Clean Grid */}
                       {detail.galleries && detail.galleries.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Galeri Gambar ({detail.galleries.length})
+                          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">
+                            Galeri ({detail.galleries.length})
                           </h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {detail.galleries.map(
                               (gallery: any, index: number) => (
                                 <div
                                   key={gallery.id || index}
-                                  className="relative group"
+                                  className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group cursor-pointer"
                                 >
-                                  <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                                    <img
-                                      src={getFullImageUrl(gallery.image_url)}
-                                      alt={gallery.title || "Gallery image"}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                      onError={(e) => {
-                                        const target =
-                                          e.target as HTMLImageElement;
-                                        console.error(
-                                          "Failed to load gallery image:",
-                                          gallery.image_url,
-                                        );
-                                        target.style.display = "none";
-                                      }}
-                                    />
-                                  </div>
+                                  <img
+                                    src={imageUrl(gallery.image_url)}
+                                    alt={gallery.title || "Gallery image"}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = "none";
+                                    }}
+                                  />
                                 </div>
                               ),
                             )}
@@ -202,125 +195,85 @@ export function CollapsibleApprovalItem({
                         </div>
                       )}
 
-                      {/* Gambar Detail Flora */}
+                      {/* Detail Images - Clean Layout */}
                       {(detail.gambar_daun ||
                         detail.gambar_batang ||
                         detail.gambar_bunga ||
                         detail.gambar_buah) && (
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Dokumentasi Detail Flora
+                          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">
+                            Dokumentasi Detail
                           </h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             {detail.gambar_daun && (
                               <div className="space-y-2">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group">
                                   <img
-                                    src={getFullImageUrl(detail.gambar_daun)}
+                                    src={imageUrl(detail.gambar_daun)}
                                     alt="Pertelaan Daun"
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     onError={(e) => {
-                                      const target =
-                                        e.target as HTMLImageElement;
-                                      console.error(
-                                        "Failed to load leaf image:",
-                                        detail.gambar_daun,
-                                      );
-                                      target.style.display = "none";
+                                      (e.target as HTMLImageElement).style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">
-                                    Pertelaan Daun
-                                  </p>
-                                  <p className="text-[10px] text-gray-500">
-                                    Detail struktur daun
-                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">Daun</p>
+                                  <p className="text-[10px] text-gray-400 mt-0.5">Pertelaan</p>
                                 </div>
                               </div>
                             )}
                             {detail.gambar_batang && (
                               <div className="space-y-2">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group">
                                   <img
-                                    src={getFullImageUrl(detail.gambar_batang)}
-                                    alt="Batang/Percabangan"
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    src={imageUrl(detail.gambar_batang)}
+                                    alt="Batang"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     onError={(e) => {
-                                      const target =
-                                        e.target as HTMLImageElement;
-                                      console.error(
-                                        "Failed to load stem image:",
-                                        detail.gambar_batang,
-                                      );
-                                      target.style.display = "none";
+                                      (e.target as HTMLImageElement).style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">
-                                    Batang
-                                  </p>
-                                  <p className="text-[10px] text-gray-500">
-                                    Batang & percabangan
-                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">Batang</p>
+                                  <p className="text-[10px] text-gray-400 mt-0.5">Percabangan</p>
                                 </div>
                               </div>
                             )}
                             {detail.gambar_bunga && (
                               <div className="space-y-2">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group">
                                   <img
-                                    src={getFullImageUrl(detail.gambar_bunga)}
+                                    src={imageUrl(detail.gambar_bunga)}
                                     alt="Bunga"
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     onError={(e) => {
-                                      const target =
-                                        e.target as HTMLImageElement;
-                                      console.error(
-                                        "Failed to load flower image:",
-                                        detail.gambar_bunga,
-                                      );
-                                      target.style.display = "none";
+                                      (e.target as HTMLImageElement).style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">
-                                    Bunga
-                                  </p>
-                                  <p className="text-[10px] text-gray-500">
-                                    Detail struktur bunga
-                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">Bunga</p>
+                                  <p className="text-[10px] text-gray-400 mt-0.5">Struktur</p>
                                 </div>
                               </div>
                             )}
                             {detail.gambar_buah && (
                               <div className="space-y-2">
-                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                                <div className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group">
                                   <img
-                                    src={getFullImageUrl(detail.gambar_buah)}
+                                    src={imageUrl(detail.gambar_buah)}
                                     alt="Buah"
-                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-200"
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                     onError={(e) => {
-                                      const target =
-                                        e.target as HTMLImageElement;
-                                      console.error(
-                                        "Failed to load fruit image:",
-                                        detail.gambar_buah,
-                                      );
-                                      target.style.display = "none";
+                                      (e.target as HTMLImageElement).style.display = "none";
                                     }}
                                   />
                                 </div>
                                 <div className="text-center">
-                                  <p className="text-xs font-medium text-gray-900">
-                                    Buah
-                                  </p>
-                                  <p className="text-[10px] text-gray-500">
-                                    Detail struktur buah
-                                  </p>
+                                  <p className="text-xs font-medium text-gray-900">Buah</p>
+                                  <p className="text-[10px] text-gray-400 mt-0.5">Struktur</p>
                                 </div>
                               </div>
                             )}
@@ -328,7 +281,8 @@ export function CollapsibleApprovalItem({
                         </div>
                       )}
 
-                      <div className="grid md:grid-cols-2 gap-4">
+                      {/* Information Grid - Clean */}
+                      <div className="grid md:grid-cols-2 gap-6">
                         <DetailField
                           label="Nama Ilmiah"
                           value={detail.nama_ilmiah}
@@ -359,6 +313,7 @@ export function CollapsibleApprovalItem({
                         />
                       </div>
 
+                      {/* Full Width Fields */}
                       <DetailField
                         label="Deskripsi Umum"
                         value={detail.deskripsi}
@@ -407,32 +362,23 @@ export function CollapsibleApprovalItem({
                   {/* Fauna Detail */}
                   {entityType === "fauna" && (
                     <>
-                      {/* Image */}
+                      {/* Main Image */}
                       {detail.gambar_utama ? (
-                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+                        <div className="rounded-lg overflow-hidden border border-gray-100">
                           <img
-                            src={getFullImageUrl(detail.gambar_utama)}
+                            src={imageUrl(detail.gambar_utama)}
                             alt={detail.nama_ilmiah || detail.nama_umum}
-                            className="w-full h-64 object-cover"
+                            className="w-full h-72 object-cover"
                             onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              console.error(
-                                "Failed to load main image:",
-                                detail.gambar_utama,
-                              );
-                              target.style.display = "none";
+                              (e.target as HTMLImageElement).style.display = "none";
                             }}
                           />
                         </div>
                       ) : (
-                        <div className="rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                          <div className="flex items-center justify-center h-64">
-                            <div className="text-center">
-                              <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                              <p className="mt-2 text-sm text-gray-500">
-                                Gambar tidak tersedia
-                              </p>
-                            </div>
+                        <div className="rounded-lg border border-gray-100 bg-gray-50 h-72 flex items-center justify-center">
+                          <div className="text-center">
+                            <ImageIcon className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                            <p className="text-sm text-gray-400">Gambar tidak tersedia</p>
                           </div>
                         </div>
                       )}
@@ -440,32 +386,24 @@ export function CollapsibleApprovalItem({
                       {/* Galleries */}
                       {detail.galleries && detail.galleries.length > 0 && (
                         <div>
-                          <h4 className="text-sm font-medium text-gray-900 mb-3">
-                            Galeri Gambar ({detail.galleries.length})
+                          <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">
+                            Galeri ({detail.galleries.length})
                           </h4>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                             {detail.galleries.map(
                               (gallery: any, index: number) => (
                                 <div
                                   key={gallery.id || index}
-                                  className="relative group"
+                                  className="aspect-square rounded-lg overflow-hidden border border-gray-100 bg-gray-50 group cursor-pointer"
                                 >
-                                  <div className="aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-                                    <img
-                                      src={getFullImageUrl(gallery.image_url)}
-                                      alt={gallery.title || "Gallery image"}
-                                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                      onError={(e) => {
-                                        const target =
-                                          e.target as HTMLImageElement;
-                                        console.error(
-                                          "Failed to load gallery image:",
-                                          gallery.image_url,
-                                        );
-                                        target.style.display = "none";
-                                      }}
-                                    />
-                                  </div>
+                                  <img
+                                    src={imageUrl(gallery.image_url)}
+                                    alt={gallery.title || "Gallery image"}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = "none";
+                                    }}
+                                  />
                                 </div>
                               ),
                             )}
@@ -473,7 +411,8 @@ export function CollapsibleApprovalItem({
                         </div>
                       )}
 
-                      <div className="grid md:grid-cols-2 gap-4">
+                      {/* Information Grid */}
+                      <div className="grid md:grid-cols-2 gap-6">
                         <DetailField
                           label="Nama Ilmiah"
                           value={detail.nama_ilmiah}
@@ -502,6 +441,7 @@ export function CollapsibleApprovalItem({
                         />
                       </div>
 
+                      {/* Full Width Fields */}
                       <DetailField
                         label="Habitat & Sumber Makanan"
                         value={detail.habitat_sumber_makanan}
@@ -520,7 +460,7 @@ export function CollapsibleApprovalItem({
                   {/* Kegiatan Detail */}
                   {entityType === "kegiatan" && (
                     <>
-                      <div className="grid md:grid-cols-2 gap-4">
+                      <div className="grid md:grid-cols-2 gap-6">
                         <DetailField label="Judul" value={detail.title} />
                         <DetailField
                           label="Tanggal"
@@ -544,15 +484,15 @@ export function CollapsibleApprovalItem({
                   )}
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  Tidak ada detail tersedia
-                </p>
+                <div className="py-8 text-center">
+                  <p className="text-sm text-gray-400">Tidak ada detail tersedia</p>
+                </div>
               )}
             </div>
           </CollapsibleContent>
         </div>
       </Collapsible>
-    </Card>
+    </div>
   );
 }
 
@@ -575,11 +515,11 @@ function DetailField({
 
   return (
     <div className={fullWidth ? "col-span-full" : ""}>
-      <div className="text-xs font-medium text-muted-foreground mb-1">
+      <div className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
         {label}
       </div>
       <div
-        className={`text-sm ${italic ? "italic" : ""} ${multiline ? "whitespace-pre-wrap leading-relaxed" : "font-medium"}`}
+        className={`text-sm text-gray-900 ${italic ? "italic" : ""} ${multiline ? "whitespace-pre-wrap leading-relaxed" : "font-medium"}`}
       >
         {displayValue}
       </div>

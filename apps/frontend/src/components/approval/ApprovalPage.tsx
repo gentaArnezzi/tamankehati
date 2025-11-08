@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../../lib/useAuth";
 import { GroupedApprovalView } from "./GroupedApprovalView";
@@ -30,27 +30,27 @@ export function ApprovalPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#233c2b] mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Memuat data...</p>
+          <Loader2 className="h-12 w-12 animate-spin text-[#00ab6c] mx-auto mb-4" />
+          <p className="text-gray-600">Memuat data...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
-          <CheckCircle className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
-          Persetujuan Data
-        </h1>
-        <p className="text-sm sm:text-base text-muted-foreground">
-          Tinjau dan proses konten yang menunggu persetujuan sebelum
-          dipublikasikan. Data dikelompokkan berdasarkan taman untuk memudahkan
-          bulk approval.
-        </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-100 sticky top-0 z-10">
+        <div className="max-w-6xl mx-auto px-8 py-8">
+          <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
+            Persetujuan Data
+          </h1>
+          <p className="text-sm text-gray-500 mt-2">
+            Tinjau dan proses konten yang menunggu persetujuan
+          </p>
+        </div>
       </div>
 
       {/* Grouped view by park */}

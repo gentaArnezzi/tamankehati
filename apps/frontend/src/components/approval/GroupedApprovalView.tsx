@@ -21,6 +21,7 @@ import {
 import { imageUrl } from "../../lib/api-url";
 import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
+import { Input } from "../ui/input";
 import { toast } from "sonner";
 import {
   CheckCircle,
@@ -34,6 +35,8 @@ import {
   Eye,
   MapPin,
   XCircle,
+  Search,
+  Filter,
 } from "lucide-react";
 import {
   Collapsible,
@@ -41,6 +44,7 @@ import {
   CollapsibleTrigger,
 } from "../ui/collapsible";
 import { Alert, AlertDescription } from "../ui/alert";
+import { ActionDialog } from "../ui/action-dialog";
 
 export function GroupedApprovalView() {
   const router = useRouter();
@@ -57,6 +61,29 @@ export function GroupedApprovalView() {
   const [processingParks, setProcessingParks] = useState<Set<number>>(
     new Set(),
   );
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "flora" | "fauna" | "kegiatan">("all");
+  
+  // Dialog states
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean;
+    parkId?: number;
+    entityType?: string;
+    entityId?: number;
+    title?: string;
+    isPark?: boolean;
+  }>({ open: false });
+  const [bulkApproveDialog, setBulkApproveDialog] = useState<{
+    open: boolean;
+    parkId?: number;
+    parkName?: string;
+    count?: number;
+  }>({ open: false });
+  const [parkApproveDialog, setParkApproveDialog] = useState<{
+    open: boolean;
+    parkId?: number;
+    parkName?: string;
+  }>({ open: false });
 
   useEffect(() => {
     loadGroupedData();
@@ -106,13 +133,17 @@ export function GroupedApprovalView() {
   };
 
   const handleBulkApprove = async (parkId: number, parkName: string) => {
-    if (
-      !confirm(
-        `Setujui SEMUA data (${getTotalCount(parkId)} item) dari taman "${parkName}"?\n\nTindakan ini tidak dapat dibatalkan.`,
-      )
-    ) {
-      return;
-    }
+    setBulkApproveDialog({
+      open: true,
+      parkId,
+      parkName,
+      count: getTotalCount(parkId),
+    });
+  };
+
+  const executeBulkApprove = async () => {
+    const { parkId, parkName } = bulkApproveDialog;
+    if (!parkId || !parkName) return;
 
     try {
       setProcessingGroups(new Set(Array.from(processingGroups).concat([parkId])));
@@ -126,7 +157,7 @@ export function GroupedApprovalView() {
         },
       );
 
-      // Reload data
+      setBulkApproveDialog({ open: false });
       await loadGroupedData();
     } catch (error) {
       console.error("Failed to bulk approve", error);
@@ -134,7 +165,7 @@ export function GroupedApprovalView() {
     } finally {
       setProcessingGroups((prev) => {
         const newSet = new Set(prev);
-        newSet.delete(parkId);
+        newSet.delete(parkId!);
         return newSet;
       });
     }
@@ -173,26 +204,43 @@ export function GroupedApprovalView() {
     entityId: number,
     title: string,
   ) => {
-    const reason = prompt(`Alasan menolak "${title}":`);
+    setRejectDialog({
+      open: true,
+      parkId,
+      entityType,
+      entityId,
+      title,
+      isPark: false,
+    });
+  };
+
+  const executeReject = async (reason?: string) => {
+    const { parkId, entityType, entityId, title, isPark } = rejectDialog;
     if (!reason || !reason.trim()) {
       toast.error("Alasan penolakan harus diisi");
       return;
     }
 
     try {
-      switch (entityType) {
-        case "flora":
-          await floraApi.reject(entityId, reason);
-          break;
-        case "fauna":
-          await faunaApi.reject(entityId, reason);
-          break;
-        case "kegiatan":
-          await activitiesApi.reject(entityId, reason);
-          break;
+      if (isPark && parkId) {
+        await parksApprovalApi.reject(parkId, reason);
+        toast.success(`❌ Taman "${title}" ditolak`);
+      } else if (entityType && entityId) {
+        switch (entityType) {
+          case "flora":
+            await floraApi.reject(entityId, reason);
+            break;
+          case "fauna":
+            await faunaApi.reject(entityId, reason);
+            break;
+          case "kegiatan":
+            await activitiesApi.reject(entityId, reason);
+            break;
+        }
+        toast.success(`Berhasil menolak: ${title}`);
       }
 
-      toast.success(`Berhasil menolak: ${title}`);
+      setRejectDialog({ open: false });
       await loadGroupedData();
     } catch (error) {
       console.error("Failed to reject item", error);
@@ -201,18 +249,22 @@ export function GroupedApprovalView() {
   };
 
   const handleApprovePark = async (parkId: number, parkName: string) => {
-    if (
-      !confirm(
-        `Setujui taman "${parkName}"?\n\nTaman akan menjadi aktif dan dapat dikelola oleh regional admin.`,
-      )
-    ) {
-      return;
-    }
+    setParkApproveDialog({
+      open: true,
+      parkId,
+      parkName,
+    });
+  };
+
+  const executeParkApprove = async () => {
+    const { parkId, parkName } = parkApproveDialog;
+    if (!parkId || !parkName) return;
 
     try {
       setProcessingParks(new Set(Array.from(processingParks).concat([parkId])));
       await parksApprovalApi.approve(parkId);
       toast.success(`✅ Taman "${parkName}" berhasil disetujui`);
+      setParkApproveDialog({ open: false });
       await loadGroupedData();
     } catch (error) {
       console.error("Failed to approve park", error);
@@ -227,24 +279,12 @@ export function GroupedApprovalView() {
   };
 
   const handleRejectPark = async (parkId: number, parkName: string) => {
-    const reason = prompt(`Alasan menolak taman "${parkName}":`);
-    if (!reason) return;
-
-    try {
-      setProcessingParks(new Set(Array.from(processingParks).concat([parkId])));
-      await parksApprovalApi.reject(parkId, reason);
-      toast.success(`❌ Taman "${parkName}" ditolak`);
-      await loadGroupedData();
-    } catch (error) {
-      console.error("Failed to reject park", error);
-      toast.error("Gagal menolak taman");
-    } finally {
-      setProcessingParks((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(parkId);
-        return newSet;
-      });
-    }
+    setRejectDialog({
+      open: true,
+      parkId,
+      title: parkName,
+      isPark: true,
+    });
   };
 
   const handleViewParkDetail = (parkId: number) => {
@@ -278,706 +318,620 @@ export function GroupedApprovalView() {
     return labels[type] || type;
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-[#233c2b] mx-auto mb-4" />
-          <p className="text-muted-foreground">Memuat data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (groups.length === 0 && pendingParks.length === 0) {
-    return (
-      <Card>
-        <CardContent className="py-12 text-center">
-          <TreePine className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <p className="text-lg font-medium text-gray-600 mb-2">
-            Tidak ada data yang menunggu persetujuan
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Semua data sudah diproses atau belum ada submission baru
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   // Calculate totals
   const totalPendingParks = pendingParks.length;
   const totalPendingFlora = groups.reduce((sum, g) => sum + g.floraCount, 0);
   const totalPendingFauna = groups.reduce((sum, g) => sum + g.faunaCount, 0);
+  const totalPendingKegiatan = groups.reduce((sum, g) => sum + g.kegiatanCount, 0);
+  const totalPendingItems = groups.reduce((sum, g) => sum + g.totalItems, 0);
+
+  // Filter and search logic
+  const filteredGroups = groups.filter((group) => {
+    // Filter by type
+    if (filterType !== "all") {
+      const hasType = group.items.some((item) => item.entityType === filterType);
+      if (!hasType) return false;
+    }
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesParkName = group.parkName.toLowerCase().includes(query);
+      const matchesItems = group.items.some(
+        (item) => item.title.toLowerCase().includes(query),
+      );
+      return matchesParkName || matchesItems;
+    }
+
+    return true;
+  });
+
+  const filteredParks = pendingParks.filter((park) => {
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        park.name.toLowerCase().includes(query) ||
+        park.provinsi?.toLowerCase().includes(query) ||
+        park.kota_kabupaten?.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-3" />
+          <p className="text-sm text-gray-500">Memuat data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-4">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  Total Taman
+    <div className="min-h-screen bg-gray-50">
+      {/* Stats Bar - Minimalis */}
+      {totalPendingItems > 0 ? (
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-6xl mx-auto px-8 py-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-6 text-sm">
+                <div className="text-gray-600">
+                  <span className="font-medium text-gray-900">{totalPendingItems}</span> item menunggu
                 </div>
-                <div className="text-3xl font-bold text-[#356447]">
-                  {totalPendingParks}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Menunggu persetujuan
-                </div>
+                {totalPendingParks > 0 && (
+                  <div className="text-gray-500">
+                    {totalPendingParks} taman
+                  </div>
+                )}
+                {totalPendingFlora > 0 && (
+                  <div className="text-gray-500">
+                    {totalPendingFlora} flora
+                  </div>
+                )}
+                {totalPendingFauna > 0 && (
+                  <div className="text-gray-500">
+                    {totalPendingFauna} fauna
+                  </div>
+                )}
+                {totalPendingKegiatan > 0 && (
+                  <div className="text-gray-500">
+                    {totalPendingKegiatan} kegiatan
+                  </div>
+                )}
               </div>
-              <div className="p-3 rounded-lg bg-blue-50">
-                <MapPin className="h-8 w-8 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  Total Flora
+
+              {/* Search and Filter */}
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Cari taman atau item..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9 h-9 w-64 text-sm border-gray-200 focus:border-gray-400"
+                  />
                 </div>
-                <div className="text-3xl font-bold text-[#356447]">
-                  {totalPendingFlora}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Menunggu persetujuan
-                </div>
-              </div>
-              <div className="p-3 rounded-lg bg-green-50">
-                <Leaf className="h-8 w-8 text-green-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  Total Fauna
-                </div>
-                <div className="text-3xl font-bold text-[#356447]">
-                  {totalPendingFauna}
-                </div>
-                <div className="text-xs text-muted-foreground mt-1">
-                  Menunggu persetujuan
-                </div>
-              </div>
-              <div className="p-3 rounded-lg bg-sky-50">
-                <Bird className="h-8 w-8 text-sky-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Pending Parks - Taman yang menunggu approval */}
-      {pendingParks.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 mb-2">
-            <MapPin className="h-5 w-5 text-[#356447]" />
-            <h3 className="text-lg font-semibold">
-              Taman Menunggu Persetujuan
-            </h3>
-            <Badge variant="secondary">{pendingParks.length}</Badge>
-          </div>
-
-          {pendingParks.map((park) => {
-            const isProcessing = processingParks.has(park.id);
-            const isExpanded = expandedParkDetails.has(park.id);
-
-            return (
-              <Card
-                key={park.id}
-                className="overflow-hidden border-2 border-blue-200 bg-blue-50/30"
-              >
-                <Collapsible
-                  open={isExpanded}
-                  onOpenChange={() => toggleParkDetail(park.id)}
-                >
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-50 to-sky-50 border-2 border-blue-200">
-                          <MapPin className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div className="flex-1">
-                          <CardTitle className="text-xl mb-1">
-                            {park.name}
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-3 flex-wrap">
-                            <Badge className="bg-blue-100 text-blue-700 border-blue-300">
-                              Taman Baru
-                            </Badge>
-                            {park.provinsi && (
-                              <span className="text-xs text-gray-600">
-                                📍 {park.provinsi}
-                                {park.kota_kabupaten &&
-                                  `, ${park.kota_kabupaten}`}
-                              </span>
-                            )}
-                            {park.area_ha && (
-                              <span className="text-xs text-gray-600">
-                                📐 {park.area_ha} ha
-                              </span>
-                            )}
-                            {park.submitted_at && (
-                              <span className="text-xs text-gray-500">
-                                📅{" "}
-                                {new Date(park.submitted_at).toLocaleDateString(
-                                  "id-ID",
-                                  {
-                                    day: "numeric",
-                                    month: "short",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )}
-                              </span>
-                            )}
-                          </CardDescription>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <CollapsibleTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-blue-300 hover:bg-blue-50"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            {isExpanded ? "Sembunyikan" : "Lihat Detail"}
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4 ml-2" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 ml-2" />
-                            )}
-                          </Button>
-                        </CollapsibleTrigger>
-                        <Button
-                          onClick={() => handleApprovePark(park.id, park.name)}
-                          disabled={isProcessing}
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                              Processing...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircle className="h-4 w-4 mr-2" />
-                              Setujui
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          onClick={() => handleRejectPark(park.id, park.name)}
-                          disabled={isProcessing}
-                          size="sm"
-                          variant="destructive"
-                        >
-                          Tolak
-                        </Button>
-                      </div>
-                    </div>
-                  </CardHeader>
-
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
-                      <div className="space-y-4 bg-white rounded-lg p-4 border border-blue-100">
-                        {/* Park Image */}
-                        {park.gambar_utama && (
-                          <div>
-                            <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                              Foto Taman
-                            </h4>
-                            <img
-                              src={imageUrl(park.gambar_utama)}
-                              alt={park.name}
-                              className="w-full h-64 object-cover rounded-lg border-2 border-gray-200 shadow-sm"
-                              onError={(e) => {
-                                console.error(
-                                  "Failed to load park image:",
-                                  park.gambar_utama,
-                                );
-                                (e.target as HTMLImageElement).style.display =
-                                  "none";
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {/* Basic Info */}
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                            Informasi Dasar
-                          </h4>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            {park.pengelola && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Pengelola:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.pengelola}
-                                </p>
-                              </div>
-                            )}
-                            {park.sk_penetapan && (
-                              <div>
-                                <span className="text-gray-500">
-                                  SK Penetapan:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.sk_penetapan}
-                                </p>
-                              </div>
-                            )}
-                            {park.tipe_ekoregion && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Tipe Ekoregion:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.tipe_ekoregion}
-                                </p>
-                              </div>
-                            )}
-                            {park.kondisi_fisik && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Kondisi Fisik:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.kondisi_fisik}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Location */}
-                        <div>
-                          <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                            Lokasi
-                          </h4>
-                          <div className="grid grid-cols-2 gap-3 text-sm">
-                            {park.provinsi && (
-                              <div>
-                                <span className="text-gray-500">Provinsi:</span>
-                                <p className="font-medium text-gray-900">
-                                  {park.provinsi}
-                                </p>
-                              </div>
-                            )}
-                            {park.kota_kabupaten && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Kota/Kabupaten:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.kota_kabupaten}
-                                </p>
-                              </div>
-                            )}
-                            {park.kecamatan && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Kecamatan:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.kecamatan}
-                                </p>
-                              </div>
-                            )}
-                            {park.desa_kelurahan && (
-                              <div>
-                                <span className="text-gray-500">
-                                  Desa/Kelurahan:
-                                </span>
-                                <p className="font-medium text-gray-900">
-                                  {park.desa_kelurahan}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Description */}
-                        {park.description && (
-                          <div>
-                            <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                              Deskripsi
-                            </h4>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              {park.description}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Sejarah */}
-                        {park.sejarah && (
-                          <div>
-                            <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                              Sejarah
-                            </h4>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              {park.sejarah}
-                            </p>
-                          </div>
-                        )}
-
-                        {/* Visi & Misi */}
-                        {(park.visi || park.misi) && (
-                          <div className="grid grid-cols-2 gap-4">
-                            {park.visi && (
-                              <div>
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                                  Visi
-                                </h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {park.visi}
-                                </p>
-                              </div>
-                            )}
-                            {park.misi && (
-                              <div>
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                                  Misi
-                                </h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {park.misi}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Nilai Penting & Nilai Dasar */}
-                        {(park.nilai_penting || park.nilai_dasar) && (
-                          <div className="grid grid-cols-2 gap-4">
-                            {park.nilai_penting && (
-                              <div>
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                                  Nilai Penting
-                                </h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {park.nilai_penting}
-                                </p>
-                              </div>
-                            )}
-                            {park.nilai_dasar && (
-                              <div>
-                                <h4 className="font-semibold text-sm text-gray-700 mb-2">
-                                  Nilai Dasar
-                                </h4>
-                                <p className="text-sm text-gray-600 leading-relaxed">
-                                  {park.nilai_dasar}
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Grouped Items - Konten yang menunggu approval per taman */}
-      {groups.length > 0 && (
-        <>
-          <div className="flex items-center gap-2 mb-2 mt-6">
-            <TreePine className="h-5 w-5 text-[#356447]" />
-            <h3 className="text-lg font-semibold">
-              Konten Menunggu Persetujuan (per Taman)
-            </h3>
-          </div>
-          <div className="space-y-3">
-            {groups.map((group) => {
-              const isExpanded = expandedGroups.has(group.parkId);
-              const isProcessing = processingGroups.has(group.parkId);
-
-              return (
-                <Card key={group.parkId} className="overflow-hidden border-2">
-                  <Collapsible
-                    open={isExpanded}
-                    onOpenChange={() => toggleGroup(group.parkId)}
+                <div className="flex items-center gap-1 border border-gray-200 rounded-md">
+                  <Button
+                    variant={filterType === "all" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilterType("all")}
+                    className="h-8 px-3 text-xs"
                   >
-                    <CollapsibleTrigger asChild>
-                      <CardHeader className="cursor-pointer hover:bg-gray-50 transition-colors">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="p-3 rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200">
-                              <TreePine className="h-6 w-6 text-[#356447]" />
-                            </div>
-                            <div>
-                              <CardTitle className="text-xl mb-1">
-                                {group.parkName}
-                              </CardTitle>
-                              <CardDescription className="flex items-center gap-3">
-                                <Badge
-                                  variant="outline"
-                                  className="bg-emerald-50 text-emerald-700 border-emerald-300"
-                                >
-                                  {group.totalItems} Item Menunggu
-                                </Badge>
-                                {group.floraCount > 0 && (
-                                  <span className="text-xs text-gray-600">
-                                    🌿 {group.floraCount} Flora
+                    Semua
+                  </Button>
+                  <Button
+                    variant={filterType === "flora" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilterType("flora")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Leaf className="h-3 w-3 mr-1" />
+                    Flora
+                  </Button>
+                  <Button
+                    variant={filterType === "fauna" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilterType("fauna")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Bird className="h-3 w-3 mr-1" />
+                    Fauna
+                  </Button>
+                  <Button
+                    variant={filterType === "kegiatan" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setFilterType("kegiatan")}
+                    className="h-8 px-3 text-xs"
+                  >
+                    <Calendar className="h-3 w-3 mr-1" />
+                    Kegiatan
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Content */}
+      <div className="max-w-6xl mx-auto px-8 py-12">
+        {filteredGroups.length === 0 && filteredParks.length === 0 ? (
+          <div className="text-center py-24">
+            <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-1">
+              Tidak ada data yang menunggu persetujuan
+            </h3>
+            <p className="text-sm text-gray-500">
+              Semua data sudah diproses
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {/* Pending Parks - Taman yang menunggu approval */}
+            {filteredParks.length > 0 && (
+              <div>
+                <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  Taman ({filteredParks.length})
+                </h2>
+                <div className="space-y-3">
+                  {filteredParks.map((park) => {
+                    const isProcessing = processingParks.has(park.id);
+                    const isExpanded = expandedParkDetails.has(park.id);
+
+                    return (
+                      <div
+                        key={park.id}
+                        className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden"
+                      >
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-base font-medium text-gray-900">
+                                  {park.name}
+                                </h3>
+                                <span className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
+                                  Baru
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                                {park.provinsi && (
+                                  <span>{park.provinsi}{park.kota_kabupaten && `, ${park.kota_kabupaten}`}</span>
+                                )}
+                                {park.area_ha && (
+                                  <span>{park.area_ha} ha</span>
+                                )}
+                                {park.submitted_at && (
+                                  <span>
+                                    {new Date(park.submitted_at).toLocaleDateString("id-ID", {
+                                      day: "numeric",
+                                      month: "short",
+                                      year: "numeric",
+                                    })}
                                   </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleParkDetail(park.id)}
+                                  className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                >
+                                  {isExpanded ? "Sembunyikan" : "Detail"}
+                                  {isExpanded ? (
+                                    <ChevronUp className="ml-1 h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="ml-1 h-3 w-3" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                            {/* Action Buttons */}
+                            <div className="flex-shrink-0 flex items-center gap-2">
+                              <Button
+                                onClick={() => handleApprovePark(park.id, park.name)}
+                                disabled={isProcessing}
+                                className="h-8 px-4 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-md"
+                              >
+                                {isProcessing ? (
+                                  <>
+                                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                                    Memproses
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="mr-1.5 h-3 w-3" />
+                                    Setujui
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                onClick={() => handleRejectPark(park.id, park.name)}
+                                disabled={isProcessing}
+                                variant="outline"
+                                className="h-8 px-4 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-300 rounded-md"
+                              >
+                                <XCircle className="mr-1.5 h-3 w-3" />
+                                Tolak
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Collapsible Detail */}
+                        <Collapsible
+                          open={isExpanded}
+                          onOpenChange={() => toggleParkDetail(park.id)}
+                        >
+                          <CollapsibleContent>
+                            <div className="px-5 pb-5 pt-0">
+                              <div className="mt-4 pt-4 border-t border-gray-100 space-y-4">
+                              {/* Park Image */}
+                              {park.gambar_utama && (
+                                <div>
+                                  <img
+                                    src={imageUrl(park.gambar_utama)}
+                                    alt={park.name}
+                                    className="w-full h-48 object-cover rounded-md"
+                                    onError={(e) => {
+                                      (e.target as HTMLImageElement).style.display = "none";
+                                    }}
+                                  />
+                                </div>
+                              )}
+
+                              {/* Basic Info */}
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                {park.pengelola && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Pengelola</div>
+                                    <div className="text-gray-900">{park.pengelola}</div>
+                                  </div>
+                                )}
+                                {park.sk_penetapan && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">SK Penetapan</div>
+                                    <div className="text-gray-900">{park.sk_penetapan}</div>
+                                  </div>
+                                )}
+                                {park.tipe_ekoregion && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Tipe Ekoregion</div>
+                                    <div className="text-gray-900">{park.tipe_ekoregion}</div>
+                                  </div>
+                                )}
+                                {park.kondisi_fisik && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Kondisi Fisik</div>
+                                    <div className="text-gray-900">{park.kondisi_fisik}</div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Location */}
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                {park.provinsi && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Provinsi</div>
+                                    <div className="text-gray-900">{park.provinsi}</div>
+                                  </div>
+                                )}
+                                {park.kota_kabupaten && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Kota/Kabupaten</div>
+                                    <div className="text-gray-900">{park.kota_kabupaten}</div>
+                                  </div>
+                                )}
+                                {park.kecamatan && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Kecamatan</div>
+                                    <div className="text-gray-900">{park.kecamatan}</div>
+                                  </div>
+                                )}
+                                {park.desa_kelurahan && (
+                                  <div>
+                                    <div className="text-xs text-gray-500 mb-1">Desa/Kelurahan</div>
+                                    <div className="text-gray-900">{park.desa_kelurahan}</div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Description */}
+                              {park.description && (
+                                <div>
+                                  <div className="text-xs text-gray-500 mb-1.5">Deskripsi</div>
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {park.description}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Sejarah */}
+                              {park.sejarah && (
+                                <div>
+                                  <div className="text-xs text-gray-500 mb-1.5">Sejarah</div>
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {park.sejarah}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Visi & Misi */}
+                              {(park.visi || park.misi) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                  {park.visi && (
+                                    <div>
+                                      <div className="text-xs text-gray-500 mb-1.5">Visi</div>
+                                      <p className="text-sm text-gray-700 leading-relaxed">
+                                        {park.visi}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {park.misi && (
+                                    <div>
+                                      <div className="text-xs text-gray-500 mb-1.5">Misi</div>
+                                      <p className="text-sm text-gray-700 leading-relaxed">
+                                        {park.misi}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+
+                              {/* Nilai Penting & Nilai Dasar */}
+                              {(park.nilai_penting || park.nilai_dasar) && (
+                                <div className="grid grid-cols-2 gap-4">
+                                  {park.nilai_penting && (
+                                    <div>
+                                      <div className="text-xs text-gray-500 mb-1.5">Nilai Penting</div>
+                                      <p className="text-sm text-gray-700 leading-relaxed">
+                                        {park.nilai_penting}
+                                      </p>
+                                    </div>
+                                  )}
+                                  {park.nilai_dasar && (
+                                    <div>
+                                      <div className="text-xs text-gray-500 mb-1.5">Nilai Dasar</div>
+                                      <p className="text-sm text-gray-700 leading-relaxed">
+                                        {park.nilai_dasar}
+                                      </p>
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                              </div>
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Grouped Items - Konten yang menunggu approval per taman */}
+            {filteredGroups.length > 0 && (
+              <div>
+                <h2 className="text-lg font-medium text-gray-900 mb-4">
+                  Konten ({filteredGroups.length} taman)
+                </h2>
+                <div className="space-y-3">
+                  {filteredGroups.map((group) => {
+                    const isExpanded = expandedGroups.has(group.parkId);
+                    const isProcessing = processingGroups.has(group.parkId);
+
+                    return (
+                      <div
+                        key={group.parkId}
+                        className="bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors overflow-hidden"
+                      >
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="text-base font-medium text-gray-900">
+                                  {group.parkName}
+                                </h3>
+                                <span className="text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded">
+                                  {group.totalItems} item
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
+                                {group.floraCount > 0 && (
+                                  <span>{group.floraCount} flora</span>
                                 )}
                                 {group.faunaCount > 0 && (
-                                  <span className="text-xs text-gray-600">
-                                    🦋 {group.faunaCount} Fauna
-                                  </span>
+                                  <span>{group.faunaCount} fauna</span>
                                 )}
                                 {group.kegiatanCount > 0 && (
-                                  <span className="text-xs text-gray-600">
-                                    📅 {group.kegiatanCount} Kegiatan
-                                  </span>
+                                  <span>{group.kegiatanCount} kegiatan</span>
                                 )}
-                              </CardDescription>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleViewParkDetail(group.parkId)}
+                                  className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                >
+                                  <Eye className="mr-1.5 h-3 w-3" />
+                                  Detail
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => toggleGroup(group.parkId)}
+                                  className="h-7 text-xs text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                                >
+                                  {isExpanded ? "Sembunyikan" : "Item"}
+                                  {isExpanded ? (
+                                    <ChevronUp className="ml-1 h-3 w-3" />
+                                  ) : (
+                                    <ChevronDown className="ml-1 h-3 w-3" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                            {/* Action Button */}
+                            <div className="flex-shrink-0">
+                              <Button
+                                onClick={() => handleBulkApprove(group.parkId, group.parkName)}
+                                disabled={isProcessing}
+                                className="h-8 px-4 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-md"
+                              >
+                                {isProcessing ? (
+                                  <>
+                                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                                    Memproses
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircle className="mr-1.5 h-3 w-3" />
+                                    Setujui Semua
+                                  </>
+                                )}
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewParkDetail(group.parkId);
-                              }}
-                              variant="outline"
-                              size="sm"
-                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 border-blue-200 hover:border-blue-300"
-                            >
-                              <Eye className="mr-2 h-4 w-4" />
-                              Lihat Detail
-                            </Button>
-                            <Button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleBulkApprove(group.parkId, group.parkName);
-                              }}
-                              disabled={isProcessing}
-                              className="bg-[#356447] hover:bg-[#2d5239] shadow-md hover:shadow-lg transition-all"
-                              size="sm"
-                            >
-                              {isProcessing ? (
-                                <>
-                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                  Memproses...
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle className="mr-2 h-4 w-4" />
-                                  Setujui Semua ({group.totalItems})
-                                </>
-                              )}
-                            </Button>
-                            {isExpanded ? (
-                              <ChevronUp className="h-5 w-5 text-gray-400" />
-                            ) : (
-                              <ChevronDown className="h-5 w-5 text-gray-400" />
-                            )}
-                          </div>
                         </div>
-                      </CardHeader>
-                    </CollapsibleTrigger>
 
-                    <CollapsibleContent>
-                      <CardContent className="pt-0 pb-6">
-                        <div className="border-t pt-4">
-                          {/* Summary by Type */}
-                          <div className="mb-4 flex items-center gap-4 px-4">
-                            {group.floraCount > 0 && (
-                              <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 rounded-lg border border-green-200">
-                                <Leaf className="h-4 w-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-700">
-                                  {group.floraCount} Flora
-                                </span>
-                              </div>
-                            )}
-                            {group.faunaCount > 0 && (
-                              <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-200">
-                                <Bird className="h-4 w-4 text-blue-600" />
-                                <span className="text-sm font-medium text-blue-700">
-                                  {group.faunaCount} Fauna
-                                </span>
-                              </div>
-                            )}
-                            {group.kegiatanCount > 0 && (
-                              <div className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 rounded-lg border border-purple-200">
-                                <Calendar className="h-4 w-4 text-purple-600" />
-                                <span className="text-sm font-medium text-purple-700">
-                                  {group.kegiatanCount} Kegiatan
-                                </span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Detailed Items List */}
-                          <div className="space-y-3">
-                            {group.items.map((item, idx) => (
-                              <div
-                                key={`${item.entityType}-${item.entityId}`}
-                                className="mx-4 p-5 rounded-lg border-2 bg-gradient-to-br from-white to-gray-50 hover:shadow-lg hover:border-[#356447] transition-all"
-                              >
-                                <div className="flex items-start justify-between gap-4">
-                                  {/* Left: Icon & Info */}
-                                  <div className="flex items-start gap-4 flex-1">
-                                    <div className="p-3 rounded-xl bg-white border-2 shadow-sm">
-                                      {getEntityIcon(item.entityType)}
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                      {/* Type Badge */}
-                                      <Badge
-                                        variant="outline"
-                                        className={`mb-2 font-medium ${
-                                          item.entityType === "flora"
-                                            ? "bg-green-100 text-green-700 border-green-300"
-                                            : item.entityType === "fauna"
-                                              ? "bg-blue-100 text-blue-700 border-blue-300"
-                                              : "bg-purple-100 text-purple-700 border-purple-300"
-                                        }`}
-                                      >
-                                        {getEntityLabel(item.entityType)}
-                                      </Badge>
-
-                                      {/* Title */}
-                                      <h4 className="text-base font-semibold text-gray-900 mb-2">
-                                        {item.entityType === "flora" ||
-                                        item.entityType === "fauna" ? (
-                                          <i>{item.title}</i>
-                                        ) : (
-                                          item.title
-                                        )}
-                                      </h4>
-
-                                      {/* Metadata Grid */}
-                                      <div className="grid grid-cols-2 gap-3 text-sm">
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                          <span className="font-medium text-gray-700">
-                                            ID:
+                        {/* Collapsible Items */}
+                        <Collapsible
+                          open={isExpanded}
+                          onOpenChange={() => toggleGroup(group.parkId)}
+                        >
+                          <CollapsibleContent>
+                            <div className="px-5 pb-5 pt-0">
+                              <div className="mt-4 pt-4 border-t border-gray-100 space-y-2">
+                                {group.items.map((item) => (
+                                  <div
+                                    key={`${item.entityType}-${item.entityId}`}
+                                    className="p-4 rounded-md border border-gray-100 bg-gray-50 hover:bg-gray-100 transition-colors"
+                                  >
+                                    <div className="flex items-start justify-between gap-4">
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-1.5">
+                                          <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                                            {getEntityLabel(item.entityType)}
                                           </span>
-                                          <span>#{item.entityId}</span>
+                                          <span className="text-xs text-gray-400">#{item.entityId}</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                          <span className="font-medium text-gray-700">
-                                            Status:
-                                          </span>
-                                          <Badge
-                                            variant="outline"
-                                            className="bg-amber-50 text-amber-700 border-amber-300 text-xs"
-                                          >
-                                            {item.status === "in_review"
-                                              ? "Menunggu Review"
-                                              : item.status}
-                                          </Badge>
+                                        <h4 className="text-sm font-medium text-gray-900 mb-1">
+                                          {item.entityType === "flora" ||
+                                          item.entityType === "fauna" ? (
+                                            <i>{item.title}</i>
+                                          ) : (
+                                            item.title
+                                          )}
+                                        </h4>
+                                        <div className="flex items-center gap-3 text-xs text-gray-500">
+                                          {item.submittedAt && (
+                                            <span>
+                                              {new Date(item.submittedAt).toLocaleDateString("id-ID", {
+                                                day: "numeric",
+                                                month: "short",
+                                                year: "numeric",
+                                              })}
+                                            </span>
+                                          )}
                                         </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                          <span className="font-medium text-gray-700">
-                                            Diajukan:
-                                          </span>
-                                          <span>
-                                            {item.submittedAt
-                                              ? new Date(
-                                                  item.submittedAt,
-                                                ).toLocaleDateString("id-ID", {
-                                                  day: "numeric",
-                                                  month: "short",
-                                                  year: "numeric",
-                                                })
-                                              : "-"}
-                                          </span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                          <span className="font-medium text-gray-700">
-                                            Update:
-                                          </span>
-                                          <span>
-                                            {item.updatedAt
-                                              ? new Date(
-                                                  item.updatedAt,
-                                                ).toLocaleDateString("id-ID", {
-                                                  day: "numeric",
-                                                  month: "short",
-                                                  year: "numeric",
-                                                })
-                                              : "-"}
-                                          </span>
-                                        </div>
+                                      </div>
+                                      <div className="flex-shrink-0 flex items-center gap-1.5">
+                                        <Button
+                                          onClick={() =>
+                                            handleSingleApprove(
+                                              group.parkId,
+                                              item.entityType,
+                                              item.entityId,
+                                              item.title,
+                                            )
+                                          }
+                                          className="h-7 px-3 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-md"
+                                        >
+                                          <CheckCircle className="mr-1 h-3 w-3" />
+                                          Setujui
+                                        </Button>
+                                        <Button
+                                          onClick={() =>
+                                            handleSingleReject(
+                                              group.parkId,
+                                              item.entityType,
+                                              item.entityId,
+                                              item.title,
+                                            )
+                                          }
+                                          variant="outline"
+                                          className="h-7 px-3 text-xs font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-300 rounded-md"
+                                        >
+                                          <XCircle className="mr-1 h-3 w-3" />
+                                          Tolak
+                                        </Button>
                                       </div>
                                     </div>
                                   </div>
-
-                                  {/* Right: Action Buttons */}
-                                  <div className="flex flex-col gap-2">
-                                    <Button
-                                      onClick={() =>
-                                        handleSingleApprove(
-                                          group.parkId,
-                                          item.entityType,
-                                          item.entityId,
-                                          item.title,
-                                        )
-                                      }
-                                      className="bg-[#356447] hover:bg-[#2d5239] shadow-md hover:shadow-lg transition-all"
-                                      size="sm"
-                                    >
-                                      <CheckCircle className="mr-2 h-4 w-4" />
-                                      Setujui
-                                    </Button>
-                                    <Button
-                                      onClick={() =>
-                                        handleSingleReject(
-                                          group.parkId,
-                                          item.entityType,
-                                          item.entityId,
-                                          item.title,
-                                        )
-                                      }
-                                      variant="destructive"
-                                      size="sm"
-                                      className="shadow-md hover:shadow-lg transition-all"
-                                    >
-                                      <XCircle className="mr-2 h-4 w-4" />
-                                      Tolak
-                                    </Button>
-                                  </div>
-                                </div>
+                                ))}
                               </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </CollapsibleContent>
-                  </Collapsible>
-                </Card>
-              );
-            })}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
+        )}
+      </div>
 
-          <Alert className="bg-blue-50 border-blue-200">
-            <AlertDescription className="text-blue-800 text-sm">
-              💡 <strong>Tips:</strong> Klik "Lihat Detail" untuk membuka
-              halaman review lengkap semua data dari taman. Gunakan "Setujui
-              Semua" untuk approve semua data dari taman sekaligus.
-            </AlertDescription>
-          </Alert>
-        </>
-      )}
+      {/* Dialogs */}
+      {/* Reject Dialog */}
+      <ActionDialog
+        open={rejectDialog.open}
+        onOpenChange={(open) => setRejectDialog({ ...rejectDialog, open })}
+        type="reject"
+        title={rejectDialog.isPark ? `Tolak Taman "${rejectDialog.title}"` : `Tolak "${rejectDialog.title}"`}
+        description={
+          rejectDialog.isPark
+            ? "Masukkan alasan penolakan taman ini. Alasan ini akan dikirim ke pengelola taman."
+            : "Masukkan alasan penolakan data ini. Alasan ini akan dikirim ke pengirim data."
+        }
+        onConfirm={executeReject}
+        requireReason={true}
+        reasonPlaceholder="Masukkan alasan penolakan..."
+      />
+
+      {/* Bulk Approve Dialog */}
+      <ActionDialog
+        open={bulkApproveDialog.open}
+        onOpenChange={(open) => setBulkApproveDialog({ ...bulkApproveDialog, open })}
+        type="approve"
+        title={`Setujui Semua Data dari "${bulkApproveDialog.parkName}"`}
+        description={`Apakah Anda yakin ingin menyetujui SEMUA data (${bulkApproveDialog.count} item) dari taman "${bulkApproveDialog.parkName}"?\n\nTindakan ini tidak dapat dibatalkan.`}
+        onConfirm={executeBulkApprove}
+        confirmLabel="Ya, Setujui Semua"
+        isLoading={bulkApproveDialog.parkId ? processingGroups.has(bulkApproveDialog.parkId) : false}
+      />
+
+      {/* Park Approve Dialog */}
+      <ActionDialog
+        open={parkApproveDialog.open}
+        onOpenChange={(open) => setParkApproveDialog({ ...parkApproveDialog, open })}
+        type="approve"
+        title={`Setujui Taman "${parkApproveDialog.parkName}"`}
+        description={`Apakah Anda yakin ingin menyetujui taman "${parkApproveDialog.parkName}"?\n\nTaman akan menjadi aktif dan dapat dikelola oleh regional admin.`}
+        onConfirm={executeParkApprove}
+        confirmLabel="Ya, Setujui"
+        isLoading={parkApproveDialog.parkId ? processingParks.has(parkApproveDialog.parkId) : false}
+      />
     </div>
   );
 }

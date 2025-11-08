@@ -19,8 +19,13 @@ import {
   ArrowLeft,
   Loader2,
   ChevronDown,
+  ChevronUp,
+  XCircle,
 } from "lucide-react";
 import { CollapsibleApprovalItem } from "../../../../../components/approval/CollapsibleApprovalItem";
+import { Button } from "../../../../../components/ui/button";
+import { imageUrl } from "../../../../../lib/api-url";
+import { ActionDialog } from "../../../../../components/ui/action-dialog";
 
 export default function ParkApprovalDetailPage() {
   const params = useParams();
@@ -37,6 +42,17 @@ export default function ParkApprovalDetailPage() {
     "flora",
   );
   const [showParkInfo, setShowParkInfo] = useState(false);
+
+  // Dialog states
+  const [bulkApproveDialog, setBulkApproveDialog] = useState({
+    open: false,
+  });
+  const [rejectDialog, setRejectDialog] = useState<{
+    open: boolean;
+    entityType?: string;
+    entityId?: number;
+    title?: string;
+  }>({ open: false });
 
   useEffect(() => {
     loadParkDetail();
@@ -64,14 +80,11 @@ export default function ParkApprovalDetailPage() {
 
   const handleBulkApprove = async () => {
     if (!groupData) return;
+    setBulkApproveDialog({ open: true });
+  };
 
-    if (
-      !confirm(
-        `Setujui SEMUA data (${groupData.totalItems} item) dari taman "${park?.name}"?\n\nTindakan ini tidak dapat dibatalkan.`,
-      )
-    ) {
-      return;
-    }
+  const executeBulkApprove = async () => {
+    if (!groupData || !park) return;
 
     try {
       setApproving(true);
@@ -82,7 +95,7 @@ export default function ParkApprovalDetailPage() {
         description: `Flora: ${result.details.flora || 0}, Fauna: ${result.details.fauna || 0}, Kegiatan: ${result.details.kegiatan || 0}`,
       });
 
-      // Navigate back to approval page
+      setBulkApproveDialog({ open: false });
       router.push("/dashboard/approval");
     } catch (error) {
       console.error("Failed to bulk approve", error);
@@ -123,8 +136,17 @@ export default function ParkApprovalDetailPage() {
     entityId: number,
     title: string,
   ) => {
-    const reason = prompt(`Alasan menolak "${title}":`);
-    if (!reason || !reason.trim()) {
+    setRejectDialog({
+      open: true,
+      entityType,
+      entityId,
+      title,
+    });
+  };
+
+  const executeReject = async (reason?: string) => {
+    const { entityType, entityId, title } = rejectDialog;
+    if (!reason || !reason.trim() || !entityType || !entityId) {
       toast.error("Alasan penolakan harus diisi");
       return;
     }
@@ -143,6 +165,7 @@ export default function ParkApprovalDetailPage() {
       }
 
       toast.success(`Berhasil menolak: ${title}`);
+      setRejectDialog({ open: false });
       await loadParkDetail();
     } catch (error) {
       console.error("Failed to reject item", error);
@@ -180,9 +203,6 @@ export default function ParkApprovalDetailPage() {
           // Fetch galleries for flora/fauna
           if (entityType === "flora" || entityType === "fauna") {
             try {
-              console.log(
-                `Fetching galleries for ${entityType} #${entityId}...`,
-              );
               const galleriesResponse = await fetch(
                 `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/galleries/entity/${entityType}/${entityId}`,
                 {
@@ -192,25 +212,9 @@ export default function ParkApprovalDetailPage() {
                 },
               );
 
-              console.log(
-                "Galleries response status:",
-                galleriesResponse.status,
-              );
-
               if (galleriesResponse.ok) {
                 const galleriesData = await galleriesResponse.json();
                 galleries = galleriesData.data || [];
-                console.log(
-                  "Galleries fetched:",
-                  galleries.length,
-                  "items",
-                  galleries,
-                );
-              } else {
-                console.error(
-                  "Galleries fetch failed:",
-                  await galleriesResponse.text(),
-                );
               }
             } catch (galleriesError) {
               console.error("Failed to load galleries:", galleriesError);
@@ -218,11 +222,6 @@ export default function ParkApprovalDetailPage() {
           }
 
           const detailWithGalleries = { ...detail, galleries };
-          console.log(
-            "Setting detail cache with galleries:",
-            detailWithGalleries,
-          );
-
           setDetailsCache((prev) => ({
             ...prev,
             [key]: detailWithGalleries,
@@ -239,10 +238,10 @@ export default function ParkApprovalDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-900 mx-auto mb-3" />
-          <p className="text-sm text-gray-500">Memuat detail taman...</p>
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto mb-3" />
+          <p className="text-sm text-gray-500">Memuat data...</p>
         </div>
       </div>
     );
@@ -259,421 +258,470 @@ export default function ParkApprovalDetailPage() {
           <p className="text-sm text-gray-500 mb-6">
             Tidak ada data pending untuk taman ini
           </p>
-          <button
+          <Button
             onClick={() => router.push("/dashboard/approval")}
-            className="text-sm px-4 py-2 border border-gray-300 hover:border-gray-900 rounded-md transition-colors"
+            variant="outline"
+            size="sm"
           >
-            <ArrowLeft className="mr-2 h-4 w-4 inline" />
-            Kembali ke Persetujuan
-          </button>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Kembali
+          </Button>
         </div>
       </div>
     );
   }
 
+  const totalPendingItems = groupData.totalItems || 0;
+  const floraCount = groupData.floraCount || 0;
+  const faunaCount = groupData.faunaCount || 0;
+  const kegiatanCount = groupData.kegiatanCount || 0;
+
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <div className="border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+      {/* Elegant Header */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-5xl mx-auto px-6 py-8">
+          {/* Back Button - Subtle */}
           <button
             onClick={() => router.push("/dashboard/approval")}
-            className="text-sm text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-900 mb-8 transition-colors group"
           >
-            <ArrowLeft className="mr-2 h-4 w-4 inline" />
-            Kembali ke Persetujuan
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-0.5 transition-transform" />
+            <span>Kembali</span>
           </button>
 
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-2xl font-medium text-gray-900 mb-1">
+          {/* Title Section - Clean & Minimal */}
+          <div className="flex items-start justify-between gap-6 mb-8">
+            <div className="flex-1">
+              <h1 className="text-2xl font-light text-gray-900 mb-2 tracking-tight">
                 {park.name}
               </h1>
-              <p className="text-sm text-gray-500">
-                Review data yang menunggu persetujuan dari taman ini
+              <p className="text-sm text-gray-500 font-light">
+                Review data yang menunggu persetujuan
               </p>
             </div>
 
-            <button
-              onClick={handleBulkApprove}
-              disabled={approving || groupData.totalItems === 0}
-              className="text-sm px-6 py-2.5 bg-gray-900 text-white hover:bg-gray-800 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {approving ? (
-                <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin inline" />
-                  Memproses...
-                </>
-              ) : (
-                <>
-                  <CheckCircle className="mr-1.5 h-4 w-4 inline" />
-                  Setujui Semua ({groupData.totalItems})
-                </>
-              )}
-            </button>
+            {totalPendingItems > 0 && (
+              <Button
+                onClick={handleBulkApprove}
+                disabled={approving}
+                size="sm"
+                className="h-9 px-4 text-xs font-medium bg-gray-900 hover:bg-gray-800 text-white rounded-md shadow-sm"
+              >
+                {approving ? (
+                  <>
+                    <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                    Memproses
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="mr-1.5 h-3 w-3" />
+                    Setujui Semua
+                  </>
+                )}
+              </Button>
+            )}
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-4 gap-6 mt-8">
-            <div className="text-center py-4 border border-gray-200 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-900 mb-1">
-                {groupData.totalItems}
+          {/* Stats - Elegant & Minimal */}
+          {totalPendingItems > 0 && (
+            <div className="flex items-center gap-8 text-xs text-gray-500">
+              <div>
+                <span className="font-medium text-gray-900">{totalPendingItems}</span>{" "}
+                item
               </div>
-              <div className="text-xs text-gray-500">Total Data</div>
+              {floraCount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Leaf className="h-3.5 w-3.5 text-green-500" />
+                  <span>{floraCount}</span>
+                </div>
+              )}
+              {faunaCount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Bird className="h-3.5 w-3.5 text-blue-500" />
+                  <span>{faunaCount}</span>
+                </div>
+              )}
+              {kegiatanCount > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="h-3.5 w-3.5 text-purple-500" />
+                  <span>{kegiatanCount}</span>
+                </div>
+              )}
             </div>
-            <div className="text-center py-4 border border-gray-200 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-900 mb-1">
-                {groupData.floraCount}
-              </div>
-              <div className="text-xs text-gray-500">Flora</div>
-            </div>
-            <div className="text-center py-4 border border-gray-200 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-900 mb-1">
-                {groupData.faunaCount}
-              </div>
-              <div className="text-xs text-gray-500">Fauna</div>
-            </div>
-            <div className="text-center py-4 border border-gray-200 rounded-lg">
-              <div className="text-2xl font-semibold text-gray-900 mb-1">
-                {groupData.kegiatanCount}
-              </div>
-              <div className="text-xs text-gray-500">Kegiatan</div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      {/* Park Information */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <button
-          onClick={() => setShowParkInfo(!showParkInfo)}
-          className="flex items-center justify-between w-full py-3 text-left hover:bg-gray-50 transition-colors"
-        >
-          <span className="text-sm font-medium text-gray-900">
-            Informasi Taman
-          </span>
-          <ChevronDown
-            className={`h-4 w-4 text-gray-500 transition-transform ${showParkInfo ? "transform rotate-180" : ""}`}
-          />
-        </button>
+      {/* Content - Clean Layout */}
+      <div className="max-w-5xl mx-auto px-6 py-10">
+        {/* Park Information - Elegant Collapsible */}
+        <div className="mb-10">
+          <button
+            onClick={() => setShowParkInfo(!showParkInfo)}
+            className="w-full flex items-center justify-between py-3 px-0 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors group"
+          >
+            <span>Informasi Taman</span>
+            {showParkInfo ? (
+              <ChevronUp className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            ) : (
+              <ChevronDown className="h-4 w-4 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            )}
+          </button>
 
-        {showParkInfo && (
-          <div className="mt-4 space-y-6 pb-6 border-b border-gray-200">
-            {/* Profil Taman */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-900">
-                Profil Taman
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Nama Kawasan
-                  </p>
-                  <p className="text-sm font-medium">{park.name || "-"}</p>
+          {showParkInfo && (
+            <div className="mt-6 space-y-8 animate-in fade-in slide-in-from-top-2 duration-200">
+              {/* Park Image - Elegant */}
+              {park.gambar_utama && (
+                <div className="rounded-lg overflow-hidden border border-gray-100">
+                  <img
+                    src={imageUrl(park.gambar_utama)}
+                    alt={park.name}
+                    className="w-full h-72 object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    SK Penetapan/Penunjukan
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.sk_penetapan || "-"}
-                  </p>
+              )}
+
+              {/* Information Grid - Clean */}
+              <div className="grid md:grid-cols-2 gap-8">
+                {/* Profil */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Profil
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Nama Kawasan</div>
+                      <div className="text-gray-900 font-medium">{park.name || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">SK Penetapan</div>
+                      <div className="text-gray-900 font-medium">{park.sk_penetapan || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Pengelola</div>
+                      <div className="text-gray-900 font-medium">{park.pengelola || "-"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1">Luas Kawasan</div>
+                      <div className="text-gray-900 font-medium">
+                        {park.area_ha ? `${park.area_ha} ha` : "-"}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Instansi Pengelola
-                  </p>
-                  <p className="text-sm font-medium">{park.pengelola || "-"}</p>
+
+                {/* Lokasi */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                    Lokasi
+                  </h3>
+                  <div className="space-y-3 text-sm">
+                    {park.provinsi && (
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Provinsi</div>
+                        <div className="text-gray-900 font-medium">{park.provinsi}</div>
+                      </div>
+                    )}
+                    {park.kota_kabupaten && (
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Kota/Kabupaten</div>
+                        <div className="text-gray-900 font-medium">{park.kota_kabupaten}</div>
+                      </div>
+                    )}
+                    {park.kecamatan && (
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Kecamatan</div>
+                        <div className="text-gray-900 font-medium">{park.kecamatan}</div>
+                      </div>
+                    )}
+                    {park.desa_kelurahan && (
+                      <div>
+                        <div className="text-xs text-gray-500 mb-1">Desa/Kelurahan</div>
+                        <div className="text-gray-900 font-medium">{park.desa_kelurahan}</div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+
+              {/* Karakteristik & Dokumen - If exists */}
+              {(park.tipe_ekoregion ||
+                park.kondisi_fisik ||
+                park.nilai_penting ||
+                park.description ||
+                park.sejarah ||
+                park.visi ||
+                park.misi ||
+                park.nilai_dasar) && (
+                <div className="pt-6 border-t border-gray-100 space-y-6">
+                  {park.tipe_ekoregion && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Tipe Ekoregion</div>
+                      <div className="text-sm text-gray-900">{park.tipe_ekoregion}</div>
+                    </div>
+                  )}
+                  {park.kondisi_fisik && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Kondisi Fisik</div>
+                      <div className="text-sm text-gray-900">{park.kondisi_fisik}</div>
+                    </div>
+                  )}
+                  {park.nilai_penting && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Nilai Penting</div>
+                      <div className="text-sm text-gray-900">{park.nilai_penting}</div>
+                    </div>
+                  )}
+                  {park.description && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Deskripsi</div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{park.description}</p>
+                    </div>
+                  )}
+                  {park.sejarah && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Sejarah</div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{park.sejarah}</p>
+                    </div>
+                  )}
+                  {(park.visi || park.misi) && (
+                    <div className="grid md:grid-cols-2 gap-6">
+                      {park.visi && (
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1.5">Visi</div>
+                          <p className="text-sm text-gray-700 leading-relaxed">{park.visi}</p>
+                        </div>
+                      )}
+                      {park.misi && (
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1.5">Misi</div>
+                          <p className="text-sm text-gray-700 leading-relaxed">{park.misi}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {park.nilai_dasar && (
+                    <div>
+                      <div className="text-xs text-gray-500 mb-1.5">Nilai Dasar</div>
+                      <p className="text-sm text-gray-700 leading-relaxed">{park.nilai_dasar}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Tabs - Elegant Design */}
+        {totalPendingItems > 0 ? (
+          <div>
+            {/* Tab Navigation - Minimal & Clean */}
+            <div className="flex items-center gap-1 border-b border-gray-100 mb-6">
+              <button
+                onClick={() => setActiveTab("flora")}
+                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === "flora"
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Leaf className="h-4 w-4" />
+                  <span>Flora</span>
+                  {floraCount > 0 && (
+                    <span className="text-xs text-gray-400">({floraCount})</span>
+                  )}
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab("fauna")}
+                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === "fauna"
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Bird className="h-4 w-4" />
+                  <span>Fauna</span>
+                  {faunaCount > 0 && (
+                    <span className="text-xs text-gray-400">({faunaCount})</span>
+                  )}
+                </div>
+              </button>
+              <button
+                onClick={() => setActiveTab("kegiatan")}
+                className={`px-4 py-2.5 text-sm font-medium transition-colors border-b-2 ${
+                  activeTab === "kegiatan"
+                    ? "border-gray-900 text-gray-900"
+                    : "border-transparent text-gray-500 hover:text-gray-700"
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span>Kegiatan</span>
+                  {kegiatanCount > 0 && (
+                    <span className="text-xs text-gray-400">({kegiatanCount})</span>
+                  )}
+                </div>
+              </button>
             </div>
 
-            {/* Lokasi Administratif */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-900">
-                Lokasi Administratif
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Provinsi</p>
-                  <p className="text-sm font-medium">{park.provinsi || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Kota/Kabupaten
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.kota_kabupaten || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Kecamatan
-                  </p>
-                  <p className="text-sm font-medium">{park.kecamatan || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Desa/Kelurahan
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.desa_kelurahan || "-"}
-                  </p>
-                </div>
-              </div>
-            </div>
+            {/* Tab Content - Clean Spacing */}
+            <div className="space-y-4">
+              {/* Flora Tab */}
+              {activeTab === "flora" &&
+                (floraCount > 0 ? (
+                  groupData.items
+                    .filter((i: any) => i.entityType === "flora")
+                    .map((item: any) => {
+                      const key = `flora-${item.entityId}`;
+                      return (
+                        <CollapsibleApprovalItem
+                          key={item.entityId}
+                          item={item}
+                          entityType="flora"
+                          detail={detailsCache[key]}
+                          isExpanded={expandedItems.has(key)}
+                          isLoadingDetail={
+                            expandedItems.has(key) && !detailsCache[key]
+                          }
+                          onToggle={() => toggleItemExpand("flora", item.entityId)}
+                          onApprove={() =>
+                            handleSingleApprove("flora", item.entityId, item.title)
+                          }
+                          onReject={() =>
+                            handleSingleReject("flora", item.entityId, item.title)
+                          }
+                        />
+                      );
+                    })
+                ) : (
+                  <div className="py-16 text-center">
+                    <p className="text-sm text-gray-400">Tidak ada flora yang menunggu persetujuan</p>
+                  </div>
+                ))}
 
-            {/* Karakteristik Kawasan */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-900">
-                Karakteristik Kawasan
-              </h3>
-              <div className="grid md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Luas Kawasan (ha)
-                  </p>
-                  <p className="text-sm font-medium">{park.area_ha || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Tipe Ekoregion
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.tipe_ekoregion || "-"}
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Kondisi Fisik Kawasan
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.kondisi_fisik || "-"}
-                  </p>
-                </div>
-                <div className="md:col-span-2">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Nilai Penting Kawasan
-                  </p>
-                  <p className="text-sm font-medium">
-                    {park.nilai_penting || "-"}
-                  </p>
-                </div>
-              </div>
-            </div>
+              {/* Fauna Tab */}
+              {activeTab === "fauna" &&
+                (faunaCount > 0 ? (
+                  groupData.items
+                    .filter((i: any) => i.entityType === "fauna")
+                    .map((item: any) => {
+                      const key = `fauna-${item.entityId}`;
+                      return (
+                        <CollapsibleApprovalItem
+                          key={item.entityId}
+                          item={item}
+                          entityType="fauna"
+                          detail={detailsCache[key]}
+                          isExpanded={expandedItems.has(key)}
+                          isLoadingDetail={
+                            expandedItems.has(key) && !detailsCache[key]
+                          }
+                          onToggle={() => toggleItemExpand("fauna", item.entityId)}
+                          onApprove={() =>
+                            handleSingleApprove("fauna", item.entityId, item.title)
+                          }
+                          onReject={() =>
+                            handleSingleReject("fauna", item.entityId, item.title)
+                          }
+                        />
+                      );
+                    })
+                ) : (
+                  <div className="py-16 text-center">
+                    <p className="text-sm text-gray-400">Tidak ada fauna yang menunggu persetujuan</p>
+                  </div>
+                ))}
 
-            {/* Dokumen Taman */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-medium text-gray-900">
-                Dokumen Taman
-              </h3>
-              <div className="space-y-4 text-sm">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Deskripsi Umum
-                  </p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {park.description || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Sejarah Taman
-                  </p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {park.sejarah || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Visi</p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {park.visi || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Misi</p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {park.misi || "-"}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Nilai-Nilai Dasar
-                  </p>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">
-                    {park.nilai_dasar || "-"}
-                  </p>
-                </div>
-              </div>
+              {/* Kegiatan Tab */}
+              {activeTab === "kegiatan" &&
+                (kegiatanCount > 0 ? (
+                  groupData.items
+                    .filter((i: any) => i.entityType === "kegiatan")
+                    .map((item: any) => {
+                      const key = `kegiatan-${item.entityId}`;
+                      return (
+                        <CollapsibleApprovalItem
+                          key={item.entityId}
+                          item={item}
+                          entityType="kegiatan"
+                          detail={detailsCache[key]}
+                          isExpanded={expandedItems.has(key)}
+                          isLoadingDetail={
+                            expandedItems.has(key) && !detailsCache[key]
+                          }
+                          onToggle={() =>
+                            toggleItemExpand("kegiatan", item.entityId)
+                          }
+                          onApprove={() =>
+                            handleSingleApprove(
+                              "kegiatan",
+                              item.entityId,
+                              item.title,
+                            )
+                          }
+                          onReject={() =>
+                            handleSingleReject(
+                              "kegiatan",
+                              item.entityId,
+                              item.title,
+                            )
+                          }
+                        />
+                      );
+                    })
+                ) : (
+                  <div className="py-16 text-center">
+                    <p className="text-sm text-gray-400">Tidak ada kegiatan yang menunggu persetujuan</p>
+                  </div>
+                ))}
             </div>
+          </div>
+        ) : (
+          <div className="py-24 text-center">
+            <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mx-auto mb-4">
+              <CheckCircle className="h-8 w-8 text-gray-300" />
+            </div>
+            <h3 className="text-base font-medium text-gray-900 mb-1">
+              Tidak ada data yang menunggu persetujuan
+            </h3>
+            <p className="text-sm text-gray-500">
+              Semua data dari taman ini sudah diproses
+            </p>
           </div>
         )}
       </div>
 
-      {/* Tabs for Items */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="border-b border-gray-200 mb-6">
-          <div className="flex gap-6">
-            <button
-              onClick={() => setActiveTab("flora")}
-              className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === "flora"
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <Leaf className="h-4 w-4 inline mr-1.5" />
-              Flora ({groupData.floraCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("fauna")}
-              className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === "fauna"
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <Bird className="h-4 w-4 inline mr-1.5" />
-              Fauna ({groupData.faunaCount})
-            </button>
-            <button
-              onClick={() => setActiveTab("kegiatan")}
-              className={`pb-3 text-sm font-medium transition-colors border-b-2 ${
-                activeTab === "kegiatan"
-                  ? "border-gray-900 text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-900"
-              }`}
-            >
-              <Calendar className="h-4 w-4 inline mr-1.5" />
-              Kegiatan ({groupData.kegiatanCount})
-            </button>
-          </div>
-        </div>
+      {/* Dialogs */}
+      {/* Bulk Approve Dialog */}
+      <ActionDialog
+        open={bulkApproveDialog.open}
+        onOpenChange={(open) => setBulkApproveDialog({ open })}
+        type="approve"
+        title={`Setujui Semua Data dari "${park?.name}"`}
+        description={`Apakah Anda yakin ingin menyetujui SEMUA data (${totalPendingItems} item) dari taman "${park?.name}"?\n\nTindakan ini tidak dapat dibatalkan.`}
+        onConfirm={executeBulkApprove}
+        confirmLabel="Ya, Setujui Semua"
+        isLoading={approving}
+      />
 
-        {/* Flora Tab Content */}
-        {activeTab === "flora" &&
-          (groupData.items.filter((i: any) => i.entityType === "flora").length >
-          0 ? (
-            <div className="space-y-2">
-              {groupData.items
-                .filter((i: any) => i.entityType === "flora")
-                .map((item: any) => {
-                  const key = `flora-${item.entityId}`;
-                  return (
-                    <CollapsibleApprovalItem
-                      key={item.entityId}
-                      item={item}
-                      entityType="flora"
-                      detail={detailsCache[key]}
-                      isExpanded={expandedItems.has(key)}
-                      isLoadingDetail={
-                        expandedItems.has(key) && !detailsCache[key]
-                      }
-                      onToggle={() => toggleItemExpand("flora", item.entityId)}
-                      onApprove={() =>
-                        handleSingleApprove("flora", item.entityId, item.title)
-                      }
-                      onReject={() =>
-                        handleSingleReject("flora", item.entityId, item.title)
-                      }
-                    />
-                  );
-                })}
-            </div>
-          ) : (
-            <div className="py-12 text-center border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-500">
-                Tidak ada flora yang menunggu persetujuan
-              </p>
-            </div>
-          ))}
-
-        {/* Fauna Tab Content */}
-        {activeTab === "fauna" &&
-          (groupData.items.filter((i: any) => i.entityType === "fauna").length >
-          0 ? (
-            <div className="space-y-2">
-              {groupData.items
-                .filter((i: any) => i.entityType === "fauna")
-                .map((item: any) => {
-                  const key = `fauna-${item.entityId}`;
-                  return (
-                    <CollapsibleApprovalItem
-                      key={item.entityId}
-                      item={item}
-                      entityType="fauna"
-                      detail={detailsCache[key]}
-                      isExpanded={expandedItems.has(key)}
-                      isLoadingDetail={
-                        expandedItems.has(key) && !detailsCache[key]
-                      }
-                      onToggle={() => toggleItemExpand("fauna", item.entityId)}
-                      onApprove={() =>
-                        handleSingleApprove("fauna", item.entityId, item.title)
-                      }
-                      onReject={() =>
-                        handleSingleReject("fauna", item.entityId, item.title)
-                      }
-                    />
-                  );
-                })}
-            </div>
-          ) : (
-            <div className="py-12 text-center border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-500">
-                Tidak ada fauna yang menunggu persetujuan
-              </p>
-            </div>
-          ))}
-
-        {/* Kegiatan Tab Content */}
-        {activeTab === "kegiatan" &&
-          (groupData.items.filter((i: any) => i.entityType === "kegiatan")
-            .length > 0 ? (
-            <div className="space-y-2">
-              {groupData.items
-                .filter((i: any) => i.entityType === "kegiatan")
-                .map((item: any) => {
-                  const key = `kegiatan-${item.entityId}`;
-                  return (
-                    <CollapsibleApprovalItem
-                      key={item.entityId}
-                      item={item}
-                      entityType="kegiatan"
-                      detail={detailsCache[key]}
-                      isExpanded={expandedItems.has(key)}
-                      isLoadingDetail={
-                        expandedItems.has(key) && !detailsCache[key]
-                      }
-                      onToggle={() =>
-                        toggleItemExpand("kegiatan", item.entityId)
-                      }
-                      onApprove={() =>
-                        handleSingleApprove(
-                          "kegiatan",
-                          item.entityId,
-                          item.title,
-                        )
-                      }
-                      onReject={() =>
-                        handleSingleReject(
-                          "kegiatan",
-                          item.entityId,
-                          item.title,
-                        )
-                      }
-                    />
-                  );
-                })}
-            </div>
-          ) : (
-            <div className="py-12 text-center border border-gray-200 rounded-lg">
-              <p className="text-sm text-gray-500">
-                Tidak ada kegiatan yang menunggu persetujuan
-              </p>
-            </div>
-          ))}
-      </div>
+      {/* Reject Dialog */}
+      <ActionDialog
+        open={rejectDialog.open}
+        onOpenChange={(open) => setRejectDialog({ ...rejectDialog, open })}
+        type="reject"
+        title={`Tolak "${rejectDialog.title}"`}
+        description="Masukkan alasan penolakan data ini. Alasan ini akan dikirim ke pengirim data."
+        onConfirm={executeReject}
+        requireReason={true}
+        reasonPlaceholder="Masukkan alasan penolakan..."
+      />
     </div>
   );
 }
