@@ -50,6 +50,7 @@ export function MediumStyleCreatePage({
   const { user } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [draftId, setDraftId] = useState<string | null>(articleId ?? null);
   const [blocks, setBlocks] = useState<ContentBlock[]>([
     { id: "1", type: "paragraph", content: "" },
   ]);
@@ -263,6 +264,8 @@ export function MediumStyleCreatePage({
             summary: data.summary || "",
             category: data.category || "",
           });
+
+          setDraftId(data.id ?? articleId ?? null);
         } catch (error) {
           console.error("Error loading article:", error);
           toast.error("Gagal memuat artikel");
@@ -292,7 +295,7 @@ export function MediumStyleCreatePage({
         clearTimeout(autosaveTimerRef.current);
       }
     };
-  }, [title, blocks]);
+  }, [title, blocks, draftId]);
 
   const handleAutosave = async () => {
     const markdownContent = blocksToMarkdown(blocks);
@@ -303,14 +306,12 @@ export function MediumStyleCreatePage({
       const token = localStorage.getItem("auth_token");
       if (!token) return;
 
-      const url =
-        mode === "edit" && articleId
-          ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`
-          : `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+      const isEditing = Boolean(draftId);
+      const endpoint = isEditing && draftId ? `${apiBase}/api/v1/articles/${draftId}` : `${apiBase}/api/v1/articles/`;
+      const method = isEditing && draftId ? "PUT" : "POST";
 
-      const method = mode === "edit" ? "PUT" : "POST";
-
-      await fetch(url, {
+      const response = await fetch(endpoint, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -324,6 +325,16 @@ export function MediumStyleCreatePage({
           status: "draft",
         }),
       });
+
+      if (!response.ok) {
+        throw new Error("Autosave failed");
+      }
+
+      const saved = await response.json();
+      const newId = saved?.id ?? saved?.data?.id ?? saved?.article?.id;
+      if (!draftId && newId) {
+        setDraftId(String(newId));
+      }
 
       setLastSaved(new Date());
     } catch (error) {
@@ -596,12 +607,11 @@ export function MediumStyleCreatePage({
         finalImageUrl = buildImageUrl(publishData.coverImage);
       }
 
-      const url =
-        mode === "edit" && articleId
-          ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`
-          : `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
-
-      const method = mode === "edit" ? "PUT" : "POST";
+      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+      const targetId = draftId || articleId;
+      const isEditing = Boolean(targetId);
+      const url = isEditing && targetId ? `${apiBase}/api/v1/articles/${targetId}` : `${apiBase}/api/v1/articles/`;
+      const method = isEditing ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
