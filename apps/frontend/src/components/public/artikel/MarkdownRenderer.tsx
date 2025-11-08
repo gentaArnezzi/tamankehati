@@ -58,15 +58,21 @@ const renderInline = (text: string, keyPrefix: string) => {
       // Image markdown: ![alt](url)
       const processedUrl = imageUrl(match[6]);
       nodes.push(
-        <img
-          key={`${keyPrefix}-image-${index}`}
-          src={processedUrl}
-          alt={match[5] || "Article image"}
-          className="inline-block max-w-full h-auto rounded my-2"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = "none";
-          }}
-        />,
+        <div key={`${keyPrefix}-image-wrapper-${index}`} className="my-4 flex justify-center">
+          <img
+            key={`${keyPrefix}-image-${index}`}
+            src={processedUrl}
+            alt={match[5] || "Article image"}
+            className="max-w-full h-auto rounded-lg shadow-md object-contain"
+            style={{
+              maxHeight: "600px",
+              width: "auto",
+            }}
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = "none";
+            }}
+          />
+        </div>,
       );
     } else if (match[7] && match[8]) {
       // Link
@@ -140,11 +146,15 @@ const renderNode = (node: MarkdownNode, index: number) => {
       // Process URL to replace backend:8000, localhost:8000, etc. with accessible URL
       const processedUrl = imageUrl(node.url);
       return (
-        <div key={`image-${index}`} className="my-6">
+        <div key={`image-${index}`} className="my-6 flex justify-center">
           <img
             src={processedUrl}
             alt={node.alt || "Article image"}
-            className="w-full h-auto rounded-lg shadow-md"
+            className="max-w-full h-auto rounded-lg shadow-md object-contain"
+            style={{
+              maxHeight: "600px",
+              width: "auto",
+            }}
             onError={(e) => {
               // Hide broken images
               (e.target as HTMLImageElement).style.display = "none";

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArtikelDetailView } from "@/components/public/artikel/ArtikelDetailView";
 import { JsonLd } from "@/components/public/seo/JsonLd";
 import { getArtikelDetail, getArtikelPage } from "@/lib/api/public";
+import { cleanArticleExcerpt } from "@/utils/text";
 
 type ArtikelDetailPageProps = {
   params: Promise<{ slug: string }>;
@@ -16,10 +17,10 @@ export async function generateMetadata({
     const artikel = await getArtikelDetail(slug);
     return {
       title: `${artikel.judul} | Artikel Taman Kehati`,
-      description: artikel.excerpt,
+      description: cleanArticleExcerpt(artikel.excerpt),
       openGraph: {
         title: artikel.judul,
-        description: artikel.excerpt,
+        description: cleanArticleExcerpt(artikel.excerpt),
         images: artikel.gambar_cover
           ? [{ url: artikel.gambar_cover }]
           : undefined,
@@ -52,7 +53,7 @@ export default async function ArtikelDetailPage({
       "@context": "https://schema.org",
       "@type": "Article",
       headline: artikel.judul,
-      description: artikel.excerpt,
+      description: cleanArticleExcerpt(artikel.excerpt),
       datePublished: artikel.tanggal_publish,
       author: artikel.penulis
         ? { "@type": "Person", name: artikel.penulis }

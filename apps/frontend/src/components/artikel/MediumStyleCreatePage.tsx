@@ -50,12 +50,12 @@ export function MediumStyleCreatePage({
   const { user } = useAuth();
   const router = useRouter();
   const [title, setTitle] = useState("");
-  const [draftId, setDraftId] = useState<string | null>(articleId ?? null);
   const [blocks, setBlocks] = useState<ContentBlock[]>([
     { id: "1", type: "paragraph", content: "" },
   ]);
   const [saving, setSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [draftId, setDraftId] = useState<string | null>(null); // Store draft ID for autosave
   const [showPublishModal, setShowPublishModal] = useState(false);
   const [publishData, setPublishData] = useState({
     coverImage: "",
@@ -210,6 +210,30 @@ export function MediumStyleCreatePage({
       .join("\n\n");
   }, []);
 
+  // Helper function to get first text node
+  const getFirstTextNode = useCallback((node: Node | HTMLElement): Text | null => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node as Text;
+    }
+    for (let i = 0; i < node.childNodes.length; i++) {
+      const textNode = getFirstTextNode(node.childNodes[i]);
+      if (textNode) return textNode;
+    }
+    return null;
+  }, []);
+
+  // Helper function to get last text node
+  const getLastTextNode = useCallback((node: Node | HTMLElement): Text | null => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return node as Text;
+    }
+    for (let i = node.childNodes.length - 1; i >= 0; i--) {
+      const textNode = getLastTextNode(node.childNodes[i]);
+      if (textNode) return textNode;
+    }
+    return null;
+  }, []);
+
   // Load article if in edit mode
   useEffect(() => {
     if (mode === "edit" && articleId) {
@@ -250,6 +274,11 @@ export function MediumStyleCreatePage({
           const data = await response.json();
           setTitle(data.title || "");
           
+          // Set draftId for autosave in edit mode
+          if (data.id) {
+            setDraftId(String(data.id));
+          }
+          
           // Convert markdown content to blocks
           if (data.content) {
             const loadedBlocks = markdownToBlocks(data.content);
@@ -264,8 +293,6 @@ export function MediumStyleCreatePage({
             summary: data.summary || "",
             category: data.category || "",
           });
-
-          setDraftId(data.id ?? articleId ?? null);
         } catch (error) {
           console.error("Error loading article:", error);
           toast.error("Gagal memuat artikel");
@@ -276,6 +303,188 @@ export function MediumStyleCreatePage({
       loadArticle();
     }
   }, [mode, articleId, router, markdownToBlocks]);
+
+  // Natural cross-block selection handler
+  // Helps browser select across blocks naturally
+  useEffect(() => {
+    const editorContainer = editorContainerRef.current;
+    if (!editorContainer) return;
+
+    let isMouseDown = false;
+    let startRange: Range | null = null;
+
+    const handleMouseDown = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const contentEditable = target.closest('[contenteditable="true"]');
+      
+      if (contentEditable && editorContainer.contains(contentEditable as Node)) {
+        isMouseDown = true;
+        // Get initial selection point immediately
+        const range = document.caretRangeFromPoint?.(e.clientX, e.clientY);
+        if (range) {
+          startRange = range.cloneRange();
+        } else {
+          // Fallback: wait for browser to set selection
+          setTimeout(() => {
+            const selection = window.getSelection();
+            if (selection && selection.rangeCount > 0) {
+              startRange = selection.getRangeAt(0).cloneRange();
+            }
+          }, 0);
+        }
+      }
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isMouseDown || !startRange) return;
+
+      const selection = window.getSelection();
+      if (!selection) return;
+
+      // Get current mouse position
+      let range: Range | null = null;
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      }
+
+      if (!range) return;
+
+      // Check if we're in a contentEditable
+      const currentEditable = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+        ? range.commonAncestorContainer.parentElement?.closest('[contenteditable="true"]')
+        : (range.commonAncestorContainer as HTMLElement).closest('[contenteditable="true"]');
+
+      if (!currentEditable || !editorContainer.contains(currentEditable as Node)) return;
+
+      // Check if selection spans multiple blocks
+      const startBlock = startRange.startContainer.nodeType === Node.TEXT_NODE
+        ? startRange.startContainer.parentElement?.closest('[data-block-id]')
+        : (startRange.startContainer as HTMLElement).closest('[data-block-id]');
+      const endBlock = range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+        ? range.commonAncestorContainer.parentElement?.closest('[data-block-id]')
+        : (range.commonAncestorContainer as HTMLElement).closest('[data-block-id]');
+
+      // Only help if selection spans multiple blocks
+      if (startBlock && endBlock && startBlock !== endBlock) {
+        try {
+          const newRange = document.createRange();
+          
+          // Set start point
+          newRange.setStart(startRange.startContainer, startRange.startOffset);
+          
+          // Set end point based on mouse position
+          // Try to get the actual text node and offset
+          let endNode = range.startContainer;
+          let endOffset = range.startOffset;
+          
+          // If we're at a text node, use it directly
+          if (endNode.nodeType === Node.TEXT_NODE) {
+            newRange.setEnd(endNode, endOffset);
+          } else {
+            // Try to find the text node
+            const textNode = getFirstTextNode(endNode as HTMLElement);
+            if (textNode) {
+              newRange.setEnd(textNode, Math.min(endOffset, textNode.textContent?.length || 0));
+            } else {
+              newRange.setEnd(endNode, endOffset);
+            }
+          }
+          
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        } catch (error) {
+          // Ignore range errors - browser will handle it
+        }
+      } else if (startBlock === endBlock) {
+        // Selection is within a single block - let browser handle it naturally
+        // Don't interfere
+      }
+    };
+
+    const handleMouseUp = () => {
+      isMouseDown = false;
+      startRange = null;
+    };
+
+    editorContainer.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      editorContainer.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [blocks]);
+
+  // Global keyboard handler for select all
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Handle Ctrl+A / Cmd+A to select all text across all blocks
+      if ((e.ctrlKey || e.metaKey) && e.key === "a") {
+        const editorContainer = editorContainerRef.current;
+        if (!editorContainer) return;
+        
+        // Check if focus is within the editor
+        const activeElement = document.activeElement;
+        const isInEditor = editorContainer.contains(activeElement);
+        if (!isInEditor) return;
+        
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Get all contentEditable elements within the editor container (excluding image blocks)
+        const allEditables = Array.from(
+          editorContainer.querySelectorAll('[contenteditable="true"]')
+        ).filter((el) => {
+          const block = (el as HTMLElement).closest('[data-block-id]');
+          const blockId = block?.getAttribute('data-block-id');
+          if (!blockId) return false;
+          const blockData = blocks.find((b) => b.id === blockId);
+          return blockData && blockData.type !== "image";
+        }) as HTMLElement[];
+        
+        if (allEditables.length === 0) return;
+        
+        // Create a range that spans all blocks
+        const selection = window.getSelection();
+        if (!selection) return;
+        
+        const range = document.createRange();
+        
+        try {
+          // Set start to the first character of the first block
+          const firstEditable = allEditables[0];
+          const firstTextNode = getFirstTextNode(firstEditable);
+          if (firstTextNode) {
+            range.setStart(firstTextNode, 0);
+          } else {
+            range.setStart(firstEditable, 0);
+          }
+          
+          // Set end to the last character of the last block
+          const lastEditable = allEditables[allEditables.length - 1];
+          const lastTextNode = getLastTextNode(lastEditable);
+          if (lastTextNode) {
+            range.setEnd(lastTextNode, lastTextNode.textContent?.length || 0);
+          } else {
+            range.setEnd(lastEditable, lastEditable.childNodes.length);
+          }
+          
+          // Select the range
+          selection.removeAllRanges();
+          selection.addRange(range);
+        } catch (error) {
+          console.debug("Error selecting all:", error);
+        }
+      }
+    };
+
+    document.addEventListener("keydown", handleGlobalKeyDown, true);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown, true);
+    };
+  }, [getFirstTextNode, getLastTextNode, blocks]);
 
   // Autosave functionality
   useEffect(() => {
@@ -295,7 +504,7 @@ export function MediumStyleCreatePage({
         clearTimeout(autosaveTimerRef.current);
       }
     };
-  }, [title, blocks, draftId]);
+  }, [title, blocks]);
 
   const handleAutosave = async () => {
     const markdownContent = blocksToMarkdown(blocks);
@@ -306,12 +515,25 @@ export function MediumStyleCreatePage({
       const token = localStorage.getItem("auth_token");
       if (!token) return;
 
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
-      const isEditing = Boolean(draftId);
-      const endpoint = isEditing && draftId ? `${apiBase}/api/v1/articles/${draftId}` : `${apiBase}/api/v1/articles/`;
-      const method = isEditing && draftId ? "PUT" : "POST";
+      // Determine URL and method based on mode and draftId
+      let url: string;
+      let method: string;
+      
+      if (mode === "edit" && articleId) {
+        // Edit mode: always use PUT with articleId
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`;
+        method = "PUT";
+      } else if (draftId) {
+        // Create mode with existing draft: use PUT to update
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${draftId}`;
+        method = "PUT";
+      } else {
+        // Create mode without draft: use POST to create new draft
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
+        method = "POST";
+      }
 
-      const response = await fetch(endpoint, {
+      const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
@@ -330,10 +552,12 @@ export function MediumStyleCreatePage({
         throw new Error("Autosave failed");
       }
 
-      const saved = await response.json();
-      const newId = saved?.id ?? saved?.data?.id ?? saved?.article?.id;
-      if (!draftId && newId) {
-        setDraftId(String(newId));
+      // If this was a POST (new draft), save the ID for future updates
+      if (method === "POST" && !draftId) {
+        const data = await response.json();
+        if (data.id) {
+          setDraftId(String(data.id));
+        }
       }
 
       setLastSaved(new Date());
@@ -607,11 +831,14 @@ export function MediumStyleCreatePage({
         finalImageUrl = buildImageUrl(publishData.coverImage);
       }
 
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
-      const targetId = draftId || articleId;
-      const isEditing = Boolean(targetId);
-      const url = isEditing && targetId ? `${apiBase}/api/v1/articles/${targetId}` : `${apiBase}/api/v1/articles/`;
-      const method = isEditing ? "PUT" : "POST";
+      // Use draftId if available, otherwise use articleId for edit mode
+      const idToUse = draftId || (mode === "edit" && articleId ? articleId : null);
+      
+      const url = idToUse
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${idToUse}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
+
+      const method = idToUse ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
@@ -718,6 +945,137 @@ export function MediumStyleCreatePage({
   );
 
   const handleKeyDown = (blockId: string, e: React.KeyboardEvent) => {
+    // Handle delete/backspace when there's a selection (single or cross-block)
+    if ((e.key === "Delete" || e.key === "Backspace") && !e.shiftKey) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+        // There's a selection, check if it spans multiple blocks
+        const range = selection.getRangeAt(0);
+        const editorContainer = editorContainerRef.current;
+        if (!editorContainer) return;
+        
+        // Check if selection spans multiple blocks
+        const startBlock = range.startContainer.nodeType === Node.TEXT_NODE
+          ? range.startContainer.parentElement?.closest('[data-block-id]')
+          : (range.startContainer as HTMLElement).closest('[data-block-id]');
+        const endBlock = range.endContainer.nodeType === Node.TEXT_NODE
+          ? range.endContainer.parentElement?.closest('[data-block-id]')
+          : (range.endContainer as HTMLElement).closest('[data-block-id]');
+        
+        if (startBlock && endBlock) {
+          const startBlockId = startBlock.getAttribute('data-block-id');
+          const endBlockId = endBlock.getAttribute('data-block-id');
+          
+          if (!startBlockId || !endBlockId) return;
+          
+          // Check if blocks are image blocks (skip them)
+          const startBlockData = blocks.find(b => b.id === startBlockId);
+          const endBlockData = blocks.find(b => b.id === endBlockId);
+          
+          if (startBlockData?.type === "image" || endBlockData?.type === "image") {
+            // Don't delete image blocks via text selection
+            return;
+          }
+          
+          if (startBlock !== endBlock) {
+            // Selection spans multiple blocks - delete all selected content
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Find indices of start and end blocks
+            const startIndex = blocks.findIndex(b => b.id === startBlockId);
+            const endIndex = blocks.findIndex(b => b.id === endBlockId);
+            
+            if (startIndex === -1 || endIndex === -1) return;
+            
+            // Get the text content from each block in the selection
+            const blocksToUpdate: { id: string; newContent: string }[] = [];
+            
+            // Update start block - remove text from selection start to end
+            const startEditable = startBlock.querySelector('[contenteditable="true"]') as HTMLElement;
+            if (startEditable) {
+              const startText = startEditable.textContent || "";
+              const startOffset = range.startOffset;
+              const newStartContent = startText.substring(0, startOffset);
+              blocksToUpdate.push({ id: startBlockId, newContent: newStartContent });
+            }
+            
+            // Update end block - remove text from start to selection end
+            const endEditable = endBlock.querySelector('[contenteditable="true"]') as HTMLElement;
+            if (endEditable) {
+              const endText = endEditable.textContent || "";
+              const endOffset = range.endOffset;
+              const newEndContent = endText.substring(endOffset);
+              blocksToUpdate.push({ id: endBlockId, newContent: newEndContent });
+            }
+            
+            // Delete all blocks between start and end
+            const blocksToDelete = blocks.slice(
+              Math.min(startIndex, endIndex) + 1,
+              Math.max(startIndex, endIndex)
+            ).filter(b => b.type !== "image").map(b => b.id);
+            
+            // Update blocks
+            setBlocks((prev) => {
+              let updated = [...prev];
+              
+              // Update start and end blocks
+              blocksToUpdate.forEach(({ id, newContent }) => {
+                const index = updated.findIndex(b => b.id === id);
+                if (index !== -1) {
+                  updated[index] = { ...updated[index], content: newContent };
+                }
+              });
+              
+              // Delete blocks in between (but keep image blocks)
+              updated = updated.filter(b => !blocksToDelete.includes(b.id));
+              
+              // If all blocks are empty, ensure at least one empty block
+              if (updated.length === 0 || updated.every(b => !b.content.trim() && b.type === "paragraph")) {
+                return [{ id: "1", type: "paragraph", content: "" }];
+              }
+              
+              return updated;
+            });
+            
+            // Clear selection and focus on the start block
+            selection.removeAllRanges();
+            setTimeout(() => {
+              const startBlockElement = blockRefs.current[startBlockId];
+              if (startBlockElement) {
+                const editable = startBlockElement.querySelector('[contenteditable="true"]') as HTMLElement;
+                if (editable) {
+                  editable.focus();
+                  // Move cursor to start of selection
+                  const newRange = document.createRange();
+                  newRange.setStart(editable, 0);
+                  newRange.collapse(true);
+                  const sel = window.getSelection();
+                  if (sel) {
+                    sel.removeAllRanges();
+                    sel.addRange(newRange);
+                  }
+                }
+              }
+            }, 0);
+            
+            return;
+          } else {
+            // Selection is within a single block - let browser handle it normally
+            // But we'll update the block content after deletion
+            const editable = startBlock.querySelector('[contenteditable="true"]') as HTMLElement;
+            if (editable) {
+              // Let browser delete the selection first
+              setTimeout(() => {
+                const newContent = editable.textContent || "";
+                updateBlockContent(startBlockId, newContent);
+              }, 0);
+            }
+          }
+        }
+      }
+    }
+    
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       const block = blocks.find((b) => b.id === blockId);
@@ -740,7 +1098,6 @@ export function MediumStyleCreatePage({
   const renderBlock = (block: ContentBlock, index: number) => {
     const blockElement = blockRefs.current[block.id];
     const showMenu = activeBlockMenu === block.id;
-    const isActiveBlock = focusedBlockId === block.id;
     let menuPosition = { x: 0, y: 0 };
 
     if (blockElement && showMenu) {
@@ -758,7 +1115,7 @@ export function MediumStyleCreatePage({
         ref={(el) => {
           blockRefs.current[block.id] = el;
         }}
-        className="group relative flex items-start py-3 pl-12"
+        className="group relative flex items-start gap-4 py-0"
         onMouseEnter={() => {
           // Show + button on hover
         }}
@@ -773,15 +1130,15 @@ export function MediumStyleCreatePage({
           }
         }}
       >
-        {/* + Button */}
+        {/* + Button - Only show when block is focused or menu is active */}
         <button
           onClick={() => {
             setActiveBlockMenu(activeBlockMenu === block.id ? null : block.id);
           }}
-          className={`absolute left-0 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-[#1a8917] text-[#1a8917] transition-all duration-200 hover:bg-[#1a8917] hover:text-white ${
-            isActiveBlock || activeBlockMenu === block.id
-              ? "opacity-100 translate-x-0 pointer-events-auto"
-              : "opacity-0 -translate-x-2 pointer-events-none"
+          className={`mt-2 flex h-8 w-8 items-center justify-center rounded-full border border-[#1a8917] text-[#1a8917] transition-opacity hover:bg-[#1a8917] hover:text-white ${
+            activeBlockMenu === block.id || focusedBlockId === block.id
+              ? "opacity-100"
+              : "opacity-0"
           }`}
         >
           <Plus className="h-4 w-4" />
@@ -802,7 +1159,11 @@ export function MediumStyleCreatePage({
                       <img
                         src={processedUrl}
                         alt={block.content.match(/!\[(.*?)\]/)?.[1] || ""}
-                        className="w-full h-auto rounded-lg"
+                        className="max-w-full h-auto rounded-lg object-contain mx-auto"
+                        style={{
+                          maxHeight: "600px",
+                          width: "auto",
+                        }}
                         onError={(e) => {
                           console.error("Image load error:", processedUrl);
                           (e.target as HTMLImageElement).style.display = "none";
@@ -834,83 +1195,29 @@ export function MediumStyleCreatePage({
                   <p className="text-gray-500">Image block</p>
                 </div>
               )}
-              {/* Invisible contentEditable below image for keyboard navigation */}
-              <div
-                contentEditable
-                suppressContentEditableWarning
-                onFocus={() => {
-                  setFocusedBlockId(block.id);
-                }}
-                onBlur={(e) => {
-                  // Clear content when blur if empty
-                  if (!e.currentTarget.textContent?.trim()) {
-                    e.currentTarget.textContent = "";
-                  }
-                }}
-                onInput={(e) => {
-                  const target = e.currentTarget;
-                  if (!target) return;
-                  
-                  const text = target.textContent || "";
-                  if (text.trim()) {
-                    // If user types, create new paragraph block after image with the content
-                    setBlocks((prev) => {
-                      const index = prev.findIndex((b) => b.id === block.id);
-                      if (index === -1) return prev;
-                      
-                      const updatedBlocks = [...prev];
-                      // Check if there's already a paragraph block after this image
-                      const nextBlock = updatedBlocks[index + 1];
-                      if (nextBlock && nextBlock.type === "paragraph" && !nextBlock.content.trim()) {
-                        // Update existing empty paragraph block
-                        updatedBlocks[index + 1] = {
-                          ...nextBlock,
-                          content: text,
-                        };
-                      } else {
-                        // Insert new paragraph block
-                        const newBlock: ContentBlock = {
-                          id: `block-${Date.now()}`,
-                          type: "paragraph",
-                          content: text,
-                        };
-                        updatedBlocks.splice(index + 1, 0, newBlock);
-                      }
-                      return updatedBlocks;
-                    });
-                    
-                    // Clear the contentEditable after state update
-                    requestAnimationFrame(() => {
-                      if (target && target.isConnected) {
-                        target.textContent = "";
-                      }
-                    });
-                  }
+              {/* Alt text input for image */}
+              <input
+                type="text"
+                value={block.content.match(/!\[(.*?)\]/)?.[1] || ""}
+                onChange={(e) => {
+                  const altText = e.target.value;
+                  const urlMatch = block.content.match(/!\[.*?\]\((.*?)\)/);
+                  const imageUrl = urlMatch?.[1] || "";
+                  const newContent = `![${altText}](${imageUrl})`;
+                  updateBlockContent(block.id, newContent);
                 }}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     insertBlock(block.id, "paragraph", "");
-                  } else if (e.key === "Backspace" && !e.currentTarget.textContent) {
-                    e.preventDefault();
-                    // Convert image block to paragraph
-                    setBlocks((prev) =>
-                      prev.map((b) =>
-                        b.id === block.id
-                          ? { ...b, type: "paragraph", content: "" }
-                          : b
-                      )
-                    );
                   }
                 }}
-                className="outline-none text-[#222] mt-2"
+                placeholder="Alt text untuk gambar..."
+                className="w-full mt-2 px-2 py-1 text-sm text-gray-600 border border-transparent rounded hover:border-gray-200 focus:border-gray-300 focus:outline-none"
                 style={{
                   fontFamily: "'Lora', 'Inter', serif",
-                  fontSize: "18px",
-                  lineHeight: "1.8",
-                  minHeight: "1.8em",
+                  fontSize: "14px",
                 }}
-                data-placeholder="Tell your story..."
               />
             </div>
           ) : (
@@ -952,8 +1259,19 @@ export function MediumStyleCreatePage({
                 updateBlockContent(block.id, text);
               }}
               onSelect={() => handleTextSelection(block.id)}
-              onKeyDown={(e) => handleKeyDown(block.id, e)}
-              className={`outline-none ${
+              onKeyDown={(e) => {
+                // Handle delete/backspace for cross-block selection first
+                if ((e.key === "Delete" || e.key === "Backspace") && !e.shiftKey) {
+                  const selection = window.getSelection();
+                  if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+                    // Let the global handler deal with it
+                    handleKeyDown(block.id, e);
+                    return;
+                  }
+                }
+                handleKeyDown(block.id, e);
+              }}
+              className={`outline-none focus:outline-none focus:ring-0 focus:ring-offset-0 ${
                 block.type === "heading"
                   ? "text-2xl font-bold"
                   : block.type === "quote"
@@ -971,6 +1289,9 @@ export function MediumStyleCreatePage({
                 lineHeight: "1.8",
                 color: "#222",
                 minHeight: "1.8em",
+                outline: "none",
+                border: "none",
+                boxShadow: "none",
               }}
               data-placeholder={
                 block.type === "paragraph" && !block.content.trim()
@@ -1093,7 +1414,7 @@ export function MediumStyleCreatePage({
       {/* Main Editor Area */}
       <main
         ref={editorContainerRef}
-        className="medium-article-editor mx-auto max-w-[700px] px-6 py-12"
+        className="mx-auto max-w-[700px] px-6 py-12"
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -1124,7 +1445,7 @@ export function MediumStyleCreatePage({
         />
 
         {/* Block Editor */}
-        <div className="space-y-4">
+        <div className="space-y-2">
           {blocks.map((block, index) => renderBlock(block, index))}
         </div>
 

@@ -95,7 +95,47 @@ body { background: var(--bg); color: var(--fg); font-family: 'Helvetica Now', sy
   color: #D1D5DB;
 }
 
-.medium-article-editor :focus-visible {
-  outline: none;
-  box-shadow: none;
+/* Remove outline from contentEditable in article editor */
+[contenteditable]:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Seamless selection across blocks in article editor */
+[data-block-id] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Make selection look seamless across blocks */
+[data-block-id] ::selection {
+  background-color: rgba(0, 123, 255, 0.2);
+  color: inherit;
+}
+
+[data-block-id] ::-moz-selection {
+  background-color: rgba(0, 123, 255, 0.2);
+  color: inherit;
+}
+
+/* Allow natural text selection behavior */
+[data-block-id] [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Make blocks feel more connected for selection */
+[data-block-id] {
+  position: relative;
+}
+
+/* Ensure selection can span across blocks visually */
+[data-block-id] + [data-block-id] {
+  margin-top: 0;
 }

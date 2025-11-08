@@ -14,7 +14,7 @@ import { type ArtikelPublic } from "../../../types/public";
 import { JsonLd } from "../seo/JsonLd";
 import { sanitizeHtmlRich } from "../../../utils/sanitizeHtml";
 import { imageUrl } from "../../../lib/api-url";
-import { cleanArticleExcerpt } from "@/utils/text";
+import { cleanArticleExcerpt } from "../../../utils/text";
 
 type ArtikelDetailViewProps = {
   artikel: ArtikelDetail;
@@ -80,18 +80,12 @@ export function ArtikelDetailView({
   let contentNode: React.ReactNode;
   let wordCount = 0;
 
-  const contentClassName =
-    "prose prose-slate mt-10 max-w-none text-base leading-relaxed md:prose-lg prose-headings:font-semibold prose-headings:text-slate-900 prose-blockquote:text-slate-700 prose-a:text-emerald-600 prose-img:rounded-3xl";
-
   if (artikel.konten_markdown && artikel.konten_markdown.trim()) {
     const parsed = parseMarkdown(artikel.konten_markdown);
     headings = parsed.headings;
     wordCount = parsed.wordCount;
     contentNode = (
-      <MarkdownRenderer
-        markdown={artikel.konten_markdown}
-        className={contentClassName}
-      />
+      <MarkdownRenderer markdown={artikel.konten_markdown} className="mt-6" />
     );
   } else if (artikel.konten_html && artikel.konten_html.trim()) {
     const processed = processHtmlContent(artikel.konten_html);
@@ -99,19 +93,16 @@ export function ArtikelDetailView({
     wordCount = processed.wordCount;
     contentNode = (
       <div
-        className={contentClassName}
+        className="prose prose-slate max-w-none mt-6 prose-headings:text-slate-900 prose-a:text-emerald-600"
         dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(processed.html) }}
       />
     );
-  }
-
-  const sanitizedExcerpt = cleanArticleExcerpt(artikel.excerpt);
-
-  if (!contentNode) {
-    wordCount = sanitizedExcerpt.split(/\s+/).filter(Boolean).length;
+  } else {
+    const cleanExcerpt = cleanArticleExcerpt(artikel.excerpt);
+    wordCount = cleanExcerpt.split(/\s+/).filter(Boolean).length;
     contentNode = (
-      <p className="mt-10 text-lg leading-relaxed text-slate-700">
-        {sanitizedExcerpt}
+      <p className="mt-6 text-base leading-relaxed text-slate-700">
+        {cleanExcerpt}
       </p>
     );
   }
@@ -119,22 +110,12 @@ export function ArtikelDetailView({
   const readingMinutes =
     artikel.estimasi_waktu_baca ?? Math.max(1, Math.round(wordCount / 200));
   const tags = Array.isArray(artikel.tag) ? artikel.tag : [];
-  const formattedWordCount = wordCount
-    ? wordCount.toLocaleString("id-ID")
-    : null;
-  const authorName = artikel.penulis?.trim() || "Tim Taman Kehati";
-  const authorInitial = authorName.charAt(0).toUpperCase();
-  const metaItems = [
-    publishDate,
-    formattedWordCount ? `${formattedWordCount} kata` : null,
-    `${readingMinutes} menit baca`,
-  ].filter(Boolean);
 
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: artikel.judul,
-    description: sanitizedExcerpt,
+    description: cleanArticleExcerpt(artikel.excerpt),
     author: artikel.penulis
       ? { "@type": "Person", name: artikel.penulis }
       : undefined,
@@ -145,64 +126,46 @@ export function ArtikelDetailView({
   };
 
   return (
-    <article className="space-y-16">
+    <article className="space-y-12">
       <JsonLd data={jsonLd} />
-
-      <div className="relative left-1/2 w-screen -translate-x-1/2">
-        <div className="relative h-[460px] w-full overflow-hidden bg-slate-900 shadow-2xl">
+      <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm">
+        <div className="relative h-[320px] w-full md:h-[420px]">
           <Image
             src={heroImage}
             alt={artikel.judul}
             fill
             priority
             className="object-cover"
-            sizes="100vw"
+            sizes="(max-width: 768px) 100vw, 960px"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent" />
-          <div className="relative mx-auto flex h-full max-w-5xl flex-col justify-end gap-5 px-4 pb-12 pt-24 text-white sm:px-6 lg:px-8">
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
+          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
             <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
               {kategori && (
-                <Badge className="bg-white/20 text-white" variant="default">
+                <Badge className="bg-emerald-600 text-white hover:bg-emerald-500">
                   {kategori}
                 </Badge>
               )}
-              {metaItems.map((item, index) => (
-                <div key={`meta-${index}`} className="flex items-center gap-3">
-                  {index > 0 && <span className="text-white/60">•</span>}
-                  <span>{item}</span>
-                </div>
-              ))}
+              {publishDate && <span>{publishDate}</span>}
+              <span>•</span>
+              <span>{readingMinutes} menit baca</span>
             </div>
-
-            <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl lg:text-5xl">
+            <h1 className="mt-4 text-3xl font-semibold text-white md:text-4xl lg:text-5xl">
               {artikel.judul}
             </h1>
-
-            <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 text-base font-semibold text-white">
-                {authorInitial}
-              </div>
-              <div>
-                <p className="text-base font-medium text-white">{authorName}</p>
-                {publishDate && (
-                  <p className="text-sm text-white/80">Diterbitkan {publishDate}</p>
-                )}
-              </div>
-            </div>
+            {artikel.penulis && (
+              <p className="mt-2 text-base text-white/80">
+                Ditulis oleh {artikel.penulis}
+              </p>
+            )}
           </div>
         </div>
-      </div>
 
-      <div className="mx-auto max-w-5xl space-y-16 px-4 sm:px-6 lg:px-0">
-        <div className="lg:grid lg:grid-cols-[minmax(0,3fr)_minmax(260px,1fr)] lg:gap-12">
+        <div className="grid gap-10 p-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:p-12">
           <div>
             <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
               <span>Kata kunci</span>
-              {tags.length === 0 && (
-                <Badge variant="outline" className="border-slate-200 text-slate-600">
-                  Konservasi
-                </Badge>
-              )}
+              {tags.length === 0 && <Badge variant="outline">Konservasi</Badge>}
               {tags.map((tag) => (
                 <Badge
                   key={tag}
@@ -217,64 +180,99 @@ export function ArtikelDetailView({
             {contentNode}
           </div>
 
-          <aside className="mt-10 lg:mt-0 lg:pl-8">
-            <div className="space-y-6 lg:sticky lg:top-24">
-              <TableOfContents headings={headings} />
-              <div className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-900">
-                  Bagikan tulisan
-                </h2>
-                <p className="mt-2 text-sm text-slate-600">
-                  Sebarkan artikel ini agar semakin banyak orang peduli pada
-                  upaya konservasi keanekaragaman hayati.
-                </p>
-                <div className="mt-4">
-                  <ShareButtons
-                    title={artikel.judul}
-                    baseUrl={SITE_URL}
-                    direction="column"
-                  />
-                </div>
-              </div>
+          <aside className="space-y-6">
+            <TableOfContents headings={headings} />
+            <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+                Bagikan
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Bagikan artikel ini untuk mendukung penyebaran informasi
+                konservasi keanekaragaman hayati Indonesia.
+              </p>
+              <ShareButtons title={artikel.judul} baseUrl={SITE_URL} />
             </div>
           </aside>
         </div>
+      </div>
 
-        {related.length ? (
-          <section className="space-y-6">
-            <h2 className="text-2xl font-semibold text-slate-900">
+      {related.length ? (
+        <section className="mt-16 pt-12 border-t border-slate-200 px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold text-slate-900 mb-2">
               Artikel terkait
             </h2>
-            <div className="grid gap-6 md:grid-cols-2">
-              {related.slice(0, 4).map((item) => (
-                <article
+            <p className="text-slate-600">
+              Artikel lain yang mungkin menarik untuk Anda
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 max-w-7xl mx-auto">
+            {related.slice(0, 6).map((item) => {
+              const coverImage = item.gambar_cover
+                ? imageUrl(item.gambar_cover)
+                : null;
+              return (
+                <Link
                   key={item.id}
-                  className="rounded-3xl border border-slate-200 bg-white/90 p-6 shadow-sm transition hover:border-emerald-200"
+                  href={`/artikel/${item.slug}`}
+                  className="group block"
                 >
-                  <p className="text-xs uppercase tracking-wide text-emerald-600">
-                    {item.kategori}
-                  </p>
-                  <Link
-                    href={`/artikel/${item.slug}`}
-                    className="mt-2 block text-lg font-semibold text-slate-900 hover:text-emerald-600"
-                  >
-                    {item.judul}
-                  </Link>
-                  <p className="mt-2 line-clamp-3 text-sm text-slate-600">
-                    {cleanArticleExcerpt(item.excerpt)}
-                  </p>
-                  <Link
-                    href={`/artikel/${item.slug}`}
-                    className="mt-4 inline-flex text-sm font-semibold text-emerald-600 hover:text-emerald-500"
-                  >
-                    Baca selengkapnya
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </div>
+                  <article className="h-full rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm transition-all duration-300 hover:shadow-lg hover:border-emerald-300 hover:-translate-y-1">
+                    {coverImage && (
+                      <div className="relative w-full h-48 overflow-hidden bg-slate-100">
+                        <Image
+                          src={coverImage}
+                          alt={item.judul}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge
+                          variant="outline"
+                          className="text-xs font-medium text-emerald-700 border-emerald-200 bg-emerald-50"
+                        >
+                          {item.kategori}
+                        </Badge>
+                        {item.tanggal_publish && (
+                          <span className="text-xs text-slate-500">
+                            {formatDate(item.tanggal_publish)}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="text-xl font-semibold text-slate-900 mb-3 line-clamp-2 group-hover:text-emerald-600 transition-colors">
+                        {item.judul}
+                      </h3>
+                      <p className="text-sm text-slate-600 line-clamp-3 leading-relaxed">
+                        {cleanArticleExcerpt(item.excerpt)}
+                      </p>
+                      <div className="mt-4 flex items-center text-sm font-medium text-emerald-600 group-hover:text-emerald-700">
+                        Baca selengkapnya
+                        <svg
+                          className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M9 5l7 7-7 7"
+                          />
+                        </svg>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
     </article>
   );
 }
