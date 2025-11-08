@@ -43,6 +43,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Eye } from "lucide-react";
+import { cleanArticleExcerpt } from "../../utils/text";
+import { imageUrl } from "../../lib/api-url";
 
 interface Artikel {
   id: string;
@@ -93,6 +95,7 @@ export function ArtikelPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [selectedArtikel, setSelectedArtikel] = useState<Artikel | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   const form = useForm<ArtikelFormData>({
     resolver: zodResolver(artikelSchema),
@@ -315,152 +318,207 @@ export function ArtikelPage() {
     });
   };
 
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl mb-2 flex items-center gap-2">
-            <FileText className="h-6 w-6 sm:h-8 sm:w-8" style={{ color: "#356447" }} />
-            Manajemen Artikel
-          </h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Kelola konten artikel dan berita keanekaragaman hayati
-          </p>
-        </div>
-        <div className="flex-shrink-0 sm:flex-none sm:w-auto sm:max-w-fit">
-          <Button 
-            onClick={handleCreate}
-            className="w-full sm:w-fit sm:min-w-0 sm:max-w-none sm:whitespace-nowrap bg-black hover:bg-gray-800 text-white"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Tulis Artikel
-          </Button>
-        </div>
-      </div>
+  const publishedCount = data.filter((a) => a.status === "approved").length;
+  const draftCount = data.filter((a) => a.status === "draft").length;
 
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Cari judul atau konten artikel..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header */}
+      <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                Artikel & Berita
+              </h1>
+              <p className="text-sm text-gray-500">
+                Kelola konten artikel dan berita keanekaragaman hayati
+              </p>
             </div>
-            <Button onClick={loadData} variant="secondary">
-              <Search className="h-4 w-4" />
+            <Button
+              onClick={handleCreate}
+              className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tulis Artikel
             </Button>
           </div>
-        </CardContent>
-      </Card>
-
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">
-              Total Artikel
-            </div>
-            <div className="text-2xl">{data.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">
-              Dipublikasikan
-            </div>
-            <div className="text-2xl">
-              {data.filter((a) => a.status === "approved").length}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="pt-6">
-            <div className="text-sm text-muted-foreground mb-1">Draft</div>
-            <div className="text-2xl">
-              {data.filter((a) => a.status === "draft").length}
-            </div>
-          </CardContent>
-        </Card>
+        </div>
       </div>
 
-      <div className="grid gap-4">
+      {/* Stats Bar */}
+      <div className="border-b border-gray-200 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Total:</span>
+              <span className="text-lg font-semibold text-gray-900">{data.length}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Dipublikasikan:</span>
+              <span className="text-lg font-semibold text-green-600">{publishedCount}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Draft:</span>
+              <span className="text-lg font-semibold text-gray-600">{draftCount}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <Input
+              placeholder="Cari artikel..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  loadData();
+                }
+              }}
+              className="pl-10 h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Error Alert */}
+      {error && (
+        <div className="max-w-7xl mx-auto px-6 pt-6">
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
+      )}
+
+      {/* Articles List */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {loading ? (
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="pt-6">
-                <div className="h-24 bg-gray-100 animate-pulse rounded"></div>
-              </CardContent>
-            </Card>
-          ))
+          <div className="space-y-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="border-b border-gray-200 pb-6">
+                <div className="h-6 bg-gray-200 animate-pulse rounded w-3/4 mb-3"></div>
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2 mb-4"></div>
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 animate-pulse rounded w-5/6"></div>
+              </div>
+            ))}
+          </div>
         ) : data.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Belum ada artikel</p>
-            </CardContent>
-          </Card>
+          <div className="text-center py-16">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Belum ada artikel
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Mulai menulis artikel pertama Anda
+            </p>
+            <Button
+              onClick={handleCreate}
+              className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Tulis Artikel Pertama
+            </Button>
+          </div>
         ) : (
-          data.map((artikel) => (
-            <Card key={artikel.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">{artikel.kategori}</Badge>
-                      {getStatusBadge(artikel.status)}
+          <div className="space-y-0">
+            {data.map((artikel, index) => {
+              const coverImage = artikel.gambar_cover;
+              const hasImageError = imageErrors.has(artikel.id);
+              const showPlaceholder = !coverImage || hasImageError;
+              
+              return (
+                <div
+                  key={artikel.id}
+                  className={`group border-b border-gray-200 py-6 hover:bg-gray-50 transition-colors ${
+                    index === 0 ? "border-t border-gray-200" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-6">
+                    {/* Cover Image */}
+                    <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                      {showPlaceholder ? (
+                        <div className="flex flex-col items-center justify-center h-full p-2 text-center">
+                          <FileText className="w-8 h-8 text-gray-400 mb-1" />
+                          <p className="text-xs text-gray-500 leading-tight">
+                            Gambar utama tidak tersedia
+                          </p>
+                        </div>
+                      ) : (
+                        <img
+                          src={imageUrl(coverImage)}
+                          alt={artikel.judul}
+                          className="w-full h-full object-cover"
+                          onError={() => {
+                            setImageErrors((prev) => new Set(prev).add(artikel.id));
+                          }}
+                        />
+                      )}
                     </div>
-                    <CardTitle className="mb-2">{artikel.judul}</CardTitle>
-                    <CardDescription>
-                      {artikel.penulis} • {formatDate(artikel.updated_at)}
-                    </CardDescription>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          {getStatusBadge(artikel.status)}
+                          <Badge variant="outline" className="text-xs">
+                            {artikel.kategori}
+                          </Badge>
+                          <span className="text-xs text-gray-500">
+                            {formatDate(artikel.updated_at)}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#00ab6c] transition-colors line-clamp-2">
+                          {artikel.judul}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                          {cleanArticleExcerpt(artikel.excerpt) || "Tidak ada ringkasan"}
+                        </p>
+                        <div className="flex items-center gap-3">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(artikel)}
+                            className="text-gray-700 hover:text-[#00ab6c] hover:bg-gray-100"
+                          >
+                            <Pencil className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(artikel)}
+                            className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
+                          </Button>
+                        </div>
+                      </div>
+                      {/* Publish Button - Separated on the right */}
+                      {artikel.status === "draft" && (
+                        <div className="flex-shrink-0">
+                          <Button
+                            onClick={() => handlePublish(artikel)}
+                            className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full shadow-sm hover:shadow-md transition-all"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Publikasikan
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  {artikel.excerpt}
-                </p>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(artikel)}
-                  >
-                    <Pencil className="mr-2 h-4 w-4" />
-                    Edit
-                  </Button>
-                  {artikel.status === "draft" && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handlePublish(artikel)}
-                    >
-                      <Eye className="mr-2 h-4 w-4" />
-                      Publikasikan
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDelete(artikel)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Hapus
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+              );
+            })}
+          </div>
         )}
       </div>
 

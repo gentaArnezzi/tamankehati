@@ -82,6 +82,7 @@ export function MediumStyleCreatePage({
   const blockRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
   const editorContainerRef = useRef<HTMLDivElement>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
 
   // Convert markdown to blocks
   const markdownToBlocks = useCallback((markdown: string): ContentBlock[] => {
@@ -1433,14 +1434,50 @@ export function MediumStyleCreatePage({
 
         {/* Title Input */}
         <input
+          ref={titleInputRef}
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              // Focus on first block's contentEditable
+              const firstBlockId = blocks[0]?.id;
+              if (firstBlockId) {
+                // Use setTimeout to ensure DOM is ready
+                setTimeout(() => {
+                  const firstBlockElement = blockRefs.current[firstBlockId];
+                  if (firstBlockElement) {
+                    // Find the contentEditable element inside the block
+                    const editable = firstBlockElement.querySelector('[contenteditable="true"]') as HTMLElement;
+                    if (editable) {
+                      editable.focus();
+                      // Move cursor to start of content
+                      const range = document.createRange();
+                      const selection = window.getSelection();
+                      range.selectNodeContents(editable);
+                      range.collapse(true);
+                      selection?.removeAllRanges();
+                      selection?.addRange(range);
+                      setFocusedBlockId(firstBlockId);
+                    } else {
+                      // Fallback: focus on block element itself
+                      firstBlockElement.focus();
+                      setFocusedBlockId(firstBlockId);
+                    }
+                  }
+                }, 0);
+              }
+            }
+          }}
           placeholder="Title..."
-          className="mb-8 w-full border-0 bg-transparent text-[42px] leading-tight text-[#222] placeholder:text-gray-400 focus:outline-none"
+          className="mb-8 w-full border-0 bg-transparent text-[42px] leading-tight text-[#222] placeholder:text-gray-400 focus:outline-none focus:ring-0 focus:ring-offset-0"
           style={{
             fontFamily: "'Playfair Display', serif",
             fontWeight: 400,
+            outline: "none",
+            border: "none",
+            boxShadow: "none",
           }}
         />
 
