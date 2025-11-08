@@ -96,6 +96,9 @@ export function ArtikelPage() {
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [selectedArtikel, setSelectedArtikel] = useState<Artikel | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalItems, setTotalItems] = useState(0);
 
   const form = useForm<ArtikelFormData>({
     resolver: zodResolver(artikelSchema),
@@ -110,8 +113,13 @@ export function ArtikelPage() {
   });
 
   useEffect(() => {
+    // Reset to page 1 when search query changes
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
     loadData();
-  }, []);
+  }, [currentPage, searchQuery]);
 
   useEffect(() => {
     if (formOpen && selectedArtikel) {
@@ -142,7 +150,10 @@ export function ArtikelPage() {
 
       // Fetch articles from API
       const token = localStorage.getItem("auth_token");
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({
+        limit: itemsPerPage.toString(),
+        offset: ((currentPage - 1) * itemsPerPage).toString(),
+      });
       if (searchQuery) {
         params.append("q", searchQuery);
       }
@@ -180,6 +191,7 @@ export function ArtikelPage() {
       }));
 
       setData(articles);
+      setTotalItems(result.total || result.items.length);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Gagal memuat data artikel",
@@ -521,6 +533,44 @@ export function ArtikelPage() {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      {(() => {
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+        if (totalPages <= 1) return null;
+        
+        return (
+          <div className="max-w-7xl mx-auto px-6 py-8 border-t border-gray-200">
+            <div className="flex justify-center">
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="w-full sm:w-auto sm:min-w-fit"
+                >
+                  Sebelumnya
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Halaman {currentPage} dari {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="w-full sm:w-auto sm:min-w-fit"
+                >
+                  Selanjutnya
+                </Button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">

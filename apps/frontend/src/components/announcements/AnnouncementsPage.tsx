@@ -56,6 +56,8 @@ import {
 import { AnnouncementForm } from "./AnnouncementForm";
 import { AnnouncementDetail } from "./AnnouncementDetail";
 import { toast } from "sonner";
+import { imageUrl } from "../../lib/api-url";
+import { FileText } from "lucide-react";
 
 // Types
 export interface Announcement {
@@ -137,6 +139,7 @@ export function AnnouncementsPage() {
   const [selectedAnnouncement, setSelectedAnnouncement] =
     useState<Announcement | null>(null);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set());
 
   const loadData = useCallback(async () => {
     try {
@@ -472,17 +475,21 @@ export function AnnouncementsPage() {
   };
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const publishedCount = announcements.filter((a) => a.status === "published").length;
+  const draftCount = announcements.filter((a) => a.status === "draft").length;
+  const archivedCount = announcements.filter((a) => a.status === "archived").length;
 
   if (loading && announcements.length === 0) {
     return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-10 w-32" />
-        </div>
-        <div className="grid gap-4">
+      <div className="min-h-screen bg-white">
+        <div className="space-y-6">
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} className="h-32 w-full" />
+            <div key={i} className="border-b border-gray-200 pb-6">
+              <div className="h-6 bg-gray-200 animate-pulse rounded w-3/4 mb-3"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-1/2 mb-4"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 animate-pulse rounded w-5/6"></div>
+            </div>
           ))}
         </div>
       </div>
@@ -490,271 +497,310 @@ export function AnnouncementsPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-        <div className="flex-1 min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold">Pengumuman & Berita</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">
-            Kelola pengumuman dan berita untuk pengguna
-          </p>
-        </div>
-        <div className="flex-shrink-0 sm:flex-none sm:w-auto sm:max-w-fit">
-          <Button 
-            onClick={handleCreate}
-            className="flex items-center gap-2 w-full sm:w-fit sm:min-w-0 sm:max-w-none sm:whitespace-nowrap bg-black hover:bg-gray-800 text-white"
-          >
-            <Plus className="h-4 w-4" />
-            Buat Pengumuman
-          </Button>
+      <div className="border-b border-gray-200 bg-white sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-1">
+                Pengumuman & Berita
+              </h1>
+              <p className="text-sm text-gray-500">
+                Kelola pengumuman dan berita untuk pengguna
+              </p>
+            </div>
+            <Button
+              onClick={handleCreate}
+              className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Buat Pengumuman
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardContent className="p-4 sm:p-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Pencarian
-              </label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Cari pengumuman..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
+      {/* Stats Bar */}
+      <div className="border-b border-gray-200 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Total:</span>
+              <span className="text-lg font-semibold text-gray-900">{totalItems}</span>
             </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Tipe</label>
-              <Select value={typeFilter} onValueChange={setTypeFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua tipe" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua tipe</SelectItem>
-                  {ANNOUNCEMENT_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Dipublikasikan:</span>
+              <span className="text-lg font-semibold text-green-600">{publishedCount}</span>
             </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Status</label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua status</SelectItem>
-                  {STATUS_OPTIONS.map((status) => (
-                    <SelectItem key={status.value} value={status.value}>
-                      {status.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Draft:</span>
+              <span className="text-lg font-semibold text-gray-600">{draftCount}</span>
             </div>
-
-            <div>
-              <label className="text-sm font-medium mb-2 block">Fitur</label>
-              <Select
-                value={
-                  featuredFilter === null ? "all" : featuredFilter.toString()
-                }
-                onValueChange={(value) =>
-                  setFeaturedFilter(value === "all" ? null : value === "true")
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Semua" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Semua</SelectItem>
-                  <SelectItem value="true">Featured</SelectItem>
-                  <SelectItem value="false">Tidak Featured</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Diarsipkan:</span>
+              <span className="text-lg font-semibold text-gray-500">{archivedCount}</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Error */}
+      {/* Search and Filters Bar */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                placeholder="Cari pengumuman..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    loadData();
+                  }
+                }}
+                className="pl-10 h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]">
+                <SelectValue placeholder="Semua tipe" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua tipe</SelectItem>
+                {ANNOUNCEMENT_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]">
+                <SelectValue placeholder="Semua status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua status</SelectItem>
+                {STATUS_OPTIONS.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              value={featuredFilter === null ? "all" : featuredFilter.toString()}
+              onValueChange={(value) =>
+                setFeaturedFilter(value === "all" ? null : value === "true")
+              }
+            >
+              <SelectTrigger className="h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]">
+                <SelectValue placeholder="Semua" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua</SelectItem>
+                <SelectItem value="true">Featured</SelectItem>
+                <SelectItem value="false">Tidak Featured</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Alert */}
       {error && (
-        <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
+        <div className="max-w-7xl mx-auto px-6 pt-6">
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        </div>
       )}
 
       {/* Announcements List */}
-      <div className="grid gap-4">
-        {announcements.map((announcement) => (
-          <Card
-            key={announcement.id}
-            className="hover:shadow-md transition-shadow"
-          >
-            <CardContent className="p-4 sm:p-6">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                <div className="flex-1 space-y-2 sm:space-y-3 min-w-0">
-                  <div className="flex items-center gap-2">
-                    {announcement.is_pinned && (
-                      <Pin className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                    )}
-                    {announcement.is_featured && (
-                      <Star className="h-4 w-4 text-yellow-600 flex-shrink-0" />
-                    )}
-                    <h3 className="text-base sm:text-lg font-semibold line-clamp-2 truncate">
-                      {announcement.title}
-                    </h3>
-                  </div>
-
-                  {announcement.summary && (
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {announcement.summary}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {getTypeBadge(announcement.type)}
-                    {getStatusBadge(announcement.status)}
-                    {getPriorityBadge(announcement.priority)}
-                    {announcement.tags && (
-                      <div className="flex items-center gap-1">
-                        <Tag className="h-3 w-3" />
-                        <span className="text-xs text-muted-foreground">
-                          {announcement.tags.split(",").length} tag
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="h-3 w-3 flex-shrink-0" />
-                      <span className="truncate">Author ID: {announcement.author_id || "N/A"}</span>
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {announcements.length === 0 ? (
+          <div className="text-center py-16">
+            <FileText className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              Belum ada pengumuman
+            </h3>
+            <p className="text-gray-500 mb-6">
+              Mulai membuat pengumuman pertama Anda
+            </p>
+            <Button
+              onClick={handleCreate}
+              className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Buat Pengumuman Pertama
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-0">
+            {announcements.map((announcement, index) => {
+              const featuredImage = announcement.featured_image;
+              const hasImageError = imageErrors.has(announcement.id);
+              const showPlaceholder = !featuredImage || hasImageError;
+              
+              return (
+                <div
+                  key={announcement.id}
+                  className={`group border-b border-gray-200 py-6 hover:bg-gray-50 transition-colors ${
+                    index === 0 ? "border-t border-gray-200" : ""
+                  }`}
+                >
+                  <div className="flex items-start gap-6">
+                    {/* Featured Image */}
+                    <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                      {showPlaceholder ? (
+                        <div className="flex flex-col items-center justify-center h-full p-2 text-center">
+                          <FileText className="w-8 h-8 text-gray-400 mb-1" />
+                          <p className="text-xs text-gray-500 leading-tight">
+                            Gambar tidak tersedia
+                          </p>
+                        </div>
+                      ) : (
+                        <img
+                          src={imageUrl(featuredImage)}
+                          alt={announcement.title}
+                          className="w-full h-full object-cover"
+                          onError={() => {
+                            setImageErrors((prev) => new Set(prev).add(announcement.id));
+                          }}
+                        />
+                      )}
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3 flex-shrink-0" />
-                      <span>
-                        {new Date(announcement.created_at).toLocaleDateString(
-                          "id-ID",
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0 flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          {announcement.is_pinned && (
+                            <Pin className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                          )}
+                          {announcement.is_featured && (
+                            <Star className="h-4 w-4 text-yellow-600 flex-shrink-0" />
+                          )}
+                          {getStatusBadge(announcement.status)}
+                          {getTypeBadge(announcement.type)}
+                          {getPriorityBadge(announcement.priority)}
+                          <span className="text-xs text-gray-500">
+                            {new Date(announcement.created_at).toLocaleDateString("id-ID")}
+                          </span>
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2 group-hover:text-[#00ab6c] transition-colors line-clamp-2">
+                          {announcement.title}
+                        </h3>
+                        {announcement.summary && (
+                          <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                            {announcement.summary}
+                          </p>
                         )}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Eye className="h-3 w-3 flex-shrink-0" />
-                      <span>{announcement.view_count} views</span>
-                    </div>
-                    {announcement.published_at && (
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-3 w-3 flex-shrink-0" />
-                        <span className="hidden sm:inline">
-                          Published:{" "}
-                          {new Date(
-                            announcement.published_at,
-                          ).toLocaleDateString("id-ID")}
-                        </span>
-                        <span className="sm:hidden">
-                          {new Date(
-                            announcement.published_at,
-                          ).toLocaleDateString("id-ID")}
-                        </span>
+                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Eye className="h-3 w-3" />
+                            <span>{announcement.view_count} views</span>
+                          </div>
+                          {announcement.tags && (
+                            <div className="flex items-center gap-1">
+                              <Tag className="h-3 w-3" />
+                              <span>{announcement.tags.split(",").length} tag</span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 mt-4">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleView(announcement)}
+                            className="text-gray-700 hover:text-[#00ab6c] hover:bg-gray-100"
+                          >
+                            <Eye className="mr-2 h-4 w-4" />
+                            Lihat
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(announcement)}
+                            className="text-gray-700 hover:text-[#00ab6c] hover:bg-gray-100"
+                          >
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(announcement.id)}
+                            className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Hapus
+                          </Button>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 sm:ml-4 flex-shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleView(announcement)}
-                    className="flex-1 sm:flex-initial"
-                  >
-                    <Eye className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Lihat</span>
-                  </Button>
-
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleEdit(announcement)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </DropdownMenuItem>
+                      {/* Publish Button - Separated on the right */}
                       {announcement.status === "draft" && (
-                        <DropdownMenuItem
-                          onClick={() => handlePublish(announcement.id)}
-                        >
-                          <Send className="h-4 w-4 mr-2" />
-                          Publish
-                        </DropdownMenuItem>
+                        <div className="flex-shrink-0">
+                          <Button
+                            onClick={() => handlePublish(announcement.id)}
+                            className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full shadow-sm hover:shadow-md transition-all"
+                          >
+                            <Send className="mr-2 h-4 w-4" />
+                            Publikasikan
+                          </Button>
+                        </div>
                       )}
                       {announcement.status === "published" && (
-                        <DropdownMenuItem
-                          onClick={() => handleArchive(announcement.id)}
-                        >
-                          <Archive className="h-4 w-4 mr-2" />
-                          Archive
-                        </DropdownMenuItem>
+                        <div className="flex-shrink-0">
+                          <Button
+                            onClick={() => handleArchive(announcement.id)}
+                            variant="outline"
+                            className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 font-medium px-6 py-2 rounded-full"
+                          >
+                            <Archive className="mr-2 h-4 w-4" />
+                            Arsipkan
+                          </Button>
+                        </div>
                       )}
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(announcement.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center">
-          <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
-            >
-              Previous
-            </Button>
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              Halaman {currentPage} dari {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-              }
-              disabled={currentPage === totalPages}
-              className="w-full sm:w-auto sm:min-w-fit sm:flex-shrink-0"
-            >
-              Next
-            </Button>
+        <div className="max-w-7xl mx-auto px-6 py-8 border-t border-gray-200">
+          <div className="flex justify-center">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="w-full sm:w-auto sm:min-w-fit"
+              >
+                Sebelumnya
+              </Button>
+              <span className="text-sm text-gray-600">
+                Halaman {currentPage} dari {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage === totalPages}
+                className="w-full sm:w-auto sm:min-w-fit"
+              >
+                Selanjutnya
+              </Button>
+            </div>
           </div>
         </div>
       )}
