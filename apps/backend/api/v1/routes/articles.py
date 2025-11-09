@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from sqlalchemy.orm import selectinload
 from core.database.session import get_session
 from domains.articles.models import Article, ArticleStatus
@@ -21,17 +21,54 @@ async def list_articles(
     q: str = None,
     park_id: str = None,
     status_filter: str = None,
+    category_filter: str = None,
+    sort_by: str = "created_at",
+    sort_order: str = "desc",
     limit: int = 50,
     offset: int = 0,
 ):
     # Get real data from database
     stmt = select(Article).where(Article.deleted_at == None)
+    count_stmt = select(func.count(Article.id)).where(Article.deleted_at == None)
     
-    # Get total count
-    total = (await db.execute(
-        select(func.count(Article.id)).where(Article.deleted_at == None)
-    )).scalar() or 0
+    # Apply search query - search by title (case-insensitive)
+    if q:
+        search_term = f"%{q}%"
+        stmt = stmt.where(Article.title.ilike(search_term))
+        count_stmt = count_stmt.where(Article.title.ilike(search_term))
+    
+    # Apply status filter
+    if status_filter:
+        stmt = stmt.where(Article.status == status_filter)
+        count_stmt = count_stmt.where(Article.status == status_filter)
+    
+    # Apply category filter
+    if category_filter:
+        stmt = stmt.where(Article.category == category_filter)
+        count_stmt = count_stmt.where(Article.category == category_filter)
+    
+    # Apply park_id filter
+    if park_id:
+        stmt = stmt.where(Article.park_id == park_id)
+        count_stmt = count_stmt.where(Article.park_id == park_id)
+    
+    # Get total count based on filters
+    total = (await db.execute(count_stmt)).scalar() or 0
 
+    # Apply sorting
+    sort_column = None
+    if sort_by == "title":
+        sort_column = Article.title
+    elif sort_by == "updated_at":
+        sort_column = Article.updated_at
+    else:  # default to created_at
+        sort_column = Article.created_at
+    
+    if sort_order == "asc":
+        stmt = stmt.order_by(sort_column.asc())
+    else:  # default to desc
+        stmt = stmt.order_by(sort_column.desc())
+    
     # Apply pagination
     stmt = stmt.limit(limit).offset(offset)
     rows = (await db.execute(stmt)).scalars().all()

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "../../lib/useAuth";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -88,10 +88,15 @@ const KATEGORI_OPTIONS = [
 export function ArtikelPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<Artikel[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterKategori, setFilterKategori] = useState<string>("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"created_at" | "title" | "updated_at">("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
   const [selectedArtikel, setSelectedArtikel] = useState<Artikel | null>(null);
@@ -99,6 +104,19 @@ export function ArtikelPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(0);
+  const [totalPublished, setTotalPublished] = useState(0);
+  const [totalDraft, setTotalDraft] = useState(0);
+
+  // Restore page from URL query params
+  useEffect(() => {
+    const pageParam = searchParams?.get('page');
+    if (pageParam) {
+      const page = parseInt(pageParam, 10);
+      if (!isNaN(page) && page > 0) {
+        setCurrentPage(page);
+      }
+    }
+  }, [searchParams]);
 
   const form = useForm<ArtikelFormData>({
     resolver: zodResolver(artikelSchema),
@@ -113,13 +131,15 @@ export function ArtikelPage() {
   });
 
   useEffect(() => {
-    // Reset to page 1 when search query changes
-    setCurrentPage(1);
-  }, [searchQuery]);
+    // Reset to page 1 when search query, filter, or sort changes
+    if (searchQuery || filterKategori || filterStatus || sortBy || sortOrder) {
+      setCurrentPage(1);
+    }
+  }, [searchQuery, filterKategori, filterStatus, sortBy, sortOrder]);
 
   useEffect(() => {
     loadData();
-  }, [currentPage, searchQuery]);
+  }, [currentPage, searchQuery, filterKategori, filterStatus, sortBy, sortOrder]);
 
   useEffect(() => {
     if (formOpen && selectedArtikel) {
@@ -157,6 +177,18 @@ export function ArtikelPage() {
       if (searchQuery) {
         params.append("q", searchQuery);
       }
+      if (filterKategori) {
+        params.append("category_filter", filterKategori);
+      }
+      if (filterStatus) {
+        params.append("status_filter", filterStatus);
+      }
+      if (sortBy) {
+        params.append("sort_by", sortBy);
+      }
+      if (sortOrder) {
+        params.append("sort_order", sortOrder);
+      }
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/?${params}`,
@@ -192,6 +224,9 @@ export function ArtikelPage() {
 
       setData(articles);
       setTotalItems(result.total || result.items.length);
+      
+      // Fetch total statistics separately
+      await loadStatistics();
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Gagal memuat data artikel",
@@ -201,12 +236,54 @@ export function ArtikelPage() {
     }
   };
 
+  const loadStatistics = async () => {
+    try {
+      const token = localStorage.getItem("auth_token");
+      
+      // Fetch all articles without pagination to get total counts
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/?limit=1000&offset=0`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        const allArticles = result.items || [];
+        
+        // Calculate total statistics from all articles
+        const published = allArticles.filter((a: any) => a.status === "approved").length;
+        const draft = allArticles.filter((a: any) => a.status === "draft").length;
+        
+        setTotalPublished(published);
+        setTotalDraft(draft);
+      }
+    } catch (err) {
+      console.error("Error loading statistics:", err);
+      // Fallback to current page data if statistics fetch fails
+      const published = data.filter((a) => a.status === "approved").length;
+      const draft = data.filter((a) => a.status === "draft").length;
+      setTotalPublished(published);
+      setTotalDraft(draft);
+    }
+  };
+
   const handleCreate = () => {
     router.push("/dashboard/taman/berita/create");
   };
 
   const handleEdit = (artikel: Artikel) => {
-    router.push(`/dashboard/taman/berita/edit/${artikel.id}`);
+    // Save current page to URL query so we can return to it
+    router.push(`/dashboard/taman/berita/edit/${artikel.id}?page=${currentPage}`);
+  };
+
+  const handleView = (artikel: Artikel) => {
+    // Save current page to URL query so we can return to it
+    router.push(`/dashboard/taman/berita/${artikel.id}?page=${currentPage}`);
   };
 
   const handleSubmit = async (formData: ArtikelFormData) => {
@@ -330,9 +407,6 @@ export function ArtikelPage() {
     });
   };
 
-  const publishedCount = data.filter((a) => a.status === "approved").length;
-  const draftCount = data.filter((a) => a.status === "draft").length;
-
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -364,36 +438,150 @@ export function ArtikelPage() {
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">Total:</span>
-              <span className="text-lg font-semibold text-gray-900">{data.length}</span>
+              <span className="text-lg font-semibold text-gray-900">{totalItems}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">Dipublikasikan:</span>
-              <span className="text-lg font-semibold text-green-600">{publishedCount}</span>
+              <span className="text-lg font-semibold text-green-600">{totalPublished}</span>
             </div>
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-700">Draft:</span>
-              <span className="text-lg font-semibold text-gray-600">{draftCount}</span>
+              <span className="text-lg font-semibold text-gray-600">{totalDraft}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar and Filters */}
       <div className="border-b border-gray-200 bg-white">
         <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              placeholder="Cari artikel..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  loadData();
-                }
-              }}
-              className="pl-10 h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]"
-            />
+          <div className="flex flex-col gap-4">
+            {/* Search */}
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <Input
+                placeholder="Cari artikel..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    loadData();
+                  }
+                }}
+                className="pl-10 h-11 border-gray-300 focus:border-[#00ab6c] focus:ring-[#00ab6c]"
+              />
+            </div>
+            
+            {/* Filters and Sort */}
+            <div className="flex flex-wrap items-center gap-4">
+              {/* Filter Kategori */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  Kategori:
+                </label>
+                <Select 
+                  value={filterKategori || undefined} 
+                  onValueChange={(value) => setFilterKategori(value || "")}
+                >
+                  <SelectTrigger className="w-[180px] h-9">
+                    <SelectValue placeholder="Semua Kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {KATEGORI_OPTIONS.map((kat) => (
+                      <SelectItem key={kat} value={kat}>
+                        {kat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {filterKategori && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFilterKategori("")}
+                    className="h-9 px-2"
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+
+              {/* Filter Status */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  Status:
+                </label>
+                <Select 
+                  value={filterStatus || undefined} 
+                  onValueChange={(value) => setFilterStatus(value || "")}
+                >
+                  <SelectTrigger className="w-[150px] h-9">
+                    <SelectValue placeholder="Semua Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="approved">Dipublikasikan</SelectItem>
+                  </SelectContent>
+                </Select>
+                {filterStatus && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setFilterStatus("")}
+                    className="h-9 px-2"
+                  >
+                    ×
+                  </Button>
+                )}
+              </div>
+
+              {/* Sort By */}
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                  Urutkan:
+                </label>
+                <Select value={sortBy} onValueChange={(value) => setSortBy(value as "created_at" | "title" | "updated_at")}>
+                  <SelectTrigger className="w-[150px] h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="created_at">Tanggal Dibuat</SelectItem>
+                    <SelectItem value="updated_at">Tanggal Diperbarui</SelectItem>
+                    <SelectItem value="title">Judul</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Sort Order */}
+              <div className="flex items-center gap-2">
+                <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
+                  <SelectTrigger className="w-[120px] h-9">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="desc">Terbaru</SelectItem>
+                    <SelectItem value="asc">Terlama</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Clear Filters */}
+              {(filterKategori || filterStatus || searchQuery) && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setFilterKategori("");
+                    setFilterStatus("");
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
+                  className="h-9"
+                >
+                  Hapus Filter
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -451,6 +639,16 @@ export function ArtikelPage() {
                   className={`group border-b border-gray-200 py-6 hover:bg-gray-50 transition-colors ${
                     index === 0 ? "border-t border-gray-200" : ""
                   }`}
+                  onClick={(e) => {
+                    // Prevent navigation when clicking buttons
+                    const target = e.target as HTMLElement;
+                    if (target.closest('button')) {
+                      return;
+                    }
+                    // Navigate to detail page when clicking on article card
+                    handleView(artikel);
+                  }}
+                  style={{ cursor: 'pointer' }}
                 >
                   <div className="flex items-start gap-6">
                     {/* Cover Image */}
@@ -492,12 +690,15 @@ export function ArtikelPage() {
                         <p className="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
                           {cleanArticleExcerpt(artikel.excerpt) || "Tidak ada ringkasan"}
                         </p>
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3" onClick={(e) => e.stopPropagation()}>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleEdit(artikel)}
-                            className="text-gray-700 hover:text-[#00ab6c] hover:bg-gray-100"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleView(artikel);
+                            }}
+                            className="text-gray-700 hover:text-[#00ab6c] hover:bg-gray-100 relative z-10"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
@@ -505,8 +706,11 @@ export function ArtikelPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(artikel)}
-                            className="text-gray-700 hover:text-red-600 hover:bg-red-50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(artikel);
+                            }}
+                            className="text-gray-700 hover:text-red-600 hover:bg-red-50 relative z-10"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Hapus
@@ -515,10 +719,13 @@ export function ArtikelPage() {
                       </div>
                       {/* Publish Button - Separated on the right */}
                       {artikel.status === "draft" && (
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
                           <Button
-                            onClick={() => handlePublish(artikel)}
-                            className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full shadow-sm hover:shadow-md transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleView(artikel);
+                            }}
+                            className="bg-[#00ab6c] hover:bg-[#008f56] text-white font-medium px-6 py-2 rounded-full shadow-sm hover:shadow-md transition-all relative z-10"
                           >
                             <Eye className="mr-2 h-4 w-4" />
                             Publikasikan

@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "react-quill/dist/quill.snow.css";
 
 /* Tokens */
 :root{
@@ -138,4 +139,176 @@ body { background: var(--bg); color: var(--fg); font-family: 'Helvetica Now', sy
 /* Ensure selection can span across blocks visually */
 [data-block-id] + [data-block-id] {
   margin-top: 0;
+}
+
+/* Quill Editor Styles */
+.ql-editor {
+  min-height: 500px;
+  font-size: 16px;
+  line-height: 1.6;
+  padding: 12px 15px;
+}
+
+.ql-editor:focus {
+  outline: none;
+}
+
+.ql-editor.ql-blank::before {
+  font-style: italic;
+  color: #9ca3af;
+}
+
+.ql-toolbar {
+  border-top: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-bottom: none;
+  background: #f9fafb;
+  padding: 8px;
+  position: sticky !important;
+  top: 0;
+  z-index: 50;
+  display: flex !important;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.ql-toolbar .ql-formats {
+  display: inline-flex;
+  align-items: center;
+  margin-right: 8px;
+}
+
+.ql-toolbar button,
+.ql-toolbar .ql-picker-label,
+.ql-toolbar .ql-picker-item {
+  cursor: pointer;
+}
+
+.ql-container {
+  border-bottom: 1px solid #e5e7eb;
+  border-left: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb;
+  border-top: none;
+  font-family: inherit;
+  position: relative;
+  z-index: 1;
+}
+
+.ql-editor {
+  cursor: text;
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
+/* Ensure Quill editor wrapper is stable */
+.quill {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.quill .ql-toolbar {
+  flex-shrink: 0;
+}
+
+.quill .ql-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sticky toolbar for Quill editor */
+.quill-editor-wrapper {
+  position: relative;
+}
+
+.quill-sticky-toolbar {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.quill-sticky-toolbar .ql-toolbar {
+  position: -webkit-sticky !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 100 !important;
+  background: #f9fafb !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  flex-shrink: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+  transition: box-shadow 0.2s ease !important;
+}
+
+/* Fixed position when scrolled past header - applied via inline style */
+.quill-sticky-toolbar .ql-toolbar[style*="position: fixed"] {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure toolbar stays visible when scrolling */
+.quill-sticky-toolbar .ql-container {
+  position: relative !important;
+  z-index: 1 !important;
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.quill-sticky-toolbar .ql-editor {
+  flex: 1 !important;
+}
+
+/* Standardize image sizes in Quill editor */
+.ql-editor img {
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+  border-radius: 8px;
+  object-fit: contain;
+  max-height: 600px;
+}
+
+/* Ensure all images have consistent frame */
+.ql-editor .ql-image {
+  display: block;
+  margin: 20px auto;
+  max-width: 100%;
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: contain;
+  max-height: 600px;
+}
+
+/* Standardize images in published articles and preview mode */
+.prose img,
+.prose-slate img,
+article img {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 20px auto !important;
+  border-radius: 8px !important;
+  object-fit: contain !important;
+  max-height: 600px !important;
+}
+
+/* Standardize images in article content */
+.artikel-content img,
+[class*="prose"] img {
+  max-width: 100% !important;
+  width: 100% !important;
+  height: auto !important;
+  display: block !important;
+  margin: 20px auto !important;
+  border-radius: 8px !important;
+  object-fit: contain !important;
+  max-height: 600px !important;
 }

@@ -28,7 +28,7 @@ const stripHtml = (value: string) => value.replace(/<[^>]*>/g, " ");
 const processHtmlContent = (html: string) => {
   const headings: MarkdownHeading[] = [];
   let index = 0;
-  const htmlWithIds = html.replace(
+  let htmlWithIds = html.replace(
     /<(h[1-4])(.*?)>([\s\S]*?)<\/\1>/gi,
     (match, tag: string, attrs: string, inner: string) => {
       const text = stripHtml(inner).trim();
@@ -50,6 +50,12 @@ const processHtmlContent = (html: string) => {
       return `<${tag}${prefix}>${inner}</${tag}>`;
     },
   );
+
+  // Standardize all images in HTML content
+  htmlWithIds = htmlWithIds.replace(/<img[^>]+src="([^"]+)"[^>]*>/gi, (match, url) => {
+    const processedUrl = imageUrl(url);
+    return `<img src="${processedUrl}" style="max-width: 100%; width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; object-fit: contain; max-height: 600px;" />`;
+  });
 
   const wordCount = stripHtml(htmlWithIds).split(/\s+/).filter(Boolean).length;
 
