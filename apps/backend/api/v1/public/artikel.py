@@ -1,4 +1,5 @@
 from typing import Optional
+import re
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
@@ -92,8 +93,17 @@ async def get_artikel_by_slug(
         if not item:
             raise HTTPException(status_code=404, detail="Artikel tidak ditemukan")
         
-        # Use content as konten_markdown (since articles are stored as markdown)
+        # Detect if content is HTML or markdown
         content = item.content or ""
+        
+        # Simple check: if content contains HTML tags (not escaped), treat as HTML
+        # Check for common HTML tags like <p>, <h1>, <div>, <img>, etc.
+        # Pattern matches: <tag>, <tag>, <tag attr="value">, etc.
+        has_html_tags = bool(re.search(r'<[a-z][a-z0-9]*[\s>]', content, re.IGNORECASE))
+        
+        # If content has HTML tags, return as HTML; otherwise as markdown
+        konten_html = content if has_html_tags else None
+        konten_markdown = content if not has_html_tags else None
         
         return ArtikelPublicOut(
             id=str(item.id),
@@ -103,8 +113,8 @@ async def get_artikel_by_slug(
             kategori=item.category or "",
             tanggal_publish=str(item.created_at) if item.created_at else "",
             gambar_cover=item.featured_image or "",
-            konten_markdown=content,  # Return full content as markdown
-            konten_html=None  # Can be generated from markdown if needed
+            konten_markdown=konten_markdown,
+            konten_html=konten_html
         )
     except HTTPException:
         raise

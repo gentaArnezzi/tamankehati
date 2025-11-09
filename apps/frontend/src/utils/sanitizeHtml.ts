@@ -82,21 +82,33 @@ export function sanitizeHtml(
  * @returns Sanitized HTML string with more formatting options
  */
 export function sanitizeHtmlRich(dirty: string | null | undefined): string {
-  return sanitizeHtml(dirty, {
-    allowedTags: [
+  if (!dirty) {
+    return '';
+  }
+
+  // Use DOMPurify with more permissive settings for rich content
+  // Ensure images are preserved with all necessary attributes
+  return DOMPurify.sanitize(dirty, {
+    ALLOWED_TAGS: [
       'p', 'br', 'strong', 'em', 'u', 's', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
       'ul', 'ol', 'li', 'blockquote', 'pre', 'code', 'a', 'img',
       'table', 'thead', 'tbody', 'tr', 'td', 'th',
       'div', 'span', 'hr', 'sub', 'sup', 'mark', 'del', 'ins'
     ],
-    allowedAttributes: {
-      'a': ['href', 'title', 'target', 'rel'],
-      'img': ['src', 'alt', 'title', 'width', 'height'],
-      '*': ['class', 'id']
-    },
-    config: {
-      ADD_ATTR: ['target'],
-    }
+    ALLOWED_ATTR: [
+      'href', 'title', 'alt', 'src', 'class', 'id',
+      'width', 'height', 'target', 'rel', 'style'
+    ],
+    ALLOW_DATA_ATTR: false,
+    // Allow all protocols for images (http, https, data, etc.)
+    ALLOWED_URI_REGEXP: /^(?:(?:(?:f|ht)tps?|mailto|tel|callto|sms|cid|xmpp|data):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
+    ADD_ATTR: ['target'],
+    // Allow inline styles for images and other elements
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    // Keep relative URLs for images
+    KEEP_CONTENT: true,
+    // Preserve image tags even if src is relative
+    SAFE_FOR_TEMPLATES: false,
   });
 }
 

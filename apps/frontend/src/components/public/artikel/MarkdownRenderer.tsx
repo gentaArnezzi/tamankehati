@@ -190,7 +190,7 @@ export function MarkdownRenderer({
   return (
     <div
       className={cn(
-        "prose prose-slate max-w-none prose-headings:text-slate-900 prose-a:text-emerald-600",
+        "prose prose-lg prose-slate max-w-none prose-headings:text-slate-900 prose-a:text-emerald-600 article-content",
         className,
       )}
     >

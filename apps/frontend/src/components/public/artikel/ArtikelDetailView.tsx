@@ -25,10 +25,44 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://tamankehati.id";
 
 const stripHtml = (value: string) => value.replace(/<[^>]*>/g, " ");
 
+// Check if HTML is escaped and unescape it if needed
+const unescapeHtml = (html: string): string => {
+  // More aggressive unescaping - handle all HTML entities
+  // Order matters: handle numeric/hex first, then named entities, &amp; last
+  let unescaped = html;
+  
+  // First pass: handle numeric and hex entities (they might contain &)
+  unescaped = unescaped.replace(/&#(\d+);/g, (match, dec) => {
+    return String.fromCharCode(parseInt(dec, 10));
+  });
+  
+  unescaped = unescaped.replace(/&#x([0-9a-fA-F]+);/gi, (match, hex) => {
+    return String.fromCharCode(parseInt(hex, 16));
+  });
+  
+  // Second pass: unescape common named entities (but not &amp; yet)
+  unescaped = unescaped
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#x2F;/gi, '/')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&#160;/g, ' ');
+  
+  // Third pass: unescape &amp; (must be last to avoid breaking other entities)
+  unescaped = unescaped.replace(/&amp;/g, '&');
+  
+  return unescaped;
+};
+
 const processHtmlContent = (html: string) => {
+  // Unescape HTML if it's escaped
+  const unescapedHtml = unescapeHtml(html);
   const headings: MarkdownHeading[] = [];
   let index = 0;
-  let htmlWithIds = html.replace(
+  const htmlWithIds = unescapedHtml.replace(
     /<(h[1-4])(.*?)>([\s\S]*?)<\/\1>/gi,
     (match, tag: string, attrs: string, inner: string) => {
       const text = stripHtml(inner).trim();
@@ -51,15 +85,53 @@ const processHtmlContent = (html: string) => {
     },
   );
 
-  // Standardize all images in HTML content
-  htmlWithIds = htmlWithIds.replace(/<img[^>]+src="([^"]+)"[^>]*>/gi, (match, url) => {
-    const processedUrl = imageUrl(url);
-    return `<img src="${processedUrl}" style="max-width: 100%; width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; object-fit: contain; max-height: 600px;" />`;
-  });
+  // Normalize image URLs in HTML (replace localhost:8000 with proper API URL)
+  // Also add responsive styling to images and wrap them in containers
+  const htmlWithNormalizedImages = htmlWithIds.replace(
+    /<img\s+([^>]*?)>/gi,
+    (match, attributes: string) => {
+      // Extract src attribute value
+      const srcMatch = attributes.match(/src=["']([^"']*?)["']/i);
+      if (srcMatch && srcMatch[1]) {
+        const originalSrc = srcMatch[1];
+        // Normalize the image URL using the imageUrl helper
+        const normalizedSrc = imageUrl(originalSrc);
+        // Replace the src attribute with normalized URL
+        let updatedAttributes = attributes.replace(
+          /src=["'][^"']*?["']/i,
+          `src="${normalizedSrc}"`
+        );
+        
+        // Remove any absolute positioning or problematic styles
+        updatedAttributes = updatedAttributes.replace(
+          /style=["'][^"']*?["']/gi,
+          ''
+        );
+        
+        // Remove position, top, left, right, bottom, z-index attributes
+        updatedAttributes = updatedAttributes.replace(
+          /(position|top|left|right|bottom|z-index|float)=["'][^"']*?["']/gi,
+          ''
+        );
+        
+        // Clean up any extra spaces
+        updatedAttributes = updatedAttributes.trim();
+        
+        // Add proper responsive styling - ensure no absolute positioning
+        updatedAttributes += ' style="max-width: 100%; width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; object-fit: contain; max-height: 600px; position: relative !important; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; z-index: auto !important; float: none !important;"';
+        
+        // Wrap image in a container div to prevent positioning issues
+        // Ensure container also has no absolute positioning
+        return `<div style="position: relative !important; width: 100%; margin: 20px 0; overflow: hidden; border-radius: 8px; top: auto !important; left: auto !important; right: auto !important; bottom: auto !important; z-index: auto !important; float: none !important;" class="article-image-container"><img ${updatedAttributes}></div>`;
+      }
+      // If no src found, return as-is
+      return match;
+    },
+  );
 
-  const wordCount = stripHtml(htmlWithIds).split(/\s+/).filter(Boolean).length;
+  const wordCount = stripHtml(htmlWithNormalizedImages).split(/\s+/).filter(Boolean).length;
 
-  return { html: htmlWithIds, headings, wordCount };
+  return { html: htmlWithNormalizedImages, headings, wordCount };
 };
 
 const formatDate = (value: string) =>
@@ -97,10 +169,24 @@ export function ArtikelDetailView({
     const processed = processHtmlContent(artikel.konten_html);
     headings = processed.headings;
     wordCount = processed.wordCount;
+    const sanitizedHtml = sanitizeHtmlRich(processed.html);
+    // Debug in development
+    if (process.env.NODE_ENV === "development") {
+      console.log("Original HTML:", artikel.konten_html.substring(0, 500));
+      console.log("Processed HTML:", processed.html.substring(0, 500));
+      console.log("Sanitized HTML:", sanitizedHtml.substring(0, 500));
+      console.log("Has images in original:", /<img/i.test(artikel.konten_html));
+      console.log("Has images in processed:", /<img/i.test(processed.html));
+      console.log("Has images in sanitized:", /<img/i.test(sanitizedHtml));
+    }
     contentNode = (
       <div
-        className="prose prose-slate max-w-none mt-6 prose-headings:text-slate-900 prose-a:text-emerald-600"
-        dangerouslySetInnerHTML={{ __html: sanitizeHtmlRich(processed.html) }}
+        className="prose prose-lg prose-slate max-w-none mt-6 prose-headings:text-slate-900 prose-a:text-emerald-600 prose-img:rounded-lg prose-img:shadow-md article-content"
+        dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
+        style={{
+          position: 'relative',
+          overflow: 'visible',
+        }}
       />
     );
   } else {
@@ -135,17 +221,20 @@ export function ArtikelDetailView({
     <article className="space-y-12">
       <JsonLd data={jsonLd} />
       <div className="overflow-hidden rounded-3xl border border-emerald-100 bg-white shadow-sm">
-        <div className="relative h-[320px] w-full md:h-[420px]">
-          <Image
-            src={heroImage}
-            alt={artikel.judul}
-            fill
-            priority
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 960px"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent" />
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
+        <div className="relative w-full min-h-[300px] max-h-[600px] md:max-h-[700px] flex items-center justify-center bg-slate-100">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <Image
+              src={heroImage}
+              alt={artikel.judul}
+              width={1200}
+              height={800}
+              priority
+              className="w-full h-auto max-h-[600px] md:max-h-[700px] object-contain"
+              sizes="(max-width: 768px) 100vw, 1200px"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 z-10">
             <div className="flex flex-wrap items-center gap-3 text-sm text-white/80">
               {kategori && (
                 <Badge className="bg-emerald-600 text-white hover:bg-emerald-500">
@@ -168,7 +257,7 @@ export function ArtikelDetailView({
         </div>
 
         <div className="grid gap-10 p-8 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] md:p-12">
-          <div>
+          <div className="relative overflow-visible">
             <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-wide text-slate-500">
               <span>Kata kunci</span>
               {tags.length === 0 && <Badge variant="outline">Konservasi</Badge>}
@@ -183,7 +272,9 @@ export function ArtikelDetailView({
               ))}
             </div>
 
-            {contentNode}
+            <div className="relative overflow-visible">
+              {contentNode}
+            </div>
           </div>
 
           <aside className="space-y-6">
