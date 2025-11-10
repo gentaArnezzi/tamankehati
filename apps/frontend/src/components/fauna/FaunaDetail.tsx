@@ -218,6 +218,10 @@ export function FaunaDetail({ open, onOpenChange, data }: FaunaDetailProps) {
                 <p>{data.nama_umum || "-"}</p>
               </div>
               <div>
+                <p className="text-sm text-muted-foreground mb-1">Kelas</p>
+                <p>{data.kelas || "-"}</p>
+              </div>
+              <div>
                 <p className="text-sm text-muted-foreground mb-1">Ordo</p>
                 <p>{data.ordo || "-"}</p>
               </div>

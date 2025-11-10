@@ -82,6 +82,7 @@ import { FaunaDetail } from "./FaunaDetail";
 const faunaSchema = z.object({
   nama_ilmiah: z.string().min(1, "Nama ilmiah wajib diisi"),
   nama_umum: z.string().optional(),
+  kelas: z.string().optional(),
   ordo: z.string().optional(),
   status_iucn: z.string().optional(),
   deskripsi: z.string().optional(),
@@ -207,6 +208,8 @@ export function FaunaPage() {
     defaultValues: {
       nama_ilmiah: "",
       nama_umum: "",
+      kelas: "",
+      ordo: "",
       status_iucn: "",
       deskripsi: "",
       is_endemic: false,
@@ -415,6 +418,7 @@ export function FaunaPage() {
     form.reset({
       nama_ilmiah: fauna?.nama_ilmiah ?? "",
       nama_umum: fauna?.nama_umum ?? "",
+      kelas: fauna?.kelas ?? "",
       ordo: fauna?.ordo ?? "",
       status_iucn: fauna?.status_iucn ?? "",
       deskripsi: fauna?.deskripsi ?? "",
@@ -609,6 +613,7 @@ export function FaunaPage() {
       const faunaData = {
         nama_ilmiah: values.nama_ilmiah,
         nama_umum: values.nama_umum,
+        kelas: values.kelas,
         ordo: values.ordo,
         status_iucn: values.status_iucn,
         deskripsi: values.deskripsi,
@@ -890,6 +895,9 @@ export function FaunaPage() {
                 Nama Umum
               </TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Kelas
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
                 Ordo
               </TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
@@ -985,6 +993,7 @@ export function FaunaPage() {
                   <TableCell className="py-4">
                     {fauna.nama_umum || "-"}
                   </TableCell>
+                  <TableCell className="py-4">{fauna.kelas || "-"}</TableCell>
                   <TableCell className="py-4">{fauna.ordo || "-"}</TableCell>
                   <TableCell className="py-4">
                     {fauna.status_iucn || "-"}
@@ -1190,6 +1199,20 @@ export function FaunaPage() {
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="kelas"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Kelas</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Contoh: Mammalia" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name="ordo"

@@ -14,10 +14,14 @@ class ParkRef(BaseModel):
 class FaunaBase(BaseModel):
     local_name: Optional[str] = Field(None, description="Nama lokal fauna")
     scientific_name: Optional[str] = Field(None, description="Nama ilmiah fauna")
+    class_: Optional[str] = Field(None, alias="class", description="Kelas/Class")
     family: Optional[str] = Field(None, description="Famili fauna")
     genus: Optional[str] = Field(None, description="Genus fauna")
     species: Optional[str] = Field(None, description="Spesies fauna")
     ordo: Optional[str] = Field(None, description="Klasifikasi ordo hewan")
+    
+    class Config:
+        populate_by_name = True
     description: Optional[str] = None
     habitat: Optional[str] = Field(None, description="Habitat fauna")
     diet: Optional[str] = Field(None, description="Makanan fauna")

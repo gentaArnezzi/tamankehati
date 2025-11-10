@@ -203,6 +203,7 @@ async def list_flora(
             "id": flora.id,
             "local_name": flora.local_name,
             "scientific_name": flora.scientific_name,
+            "class": flora.class_,
             "family": flora.family,
             "genus": flora.genus,
             "species": flora.species,
@@ -274,6 +275,7 @@ async def get_flora(flora_id: int, db: AsyncSession = Depends(get_session), user
         "id": obj.id,
         "local_name": obj.local_name,
         "scientific_name": obj.scientific_name,
+        "class": obj.class_,
         "family": obj.family,
         "genus": obj.genus,
         "species": obj.species,
@@ -348,7 +350,7 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
     
     result = await db.execute(text("""
         INSERT INTO flora (
-            park_id, local_name, scientific_name, family, genus, species, synonym,
+            park_id, local_name, scientific_name, "class", family, genus, species, synonym,
             description, habitat, morphology, benefits, uses,
             flowering_time, distribution, propagation_method, reference,
             is_endemic, iucn_status, 
@@ -356,7 +358,7 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
             submitted_by, status, created_at, updated_at
         )
         VALUES (
-            :park_id, :local_name, :scientific_name, :family, :genus, :species, :synonym,
+            :park_id, :local_name, :scientific_name, :class, :family, :genus, :species, :synonym,
             :description, :habitat, :morphology, :benefits, :uses,
             :flowering_time, :distribution, :propagation_method, :reference,
             :is_endemic, :iucn_status,
@@ -368,6 +370,7 @@ async def create_flora(payload: FloraIn, db: AsyncSession = Depends(get_session)
         "park_id": payload.park_id,
         "local_name": payload.local_name,
         "scientific_name": payload.scientific_name,
+        "class": getattr(payload, 'class_', None),
         "family": payload.family,
         "genus": payload.genus,
         "species": payload.species,
@@ -436,7 +439,7 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     backup_json = None
     if obj.status == "approved":
         backup_query = text("""
-            SELECT local_name, scientific_name, family, genus, species, synonym,
+            SELECT local_name, scientific_name, "class", family, genus, species, synonym,
                    description, habitat, morphology, benefits, uses,
                    flowering_time, distribution, propagation_method, reference,
                    is_endemic, iucn_status, park_id, 
@@ -450,27 +453,28 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
             backup_data = {
                 "local_name": backup_row[0],
                 "scientific_name": backup_row[1],
-                "family": backup_row[2],
-                "genus": backup_row[3],
-                "species": backup_row[4],
-                "synonym": backup_row[5],
-                "description": backup_row[6],
-                "habitat": backup_row[7],
-                "morphology": backup_row[8],
-                "benefits": backup_row[9],
-                "uses": backup_row[10],
-                "flowering_time": backup_row[11],
-                "distribution": backup_row[12],
-                "propagation_method": backup_row[13],
-                "reference": backup_row[14],
-                "is_endemic": backup_row[15],
-                "iucn_status": backup_row[16],
-                "park_id": backup_row[17],
-                "gambar_utama": backup_row[18],
-                "leaf_image_url": backup_row[19],
-                "stem_image_url": backup_row[20],
-                "flower_image_url": backup_row[21],
-                "fruit_image_url": backup_row[22],
+                "class": backup_row[2],
+                "family": backup_row[3],
+                "genus": backup_row[4],
+                "species": backup_row[5],
+                "synonym": backup_row[6],
+                "description": backup_row[7],
+                "habitat": backup_row[8],
+                "morphology": backup_row[9],
+                "benefits": backup_row[10],
+                "uses": backup_row[11],
+                "flowering_time": backup_row[12],
+                "distribution": backup_row[13],
+                "propagation_method": backup_row[14],
+                "reference": backup_row[15],
+                "is_endemic": backup_row[16],
+                "iucn_status": backup_row[17],
+                "park_id": backup_row[18],
+                "gambar_utama": backup_row[19],
+                "leaf_image_url": backup_row[20],
+                "stem_image_url": backup_row[21],
+                "flower_image_url": backup_row[22],
+                "fruit_image_url": backup_row[23],
                 "_backup": True  # Mark as backup
             }
             backup_json = json.dumps(backup_data)
@@ -479,6 +483,12 @@ async def update_flora(flora_id: int, payload: FloraUpdate, db: AsyncSession = D
     # Build dynamic UPDATE query
     update_fields = []
     update_values = {"flora_id": flora_id}
+    
+    # Handle class field separately since it's a Python keyword
+    class_value = getattr(payload, 'class_', None)
+    if class_value is not None:
+        update_fields.append('"class" = :class')
+        update_values["class"] = class_value
     
     for f in ("local_name","scientific_name","family","genus","species","synonym",
               "description","habitat","morphology","benefits","uses",

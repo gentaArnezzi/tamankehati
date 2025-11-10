@@ -12,6 +12,7 @@ type FloraPublicResponse = {
   id: string;
   nama_ilmiah: string;
   nama_umum: string;
+  kelas?: string;
   famili: string;
   status_iucn: string;
   deskripsi: string;
@@ -25,6 +26,7 @@ type FaunaPublicResponse = {
   id: string;
   nama_ilmiah: string;
   nama_umum: string;
+  kelas?: string;
   famili: string;
   status_iucn: string;
   deskripsi: string;
@@ -90,6 +92,8 @@ const mapFlora = (item: FloraPublicResponse) => ({
   nama_spesies: item.nama_ilmiah,
   nama_ilmiah: item.nama_ilmiah,
   nama_umum: item.nama_umum,
+  kelas: item.kelas,
+  famili: item.famili,
   status_konservasi: item.status_iucn,
   habitat: item.habitat,
   deskripsi: item.deskripsi,
@@ -103,6 +107,8 @@ const mapFauna = (item: FaunaPublicResponse) => ({
   nama_spesies: item.nama_ilmiah,
   nama_ilmiah: item.nama_ilmiah,
   nama_umum: item.nama_umum,
+  kelas: item.kelas,
+  famili: item.famili,
   status_konservasi: item.status_iucn,
   habitat: item.habitat,
   deskripsi: item.deskripsi,

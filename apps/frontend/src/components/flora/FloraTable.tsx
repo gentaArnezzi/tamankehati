@@ -177,6 +177,9 @@ export function FloraTable({
                 Nama Lokal
               </TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
+                Kelas
+              </TableHead>
+              <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
                 Famili
               </TableHead>
               <TableHead className="text-xs font-semibold text-gray-500 uppercase tracking-wider py-4">
@@ -214,6 +217,7 @@ export function FloraTable({
                   </span>
                 </TableCell>
                 <TableCell className="py-4">{flora.nama_umum || "-"}</TableCell>
+                <TableCell className="py-4">{flora.kelas || "-"}</TableCell>
                 <TableCell className="py-4">{flora.famili || "-"}</TableCell>
                 <TableCell className="py-4">{flora.genus || "-"}</TableCell>
                 <TableCell className="py-4 max-w-[200px] truncate">

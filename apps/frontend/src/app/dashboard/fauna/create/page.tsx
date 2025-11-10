@@ -81,6 +81,7 @@ export default function CreateFaunaPage() {
   const [formData, setFormData] = useState({
     nama_ilmiah: "",
     nama_umum: "",
+    kelas: "",
     ordo: "",
     deskripsi: "",
     habitat_sumber_makanan: "",
@@ -556,20 +557,38 @@ export default function CreateFaunaPage() {
                   />
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="ordo"
-                    className="text-sm font-medium text-gray-700"
-                  >
-                    Ordo
-                  </Label>
-                  <Input
-                    id="ordo"
-                    placeholder="Contoh: Primates"
-                    value={formData.ordo}
-                    onChange={(e) => handleChange("ordo", e.target.value)}
-                    className="h-11 border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="kelas"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Kelas
+                    </Label>
+                    <Input
+                      id="kelas"
+                      placeholder="Contoh: Mammalia"
+                      value={formData.kelas}
+                      onChange={(e) => handleChange("kelas", e.target.value)}
+                      className="h-11 border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="ordo"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Ordo
+                    </Label>
+                    <Input
+                      id="ordo"
+                      placeholder="Contoh: Primates"
+                      value={formData.ordo}
+                      onChange={(e) => handleChange("ordo", e.target.value)}
+                      className="h-11 border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

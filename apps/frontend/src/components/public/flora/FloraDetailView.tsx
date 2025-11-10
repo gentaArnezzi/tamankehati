@@ -100,6 +100,7 @@ const getTaxonomyEntries = (flora: FloraDetail) =>
     { label: "Nama ilmiah", value: flora.nama_ilmiah },
     { label: "Nama umum", value: flora.nama_umum },
     { label: "Sinonim", value: flora.sinonim },
+    { label: "Kelas", value: flora.kelas },
     { label: "Famili", value: flora.famili },
     { label: "Genus", value: flora.genus },
     { label: "Spesies", value: flora.spesies },

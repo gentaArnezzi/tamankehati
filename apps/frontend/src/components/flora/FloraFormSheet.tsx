@@ -56,6 +56,7 @@ export function FloraFormSheet({
   const [formData, setFormData] = useState({
     nama_ilmiah: "",
     nama_umum: "",
+    kelas: "",
     famili: "",
     genus: "",
     deskripsi: "",
@@ -71,6 +72,7 @@ export function FloraFormSheet({
       setFormData({
         nama_ilmiah: flora.nama_ilmiah || "",
         nama_umum: flora.nama_umum || "",
+        kelas: flora.kelas || "",
         famili: flora.famili || "",
         genus: flora.genus || "",
         deskripsi: flora.deskripsi || "",
@@ -85,6 +87,7 @@ export function FloraFormSheet({
       setFormData({
         nama_ilmiah: "",
         nama_umum: "",
+        kelas: "",
         famili: "",
         genus: "",
         deskripsi: "",
@@ -462,7 +465,17 @@ export function FloraFormSheet({
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="kelas">Kelas</Label>
+            <Input
+              id="kelas"
+              placeholder="Contoh: Magnoliopsida"
+              value={formData.kelas || ""}
+              onChange={(e) => handleChange("kelas", e.target.value)}
+            />
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="famili">Famili</Label>
             <Input

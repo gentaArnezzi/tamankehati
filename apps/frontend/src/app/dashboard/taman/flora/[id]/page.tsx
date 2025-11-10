@@ -145,6 +145,10 @@ export default function FloraDetailPage() {
                   <dd className="font-medium">{flora.nama_umum || "-"}</dd>
                 </div>
                 <div>
+                  <dt className="text-sm text-muted-foreground">Kelas</dt>
+                  <dd className="font-medium">{flora.kelas || "-"}</dd>
+                </div>
+                <div>
                   <dt className="text-sm text-muted-foreground">Famili</dt>
                   <dd className="font-medium">{flora.famili || "-"}</dd>
                 </div>

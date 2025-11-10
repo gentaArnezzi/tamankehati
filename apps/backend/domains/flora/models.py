@@ -20,6 +20,7 @@ class Flora(Base):
 
     local_name = Column(String)
     scientific_name = Column(String)
+    class_ = Column("class", String(100), nullable=True)  # Class/Kelas
     family = Column(String)  # Famili
     genus = Column(String)  # Genus
     species = Column(String)

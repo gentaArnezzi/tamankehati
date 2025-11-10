@@ -292,6 +292,7 @@ export function CollapsibleApprovalItem({
                           label="Nama Umum"
                           value={detail.nama_umum}
                         />
+                        <DetailField label="Kelas" value={detail.kelas} />
                         <DetailField label="Famili" value={detail.famili} />
                         <DetailField label="Genus" value={detail.genus} />
                         <DetailField
@@ -422,6 +423,8 @@ export function CollapsibleApprovalItem({
                           label="Nama Umum"
                           value={detail.nama_umum}
                         />
+                        <DetailField label="Kelas" value={detail.kelas} />
+                        <DetailField label="Famili" value={detail.family || detail.famili} />
                         <DetailField label="Ordo" value={detail.ordo} />
                         <DetailField
                           label="Status IUCN"

@@ -328,6 +328,12 @@ export function FloraDetail({ open, onOpenChange, data }: FloraDetailProps) {
                   <p className="italic text-sm">{data.sinonim}</p>
                 </div>
               )}
+              {data.kelas && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-1">Kelas</p>
+                  <p>{data.kelas}</p>
+                </div>
+              )}
               {data.famili && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Famili</p>

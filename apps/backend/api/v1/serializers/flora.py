@@ -15,9 +15,13 @@ class ParkRef(BaseModel):
 class FloraBase(BaseModel):
     local_name: Optional[str] = Field(None, description="Nama lokal flora")
     scientific_name: Optional[str] = Field(None, description="Nama ilmiah flora")
+    class_: Optional[str] = Field(None, alias="class", description="Kelas/Class")
     family: Optional[str] = Field(None, description="Famili")
     genus: Optional[str] = Field(None, description="Genus")
     species: Optional[str] = Field(None, description="Nama spesies flora")
+    
+    class Config:
+        populate_by_name = True
     synonym: Optional[str] = Field(None, description="Sinonim")
     description: Optional[str] = None
     habitat: Optional[str] = Field(None, description="Data alami habitat")

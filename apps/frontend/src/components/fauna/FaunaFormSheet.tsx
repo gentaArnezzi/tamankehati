@@ -59,6 +59,7 @@ export function FaunaFormSheet({
   const [formData, setFormData] = useState({
     nama_ilmiah: "",
     nama_umum: "",
+    kelas: "",
     ordo: "",
     deskripsi: "",
     habitat_sumber_makanan: "",
@@ -74,6 +75,7 @@ export function FaunaFormSheet({
       setFormData({
         nama_ilmiah: fauna.nama_ilmiah || "",
         nama_umum: fauna.nama_umum || "",
+        kelas: fauna.kelas || "",
         ordo: fauna.ordo || "",
         deskripsi: fauna.deskripsi || "",
         habitat_sumber_makanan: fauna.habitat_sumber_makanan || "",
@@ -87,6 +89,7 @@ export function FaunaFormSheet({
       setFormData({
         nama_ilmiah: "",
         nama_umum: "",
+        kelas: "",
         ordo: "",
         deskripsi: "",
         habitat_sumber_makanan: "",
@@ -174,14 +177,26 @@ export function FaunaFormSheet({
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="ordo">Ordo</Label>
-          <Input
-            id="ordo"
-            placeholder="Contoh: Primates"
-            value={formData.ordo}
-            onChange={(e) => handleChange("ordo", e.target.value)}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="kelas">Kelas</Label>
+            <Input
+              id="kelas"
+              placeholder="Contoh: Mammalia"
+              value={formData.kelas}
+              onChange={(e) => handleChange("kelas", e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="ordo">Ordo</Label>
+            <Input
+              id="ordo"
+              placeholder="Contoh: Primates"
+              value={formData.ordo}
+              onChange={(e) => handleChange("ordo", e.target.value)}
+            />
+          </div>
         </div>
       </FormSection>
 

@@ -77,6 +77,7 @@ export default function CreateFloraPage() {
   const [formData, setFormData] = useState({
     nama_ilmiah: "",
     nama_umum: "",
+    kelas: "",
     famili: "",
     genus: "",
     sinonim: "",
@@ -679,7 +680,23 @@ export default function CreateFloraPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="kelas"
+                      className="text-sm font-medium text-gray-700"
+                    >
+                      Kelas
+                    </Label>
+                    <Input
+                      id="kelas"
+                      placeholder="Contoh: Magnoliopsida"
+                      value={formData.kelas}
+                      onChange={(e) => handleChange("kelas", e.target.value)}
+                      className="h-11 border-gray-300 focus:border-gray-900 focus:ring-0 transition-colors"
+                    />
+                  </div>
+
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="famili"

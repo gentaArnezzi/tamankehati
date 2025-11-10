@@ -202,6 +202,7 @@ async def list_fauna(
             "id": fauna.id,
             "local_name": fauna.local_name,
             "scientific_name": fauna.scientific_name,
+            "class": fauna.class_,
             "family": fauna.family,
             "genus": fauna.genus,
             "species": fauna.species,
@@ -270,6 +271,7 @@ async def get_fauna(
         "id": obj.id,
         "local_name": obj.local_name,
         "scientific_name": obj.scientific_name,
+        "class": obj.class_,
         "family": obj.family,
         "genus": obj.genus,
         "species": obj.species,
@@ -344,15 +346,23 @@ async def create_fauna(
     status_value = payload.status.value if payload.status else 'draft'  # Get enum value
     
     result = await db.execute(text("""
-        INSERT INTO fauna (park_id, local_name, scientific_name, ordo, description, habitat_sumber_makanan, status_hama, tingkat_hama, is_endemic, iucn_status, gambar_utama, submitted_by, status, created_at, updated_at)
-        VALUES (:park_id, :local_name, :scientific_name, :ordo, :description, :habitat_sumber_makanan, :status_hama, :tingkat_hama, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, :status, now(), now())
+        INSERT INTO fauna (park_id, local_name, scientific_name, "class", family, genus, species, ordo, description, habitat, diet, behavior, morphology, habitat_sumber_makanan, status_hama, tingkat_hama, is_endemic, iucn_status, gambar_utama, submitted_by, status, created_at, updated_at)
+        VALUES (:park_id, :local_name, :scientific_name, :class, :family, :genus, :species, :ordo, :description, :habitat, :diet, :behavior, :morphology, :habitat_sumber_makanan, :status_hama, :tingkat_hama, :is_endemic, :iucn_status, :gambar_utama, :submitted_by, :status, now(), now())
         RETURNING id
     """), {
         "park_id": payload.park_id,
         "local_name": payload.local_name,
         "scientific_name": payload.scientific_name,
+        "class": getattr(payload, 'class_', None),
+        "family": payload.family,
+        "genus": payload.genus,
+        "species": payload.species,
         "ordo": payload.ordo,
         "description": payload.description,
+        "habitat": payload.habitat,
+        "diet": payload.diet,
+        "behavior": payload.behavior,
+        "morphology": payload.morphology,
         "habitat_sumber_makanan": payload.habitat_sumber_makanan,
         "status_hama": payload.status_hama,
         "tingkat_hama": payload.tingkat_hama,
@@ -416,7 +426,7 @@ async def update_fauna(
     backup_json = None
     if obj.status == "approved":
         backup_query = text("""
-            SELECT local_name, scientific_name, ordo, description, habitat_sumber_makanan,
+            SELECT local_name, scientific_name, "class", family, genus, species, ordo, description, habitat, diet, behavior, morphology, habitat_sumber_makanan,
                    status_hama, tingkat_hama, is_endemic, iucn_status, park_id, gambar_utama
             FROM fauna WHERE id = :fauna_id
         """)
@@ -427,15 +437,23 @@ async def update_fauna(
             backup_data = {
                 "local_name": backup_row[0],
                 "scientific_name": backup_row[1],
-                "ordo": backup_row[2],
-                "description": backup_row[3],
-                "habitat_sumber_makanan": backup_row[4],
-                "status_hama": backup_row[5],
-                "tingkat_hama": backup_row[6],
-                "is_endemic": backup_row[7],
-                "iucn_status": backup_row[8],
-                "park_id": backup_row[9],
-                "gambar_utama": backup_row[10],
+                "class": backup_row[2],
+                "family": backup_row[3],
+                "genus": backup_row[4],
+                "species": backup_row[5],
+                "ordo": backup_row[6],
+                "description": backup_row[7],
+                "habitat": backup_row[8],
+                "diet": backup_row[9],
+                "behavior": backup_row[10],
+                "morphology": backup_row[11],
+                "habitat_sumber_makanan": backup_row[12],
+                "status_hama": backup_row[13],
+                "tingkat_hama": backup_row[14],
+                "is_endemic": backup_row[15],
+                "iucn_status": backup_row[16],
+                "park_id": backup_row[17],
+                "gambar_utama": backup_row[18],
                 "_backup": True  # Mark as backup
             }
             backup_json = json.dumps(backup_data)
@@ -445,7 +463,13 @@ async def update_fauna(
     update_fields = []
     update_values = {"fauna_id": fauna_id}
     
-    update_field_names = ("local_name", "scientific_name", "ordo", "description", "habitat_sumber_makanan", "status_hama", "tingkat_hama", "is_endemic", "iucn_status", "park_id", "gambar_utama")
+    # Handle class field separately since it's a Python keyword
+    class_value = getattr(payload, 'class_', None)
+    if class_value is not None:
+        update_fields.append('"class" = :class')
+        update_values["class"] = class_value
+    
+    update_field_names = ("local_name", "scientific_name", "family", "genus", "species", "ordo", "description", "habitat", "diet", "behavior", "morphology", "habitat_sumber_makanan", "status_hama", "tingkat_hama", "is_endemic", "iucn_status", "park_id", "gambar_utama")
     for field in update_field_names:
         value = getattr(payload, field, None)
         if value is not None:

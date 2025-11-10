@@ -193,6 +193,7 @@ async def get_fauna_by_id(
             id=str(item.id),
             nama_ilmiah=item.scientific_name or "",
             nama_umum=item.local_name or "",
+            kelas=item.class_ or "",
             famili=item.family or "",
             genus=item.genus or "",
             spesies=item.species or "",

@@ -145,8 +145,16 @@ export default function FaunaDetailPage() {
                   <dd className="font-medium">{fauna.nama_umum || "-"}</dd>
                 </div>
                 <div>
+                  <dt className="text-sm text-muted-foreground">Kelas</dt>
+                  <dd className="font-medium">{fauna.kelas || "-"}</dd>
+                </div>
+                <div>
                   <dt className="text-sm text-muted-foreground">Famili</dt>
                   <dd className="font-medium">{fauna.family || "-"}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm text-muted-foreground">Ordo</dt>
+                  <dd className="font-medium">{fauna.ordo || "-"}</dd>
                 </div>
                 <div>
                   <dt className="text-sm text-muted-foreground">Status IUCN</dt>

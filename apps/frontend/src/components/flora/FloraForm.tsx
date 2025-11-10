@@ -38,6 +38,7 @@ import { MultipleFileUpload } from "../ui/multiple-file-upload";
 const floraSchema = z.object({
   nama_ilmiah: z.string().min(1, "Nama ilmiah wajib diisi"),
   nama_umum: z.string().optional(),
+  kelas: z.string().optional(),
   famili: z.string().optional(),
   genus: z.string().optional(),
   sinonim: z.string().optional(),
@@ -121,6 +122,7 @@ export function FloraForm({
     defaultValues: {
       nama_ilmiah: initialData?.nama_ilmiah ?? "",
       nama_umum: initialData?.nama_umum ?? "",
+      kelas: initialData?.kelas ?? "",
       famili: initialData?.famili ?? "",
       genus: initialData?.genus ?? "",
       sinonim: initialData?.sinonim ?? "",
@@ -156,6 +158,7 @@ export function FloraForm({
     const formData = {
       nama_ilmiah: initialData?.nama_ilmiah ?? "",
       nama_umum: initialData?.nama_umum ?? "",
+      kelas: initialData?.kelas ?? "",
       famili: initialData?.famili ?? "",
       genus: initialData?.genus ?? "",
       sinonim: initialData?.sinonim ?? "",
@@ -664,7 +667,21 @@ export function FloraForm({
               />
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-4 md:grid-cols-3">
+              <FormField
+                control={form.control}
+                name="kelas"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Kelas</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Contoh: Magnoliopsida" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="famili"

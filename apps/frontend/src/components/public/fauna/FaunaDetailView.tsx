@@ -49,6 +49,7 @@ const taxonomyEntries = (fauna: FaunaDetail) =>
   [
     { label: "Nama ilmiah", value: fauna.nama_ilmiah },
     { label: "Nama umum", value: fauna.nama_umum },
+    { label: "Kelas", value: fauna.kelas },
     { label: "Famili", value: fauna.famili },
     { label: "Genus", value: fauna.genus },
     { label: "Spesies", value: fauna.spesies },

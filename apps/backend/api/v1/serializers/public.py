@@ -34,6 +34,7 @@ class FloraPublicOut(FloraPublicBase):
     id: str
     nama_ilmiah: str
     nama_umum: str
+    kelas: Optional[str] = None  # Class/Kelas
     famili: str
     genus: Optional[str] = None
     spesies: Optional[str] = None
@@ -81,6 +82,7 @@ class FaunaPublicOut(FaunaPublicBase):
     id: str
     nama_ilmiah: str
     nama_umum: str
+    kelas: Optional[str] = None  # Class/Kelas
     famili: str
     genus: Optional[str] = None
     spesies: Optional[str] = None

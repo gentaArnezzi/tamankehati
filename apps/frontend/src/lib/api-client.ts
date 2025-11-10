@@ -106,6 +106,7 @@ type FloraAdminResponse = {
   id: number;
   scientific_name?: string | null;
   local_name?: string | null;
+  class?: string | null; // Backend uses "class" as field name
   family?: string | null;
   genus?: string | null;
   synonym?: string | null;
@@ -145,6 +146,7 @@ type FaunaAdminResponse = {
   id: number;
   scientific_name?: string | null;
   local_name?: string | null;
+  class?: string | null; // Backend uses "class" as field name
   family?: string | null;
   genus?: string | null;
   species?: string | null;
@@ -359,6 +361,7 @@ export interface Flora {
   id: string;
   nama_ilmiah: string; // Frontend Indonesian, maps to scientific_name in backend
   nama_umum?: string; // Frontend Indonesian, maps to local_name in backend
+  kelas?: string; // Frontend Indonesian, maps to class in backend
   famili?: string; // Frontend Indonesian, maps to family in backend
   genus?: string;
   sinonim?: string; // Frontend Indonesian, maps to synonym in backend
@@ -400,6 +403,7 @@ export interface Fauna {
   id: string;
   nama_ilmiah: string; // Frontend Indonesian, maps to scientific_name in backend
   nama_umum?: string; // Frontend Indonesian, maps to local_name in backend
+  kelas?: string; // Frontend Indonesian, maps to class in backend
   family?: string; // Frontend Indonesian, maps to family in backend
   genus?: string; // Frontend Indonesian, maps to genus in backend
   species?: string; // Frontend Indonesian, maps to species in backend
@@ -620,6 +624,7 @@ const mapFlora = (flora: FloraAdminResponse): Flora => ({
   id: String(flora.id),
   nama_ilmiah: flora.scientific_name ?? "Tidak diketahui",
   nama_umum: flora.local_name ?? undefined,
+  kelas: flora.class ?? undefined,
   famili: flora.family ?? undefined,
   genus: flora.genus ?? undefined,
   sinonim: flora.synonym ?? undefined,
@@ -660,6 +665,7 @@ const mapFauna = (fauna: FaunaAdminResponse): Fauna => ({
   id: String(fauna.id),
   nama_ilmiah: fauna.scientific_name ?? "Tidak diketahui",
   nama_umum: fauna.local_name ?? undefined,
+  kelas: fauna.class ?? undefined,
   family: fauna.family ?? undefined,
   genus: fauna.genus ?? undefined,
   species: fauna.species ?? undefined,
@@ -917,6 +923,7 @@ export const floraApi = {
         park_id: payload.park_id || 1, // Default to park 1 if not specified
         scientific_name: payload.nama_ilmiah,
         local_name: payload.nama_umum,
+        class: payload.kelas,
         family: payload.famili,
         genus: payload.genus,
         synonym: payload.sinonim,
@@ -948,6 +955,7 @@ export const floraApi = {
         park_id: payload.park_id,
         scientific_name: payload.nama_ilmiah,
         local_name: payload.nama_umum,
+        class: payload.kelas,
         family: payload.famili,
         genus: payload.genus,
         synonym: payload.sinonim,
@@ -1037,8 +1045,16 @@ export const faunaApi = {
       park_id: payload.park_id || 1, // Default to park 1 if not specified
       scientific_name: payload.nama_ilmiah,
       local_name: payload.nama_umum,
+      class: payload.kelas,
+      family: payload.family,
+      genus: payload.genus,
+      species: payload.species,
       ordo: payload.ordo,
       description: payload.deskripsi,
+      habitat: payload.habitat,
+      diet: payload.diet,
+      behavior: payload.behavior,
+      morphology: payload.morphology,
       habitat_sumber_makanan: payload.habitat_sumber_makanan,
       status_hama: payload.status_hama,
       tingkat_hama: payload.tingkat_hama,
@@ -1063,8 +1079,16 @@ export const faunaApi = {
         park_id: payload.park_id,
         scientific_name: payload.nama_ilmiah,
         local_name: payload.nama_umum,
+        class: payload.kelas,
+        family: payload.family,
+        genus: payload.genus,
+        species: payload.species,
         ordo: payload.ordo,
         description: payload.deskripsi,
+        habitat: payload.habitat,
+        diet: payload.diet,
+        behavior: payload.behavior,
+        morphology: payload.morphology,
         habitat_sumber_makanan: payload.habitat_sumber_makanan,
         status_hama: payload.status_hama,
         tingkat_hama: payload.tingkat_hama,
