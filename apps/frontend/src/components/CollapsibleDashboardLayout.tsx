@@ -326,16 +326,20 @@ export function CollapsibleDashboardLayout({
       !loadingNewUser &&
       isNewUser === true && // Explicit check for true
       user?.role === "regional_admin" &&
-      !onboardingStartedRef.current
+      !onboardingStartedRef.current &&
+      !runOnboarding // Prevent triggering if already running
     ) {
       // Delay to let user see the dashboard first before tour starts
       const timer = setTimeout(() => {
-        setRunOnboarding(true);
-        onboardingStartedRef.current = true; // Mark as started
+        // Double-check before setting to prevent race conditions
+        if (!onboardingStartedRef.current && !runOnboarding) {
+          setRunOnboarding(true);
+          onboardingStartedRef.current = true; // Mark as started
+        }
       }, TOUR_DELAY_MS);
       return () => clearTimeout(timer);
     }
-  }, [isNewUser, loadingNewUser, user]);
+  }, [isNewUser, loadingNewUser, user, runOnboarding]);
 
   // Manual trigger tour function (can be called from button)
   const handleStartTour = () => {
@@ -353,9 +357,11 @@ export function CollapsibleDashboardLayout({
   };
 
   const handleOnboardingFinish = () => {
-    setRunOnboarding(false);
-    onboardingStartedRef.current = false; // Reset for potential manual re-runs
+    // Mark tour as completed FIRST to prevent re-trigger
     markTourAsCompleted();
+    // Then cleanup state
+    setRunOnboarding(false);
+    onboardingStartedRef.current = true; // Keep as true to prevent auto-trigger again
   };
 
   return (

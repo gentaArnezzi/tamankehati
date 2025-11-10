@@ -60,6 +60,7 @@ export function InteractiveOnboardingTour({
   const isInitializedRef = useRef(false);
   const currentStepRef = useRef(0);
   const isNavigatingRef = useRef(false); // Track if we're in the middle of programmatic navigation
+  const onFinishCalledRef = useRef(false); // Prevent multiple calls to onFinish
 
   // Save current step to localStorage
   const saveCurrentStep = (step: number) => {
@@ -88,8 +89,12 @@ export function InteractiveOnboardingTour({
         isInitializedRef.current = false;
       }
       localStorage.removeItem(ONBOARDING_CURRENT_STEP_KEY);
+      onFinishCalledRef.current = false; // Reset flag when tour stops
       return;
     }
+
+    // Reset flag when tour starts
+    onFinishCalledRef.current = false;
 
     // Check if we have a saved step, which means tour was in progress
     const savedStep = getSavedStep();
@@ -444,6 +449,12 @@ export function InteractiveOnboardingTour({
           },
         ],
         onDestroyed: () => {
+          // Prevent multiple calls to onFinish
+          if (onFinishCalledRef.current) {
+            return;
+          }
+          onFinishCalledRef.current = true;
+          
           try {
             if (driverRef.current && typeof driverRef.current.destroy === 'function') {
               driverRef.current.destroy();
@@ -461,6 +472,12 @@ export function InteractiveOnboardingTour({
             "Apakah Anda yakin ingin menutup tutorial? Anda dapat menjalankan ulang tutorial dari menu Panduan.",
           );
           if (confirmed && driverRef.current) {
+            // Prevent multiple calls to onFinish
+            if (onFinishCalledRef.current) {
+              return;
+            }
+            onFinishCalledRef.current = true;
+            
             try {
               if (typeof driverRef.current.destroy === 'function') {
                 driverRef.current.destroy();

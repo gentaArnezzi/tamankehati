@@ -194,7 +194,12 @@ export function AddUserForm({
                           <SelectValue placeholder="Pilih role" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent
+                        className="!z-[110]"
+                        position="popper"
+                        sideOffset={4}
+                        style={{ zIndex: 110 }}
+                      >
                         <SelectItem value="regional_admin">
                           Regional Admin
                         </SelectItem>
