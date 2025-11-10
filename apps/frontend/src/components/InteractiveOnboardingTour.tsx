@@ -118,6 +118,19 @@ export function InteractiveOnboardingTour({
           if (state.activeIndex !== undefined) {
             saveCurrentStep(state.activeIndex);
           }
+          
+          // Remove any arrow characters from button text
+          setTimeout(() => {
+            const nextButton = document.querySelector('.interactive-onboarding-tour .driver-popover-next-btn, .interactive-onboarding-tour .driver-popover-btn-next');
+            if (nextButton) {
+              const text = nextButton.textContent || '';
+              // Remove common arrow characters: →, →, →, →, →
+              const cleanText = text.replace(/[→→→→→]/g, '').trim();
+              if (cleanText !== text) {
+                nextButton.textContent = cleanText;
+              }
+            }
+          }, 0);
         },
 
         onHighlighted: (element, step, options) => {
@@ -494,9 +507,9 @@ export function InteractiveOnboardingTour({
         // Custom styling
         popoverClass: "interactive-onboarding-tour",
         progressText: "Langkah {{current}} dari {{total}}",
-        nextBtnText: "Selanjutnya →",
-        prevBtnText: "← Kembali",
-        doneBtnText: "Selesai ✓",
+        nextBtnText: "Selanjutnya",
+        prevBtnText: "Kembali",
+        doneBtnText: "Selesai",
       });
 
       // Store driver instance in ref

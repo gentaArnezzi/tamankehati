@@ -144,6 +144,88 @@
   transition: all 0.2s ease;
   letter-spacing: 0;
   position: relative;
+  /* Remove any text shadow or duplicate text effects */
+  text-shadow: none !important;
+  -webkit-text-stroke: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: always;
+}
+
+/* Prevent duplicate text in all buttons */
+.interactive-onboarding-tour .driver-popover-btn::after,
+.interactive-onboarding-tour .driver-popover-btn::before,
+.interactive-onboarding-tour .driver-popover-next-btn::after,
+.interactive-onboarding-tour .driver-popover-next-btn::before,
+.interactive-onboarding-tour .driver-popover-prev-btn::after,
+.interactive-onboarding-tour .driver-popover-prev-btn::before,
+.interactive-onboarding-tour .driver-popover-btn-next::after,
+.interactive-onboarding-tour .driver-popover-btn-next::before,
+.interactive-onboarding-tour .driver-popover-btn-prev::after,
+.interactive-onboarding-tour .driver-popover-btn-prev::before {
+  content: none !important;
+  display: none !important;
+}
+
+/* Ensure button text is only displayed once - hide any duplicate spans or text nodes */
+.interactive-onboarding-tour .driver-popover-next-btn > *:not(:first-child),
+.interactive-onboarding-tour .driver-popover-btn-next > *:not(:first-child) {
+  display: none !important;
+}
+
+/* Ensure button only shows text content once */
+.interactive-onboarding-tour .driver-popover-next-btn,
+.interactive-onboarding-tour .driver-popover-btn-next {
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Hide any arrow icons or additional elements inside next button */
+.interactive-onboarding-tour .driver-popover-next-btn svg,
+.interactive-onboarding-tour .driver-popover-btn-next svg,
+.interactive-onboarding-tour .driver-popover-next-btn i,
+.interactive-onboarding-tour .driver-popover-btn-next i,
+.interactive-onboarding-tour .driver-popover-next-btn .arrow,
+.interactive-onboarding-tour .driver-popover-btn-next .arrow,
+.interactive-onboarding-tour .driver-popover-next-btn [class*="arrow"],
+.interactive-onboarding-tour .driver-popover-btn-next [class*="arrow"],
+.interactive-onboarding-tour .driver-popover-next-btn [class*="icon"],
+.interactive-onboarding-tour .driver-popover-btn-next [class*="icon"] {
+  display: none !important;
+}
+
+/* Hide any text nodes or spans that contain arrows or special characters */
+.interactive-onboarding-tour .driver-popover-next-btn span:not(:first-child),
+.interactive-onboarding-tour .driver-popover-btn-next span:not(:first-child) {
+  display: none !important;
+}
+
+/* Hide any unicode arrows or special characters that might be added by driver.js */
+.interactive-onboarding-tour .driver-popover-next-btn::after {
+  content: "" !important;
+  display: none !important;
+}
+
+/* Ensure button text is clean - remove any trailing arrows or special characters */
+.interactive-onboarding-tour .driver-popover-next-btn {
+  font-variant-numeric: normal;
+  text-rendering: optimizeLegibility;
+  /* Hide any unicode arrows (→, →, →) that might be in the text */
+  text-indent: 0;
+}
+
+/* Use CSS to hide unicode arrow characters if they exist in the text */
+.interactive-onboarding-tour .driver-popover-next-btn::before {
+  content: "" !important;
+  display: none !important;
+}
+
+/* Force button to only show the text content, no additional elements */
+/* But keep the text content visible - only hide icons/arrows */
+.interactive-onboarding-tour .driver-popover-next-btn {
+  display: inline-block !important;
 }
 
 /* Primary Button - Simple Black */
@@ -152,6 +234,16 @@
   background: #000000;
   color: #ffffff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  /* Remove any text shadow or duplicate text effects */
+  text-shadow: none !important;
+  -webkit-text-stroke: none !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smooth: always;
+  /* Ensure no duplicate rendering */
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .interactive-onboarding-tour .driver-popover-next-btn:hover,
