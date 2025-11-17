@@ -4,7 +4,24 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Leaf, MapPin, TreePine } from "lucide-react";
 
-export function FloraHero() {
+type FloraHeroStats = {
+  totalSpecies?: number;
+  totalFamilies?: number;
+  totalProvinces?: number;
+};
+
+type FloraHeroProps = {
+  stats?: FloraHeroStats;
+};
+
+const formatStat = (value?: number) => {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "0";
+  }
+  return new Intl.NumberFormat("id-ID").format(value);
+};
+
+export function FloraHero({ stats }: FloraHeroProps = {}) {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -72,8 +89,9 @@ export function FloraHero() {
             {/* Stats */}
             <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  500+
+                <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
+                  <TreePine className="w-6 h-6" />
+                  {formatStat(stats?.totalSpecies)}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
                   Spesies Terdata
@@ -81,8 +99,9 @@ export function FloraHero() {
               </div>
 
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  25+
+                <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
+                  <Leaf className="w-6 h-6" />
+                  {formatStat(stats?.totalFamilies)}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
                   Famili Tanaman
@@ -90,11 +109,12 @@ export function FloraHero() {
               </div>
 
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  <MapPin className="w-8 h-8 mx-auto" />
+                <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
+                  <MapPin className="w-6 h-6" />
+                  {formatStat(stats?.totalProvinces)}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Seluruh Nusantara
+                  Provinsi Persebaran
                 </div>
               </div>
             </div>

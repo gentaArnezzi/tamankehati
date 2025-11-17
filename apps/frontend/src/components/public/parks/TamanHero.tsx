@@ -1,16 +1,34 @@
 "use client";
 
-import { MapPin } from "lucide-react";
+import { MapPin, Trees, Leaf } from "lucide-react";
 import Image from "next/image";
 
-export function TamanHero() {
+type TamanHeroStats = {
+  totalTaman?: number;
+  totalProvinsi?: number;
+  totalFlora?: number;
+  totalFauna?: number;
+};
+
+type TamanHeroProps = {
+  stats?: TamanHeroStats;
+};
+
+const formatStat = (value?: number) => {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "0";
+  }
+  return new Intl.NumberFormat("id-ID").format(value);
+};
+
+export function TamanHero({ stats }: TamanHeroProps = {}) {
   return (
     <section className="relative h-[80vh] min-h-[600px] overflow-hidden">
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src="/tamankehati_images/task_01k8anse77f03bb23rej2dm5xz_1761295090_img_0.webp"
-          alt="Taman Kehati Indonesia"
+          src="/tamankehati_images/taman.webp"
+          alt="Panorama Taman Kehati Indonesia"
           fill
           className="object-cover"
           priority
@@ -44,7 +62,7 @@ export function TamanHero() {
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-light text-white mb-8 leading-tight animate-slide-up">
               <span className="block">Taman</span>
               <span className="block font-normal text-amber-50">
-                Konservasi
+                Kehati
               </span>
             </h1>
 
@@ -56,23 +74,32 @@ export function TamanHero() {
 
             <div className="flex flex-wrap justify-center gap-8 text-amber-100 animate-fade-in delay-500">
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">8+</div>
+                <div className="text-lg font-medium text-white mb-1 flex items-center justify-center gap-2">
+                  <Trees className="w-5 h-5" />
+                  {formatStat(stats?.totalTaman)}
+                </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
                   Taman Terdata
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">5+</div>
+                <div className="text-lg font-medium text-white mb-1 flex items-center justify-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  {formatStat(stats?.totalProvinsi)}
+                </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
                   Provinsi
                 </div>
               </div>
               <div className="text-center">
-                <div className="text-lg font-medium text-white mb-1">
-                  Konservasi
+                <div className="text-lg font-medium text-white mb-1 flex items-center justify-center gap-2">
+                  <Leaf className="w-5 h-5" />
+                  {formatStat(
+                    (stats?.totalFlora ?? 0) + (stats?.totalFauna ?? 0),
+                  )}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Alam
+                  Konservasi Alam
                 </div>
               </div>
             </div>

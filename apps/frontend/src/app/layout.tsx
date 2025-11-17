@@ -6,13 +6,36 @@ import "../styles/product-tour.css";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Taman Kehati",
-  description: "Taman Kehati - Sistem Manajemen Taman Keanekaragaman Hayati",
+  title: {
+    default: "Taman Kehati - Keanekaragaman Hayati Indonesia",
+    template: "%s | Taman Kehati",
+  },
+  description: "Taman Kehati - Portal keanekaragaman hayati Indonesia. Jelajahi taman keanekaragaman hayati, data flora, fauna, dan informasi konservasi terpadu di seluruh Nusantara.",
+  keywords: [
+    "taman kehati",
+    "taman keanekaragaman hayati",
+    "konservasi keanekaragaman hayati indonesia",
+    "flora fauna indonesia",
+    "konservasi alam",
+    "keanekaragaman hayati",
+  ],
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || "https://tamankehati-8x6q.vercel.app"),
   icons: {
     icon: "/logo/logo_klh.ico",
     shortcut: "/logo/logo_klh.ico",
     apple: "/logo/logo_klh.png",
+  },
+  openGraph: {
+    type: "website",
+    locale: "id_ID",
+    siteName: "Taman Kehati",
+    title: "Taman Kehati - Keanekaragaman Hayati Indonesia",
+    description: "Portal keanekaragaman hayati Indonesia. Jelajahi taman keanekaragaman hayati, data flora, fauna, dan informasi konservasi terpadu.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Taman Kehati - Keanekaragaman Hayati Indonesia",
+    description: "Portal keanekaragaman hayati Indonesia. Jelajahi taman keanekaragaman hayati, data flora, fauna, dan informasi konservasi terpadu.",
   },
 };
 

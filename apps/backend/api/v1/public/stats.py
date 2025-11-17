@@ -88,6 +88,30 @@ async def get_stats(
         print(f"   Approved/Published & not deleted: {total_taman}")
         print(f"   Status breakdown: {dict(taman_status_counts)}")
 
+        # Get unique provinces from approved parks
+        provinsi_query = text("""
+            SELECT COUNT(DISTINCT provinsi)
+            FROM parks
+            WHERE status IN ('approved', 'published')
+            AND deleted_at IS NULL
+            AND provinsi IS NOT NULL
+            AND provinsi <> ''
+        """)
+        provinsi_result = await db.execute(provinsi_query)
+        total_provinsi = provinsi_result.scalar() or 0
+
+        # Get unique flora families (approved & not deleted)
+        flora_family_query = text("""
+            SELECT COUNT(DISTINCT family)
+            FROM flora
+            WHERE status = 'approved'
+            AND deleted_at IS NULL
+            AND family IS NOT NULL
+            AND family <> ''
+        """)
+        flora_family_result = await db.execute(flora_family_query)
+        total_famili_flora = flora_family_result.scalar() or 0
+        
         # Get artikel count (approved only, exclude deleted if column exists)
         # Check if deleted_at column exists for articles
         try:
@@ -113,7 +137,9 @@ async def get_stats(
             total_flora=total_flora,
             total_fauna=total_fauna,
             total_taman=total_taman,
-            total_artikel=total_artikel
+            total_artikel=total_artikel,
+            total_provinsi=total_provinsi,
+            total_famili_flora=total_famili_flora
         )
     except Exception as e:
         import traceback
@@ -124,7 +150,9 @@ async def get_stats(
             total_flora=0,
             total_fauna=0,
             total_taman=0,
-            total_artikel=0
+            total_artikel=0,
+            total_provinsi=0,
+            total_famili_flora=0
         )
 
 

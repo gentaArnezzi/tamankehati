@@ -164,7 +164,7 @@ export function MinimalMapSection(props: MinimalMapSectionProps) {
             transition={{ duration: 0.6 }}
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-slate-900 mb-4 sm:mb-6">
-              Jelajahi Taman Konservasi
+              Jelajahi Taman Kehati
             </h2>
             <div className="w-16 sm:w-24 h-1 bg-emerald-500 rounded-full mb-4 sm:mb-6"></div>
             <p className="text-gray-600 mb-6 sm:mb-8" style={{ fontSize: 'clamp(1rem, 1.5vw, 1.5rem)' }}>

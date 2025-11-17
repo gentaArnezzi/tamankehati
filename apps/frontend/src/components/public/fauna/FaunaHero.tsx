@@ -2,9 +2,23 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Bird, MapPin, PawPrint } from "lucide-react";
+import { Bird, PawPrint } from "lucide-react";
 
-export function FaunaHero() {
+type FaunaHeroProps = {
+  stats?: {
+    totalSpecies?: number;
+    totalParks?: number;
+  };
+};
+
+const formatStat = (value?: number) => {
+  if (typeof value !== "number" || Number.isNaN(value)) {
+    return "0";
+  }
+  return new Intl.NumberFormat("id-ID").format(value);
+};
+
+export function FaunaHero({ stats }: FaunaHeroProps = {}) {
   const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
@@ -23,8 +37,8 @@ export function FaunaHero() {
         }}
       >
         <Image
-          src="/tamankehati_images/task_01k8anqy76ef2rnp472k1c202d_1761294984_img_0.webp"
-          alt="Hutan Indonesia dengan keanekaragaman fauna"
+          src="/tamankehati_images/cendrawasih.jpg"
+          alt="Burung cendrawasih di hutan hujan Papua"
           fill
           className="object-cover"
           priority
@@ -72,8 +86,9 @@ export function FaunaHero() {
             {/* Stats */}
             <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  300+
+                <div className="text-3xl md:text-4xl font-light text-white mb-1 flex items-center justify-center gap-2">
+                  <PawPrint className="w-7 h-7" />
+                  {formatStat(stats?.totalSpecies)}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
                   Spesies Terdata
@@ -81,20 +96,20 @@ export function FaunaHero() {
               </div>
 
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  50+
+                <div className="text-3xl md:text-4xl font-light text-white mb-1">
+                  {formatStat(stats?.totalParks)}
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Famili Hewan
+                  Taman Kontributor
                 </div>
               </div>
 
               <div className="text-center">
-                <div className="text-3xl md:text-4xl font-light text-white mb-2">
-                  <MapPin className="w-8 h-8 mx-auto" />
+                <div className="text-lg md:text-xl font-medium text-white mb-1 tracking-widest">
+                  CR · EN · VU · LC
                 </div>
                 <div className="text-sm text-amber-100 uppercase tracking-wide">
-                  Seluruh Nusantara
+                  Status IUCN yang dipantau
                 </div>
               </div>
             </div>

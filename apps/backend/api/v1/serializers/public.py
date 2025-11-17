@@ -243,3 +243,5 @@ class StatsResponse(BaseModel):
     total_fauna: int
     total_taman: int
     total_artikel: int
+    total_provinsi: int
+    total_famili_flora: int

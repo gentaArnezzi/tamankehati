@@ -9,8 +9,8 @@ export function ArtikelHero() {
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src="/tamankehati_images/task_01k8anse77f03bb23rej2dm5xz_1761295090_img_0.webp"
-          alt="Artikel Keanekaragaman Hayati Indonesia"
+          src="/tamankehati_images/artikel.webp"
+          alt="Ilustrasi artikel edukasi keanekaragaman hayati"
           fill
           className="object-cover"
           priority

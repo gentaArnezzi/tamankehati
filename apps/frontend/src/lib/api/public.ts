@@ -210,6 +210,8 @@ export const getPublicStats = cache(async (): Promise<PublicStats> => {
         total_fauna: 0,
         total_taman: 0,
         total_artikel: 0,
+        total_provinsi: 0,
+        total_famili_flora: 0,
       };
     }
     // For other errors, also return fallback
@@ -218,6 +220,8 @@ export const getPublicStats = cache(async (): Promise<PublicStats> => {
       total_fauna: 0,
       total_taman: 0,
       total_artikel: 0,
+      total_provinsi: 0,
+      total_famili_flora: 0,
     };
   }
 });
