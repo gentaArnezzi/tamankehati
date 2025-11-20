@@ -31,7 +31,7 @@ export function FloraHero({ stats }: FloraHeroProps = {}) {
   }, []);
 
   return (
-    <section className="relative h-[80vh] min-h-[600px] overflow-hidden">
+    <section className="relative h-[80vh] min-h-[600px] overflow-hidden pb-20">
       {/* Parallax Background */}
       <div
         className="absolute inset-0 w-full h-[120%]"
@@ -87,33 +87,33 @@ export function FloraHero({ stats }: FloraHeroProps = {}) {
             </p>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8 animate-fade-in delay-700">
-              <div className="text-center">
+            <div className="flex flex-wrap justify-center gap-6 md:gap-8 animate-fade-in delay-700">
+              <div className="text-center min-w-[140px] flex-shrink-0">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
-                  <TreePine className="w-6 h-6" />
+                  <TreePine className="w-6 h-6 flex-shrink-0" />
                   {formatStat(stats?.totalSpecies)}
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                <div className="text-sm text-amber-100 uppercase tracking-wide whitespace-nowrap">
                   Spesies Terdata
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center min-w-[140px] flex-shrink-0">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
-                  <Leaf className="w-6 h-6" />
+                  <Leaf className="w-6 h-6 flex-shrink-0" />
                   {formatStat(stats?.totalFamilies)}
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                <div className="text-sm text-amber-100 uppercase tracking-wide whitespace-nowrap">
                   Famili Tanaman
                 </div>
               </div>
 
-              <div className="text-center">
+              <div className="text-center min-w-[140px] flex-shrink-0">
                 <div className="text-3xl md:text-4xl font-light text-white mb-2 flex items-center justify-center gap-2">
-                  <MapPin className="w-6 h-6" />
+                  <MapPin className="w-6 h-6 flex-shrink-0" />
                   {formatStat(stats?.totalProvinces)}
                 </div>
-                <div className="text-sm text-amber-100 uppercase tracking-wide">
+                <div className="text-sm text-amber-100 uppercase tracking-wide whitespace-nowrap">
                   Provinsi Persebaran
                 </div>
               </div>
@@ -123,9 +123,9 @@ export function FloraHero({ stats }: FloraHeroProps = {}) {
       </div>
 
       {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-amber-100">
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-amber-100 z-20">
         <div className="flex flex-col items-center gap-2">
-          <span className="text-xs uppercase tracking-widest">Scroll</span>
+          <span className="text-xs uppercase tracking-widest whitespace-nowrap">Scroll</span>
           <div className="w-6 h-10 border border-amber-200/30 rounded-full flex justify-center">
             <div className="w-1 h-3 bg-amber-200/60 rounded-full mt-2 animate-bounce"></div>
           </div>

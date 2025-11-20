@@ -333,48 +333,106 @@ export const getGalleryHighlights = cache(
 // Main Taman functions
 // Optimize cache key with params for better cache hits
 export const getTamanList = cache(async (params: SearchParams = {}) => {
-  // Map frontend parameters to backend parameters
-  const backendParams: SearchParams = {};
+  try {
+    // Map frontend parameters to backend parameters
+    const backendParams: SearchParams = {};
 
-  if (params.search) backendParams.search = params.search;
-  if (params.region) backendParams.wilayah = params.region; // Map region to wilayah
-  if (params.status) backendParams.status = params.status;
-  if (params.limit) backendParams.limit = params.limit;
-  if (params.offset) backendParams.offset = params.offset;
+    if (params.search) backendParams.search = params.search;
+    if (params.region) backendParams.wilayah = params.region; // Map region to wilayah
+    if (params.status) backendParams.status = params.status;
+    if (params.limit) backendParams.limit = params.limit;
+    if (params.offset) backendParams.offset = params.offset;
 
-  const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
-  if (process.env.NODE_ENV === "development") {
-    console.log("[SSR] Fetching taman data from:", url);
+    const url = `${API_BASE_URL}/api/public/parks${buildQuery(backendParams)}`;
+    if (process.env.NODE_ENV === "development") {
+      console.log("[SSR] Fetching taman data from:", url);
+    }
+
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      next: {
+        revalidate: 300, // Cache for 5 minutes - much faster than 0
+      },
+    });
+
+    if (!response.ok) {
+      // Handle backend errors gracefully
+      const status = response.status;
+      
+      if (
+        status === 500 ||
+        status === 502 ||
+        status === 503 ||
+        status === 504
+      ) {
+        if (process.env.NODE_ENV === "development") {
+          console.warn(
+            `[SSR] Backend unavailable for parks (${status}), returning empty list`,
+          );
+        }
+        // Return empty paginated response
+        return TamanPaginatedSchema.parse({
+          items: [],
+          total: 0,
+          limit: params?.limit || 20,
+          offset: params?.offset || 0,
+          has_next: false,
+          has_prev: false,
+        });
+      }
+      
+      console.error(
+        `[SSR] Failed to fetch parks: ${status} ${response.statusText}`,
+      );
+      throw new Error(
+        `Gagal memuat data dari /api/public/parks (${status})`,
+      );
+    }
+
+    const data = await response.json();
+    if (process.env.NODE_ENV === "development") {
+      console.log(
+        "[SSR] Parks data received:",
+        JSON.stringify(data).substring(0, 200),
+      );
+    }
+
+    // The backend now returns a proper paginated response with TamanPaginatedSchema format
+    return TamanPaginatedSchema.parse(data);
+  } catch (error: any) {
+    // Handle network errors and other exceptions gracefully
+    if (
+      error?.message?.includes("500") ||
+      error?.message?.includes("502") ||
+      error?.message?.includes("503") ||
+      error?.message?.includes("504") ||
+      error?.message?.includes("Backend service") ||
+      error?.message?.includes("unavailable") ||
+      error?.message?.includes("nodename nor servname") ||
+      error?.message?.includes("ENOTFOUND") ||
+      error?.message?.includes("ECONNREFUSED") ||
+      error?.message?.includes("fetch failed")
+    ) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn(
+          "[SSR] Backend unavailable for parks list, returning empty list:",
+          error?.message || error,
+        );
+      }
+      // Return empty paginated response
+      return TamanPaginatedSchema.parse({
+        items: [],
+        total: 0,
+        limit: params?.limit || 20,
+        offset: params?.offset || 0,
+        has_next: false,
+        has_prev: false,
+      });
+    }
+    throw error;
   }
-
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-    },
-    next: {
-      revalidate: 300, // Cache for 5 minutes - much faster than 0
-    },
-  });
-
-  if (!response.ok) {
-    console.error(
-      `[SSR] Failed to fetch parks: ${response.status} ${response.statusText}`,
-    );
-    throw new Error(
-      `Gagal memuat data dari /api/public/parks (${response.status})`,
-    );
-  }
-
-  const data = await response.json();
-  if (process.env.NODE_ENV === "development") {
-    console.log(
-      "[SSR] Parks data received:",
-      JSON.stringify(data).substring(0, 200),
-    );
-  }
-
-  // The backend now returns a proper paginated response with TamanPaginatedSchema format
-  return TamanPaginatedSchema.parse(data);
 });
 
 // Alias for consistency
@@ -412,16 +470,22 @@ export const getFloraList = cache(async (params: SearchParams = {}) => {
     const fetcher = createFetcher(FloraPaginatedSchema, { revalidate: 300 }); // Cache for 5 minutes
     return await fetcher("/api/public/flora/", params);
   } catch (error: any) {
-    // Handle 502/503/504 errors gracefully - return empty list instead of crashing
+    // Handle backend errors gracefully - return empty list instead of crashing
     if (
+      error?.message?.includes("500") ||
       error?.message?.includes("502") ||
       error?.message?.includes("503") ||
       error?.message?.includes("504") ||
-      error?.message?.includes("unavailable")
+      error?.message?.includes("Backend service") ||
+      error?.message?.includes("unavailable") ||
+      error?.message?.includes("nodename nor servname") ||
+      error?.message?.includes("ENOTFOUND") ||
+      error?.message?.includes("ECONNREFUSED")
     ) {
       if (process.env.NODE_ENV === "development") {
         console.warn(
-          "[SSR] Backend unavailable for flora list, returning empty list",
+          "[SSR] Backend unavailable for flora list, returning empty list:",
+          error?.message || error,
         );
       }
       // Return empty paginated response
@@ -443,16 +507,22 @@ export const getFloraDetail = cache(async (id: string) => {
     const fetcher = createFetcher(FloraDetailSchema, { revalidate: 300 }); // Cache for 5 minutes
     return await fetcher(`/api/public/flora/${id}`);
   } catch (error: any) {
-    // Handle 502/503/504 errors gracefully
+    // Handle backend errors - log but still throw for proper 404/error page handling
     if (
+      error?.message?.includes("500") ||
       error?.message?.includes("502") ||
       error?.message?.includes("503") ||
       error?.message?.includes("504") ||
-      error?.message?.includes("unavailable")
+      error?.message?.includes("Backend service") ||
+      error?.message?.includes("unavailable") ||
+      error?.message?.includes("nodename nor servname") ||
+      error?.message?.includes("ENOTFOUND") ||
+      error?.message?.includes("ECONNREFUSED")
     ) {
       if (process.env.NODE_ENV === "development") {
         console.warn(
-          "[SSR] Backend unavailable for flora detail, throwing error for proper 404 handling",
+          `[SSR] Backend unavailable for flora detail ${id}, throwing error for proper 404 handling:`,
+          error?.message || error,
         );
       }
       // Re-throw so Next.js can show proper 404 or error page

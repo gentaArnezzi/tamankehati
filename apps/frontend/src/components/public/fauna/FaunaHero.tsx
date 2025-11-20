@@ -37,8 +37,8 @@ export function FaunaHero({ stats }: FaunaHeroProps = {}) {
         }}
       >
         <Image
-          src="/tamankehati_images/cendrawasih.jpg"
-          alt="Burung cendrawasih di hutan hujan Papua"
+          src="/tamankehati_images/burungpenyerbuk.png"
+          alt="Burung penyerbuk sedang menghisap nektar dari bunga"
           fill
           className="object-cover"
           priority
