@@ -37,7 +37,8 @@ ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
 # Install wget for health checks and sharp dependencies
-RUN apk add --no-cache wget vips-dev
+# Add build dependencies for sharp
+RUN apk add --no-cache wget vips-dev build-base python3
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -57,7 +58,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 # Sharp is needed for image optimization but not included in standalone output
 # Copy package.json temporarily to install sharp
 COPY --from=builder /app/package.json ./package.json
-RUN npm install sharp --omit=dev
+RUN npm install --cpu=x64 --os=linux --libc=musl sharp
 RUN chown -R nextjs:nodejs node_modules
 
 # Copy public folder if exists
