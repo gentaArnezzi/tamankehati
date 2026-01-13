@@ -332,6 +332,7 @@ function CreateActivityPageContent() {
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
+                                type="button"
                                 variant="outline"
                                 className={cn(
                                   "w-full pl-3 text-left font-normal",
@@ -347,11 +348,14 @@ function CreateActivityPageContent() {
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
+                          <PopoverContent className="w-auto p-0 z-[100]" align="start">
                             <Calendar
                               mode="single"
                               selected={date}
-                              onSelect={setDate}
+                              onSelect={(selectedDate) => {
+                                setDate(selectedDate);
+                                setCalendarOpen(false);
+                              }}
                               disabled={(date) => date < new Date("1900-01-01")}
                               initialFocus
                             />
