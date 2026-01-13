@@ -330,25 +330,25 @@ function CreateActivityPageContent() {
                           onOpenChange={setCalendarOpen}
                         >
                           <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className={cn(
-                                  "w-full pl-3 text-left font-normal",
-                                  !date && "text-muted-foreground",
-                                )}
-                              >
-                                {date ? (
-                                  format(date, "dd MMMM yyyy", { locale: id })
-                                ) : (
-                                  <span>Pilih tanggal</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                              </Button>
-                            </FormControl>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                "w-full pl-3 text-left font-normal justify-between",
+                                !date && "text-muted-foreground",
+                              )}
+                              onClick={() => setCalendarOpen(!calendarOpen)}
+                            >
+                              {date ? (
+                                format(date, "dd MMMM yyyy", { locale: id })
+                              ) : (
+                                <span>Pilih tanggal</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0 z-[100]" align="start">
+                          <PopoverContent className="w-auto p-0 z-[9999]" align="start" sideOffset={4}>
                             <Calendar
                               mode="single"
                               selected={date}
