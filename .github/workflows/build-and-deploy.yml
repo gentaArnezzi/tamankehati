@@ -384,28 +384,32 @@ jobs:
       - name: Deploy to server
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: deploy_step
+        env:
+          GHCR_LOGIN_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
         run: |
-          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' IMAGE_TAG='${{ env.IMAGE_TAG }}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' bash" << 'DEPLOY_SCRIPT'
             set +e  # Don't exit on error, we'll handle errors manually
-            cd ${{ env.DEPLOY_PATH }}
+            cd "$DEPLOY_PATH"
             DEPLOY_SUCCESS=0
             
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🚀 Starting Deployment"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
-            echo "📦 Image Tag: ${{ env.IMAGE_TAG }}"
+            echo "📦 Image Tag: $IMAGE_TAG"
             echo ""
             
             # Update .env file with new image tag
             if [ -f .env ]; then
               echo "📝 Updating IMAGE_TAG in .env..."
               if grep -q "^IMAGE_TAG=" .env; then
-                sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${{ env.IMAGE_TAG }}|" .env
+                sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
               else
-                echo "IMAGE_TAG=${{ env.IMAGE_TAG }}" >> .env
+                echo "IMAGE_TAG=$IMAGE_TAG" >> .env
               fi
-              echo "✅ Updated IMAGE_TAG=${{ env.IMAGE_TAG }}"
+              echo "✅ Updated IMAGE_TAG=$IMAGE_TAG"
             fi
             
             # Pull latest code (optional, for config updates)
@@ -416,15 +420,23 @@ jobs:
               git pull origin main || echo "⚠️  Git pull failed, continuing..."
             fi
             
+            # Login to GHCR (required for private packages)
+            echo "🔑 Logging into GitHub Container Registry..."
+            if [ -n "$GHCR_TOKEN" ]; then
+              echo "$GHCR_TOKEN" | docker login "$DOCKER_REGISTRY" -u "$GHCR_USER" --password-stdin 2>&1
+              if [ $? -eq 0 ]; then
+                echo "✅ GHCR login successful"
+              else
+                echo "⚠️  GHCR login failed, will try pull anyway..."
+              fi
+            else
+              echo "⚠️  No GHCR token provided, pull may fail for private packages"
+            fi
+            
             # Pull latest Docker images
             echo "🐳 Pulling latest Docker images..."
-            export IMAGE_TAG=${{ env.IMAGE_TAG }}
-            export DOCKER_USERNAME=${{ env.DOCKER_USERNAME }}
-            export DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
-            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
-              echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.DOCKER_REGISTRY }} -u "${{ secrets.GHCR_USERNAME || github.actor }}" --password-stdin
-            fi
-            if docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull backend frontend; then
+            export IMAGE_TAG DOCKER_USERNAME DOCKER_REGISTRY
+            if docker compose -f "$COMPOSE_FILE" pull backend frontend; then
               echo "✅ Images pulled successfully"
             else
               echo "❌ Failed to pull images"
@@ -433,11 +445,11 @@ jobs:
             
             # Stop existing containers gracefully
             echo "🛑 Stopping existing containers..."
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} down --timeout 30 || true
+            docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
             
             # Start services
             echo "▶️  Starting services..."
-            if docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d; then
+            if docker compose -f "$COMPOSE_FILE" up -d; then
               echo "✅ Services started"
             else
               echo "⚠️  Service start had issues, but continuing..."
@@ -450,7 +462,7 @@ jobs:
             
             # Run database migrations
             echo "🗄️  Running database migrations..."
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} exec -T backend alembic upgrade head || echo "⚠️  Migration failed, but continuing..."
+            docker compose -f "$COMPOSE_FILE" exec -T backend alembic upgrade head || echo "⚠️  Migration failed, but continuing..."
             
             echo ""
             if [ $DEPLOY_SUCCESS -eq 0 ]; then
@@ -776,10 +788,14 @@ jobs:
 
       - name: Rollback to previous image
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        env:
+          GHCR_LOGIN_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
         run: |
-          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ROLLBACK_SCRIPT'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' bash" << 'ROLLBACK_SCRIPT'
             set +e
-            cd ${{ env.DEPLOY_PATH }}
+            cd "$DEPLOY_PATH"
             
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "🔄 Starting Rollback"
@@ -814,19 +830,21 @@ jobs:
               echo "⚠️ No .env file found, using 'latest' tag"
             fi
             
+            # Login to GHCR (required for private packages)
+            echo "🔑 Logging into GitHub Container Registry..."
+            if [ -n "$GHCR_TOKEN" ]; then
+              echo "$GHCR_TOKEN" | docker login "$DOCKER_REGISTRY" -u "$GHCR_USER" --password-stdin 2>&1
+            fi
+            
             # Pull previous Docker images
             echo "🐳 Pulling previous Docker images..."
             export IMAGE_TAG=$PREVIOUS_TAG
-            export DOCKER_USERNAME=${{ env.DOCKER_USERNAME }}
-            export DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
-            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
-              echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.DOCKER_REGISTRY }} -u "${{ secrets.GHCR_USERNAME || github.actor }}" --password-stdin
-            fi
+            export DOCKER_USERNAME DOCKER_REGISTRY
             
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull backend frontend || {
+            docker compose -f "$COMPOSE_FILE" pull backend frontend || {
               echo "⚠️ Failed to pull previous images, trying 'latest' tag..."
               export IMAGE_TAG=latest
-              docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull backend frontend || {
+              docker compose -f "$COMPOSE_FILE" pull backend frontend || {
                 echo "❌ Failed to pull images"
                 exit 1
               }
@@ -834,11 +852,11 @@ jobs:
             
             # Stop existing containers
             echo "🛑 Stopping existing containers..."
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} down --timeout 30 || true
+            docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
             
             # Start services with previous image
             echo "▶️  Starting services with previous image..."
-            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} up -d || {
+            docker compose -f "$COMPOSE_FILE" up -d || {
               echo "❌ Failed to start services"
               exit 1
             }
