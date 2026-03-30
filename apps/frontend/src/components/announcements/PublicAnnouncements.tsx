@@ -128,7 +128,7 @@ export function PublicAnnouncements({
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/announcements/public?${params}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/announcements/public?${params}`,
       );
 
       if (!response.ok) {

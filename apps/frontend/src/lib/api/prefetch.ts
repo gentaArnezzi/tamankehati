@@ -12,7 +12,7 @@ import {
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "http://38.47.93.167:8080";
+  "http://103.125.91.16";
 
 // Helper to fetch detail data
 const fetchDetail = async <T>(path: string): Promise<T | null> => {

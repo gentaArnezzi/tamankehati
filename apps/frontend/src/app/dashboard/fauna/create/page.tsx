@@ -106,7 +106,7 @@ export default function CreateFaunaPage() {
 
       const base =
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://38.47.93.167:8080";
+        "http://103.125.91.16";
       const response = await fetch(`${base}/api/v1/upload/gallery-image`, {
         method: "POST",
         headers: {
@@ -142,7 +142,7 @@ export default function CreateFaunaPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/upload/multiple-gallery-images",
         {
           method: "POST",
@@ -215,7 +215,7 @@ export default function CreateFaunaPage() {
 
       const base =
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://38.47.93.167:8080";
+        "http://103.125.91.16";
 
       // Get auth token
       const token =

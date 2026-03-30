@@ -204,7 +204,7 @@ export default function ParkApprovalDetailPage() {
           if (entityType === "flora" || entityType === "fauna") {
             try {
               const galleriesResponse = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/galleries/entity/${entityType}/${entityId}`,
+                `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/galleries/entity/${entityType}/${entityId}`,
                 {
                   headers: {
                     Authorization: `Bearer ${localStorage.getItem("auth_token")}`,

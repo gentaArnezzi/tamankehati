@@ -111,7 +111,7 @@ export default function CreateFloraPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/upload/gallery-image",
         {
           method: "POST",
@@ -147,7 +147,7 @@ export default function CreateFloraPage() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/upload/multiple-gallery-images",
         {
           method: "POST",
@@ -214,7 +214,7 @@ export default function CreateFloraPage() {
 
       const base =
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://38.47.93.167:8080";
+        "http://103.125.91.16";
 
       // Get auth token
       const token =

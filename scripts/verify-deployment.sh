@@ -12,7 +12,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Server IP
-SERVER_IP="${SERVER_IP:-38.47.93.167}"
+SERVER_IP="${SERVER_IP:-103.125.91.16}"
 PORT="${PORT:-8080}"
 
 echo "=========================================="
@@ -68,6 +68,23 @@ check_container() {
     fi
 }
 
+resolve_container_name() {
+    local primary=$1
+    local secondary=$2
+
+    if docker ps --format '{{.Names}}' | grep -q "^${primary}$"; then
+        echo "${primary}"
+        return 0
+    fi
+
+    if docker ps --format '{{.Names}}' | grep -q "^${secondary}$"; then
+        echo "${secondary}"
+        return 0
+    fi
+
+    echo "${primary}"
+}
+
 # Check Docker
 echo "🔧 Checking Docker..."
 if ! command -v docker &> /dev/null; then
@@ -79,10 +96,14 @@ echo ""
 
 # Check Containers
 echo "🐳 Checking Containers..."
-check_container "tamankehati-postgres-prod"
-check_container "tamankehati-redis-prod"
-check_container "tamankehati-backend-prod"
-check_container "tamankehati-frontend-prod"
+POSTGRES_CONTAINER=$(resolve_container_name "kehati-postgres-prod" "tamankehati-postgres-prod")
+REDIS_CONTAINER=$(resolve_container_name "kehati-redis-prod" "tamankehati-redis-prod")
+BACKEND_CONTAINER=$(resolve_container_name "kehati-backend-prod" "tamankehati-backend-prod")
+FRONTEND_CONTAINER=$(resolve_container_name "kehati-frontend-prod" "tamankehati-frontend-prod")
+check_container "${POSTGRES_CONTAINER}"
+check_container "${REDIS_CONTAINER}"
+check_container "${BACKEND_CONTAINER}"
+check_container "${FRONTEND_CONTAINER}"
 echo ""
 
 # Check Health Endpoints
@@ -100,7 +121,7 @@ echo ""
 
 # Check Database Connection
 echo "🗄️  Checking Database..."
-if docker exec tamankehati-postgres-prod pg_isready -U kehati_user -d kehati_db &>/dev/null; then
+if docker exec "${POSTGRES_CONTAINER}" pg_isready -U kehati_user -d kehati_db &>/dev/null; then
     echo -e "${GREEN}✅ Database accessible${NC}"
 else
     echo -e "${RED}❌ Database not accessible${NC}"
@@ -110,7 +131,7 @@ echo ""
 
 # Check Redis Connection
 echo "📦 Checking Redis..."
-if docker exec tamankehati-redis-prod redis-cli ping &>/dev/null; then
+if docker exec "${REDIS_CONTAINER}" redis-cli ping &>/dev/null; then
     echo -e "${GREEN}✅ Redis accessible${NC}"
 else
     echo -e "${RED}❌ Redis not accessible${NC}"
@@ -120,15 +141,15 @@ echo ""
 
 # Check Frontend API URL
 echo "🔗 Checking Frontend API Configuration..."
-if docker exec tamankehati-frontend-prod env | grep -q "NEXT_PUBLIC_API_URL"; then
-    api_url=$(docker exec tamankehati-frontend-prod env | grep NEXT_PUBLIC_API_URL | cut -d'=' -f2)
+if docker exec "${FRONTEND_CONTAINER}" env | grep -q "NEXT_PUBLIC_API_URL"; then
+    api_url=$(docker exec "${FRONTEND_CONTAINER}" env | grep NEXT_PUBLIC_API_URL | cut -d'=' -f2)
     echo -e "${BLUE}ℹ️  NEXT_PUBLIC_API_URL: ${api_url}${NC}"
     
     if echo "$api_url" | grep -q "localhost:8000"; then
         echo -e "${RED}❌ WARNING: Frontend still using localhost:8000${NC}"
         echo -e "${YELLOW}   You need to rebuild frontend with correct NEXT_PUBLIC_API_URL${NC}"
         WARNINGS=$((WARNINGS + 1))
-    elif echo "$api_url" | grep -q "${SERVER_IP}:${PORT}"; then
+    elif echo "$api_url" | grep -q "${SERVER_IP}"; then
         echo -e "${GREEN}✅ Frontend API URL configured correctly${NC}"
     else
         echo -e "${YELLOW}⚠️  Frontend API URL: ${api_url}${NC}"

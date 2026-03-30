@@ -14,7 +14,7 @@ Untuk deploy aplikasi Taman Kehati ke server Ubuntu menggunakan Docker Compose:
 2. **Edit .env file dengan IP server Anda:**
    ```bash
    nano .env
-   # Update: SERVER_IP, SECRET_KEY, POSTGRES_PASSWORD, NEXT_PUBLIC_API_URL, CORS_ORIGINS
+   # Update: SERVER_IP, SECRET_KEY, POSTGRES_PASSWORD, NEXT_PUBLIC_API_URL, NEXT_PUBLIC_SITE_URL, CORS_ORIGINS
    ```
 
 3. **Build images:**
@@ -34,9 +34,14 @@ Untuk deploy aplikasi Taman Kehati ke server Ubuntu menggunakan Docker Compose:
 
 ### Akses Aplikasi
 
-- **Frontend:** http://YOUR_SERVER_IP:3000 atau http://YOUR_SERVER_IP (via Nginx)
-- **Backend API:** http://YOUR_SERVER_IP:8000 atau http://YOUR_SERVER_IP/api (via Nginx)
-- **API Docs:** http://YOUR_SERVER_IP:8000/docs
+- **Frontend:** http://YOUR_SERVER_IP:8080
+- **Backend API:** http://YOUR_SERVER_IP:8080/api
+- **Health Check:** http://YOUR_SERVER_IP:8080/health
+- **API Docs:** http://YOUR_SERVER_IP:8080/docs
+
+### KKH Server Note
+
+Untuk server KKH saat ini, Dasmap memakai host `nginx` di port `80`. Jadi Taman Kehati sementara dipublikasikan di `8080` memakai container `nginx` sendiri agar tidak bentrok.
 
 ### Dokumentasi Lengkap
 
@@ -49,6 +54,11 @@ Untuk deploy aplikasi Taman Kehati ke server Ubuntu menggunakan Docker Compose:
 
 - `scripts/verify-deployment.sh` - Verify semua services
 - `scripts/backup-database.sh` - Backup database PostgreSQL
+- `scripts/setup-kkh-server.sh` - Setup Docker dan firewall host KKH
+- `scripts/deploy-kkh.sh` - Build dan jalankan stack production
+- `scripts/install-kkh-nginx.sh` - Pasang reverse proxy host Nginx untuk KKH
+- `scripts/restore-database.sh` - Restore dump PostgreSQL ke container production
+- `scripts/restore-uploads.sh` - Restore file upload ke volume backend
 
 ### Troubleshooting
 

@@ -198,7 +198,7 @@ export default function ComprehensiveAIGenerator() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/ai/test-ollama",
         {
           method: "GET",
@@ -251,18 +251,18 @@ export default function ComprehensiveAIGenerator() {
         type === "description"
           ? floraFaunaType === "flora"
             ? (process.env.NEXT_PUBLIC_API_URL ||
-                "http://38.47.93.167:8080") +
+                "http://103.125.91.16") +
               "/api/v1/ai/generate-flora-description"
             : (process.env.NEXT_PUBLIC_API_URL ||
-                "http://38.47.93.167:8080") +
+                "http://103.125.91.16") +
               "/api/v1/ai/generate-fauna-description"
           : floraFaunaType === "flora"
             ? (process.env.NEXT_PUBLIC_API_URL ||
-                "http://38.47.93.167:8080") +
+                "http://103.125.91.16") +
               "/api/v1/ai/generate-flora-" +
               type
             : (process.env.NEXT_PUBLIC_API_URL ||
-                "http://38.47.93.167:8080") +
+                "http://103.125.91.16") +
               "/api/v1/ai/generate-fauna-" +
               type;
 
@@ -334,7 +334,7 @@ export default function ComprehensiveAIGenerator() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/ai/generate-article",
         {
           method: "POST",
@@ -387,7 +387,7 @@ export default function ComprehensiveAIGenerator() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/ai/generate-news",
         {
           method: "POST",
@@ -441,7 +441,7 @@ export default function ComprehensiveAIGenerator() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/ai/preview-csv-mapping",
         {
           method: "POST",
@@ -503,7 +503,7 @@ export default function ComprehensiveAIGenerator() {
 
       const response = await fetch(
         (process.env.NEXT_PUBLIC_API_URL ||
-          "http://38.47.93.167:8080") +
+          "http://103.125.91.16") +
           "/api/v1/ai/test-extract-csv",
         {
           method: "POST",

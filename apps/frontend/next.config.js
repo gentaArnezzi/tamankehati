@@ -17,54 +17,24 @@ const nextConfig = {
         port: '8000',
         pathname: '/uploads/**',
       },
-      // Production - Server IP (Ubuntu server)
+      // Production - KKH server (via Nginx and direct backend access)
       {
         protocol: 'http',
-        hostname: '38.47.93.167',
-        port: '8080',
-        pathname: '/uploads/**',
-      },
-      // Production - Render.com domains (legacy support)
-      {
-        protocol: 'https',
-        hostname: 'tamankehati-backend-pxnu.onrender.com',
+        hostname: '103.125.91.16',
         pathname: '/uploads/**',
       },
       {
-        protocol: 'https',
-        hostname: 'tamankehati-21.onrender.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'tamankehati-backend-zxb9.onrender.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'tamankehati-backend.onrender.com',
-        pathname: '/**',
+        protocol: 'http',
+        hostname: '103.125.91.16',
+        port: '8000',
+        pathname: '/uploads/**',
       },
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
-      // Allow localhost:8000 for development (always allow, imageUrl() should normalize)
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8000',
-        pathname: '/uploads/**',
-      },
-      {
-        protocol: 'http',
-        hostname: '127.0.0.1',
-        port: '8000',
-        pathname: '/uploads/**',
-      },
     ],
-    // domains is deprecated, using remotePatterns above instead
   },
   typescript: {
     ignoreBuildErrors: true,

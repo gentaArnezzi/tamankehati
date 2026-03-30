@@ -41,7 +41,7 @@ services:
 
   # Backend API - Pull from registry
   backend:
-    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
     platform: linux/amd64
     container_name: tamankehati-backend-prod
     environment:
@@ -81,7 +81,7 @@ services:
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2:1.5b}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
@@ -101,18 +101,19 @@ services:
 
   # Frontend Next.js - Pull from registry
   frontend:
-    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
     platform: linux/amd64
     container_name: tamankehati-frontend-prod
     environment:
-      # API Configuration
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://YOUR_SERVER_IP:8000}
+      # Public URL configuration for Next.js runtime and metadata
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
       
       # Environment
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -131,6 +132,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: tamankehati-ollama-prod
+    profiles: ["ai"]
     volumes:
       - ollama_data:/root/.ollama
     environment:
@@ -185,4 +187,3 @@ networks:
       config:
         - subnet: 172.28.0.0/16  # Explicit subnet to avoid conflict with dasmap_prod_go-net (172.27.0.0/16)
           gateway: 172.28.0.1
-

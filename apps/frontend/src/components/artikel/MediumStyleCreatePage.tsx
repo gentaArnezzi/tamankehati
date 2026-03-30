@@ -239,7 +239,7 @@ export function MediumStyleCreatePage({
           }
 
           const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`,
+            `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${articleId}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -310,13 +310,13 @@ export function MediumStyleCreatePage({
       let method: string;
       
       if (mode === "edit" && articleId) {
-        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${articleId}`;
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${articleId}`;
         method = "PUT";
       } else if (draftId) {
-        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${draftId}`;
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${draftId}`;
         method = "PUT";
       } else {
-        url = `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
+        url = `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/`;
         method = "POST";
       }
 
@@ -373,7 +373,7 @@ export function MediumStyleCreatePage({
       formData.append("file", file);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/upload/gallery-image`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/upload/gallery-image`,
         {
           method: "POST",
           headers: {
@@ -531,8 +531,8 @@ export function MediumStyleCreatePage({
 
       const idToUse = draftId || (mode === "edit" && articleId ? articleId : null);
       const url = idToUse
-        ? `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${idToUse}`
-        : `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/`;
+        ? `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${idToUse}`
+        : `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/`;
       const method = idToUse ? "PUT" : "POST";
 
       const response = await fetch(url, {

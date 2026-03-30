@@ -55,7 +55,7 @@ export default function ArtikelDetailPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -117,7 +117,7 @@ export default function ArtikelDetailPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${id}`,
         {
           method: "PUT",
           headers: {
@@ -170,7 +170,7 @@ export default function ArtikelDetailPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/articles/${id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/articles/${id}`,
         {
           method: "DELETE",
           headers: {

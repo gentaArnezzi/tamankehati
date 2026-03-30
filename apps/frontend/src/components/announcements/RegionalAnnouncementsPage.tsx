@@ -104,7 +104,7 @@ export function RegionalAnnouncementsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/announcements/?status_filter=published&limit=100`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/announcements/?status_filter=published&limit=100`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -206,7 +206,7 @@ export function RegionalAnnouncementsPage() {
       if (!token) return;
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/announcements/${announcementId}/mark-read`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/announcements/${announcementId}/mark-read`,
         {
           method: "POST",
           headers: {

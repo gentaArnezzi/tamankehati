@@ -133,9 +133,9 @@ log "  Platform: linux/amd64"
 
 # Default API URL for production (can be overridden via NEXT_PUBLIC_API_URL env var)
 # Supports both IP and domain:
-# - IP: http://38.47.93.167:8080
+# - IP: http://103.125.91.16:8080
 # - Domain: https://tamankehati.dasmap.co.id
-DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://38.47.93.167:8080}"
+DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://103.125.91.16:8080}"
 log "  API URL: ${DEFAULT_API_URL}"
 log "  💡 Tip: Set NEXT_PUBLIC_API_URL env var to use domain instead of IP"
 
@@ -175,7 +175,7 @@ if [ "$PUSH_TO_REGISTRY" = "true" ]; then
     fi
     
     log "Pushing frontend image..."
-    DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://38.47.93.167:8080}"
+    DEFAULT_API_URL="${NEXT_PUBLIC_API_URL:-http://103.125.91.16:8080}"
     log "  API URL: ${DEFAULT_API_URL}"
     log "  💡 Tip: Set NEXT_PUBLIC_API_URL env var to use domain instead of IP"
     docker buildx build \
@@ -218,4 +218,3 @@ log "  2. Use docker-compose.pull.yml on server:"
 log "     docker compose -f docker-compose.pull.yml pull"
 log "     docker compose -f docker-compose.pull.yml up -d"
 echo ""
-

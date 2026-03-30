@@ -193,7 +193,7 @@ export function AnnouncementForm({
 
     const token = localStorage.getItem("auth_token");
     const baseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+      process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16";
 
     const response = await fetch(`${baseUrl}/api/v1/upload/gallery-image`, {
       method: "POST",

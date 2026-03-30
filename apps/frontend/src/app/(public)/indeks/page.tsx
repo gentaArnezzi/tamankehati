@@ -146,7 +146,7 @@ export default function TentangPage() {
   const fetchInsights = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/public/dashboard/insights`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/public/dashboard/insights`,
       );
       if (response.ok) {
         const data = await response.json();

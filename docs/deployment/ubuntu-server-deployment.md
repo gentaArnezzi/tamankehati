@@ -62,18 +62,18 @@ sudo ufw default deny incoming
 sudo ufw default allow outgoing
 
 # Allow SSH (CRITICAL - must be first to avoid lockout!)
-sudo ufw allow 22/tcp
+sudo ufw allow 5617/tcp
 # Alternative: Allow from specific IP only (more secure)
-# sudo ufw allow from YOUR_IP_ADDRESS to any port 22
+# sudo ufw allow from YOUR_IP_ADDRESS to any port 5617
 
-# Allow HTTP (port 80) - For Nginx reverse proxy
-sudo ufw allow 80/tcp
+# Allow HTTP (port 8080) - For Taman Kehati nginx container
+sudo ufw allow 8080/tcp
 
 # Allow HTTPS (port 443) - For future SSL/TLS setup
 sudo ufw allow 443/tcp
 
 # Note: Ports 8000 and 3000 should NOT be opened publicly
-# They are only accessible via Nginx reverse proxy on port 80
+# They are only accessible via Nginx reverse proxy on port 8080
 # If you need direct access (for testing only), you can temporarily allow:
 # sudo ufw allow 8000/tcp  # Backend direct access (NOT recommended for production)
 # sudo ufw allow 3000/tcp  # Frontend direct access (NOT recommended for production)
@@ -89,8 +89,8 @@ sudo ufw status numbered
 ```
 
 **Firewall Rules Summary:**
-- ✅ **Port 22 (SSH)** - Required for server access
-- ✅ **Port 80 (HTTP)** - For Nginx reverse proxy
+- ✅ **Port 5617 (SSH)** - Required for server access
+- ✅ **Port 8080 (HTTP)** - For Taman Kehati public access
 - ✅ **Port 443 (HTTPS)** - For future SSL/TLS setup
 - ❌ **Port 8000 (Backend)** - Should NOT be public (internal only via Docker network)
 - ❌ **Port 3000 (Frontend)** - Should NOT be public (internal only via Docker network)
@@ -100,7 +100,7 @@ sudo ufw status numbered
 **Security Note:** If you need to access backend/frontend directly for debugging, use SSH tunnel instead:
 ```bash
 # SSH tunnel to access backend (from your local machine)
-ssh -L 8000:localhost:8000 user@server-ip
+ssh -p 5617 -L 8000:localhost:8000 user@server-ip
 
 # Then access http://localhost:8000 on your local machine
 ```
@@ -165,16 +165,14 @@ nano .env
 
 4. **CORS_ORIGINS** - Frontend access URL
    ```bash
-   CORS_ORIGINS=http://YOUR_SERVER_IP:3000,http://YOUR_SERVER_IP:80
+   CORS_ORIGINS=http://YOUR_SERVER_IP:8080
    ```
 
-5. **NEXT_PUBLIC_API_URL** - Backend API URL
+5. **NEXT_PUBLIC_API_URL** - Public base URL untuk frontend
    ```bash
-   # Option 1: Direct backend access
-   NEXT_PUBLIC_API_URL=http://YOUR_SERVER_IP:8000
-   
-   # Option 2: Via Nginx (recommended)
-   NEXT_PUBLIC_API_URL=http://YOUR_SERVER_IP/api
+   # Gunakan base URL publik. Aplikasi akan memanggil /api/... sendiri via Nginx.
+   NEXT_PUBLIC_API_URL=http://YOUR_SERVER_IP:8080
+   NEXT_PUBLIC_SITE_URL=http://YOUR_SERVER_IP:8080
    ```
 
 6. **ENVIRONMENT and DEBUG**
@@ -196,8 +194,9 @@ POSTGRES_DB=kehati_db
 POSTGRES_USER=kehati_user
 POSTGRES_PASSWORD=StrongPassword123!
 SECRET_KEY=your-generated-secret-key-32-chars-minimum
-CORS_ORIGINS=http://192.168.1.100:3000,http://192.168.1.100:80
-NEXT_PUBLIC_API_URL=http://192.168.1.100/api
+CORS_ORIGINS=http://192.168.1.100:8080
+NEXT_PUBLIC_API_URL=http://192.168.1.100:8080
+NEXT_PUBLIC_SITE_URL=http://192.168.1.100:8080
 ENVIRONMENT=production
 DEBUG=false
 ADMIN_EMAIL=admin@kehati.org
@@ -299,20 +298,20 @@ chmod +x scripts/verify-deployment.sh
 
 **Backend Health:**
 ```bash
-curl http://YOUR_SERVER_IP:8000/health
-# Should return: {"status":"healthy"}
+curl http://YOUR_SERVER_IP:8080/health
+# Should return: healthy
 ```
 
 **Frontend:**
 ```bash
-curl http://YOUR_SERVER_IP:3000
+curl http://YOUR_SERVER_IP:8080
 # Should return HTML
 ```
 
-**Nginx (if configured):**
+**Public API (via Nginx):**
 ```bash
-curl http://YOUR_SERVER_IP/health
-curl http://YOUR_SERVER_IP/api/health
+curl http://YOUR_SERVER_IP:8080/api/health
+curl http://YOUR_SERVER_IP:8080/docs
 ```
 
 **Database Connection:**
@@ -322,10 +321,10 @@ docker compose -f docker-compose.prod.yml exec postgres pg_isready -U kehati_use
 
 ### 4.3 Access Application
 
-- **Frontend (direct):** http://YOUR_SERVER_IP:3000
-- **Frontend (via Nginx):** http://YOUR_SERVER_IP
-- **Backend API:** http://YOUR_SERVER_IP:8000
-- **API Docs:** http://YOUR_SERVER_IP:8000/docs
+- **Frontend:** http://YOUR_SERVER_IP:8080
+- **Backend API:** http://YOUR_SERVER_IP:8080/api
+- **Health Check:** http://YOUR_SERVER_IP:8080/health
+- **API Docs:** http://YOUR_SERVER_IP:8080/docs
 
 ## Step 5: Post-Deployment
 
@@ -343,7 +342,7 @@ docker compose -f docker-compose.prod.yml exec backend python3 init_admin.py
 
 ### 5.2 Verify Admin Login
 
-1. Open frontend: http://YOUR_SERVER_IP:3000
+1. Open frontend: http://YOUR_SERVER_IP:8080
 2. Navigate to login page
 3. Use credentials from `.env` file (ADMIN_EMAIL and ADMIN_PASSWORD)
 
@@ -383,9 +382,8 @@ docker compose -f docker-compose.prod.yml logs [service-name]
 1. **Port already in use:**
    ```bash
    # Check what's using the port
-   sudo lsof -i :80
-   sudo lsof -i :3000
-   sudo lsof -i :8000
+   sudo lsof -i :8080
+   sudo lsof -i :5617
    
    # Stop conflicting service or change port in .env
    ```
@@ -402,7 +400,7 @@ docker compose -f docker-compose.prod.yml logs [service-name]
 
 4. **Frontend can't connect to backend:**
    - Verify NEXT_PUBLIC_API_URL in .env
-   - Check backend is accessible: `curl http://YOUR_SERVER_IP:8000/health`
+   - Check backend is accessible through Nginx: `curl http://YOUR_SERVER_IP:8080/api/health`
    - Rebuild frontend if NEXT_PUBLIC_API_URL changed:
      ```bash
      docker compose -f docker-compose.prod.yml build frontend
@@ -680,4 +678,3 @@ For issues or questions:
 
 **Last Updated:** 2025-01-02
 **Version:** 1.0.0
-

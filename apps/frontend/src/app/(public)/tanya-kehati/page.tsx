@@ -295,7 +295,7 @@ export default function TanyaKehatiPage() {
     try {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://38.47.93.167:8080";
+        "http://103.125.91.16";
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
         method: "POST",
         headers: {
@@ -370,7 +370,7 @@ export default function TanyaKehatiPage() {
     try {
       const apiUrl =
         process.env.NEXT_PUBLIC_API_URL ||
-        "http://38.47.93.167:8080";
+        "http://103.125.91.16";
       const response = await fetch(`${apiUrl}/api/public/chat/`, {
         method: "POST",
         headers: {

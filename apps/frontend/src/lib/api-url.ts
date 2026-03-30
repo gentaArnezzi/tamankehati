@@ -1,16 +1,19 @@
 /**
- * Centralized API URL configuration
+ * Centralized API URL configuration.
  *
- * Always use getApiUrl() to get the correct API base URL
- * Never hardcode localhost:8000 or production URLs in components!
- * 
- * Production URL fallback is intentionally kept for development environments
- * but should be replaced via NEXT_PUBLIC_API_URL environment variable in production.
+ * `NEXT_PUBLIC_API_URL` is normalized so both `http://host` and
+ * `http://host/api` work without generating `/api/api/...` paths.
  */
 
-// Default production API URL - should be overridden by NEXT_PUBLIC_API_URL env var
-// For Ubuntu server deployment, set NEXT_PUBLIC_API_URL in .env or build args
-const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080";
+const DEFAULT_PUBLIC_BASE_URL = "http://103.125.91.16";
+
+function normalizeBaseUrl(value?: string | null): string {
+  const trimmed = (value || "").trim();
+  if (!trimmed) return DEFAULT_PUBLIC_BASE_URL;
+  return trimmed.replace(/\/api\/?$/, "").replace(/\/$/, "");
+}
+
+const PRODUCTION_API_URL = normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL);
 
 /**
  * Get the API base URL from environment variable
@@ -19,10 +22,7 @@ const PRODUCTION_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.1
  * @returns The API base URL (without trailing slash)
  */
 export function getApiUrl(): string {
-  return (
-    process.env.NEXT_PUBLIC_API_URL ||
-    PRODUCTION_API_URL
-  );
+  return normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL || PRODUCTION_API_URL);
 }
 
 /**
@@ -34,7 +34,7 @@ export function getApiUrl(): string {
  * @example
  * ```typescript
  * const url = apiUrl("/api/v1/parks");
- * // Returns: "http://38.47.93.167:8080/api/v1/parks"
+ * // Returns: "http://103.125.91.16/api/v1/parks"
  * ```
  */
 export function apiUrl(path: string): string {
@@ -53,10 +53,10 @@ export function apiUrl(path: string): string {
  * @example
  * ```typescript
  * imageUrl("/uploads/photo.jpg")
- * // Returns: "http://38.47.93.167:8080/uploads/photo.jpg"
+ * // Returns: "http://103.125.91.16/uploads/photo.jpg"
  * 
  * imageUrl("http://localhost:8000/uploads/photo.jpg")
- * // Returns: "http://38.47.93.167:8080/uploads/photo.jpg"
+ * // Returns: "http://103.125.91.16/uploads/photo.jpg"
  * ```
  */
 export function imageUrl(path: string | null | undefined): string {
@@ -209,4 +209,6 @@ export function normalizeUrl(url: string): string {
  * Use getApiUrl() function if you need runtime evaluation
  */
 export const API_BASE_URL = getApiUrl();
-
+export const SITE_BASE_URL =
+  (process.env.NEXT_PUBLIC_SITE_URL || "").trim().replace(/\/$/, "") ||
+  API_BASE_URL;

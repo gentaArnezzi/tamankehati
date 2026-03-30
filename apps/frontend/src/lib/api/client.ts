@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const client = new HttpClient(
   process.env.NEXT_PUBLIC_API_URL ||
-    "http://38.47.93.167:8080",
+    "http://103.125.91.16",
 );
 
 export const getParkStats = async (parkId: number) => {

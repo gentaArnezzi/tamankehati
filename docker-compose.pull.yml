@@ -41,10 +41,8 @@ services:
 
   # Backend API - Pull from registry
   backend:
-    # Replace YOUR_DOCKER_USERNAME with your Docker Hub username or registry URL
-    # Example: docker.io/yourusername/tamankehati-backend:latest
-    # Or: registry.example.com/tamankehati-backend:latest
-    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
+    # Default target is GitHub Container Registry.
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-backend:${IMAGE_TAG:-latest}
     container_name: kehati-backend-prod
     environment:
       # Database
@@ -85,7 +83,7 @@ services:
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2:1.5b}
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "127.0.0.1:${BACKEND_PORT:-8000}:8000"
     volumes:
       - backend_uploads:/app/uploads
     depends_on:
@@ -105,18 +103,18 @@ services:
 
   # Frontend Next.js - Pull from registry
   frontend:
-    # Replace YOUR_DOCKER_USERNAME with your Docker Hub username or registry URL
-    image: ${DOCKER_REGISTRY:-docker.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
+    image: ${DOCKER_REGISTRY:-ghcr.io}/${DOCKER_USERNAME:-yourusername}/tamankehati-frontend:${IMAGE_TAG:-latest}
     container_name: kehati-frontend-prod
     environment:
-      # API Configuration
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://YOUR_SERVER_IP:8000}
+      # Public URL configuration for Next.js runtime and metadata
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
       
       # Environment
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -134,6 +132,7 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: kehati-ollama-prod
+    profiles: ["ai"]
     volumes:
       - ollama_data:/root/.ollama
     # Security: Ollama not exposed externally by default
@@ -155,7 +154,7 @@ services:
     image: nginx:alpine
     container_name: kehati-nginx-prod
     ports:
-      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_PORT:-8080}:80"
     volumes:
       - ./deploy-package/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./deploy-package/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -163,8 +162,6 @@ services:
       backend:
         condition: service_healthy
       frontend:
-        condition: service_healthy
-      ollama:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
@@ -189,4 +186,3 @@ volumes:
 networks:
   kehati-network:
     driver: bridge
-

@@ -1,5 +1,9 @@
 name: CI/CD - Build and Deploy
 
+permissions:
+  contents: read
+  packages: write
+
 on:
   push:
     branches: [main]
@@ -18,12 +22,15 @@ on:
         type: string
 
 env:
-  DOCKER_REGISTRY: docker.io
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME || 'arnezzi' }}
+  DOCKER_REGISTRY: ghcr.io
+  DOCKER_USERNAME: ${{ secrets.GHCR_NAMESPACE || github.repository_owner }}
   IMAGE_TAG: ${{ github.event.inputs.image_tag || github.sha }}
-  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '~/dasmap_prod/apps/tamankehati' }}
-  DOCKER_COMPOSE_FILE: docker-compose.pull.no-nginx.yml
-  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://38.47.93.167:8080' }}
+  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
+  DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '5617' }}
+  DOCKER_COMPOSE_FILE: docker-compose.pull.yml
+  APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'http://103.125.91.16:8080' }}
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16:8080' }}
+  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16:8080' }}
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "22.x"
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -88,6 +95,7 @@ jobs:
         working-directory: apps/frontend
         env:
           NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_SITE_URL: ${{ env.NEXT_PUBLIC_SITE_URL }}
         run: |
           echo "Building frontend for verification..."
           npm run build || {
@@ -151,11 +159,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Docker Hub
+      - name: Login to GitHub Container Registry
         uses: docker/login-action@v3
         with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata for backend
         id: meta-backend
@@ -199,6 +208,7 @@ jobs:
           labels: ${{ steps.meta-frontend.outputs.labels }}
           build-args: |
             NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
+            NEXT_PUBLIC_SITE_URL=${{ env.NEXT_PUBLIC_SITE_URL }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
@@ -305,11 +315,13 @@ jobs:
           echo "To enable auto-deployment:"
           echo "1. Go to repository Settings → Secrets and variables → Actions"
           echo "2. Add these secrets:"
-          echo "   - DEPLOY_HOST: 38.47.93.167"
+          echo "   - DEPLOY_HOST: 103.125.91.16"
+          echo "   - DEPLOY_PORT: 5617"
           echo "   - DEPLOY_USER: ubuntu"
           echo "   - DEPLOY_SSH_KEY: (your SSH private key)"
-          echo "   - DOCKER_PASSWORD: (your Docker Hub password/token)"
-          echo "   - DOCKER_USERNAME: arnezzi (optional, defaults to arnezzi)"
+          echo "   - GHCR_NAMESPACE: $(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]') (optional)"
+          echo "   - GHCR_USERNAME: (optional, for server-side ghcr login)"
+          echo "   - GHCR_TOKEN: (optional, if GHCR package is private)"
           echo "3. Push to main branch again"
 
       - name: Setup SSH
@@ -322,18 +334,18 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
       - name: Test SSH connection
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo '✅ SSH connection successful'"
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo '✅ SSH connection successful'"
 
       - name: Save previous image tag
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: save_previous_tag
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             cd ${{ env.DEPLOY_PATH }}
             if [ -f .env ] && grep -q "^IMAGE_TAG=" .env; then
               PREVIOUS_TAG=$(grep "^IMAGE_TAG=" .env | cut -d'=' -f2)
@@ -350,7 +362,7 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: deploy_step
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
             set +e  # Don't exit on error, we'll handle errors manually
             cd ${{ env.DEPLOY_PATH }}
             DEPLOY_SUCCESS=0
@@ -386,6 +398,9 @@ jobs:
             export IMAGE_TAG=${{ env.IMAGE_TAG }}
             export DOCKER_USERNAME=${{ env.DOCKER_USERNAME }}
             export DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
+            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
+              echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.DOCKER_REGISTRY }} -u "${{ secrets.GHCR_USERNAME || github.actor }}" --password-stdin
+            fi
             if docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull backend frontend; then
               echo "✅ Images pulled successfully"
             else
@@ -426,7 +441,7 @@ jobs:
       - name: Health check - Backend
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🏥 Checking backend health..."
             
             BACKEND_URL="http://localhost:8000/health"
@@ -457,7 +472,7 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         continue-on-error: true
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🌐 Checking frontend health..."
             
             FRONTEND_URL="http://localhost:3000"
@@ -495,8 +510,8 @@ jobs:
           echo "🐳 Backend: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-backend:${{ env.IMAGE_TAG }}"
           echo "🌐 Frontend: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-frontend:${{ env.IMAGE_TAG }}"
           echo ""
-          echo "🌐 Application URL: http://38.47.93.167:8080"
-          echo "🏥 Health Check: http://38.47.93.167:8080/api/health"
+          echo "🌐 Application URL: ${{ env.APP_BASE_URL }}"
+          echo "🏥 Health Check: ${{ env.APP_BASE_URL }}/health"
           echo ""
           echo "All services should be running and healthy."
 
@@ -531,7 +546,7 @@ jobs:
             
             📅 <b>Time:</b> ${{ steps.deployment_time.outputs.timestamp }}
             
-            🚀 <b>Status:</b> Successfully deployed to server (38.47.93.167)
+            🚀 <b>Status:</b> Successfully deployed to server (103.125.91.16)
             
             🩺 <b>Health Check:</b> Passed ✅
             
@@ -590,7 +605,7 @@ jobs:
         run: |
           echo "🏥 Verifying backend health from external URL..."
           
-          BACKEND_URL="http://38.47.93.167:8080/api/health"
+          BACKEND_URL="${{ env.APP_BASE_URL }}/health"
           MAX_RETRIES=15
           RETRY_COUNT=0
           HEALTH_CHECK_PASSED=0
@@ -619,7 +634,7 @@ jobs:
         run: |
           echo "🔍 Verifying public API endpoints..."
           
-          BASE_URL="http://38.47.93.167:8080"
+          BASE_URL="${{ env.APP_BASE_URL }}"
           ENDPOINTS=(
             "/api/public/parks/"
             "/api/public/stats/"
@@ -651,7 +666,7 @@ jobs:
         run: |
           echo "🌐 Verifying frontend from external URL..."
           
-          FRONTEND_URL="http://38.47.93.167:8080"
+          FRONTEND_URL="${{ env.APP_BASE_URL }}"
           MAX_RETRIES=10
           RETRY_COUNT=0
           FRONTEND_CHECK_PASSED=0
@@ -687,7 +702,7 @@ jobs:
           echo "✅ Frontend: CHECKED"
           echo ""
           echo "🌐 Application is live and accessible:"
-          echo "   http://38.47.93.167:8080"
+          echo "   ${{ env.APP_BASE_URL }}"
 
   rollback-deployment:
     name: Rollback Deployment
@@ -720,12 +735,12 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
       - name: Rollback to previous image
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ROLLBACK_SCRIPT'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'ROLLBACK_SCRIPT'
             set +e
             cd ${{ env.DEPLOY_PATH }}
             
@@ -767,6 +782,9 @@ jobs:
             export IMAGE_TAG=$PREVIOUS_TAG
             export DOCKER_USERNAME=${{ env.DOCKER_USERNAME }}
             export DOCKER_REGISTRY=${{ env.DOCKER_REGISTRY }}
+            if [ -n "${{ secrets.GHCR_TOKEN }}" ]; then
+              echo "${{ secrets.GHCR_TOKEN }}" | docker login ${{ env.DOCKER_REGISTRY }} -u "${{ secrets.GHCR_USERNAME || github.actor }}" --password-stdin
+            fi
             
             docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} pull backend frontend || {
               echo "⚠️ Failed to pull previous images, trying 'latest' tag..."
@@ -800,7 +818,7 @@ jobs:
       - name: Verify rollback
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🔍 Verifying rollback..."
             
             BACKEND_URL="http://localhost:8000/health"
@@ -826,7 +844,7 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: previous_tag_notify
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             cd ${{ env.DEPLOY_PATH }}
             if [ -f .env ] && grep -q "^IMAGE_TAG=" .env; then
               grep "^IMAGE_TAG=" .env | cut -d'=' -f2
@@ -867,4 +885,3 @@ jobs:
             🚦 <b>Status:</b> Rollback completed successfully
             
             #ci-cd #rollback #stability
-

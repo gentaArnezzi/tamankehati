@@ -9,7 +9,7 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 env:
-  API_URL: "http://38.47.93.167:8080"
+  API_URL: "http://103.125.91.16:8080"
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
@@ -148,4 +148,3 @@ jobs:
             💡 <b>Next Check:</b> Automated monitoring continues every 10 minutes.
             
             #monitoring #daily-report #system-healthy
-

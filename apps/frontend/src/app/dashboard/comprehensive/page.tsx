@@ -125,7 +125,7 @@ const ComprehensiveDashboardPage: React.FC = () => {
 
       // Use the comprehensive dashboard API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/dashboard/comprehensive-simple?time_range=${timeRange}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

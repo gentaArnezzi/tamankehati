@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
-  "https://tamankehati-backend.onrender.com";
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/api$/, "") ||
+  "http://103.125.91.16";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

@@ -12,8 +12,9 @@ on:
         type: string
 
 env:
-  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '~/dasmap_prod/apps/tamankehati' }}
-  DOCKER_COMPOSE_FILE: docker-compose.pull.no-nginx.yml
+  DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
+  DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '5617' }}
+  DOCKER_COMPOSE_FILE: docker-compose.pull.yml
 
 jobs:
   deploy:
@@ -49,7 +50,7 @@ jobs:
           echo "To enable auto-deployment:"
           echo "1. Go to repository Settings → Secrets and variables → Actions"
           echo "2. Add these secrets:"
-          echo "   - DEPLOY_HOST: 38.47.93.167"
+          echo "   - DEPLOY_HOST: 103.125.91.16"
           echo "   - DEPLOY_USER: ubuntu"
           echo "   - DEPLOY_SSH_KEY: (your SSH private key)"
           echo "3. Push to main branch again"
@@ -66,17 +67,17 @@ jobs:
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
       - name: Test SSH connection
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo '✅ SSH connection successful'"
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} "echo '✅ SSH connection successful'"
 
       - name: Deploy application (Pull-based)
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'DEPLOY_SCRIPT'
             set -e
             cd ${{ env.DEPLOY_PATH }}
             
@@ -179,7 +180,7 @@ jobs:
             set -e
             echo "🔍 Checking public API..."
             
-            API_URL="http://38.47.93.167:8080/api/health"
+            API_URL="http://103.125.91.16:8080/health"
             MAX_RETRIES=5
             RETRY_COUNT=0
             
@@ -207,10 +208,10 @@ jobs:
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
             echo "🐳 Docker containers status:"
-            docker compose -f docker-compose.pull.no-nginx.yml ps
+            docker compose -f docker-compose.pull.yml ps
             echo ""
             echo "📋 Recent logs:"
-            docker compose -f docker-compose.pull.no-nginx.yml logs --tail=10
+            docker compose -f docker-compose.pull.yml logs --tail=10
           EOF
 
       - name: Deployment summary
@@ -220,8 +221,7 @@ jobs:
           echo "✅ Deployment Completed Successfully!"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "🌐 Application URL: http://38.47.93.167:8080"
-          echo "🏥 Health Check: http://38.47.93.167:8080/api/health"
+          echo "🌐 Application URL: http://103.125.91.16:8080"
+          echo "🏥 Health Check: http://103.125.91.16:8080/health"
           echo ""
           echo "All services should be running and healthy."
-

@@ -232,7 +232,7 @@ export default function SettingsPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/users/me/notifications`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/users/me/notifications`,
         {
           method: "PATCH",
           headers: {
@@ -301,7 +301,7 @@ export default function SettingsPage() {
       formDataToUpload.append("file", file);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}/api/v1/users/me/upload-photo`,
+        `${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}/api/v1/users/me/upload-photo`,
         {
           method: "POST",
           headers: {
@@ -417,7 +417,7 @@ export default function SettingsPage() {
                 >
                   {user?.profile_picture_url && (
                     <AvatarImage
-                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://38.47.93.167:8080"}${user.profile_picture_url}`}
+                      src={`${process.env.NEXT_PUBLIC_API_URL || "http://103.125.91.16"}${user.profile_picture_url}`}
                       alt={user?.nama || "Profile photo"}
                       onError={(e) => {
                         console.error("Failed to load profile image:", user.profile_picture_url);

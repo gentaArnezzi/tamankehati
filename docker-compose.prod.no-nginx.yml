@@ -1,5 +1,4 @@
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:15-alpine
     container_name: kehati-postgres-prod
@@ -7,9 +6,6 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-kehati_db}
       POSTGRES_USER: ${POSTGRES_USER:-kehati_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kehati_password}
-    # Security: Database not exposed externally - only accessible via Docker network
-    # ports:
-    #   - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -22,14 +18,10 @@ services:
       - kehati-network
     restart: unless-stopped
 
-  # Redis for caching and sessions
   redis:
     image: redis:7-alpine
     container_name: kehati-redis-prod
     command: redis-server --appendonly yes
-    # Security: Redis not exposed externally - only accessible via Docker network
-    # ports:
-    #   - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
     healthcheck:
@@ -41,7 +33,6 @@ services:
       - kehati-network
     restart: unless-stopped
 
-  # Backend API - Production
   backend:
     build:
       context: ./apps/backend
@@ -49,42 +40,24 @@ services:
       target: production
     container_name: kehati-backend-prod
     environment:
-      # Database
       DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
       DATABASE_URL_SYNC: postgresql://${POSTGRES_USER:-kehati_user}:${POSTGRES_PASSWORD:-kehati_password}@postgres:5432/${POSTGRES_DB:-kehati_db}
-      
-      # Redis
       REDIS_URL: redis://redis:6379
-      
-      # Security
       SECRET_KEY: ${SECRET_KEY}
       ALGORITHM: ${ALGORITHM:-HS256}
       ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      
-      # CORS - Support IP-based access via the public Nginx endpoint
-      # Format: http://YOUR_SERVER_IP:8080 or comma-separated list
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
       CORS_ALLOW_ORIGINS: ${CORS_ALLOW_ORIGINS:-${CORS_ORIGINS:-http://localhost:3000}}
-      
-      # Environment
       ENVIRONMENT: production
       DEBUG: "false"
-      
-      # Upload
       UPLOAD_DIRECTORY: /app/uploads
-      
-      # Logging
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       LOG_FORMAT: ${LOG_FORMAT:-json}
-      
-      # Firewall (optional)
       FIREWALL_ENABLED: ${FIREWALL_ENABLED:-false}
       FIREWALL_MODE: ${FIREWALL_MODE:-blacklist}
       IP_WHITELIST: ${IP_WHITELIST:-}
       IP_BLACKLIST: ${IP_BLACKLIST:-}
       FIREWALL_BYPASS_PATHS: ${FIREWALL_BYPASS_PATHS:-/health,/healthz,/api/health}
-      
-      # Ollama Configuration (for AI functionality)
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.1:8b}
     ports:
@@ -105,34 +78,27 @@ services:
     networks:
       - kehati-network
     restart: unless-stopped
-    # Entrypoint and command are handled by Dockerfile start.sh script
 
-  # Frontend Next.js - Production
   frontend:
     build:
       context: ./apps/frontend
       dockerfile: Dockerfile
       target: runner
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
     container_name: kehati-frontend-prod
     environment:
-      # Public URL configuration for Next.js runtime and metadata
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
-      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:${NGINX_PORT:-8080}}
-      
-      # Environment
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://${SERVER_IP:-103.125.91.16}:8080}
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: 1
-    # Frontend is published through the nginx service on port 8080
     ports:
       - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
     depends_on:
       backend:
         condition: service_healthy
     healthcheck:
-      # Use wget instead of curl (more reliable in alpine)
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1"]
       interval: 30s
       timeout: 10s
@@ -142,17 +108,12 @@ services:
       - kehati-network
     restart: unless-stopped
 
-  # Ollama LLM Service (Optional - for AI functionality)
   ollama:
     image: ollama/ollama:latest
     container_name: kehati-ollama-prod
     profiles: ["ai"]
     volumes:
       - ollama_data:/root/.ollama
-    # Security: Ollama not exposed externally by default
-    # Uncomment port if you need external access to Ollama
-    # ports:
-    #   - "${OLLAMA_PORT:-11434}:11434"
     networks:
       - kehati-network
     restart: unless-stopped
@@ -162,38 +123,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    # Optional: GPU support (uncomment if server has NVIDIA GPU)
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
-
-  # Nginx Reverse Proxy
-  nginx:
-    image: nginx:alpine
-    container_name: kehati-nginx-prod
-    ports:
-      - "${NGINX_PORT:-8080}:80"
-    volumes:
-      - ./deploy-package/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./deploy-package/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      backend:
-        condition: service_healthy
-      frontend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
-    networks:
-      - kehati-network
-    restart: unless-stopped
 
 volumes:
   postgres_data:
