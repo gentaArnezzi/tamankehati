@@ -51,16 +51,20 @@ jobs:
           echo ""
           echo "To enable deployment later:"
           echo "1. Go to repository Settings → Secrets and variables → Actions"
-          echo "2. Add: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY"
+          echo "2. Add: DEPLOY_HOST, DEPLOY_USER, DEPLOY_SSH_KEY (raw SSH private key content)"
           echo "3. Push to main branch again"
           echo ""
           echo "Workflow completed successfully (deployment skipped)."
 
-      - name: Setup SSH
+      - name: Setup SSH key
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$DEPLOY_SSH_KEY" | perl -0pe 's/\r//g; s/\\n/\n/g' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
 
       - name: Add server to known hosts
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
@@ -243,4 +247,3 @@ jobs:
             docker compose -f docker-compose.prod.yml logs --tail=50
           EOF
         continue-on-error: true
-

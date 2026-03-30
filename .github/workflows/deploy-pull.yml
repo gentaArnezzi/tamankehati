@@ -52,16 +52,20 @@ jobs:
           echo "2. Add these secrets:"
           echo "   - DEPLOY_HOST: 103.125.91.16"
           echo "   - DEPLOY_USER: ubuntu"
-          echo "   - DEPLOY_SSH_KEY: (your SSH private key)"
+          echo "   - DEPLOY_SSH_KEY: (raw SSH private key content, not the server password)"
           echo "3. Push to main branch again"
           echo ""
           echo "See docs/deployment/CI_CD_SETUP.md for detailed guide"
 
-      - name: Setup SSH
+      - name: Setup SSH key
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s' "$DEPLOY_SSH_KEY" | perl -0pe 's/\r//g; s/\\n/\n/g' > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
 
       - name: Add server to known hosts
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
