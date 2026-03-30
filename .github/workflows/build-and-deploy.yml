@@ -156,6 +156,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Normalize registry namespace
+        env:
+          GHCR_NAMESPACE: ${{ secrets.GHCR_NAMESPACE }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          REGISTRY_NAMESPACE=$(printf '%s' "${GHCR_NAMESPACE:-$REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "DOCKER_USERNAME=$REGISTRY_NAMESPACE" >> $GITHUB_ENV
+          echo "Using registry namespace: $REGISTRY_NAMESPACE"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -323,6 +332,16 @@ jobs:
           echo "   - GHCR_USERNAME: (optional, for server-side ghcr login)"
           echo "   - GHCR_TOKEN: (optional, if GHCR package is private)"
           echo "3. Push to main branch again"
+
+      - name: Normalize registry namespace
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        env:
+          GHCR_NAMESPACE: ${{ secrets.GHCR_NAMESPACE }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          REGISTRY_NAMESPACE=$(printf '%s' "${GHCR_NAMESPACE:-$REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "DOCKER_USERNAME=$REGISTRY_NAMESPACE" >> $GITHUB_ENV
+          echo "Using registry namespace: $REGISTRY_NAMESPACE"
 
       - name: Setup SSH key
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
@@ -728,6 +747,16 @@ jobs:
             echo "✅ Rollback prerequisites met"
             echo "deploy_skipped=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Normalize registry namespace
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        env:
+          GHCR_NAMESPACE: ${{ secrets.GHCR_NAMESPACE }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+        run: |
+          REGISTRY_NAMESPACE=$(printf '%s' "${GHCR_NAMESPACE:-$REPOSITORY_OWNER}" | tr '[:upper:]' '[:lower:]')
+          echo "DOCKER_USERNAME=$REGISTRY_NAMESPACE" >> $GITHUB_ENV
+          echo "Using registry namespace: $REGISTRY_NAMESPACE"
 
       - name: Setup SSH key
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
