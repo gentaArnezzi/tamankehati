@@ -28,9 +28,9 @@ env:
   DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
   DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '5617' }}
   DOCKER_COMPOSE_FILE: docker-compose.pull.yml
-  APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'http://103.125.91.16:8080' }}
-  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16:8080' }}
-  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16:8080' }}
+  APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'http://103.125.91.16' }}
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16' }}
+  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16' }}
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "22.x"
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -458,11 +458,37 @@ jobs:
             
             # Wait for services to be ready
             echo "⏳ Waiting for services to initialize..."
-            sleep 15
+            sleep 20
             
             # Run database migrations
             echo "🗄️  Running database migrations..."
             docker compose -f "$COMPOSE_FILE" exec -T backend alembic upgrade head || echo "⚠️  Migration failed, but continuing..."
+            
+            # Patch frontend JS bundles to use port 80 instead of 8080
+            echo "🔧 Patching frontend JS bundles (replacing :8080 → port 80)..."
+            FRONTEND_CONTAINER=$(docker compose -f "$COMPOSE_FILE" ps -q frontend 2>/dev/null || docker ps --filter 'name=kehati-frontend' -q)
+            if [ -n "$FRONTEND_CONTAINER" ]; then
+              docker exec "$FRONTEND_CONTAINER" sh -c "
+                FILES=\$(find /app/.next -type f \( -name '*.js' -o -name '*.html' -o -name '*.rsc' \) 2>/dev/null | xargs grep -l '103.125.91.16:8080' 2>/dev/null)
+                if [ -n \"\$FILES\" ]; then
+                  echo \"\$FILES\" | while read f; do
+                    sed -i 's|http://103.125.91.16:8080|http://103.125.91.16|g' \"\$f\"
+                  done
+                  echo 'Patched JS bundles successfully'
+                else
+                  echo 'No files to patch (already clean)'
+                fi
+                # Also patch fetch-cache
+                find /app/.next/cache -type f 2>/dev/null | xargs grep -l '103.125.91.16:8080' 2>/dev/null | while read f; do
+                  sed -i 's|http://103.125.91.16:8080|http://103.125.91.16|g' \"\$f\"
+                done
+                # Update timestamps to bust browser cache
+                find /app/.next/static -name '*.js' -exec touch {} \; 2>/dev/null || true
+              " 2>&1 || echo "⚠️ Frontend patch failed (non-critical)"
+              echo "✅ Frontend JS bundles patched"
+            else
+              echo "⚠️ Frontend container not found, skipping patch"
+            fi
             
             echo ""
             if [ $DEPLOY_SUCCESS -eq 0 ]; then
