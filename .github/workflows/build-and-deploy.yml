@@ -388,7 +388,7 @@ jobs:
           echo "DOCKER_USERNAME=$REGISTRY_NAMESPACE" >> $GITHUB_ENV
           echo "Using registry namespace: $REGISTRY_NAMESPACE"
 
-- name: Setup SSH key
+      - name: Setup SSH key
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
