@@ -459,20 +459,60 @@ jobs:
               echo "$GHCR_TOKEN" | docker login "$DOCKER_REGISTRY" -u "$GHCR_USER" --password-stdin 2>&1
             fi
             
-            # Create .env file if not exists
+            # Create/update .env file with proper values
             echo "Setting up environment variables..."
-            if [ ! -f .env ]; then
-              printf 'DOCKER_REGISTRY=%s\nDOCKER_USERNAME=%s\nIMAGE_TAG=%s\nNEXT_PUBLIC_API_URL=%s\nNEXT_PUBLIC_SITE_URL=%s\nPOSTGRES_DB=kehati_db\nPOSTGRES_USER=kehati_user\nPOSTGRES_PASSWORD=kehati_password\nSECRET_KEY=changeme-production-secret-key-min-32-chars\nALGORITHM=HS256\nACCESS_TOKEN_EXPIRE_MINUTES=30\nCORS_ORIGINS=%s\nBACKEND_PORT=8000\nFRONTEND_PORT=3001\nENVIRONMENT=production\nDEBUG=false\nOLLAMA_MODEL=qwen2:1.5b\n' "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$IMAGE_TAG" "$NEXT_PUBLIC_SITE_URL" "$NEXT_PUBLIC_SITE_URL" "$NEXT_PUBLIC_SITE_URL" > .env
-              echo "Created .env file"
+            
+            # Check existing postgres container credentials by inspecting it
+            # If postgres is already running, get its actual credentials
+            RUNNING_PG=$(docker ps -q --filter "name=tamankehati-postgres")
+            if [ -n "$RUNNING_PG" ]; then
+              # Use docker inspect to get the environment from running container
+              POSTGRES_USER=$(docker inspect tamankehati-postgres-prod --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "POSTGRES_USER"}}{{index (split . "=") 1}}{{end}}{{end}}')
+              POSTGRES_PASSWORD=$(docker inspect tamankehati-postgres-prod --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "POSTGRES_PASSWORD"}}{{index (split . "=") 1}}{{end}}{{end}}')
+              POSTGRES_DB=$(docker inspect tamankehati-postgres-prod --format '{{range .Config.Env}}{{if eq (index (split . "=") 0) "POSTGRES_DB"}}{{index (split . "=") 1}}{{end}}{{end}}')
+              echo "Using existing postgres credentials from running container"
             else
-              echo ".env file already exists"
-              # Update IMAGE_TAG in existing .env
-              if grep -q "^IMAGE_TAG=" .env; then
-                sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
-              else
-                echo "IMAGE_TAG=$IMAGE_TAG" >> .env
-              fi
+              POSTGRES_USER="kehati_user"
+              POSTGRES_PASSWORD="kehati_password"
+              POSTGRES_DB="kehati_db"
             fi
+            
+            # Generate or keep secret key
+            if [ -f .env ]; then
+              EXISTING_SECRET=$(grep "^SECRET_KEY=" .env | cut -d'=' -f2-)
+              if [ -z "$EXISTING_SECRET" ] || [ "$EXISTING_SECRET" == "changeme-production-secret-key-min-32-chars" ]; then
+                SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "changeme-$(date +%s)-secret-key-min-32-chars")
+              else
+                SECRET_KEY="$EXISTING_SECRET"
+              fi
+            else
+              SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(32))" 2>/dev/null || echo "changeme-$(date +%s)-secret-key-min-32-chars")
+            fi
+            
+            # Create complete .env file
+            cat > .env << ENVEOF
+DOCKER_REGISTRY=$DOCKER_REGISTRY
+DOCKER_USERNAME=$DOCKER_USERNAME
+IMAGE_TAG=$IMAGE_TAG
+POSTGRES_DB=kehati_db
+POSTGRES_USER=$POSTGRES_USER
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+SECRET_KEY=$SECRET_KEY
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+CORS_ORIGINS=$NEXT_PUBLIC_SITE_URL
+BACKEND_PORT=8000
+FRONTEND_PORT=3001
+ENVIRONMENT=production
+DEBUG=false
+OLLAMA_MODEL=qwen2:1.5b
+NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+REDIS_URL=redis://redis:6379
+DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+DATABASE_URL_SYNC=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+ENVEOF
+            echo "Created/Updated .env file"
             
             # Pull latest images
             echo "Pulling Docker images..."
