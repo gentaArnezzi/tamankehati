@@ -455,25 +455,7 @@ jobs:
             # Create .env file if not exists
             echo "Setting up environment variables..."
             if [ ! -f .env ]; then
-              cat > .env << 'ENVEOF'
-DOCKER_REGISTRY=${DOCKER_REGISTRY}
-DOCKER_USERNAME=${DOCKER_USERNAME}
-IMAGE_TAG=${IMAGE_TAG}
-NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_SITE_URL}
-NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
-POSTGRES_DB=kehati_db
-POSTGRES_USER=kehati_user
-POSTGRES_PASSWORD=kehati_password
-SECRET_KEY=changeme-production-secret-key-min-32-chars
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-CORS_ORIGINS=${NEXT_PUBLIC_SITE_URL}
-BACKEND_PORT=8000
-FRONTEND_PORT=3001
-ENVIRONMENT=production
-DEBUG=false
-OLLAMA_MODEL=qwen2:1.5b
-ENVEOF
+              printf 'DOCKER_REGISTRY=%s\nDOCKER_USERNAME=%s\nIMAGE_TAG=%s\nNEXT_PUBLIC_API_URL=%s\nNEXT_PUBLIC_SITE_URL=%s\nPOSTGRES_DB=kehati_db\nPOSTGRES_USER=kehati_user\nPOSTGRES_PASSWORD=kehati_password\nSECRET_KEY=changeme-production-secret-key-min-32-chars\nALGORITHM=HS256\nACCESS_TOKEN_EXPIRE_MINUTES=30\nCORS_ORIGINS=%s\nBACKEND_PORT=8000\nFRONTEND_PORT=3001\nENVIRONMENT=production\nDEBUG=false\nOLLAMA_MODEL=qwen2:1.5b\n' "$DOCKER_REGISTRY" "$DOCKER_USERNAME" "$IMAGE_TAG" "$NEXT_PUBLIC_SITE_URL" "$NEXT_PUBLIC_SITE_URL" "$NEXT_PUBLIC_SITE_URL" > .env
               echo "Created .env file"
             else
               echo ".env file already exists"
