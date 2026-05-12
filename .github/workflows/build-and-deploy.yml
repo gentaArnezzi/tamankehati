@@ -406,6 +406,13 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Copy docker-compose file to server
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          scp -P ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            deployment-package/docker-compose.pull.no-nginx.yml \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/${{ secrets.DEPLOY_USER }}/docker-compose.pull.no-nginx.yml
+
       - name: Deploy to Server
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         env:
@@ -530,6 +537,13 @@ jobs:
           echo "tag=$CUR_TAG" >> $GITHUB_OUTPUT
           echo "Current deployed tag: $CUR_TAG"
 
+      - name: Copy docker-compose file to server (rollback)
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          scp -P ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no \
+            deployment-package/docker-compose.pull.no-nginx.yml \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:/home/${{ secrets.DEPLOY_USER }}/docker-compose.pull.no-nginx.yml
+
       - name: Rollback to previous image
         if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
         env:
@@ -537,7 +551,7 @@ jobs:
           GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
         run: |
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' bash" << 'ROLLBACK_SCRIPT'
+            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' DEPLOY_USER='${{ secrets.DEPLOY_USER }}' bash" << 'ROLLBACK_SCRIPT'
             set +e
             cd "$DEPLOY_PATH"
             
@@ -545,6 +559,19 @@ jobs:
             echo "🔄 Starting Rollback"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
+            
+            # Copy docker-compose file if not exists
+            if [ ! -f "$COMPOSE_FILE" ]; then
+              echo "Copying docker-compose file..."
+              if [ -f "/home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml" ]; then
+                cp /home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
+              elif [ -f "docker-compose.pull.no-nginx.yml" ]; then
+                cp docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
+              else
+                echo "docker-compose.pull.no-nginx.yml not found!"
+                exit 1
+              fi
+            fi
             
             # Get previous tag from .env backup or use latest
             if [ -f .env ]; then
