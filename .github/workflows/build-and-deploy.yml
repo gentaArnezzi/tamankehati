@@ -455,38 +455,23 @@ jobs:
             # Create .env file if not exists
             echo "Setting up environment variables..."
             if [ ! -f .env ]; then
-              cat > .env << ENVEOF
-# Docker Registry Configuration
-DOCKER_REGISTRY=$$DOCKER_REGISTRY
-DOCKER_USERNAME=$$DOCKER_USERNAME
-IMAGE_TAG=$$IMAGE_TAG
-
-# Environment Configuration
-NEXT_PUBLIC_API_URL=$$NEXT_PUBLIC_SITE_URL
-NEXT_PUBLIC_SITE_URL=$$NEXT_PUBLIC_SITE_URL
-
-# Database Configuration (use existing values if available)
+              cat > .env << 'ENVEOF'
+DOCKER_REGISTRY=${DOCKER_REGISTRY}
+DOCKER_USERNAME=${DOCKER_USERNAME}
+IMAGE_TAG=${IMAGE_TAG}
+NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_SITE_URL}
+NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL}
 POSTGRES_DB=kehati_db
 POSTGRES_USER=kehati_user
 POSTGRES_PASSWORD=kehati_password
-
-# Security
 SECRET_KEY=changeme-production-secret-key-min-32-chars
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-
-# CORS
-CORS_ORIGINS=$$NEXT_PUBLIC_SITE_URL
-
-# Backend
+CORS_ORIGINS=${NEXT_PUBLIC_SITE_URL}
 BACKEND_PORT=8000
 FRONTEND_PORT=3001
-
-# Environment
 ENVIRONMENT=production
 DEBUG=false
-
-# Ollama
 OLLAMA_MODEL=qwen2:1.5b
 ENVEOF
               echo "Created .env file"
