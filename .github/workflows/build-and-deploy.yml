@@ -406,8 +406,165 @@ jobs:
           mkdir -p ~/.ssh
           ssh-keyscan -p ${{ env.DEPLOY_PORT }} -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Rollback to previous image
+      - name: Deploy to Server
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        env:
+          GHCR_LOGIN_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
+          GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
+        run: |
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
+            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' DEPLOY_USER='${{ secrets.DEPLOY_USER }}' IMAGE_TAG='${{ env.IMAGE_TAG }}' NEXT_PUBLIC_API_URL='${{ steps.public_urls.outputs.api_url }}' NEXT_PUBLIC_SITE_URL='${{ steps.public_urls.outputs.site_url }}' bash" << 'DEPLOY_SCRIPT'
+            set -e
+            
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🚀 Starting Deployment"
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo ""
+            
+            # Create deployment directory if not exists
+            echo "📁 Creating deployment directory..."
+            if [ ! -d "$DEPLOY_PATH" ]; then
+              sudo mkdir -p "$DEPLOY_PATH"
+              sudo chown -R $(whoami):$(whoami) "$DEPLOY_PATH"
+              echo "✅ Created directory: $DEPLOY_PATH"
+            else
+              echo "✅ Directory already exists: $DEPLOY_PATH"
+            fi
+            
+            cd "$DEPLOY_PATH"
+            
+            # Copy docker-compose file if not exists
+            if [ ! -f "$COMPOSE_FILE" ]; then
+              echo "📦 Copying docker-compose file..."
+              if [ -f "/home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml" ]; then
+                cp /home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
+              elif [ -f "docker-compose.pull.no-nginx.yml" ]; then
+                cp docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
+              else
+                echo "❌ docker-compose.pull.no-nginx.yml not found!"
+                exit 1
+              fi
+            fi
+            
+            # Login to GHCR (required for private packages)
+            echo "🔑 Logging into GitHub Container Registry..."
+            if [ -n "$GHCR_TOKEN" ]; then
+              echo "$GHCR_TOKEN" | docker login "$DOCKER_REGISTRY" -u "$GHCR_USER" --password-stdin 2>&1
+            fi
+            
+            # Create .env file if not exists
+            echo "⚙️  Setting up environment variables..."
+            if [ ! -f .env ]; then
+              cat > .env << ENVEOF
+# Docker Registry Configuration
+DOCKER_REGISTRY=$DOCKER_REGISTRY
+DOCKER_USERNAME=$DOCKER_USERNAME
+IMAGE_TAG=$IMAGE_TAG
+
+# Environment Configuration
+NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
+# Database Configuration (use existing values if available)
+POSTGRES_DB=kehati_db
+POSTGRES_USER=kehati_user
+POSTGRES_PASSWORD=kehati_password
+
+# Security
+SECRET_KEY=changeme-production-secret-key-min-32-chars
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# CORS
+CORS_ORIGINS=$NEXT_PUBLIC_SITE_URL
+
+# Backend
+BACKEND_PORT=8000
+FRONTEND_PORT=3001
+
+# Environment
+ENVIRONMENT=production
+DEBUG=false
+
+# Ollama
+OLLAMA_MODEL=qwen2:1.5b
+ENVEOF
+              echo "✅ Created .env file"
+            else
+              echo "✅ .env file already exists"
+              # Update IMAGE_TAG in existing .env
+              if grep -q "^IMAGE_TAG=" .env; then
+                sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
+              else
+                echo "IMAGE_TAG=$IMAGE_TAG" >> .env
+              fi
+            fi
+            
+            # Pull latest images
+            echo "🐳 Pulling Docker images..."
+            export IMAGE_TAG=$IMAGE_TAG
+            docker compose -f "$COMPOSE_FILE" pull
+            
+            # Stop existing containers
+            echo "🛑 Stopping existing containers..."
+            docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
+            
+            # Start services
+            echo "▶️  Starting services..."
+            docker compose -f "$COMPOSE_FILE" up -d
+            
+            # Wait for services to be ready
+            echo "⏳ Waiting for services to initialize..."
+            sleep 15
+            
+            echo ""
+            echo "✅ Deployment completed successfully!"
+            echo "📦 Deployed images with tag: $IMAGE_TAG"
+          DEPLOY_SCRIPT
+
+      - name: Verify deployment
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            echo "🔍 Verifying deployment..."
+            
+            BACKEND_URL="http://localhost:8000/health"
+            MAX_RETRIES=10
+            RETRY_COUNT=0
+            
+            while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+              if curl -f -s $BACKEND_URL > /dev/null 2>&1; then
+                echo "✅ Backend health check passed"
+                exit 0
+              fi
+              
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "⏳ Service not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              sleep 5
+            done
+            
+            echo "⚠️ Backend health check failed"
+            exit 1
+          EOF
+
+      - name: Get current tag for rollback
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        id: current_tag
+        run: |
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            cd ${{ env.DEPLOY_PATH }}
+            if [ -f .env ] && grep -q "^IMAGE_TAG=" .env; then
+              grep "^IMAGE_TAG=" .env | cut -d'=' -f2
+            else
+              echo "latest"
+            fi
+          EOF > /tmp/current_tag.txt
+          CUR_TAG=$(cat /tmp/current_tag.txt | tr -d '\n')
+          echo "tag=$CUR_TAG" >> $GITHUB_OUTPUT
+          echo "Current deployed tag: $CUR_TAG"
+
+      - name: Rollback to previous image
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
         env:
           GHCR_LOGIN_TOKEN: ${{ secrets.GHCR_TOKEN || secrets.GITHUB_TOKEN }}
           GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
@@ -491,7 +648,7 @@ jobs:
           ROLLBACK_SCRIPT
 
       - name: Verify rollback
-        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🔍 Verifying rollback..."
@@ -516,7 +673,7 @@ jobs:
           EOF
 
       - name: Get previous tag for rollback notification
-        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: previous_tag_notify
         run: |
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
@@ -531,14 +688,14 @@ jobs:
           echo "tag=$PREV_TAG" >> $GITHUB_OUTPUT
 
       - name: Get rollback timestamp
-        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false'
         id: rollback_time
         run: |
           TIMESTAMP=$(TZ='Asia/Jakarta' date +'%d %b %Y, %H:%M WIB')
           echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
 
       - name: Notify rollback
-        if: steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
+        if: failure() && steps.check_prereqs.outputs.deploy_skipped == 'false' && env.TELEGRAM_BOT_TOKEN != '' && env.TELEGRAM_CHAT_ID != ''
         uses: appleboy/telegram-action@master
         with:
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
