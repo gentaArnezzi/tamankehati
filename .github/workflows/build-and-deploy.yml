@@ -479,13 +479,17 @@ jobs:
             export IMAGE_TAG=$IMAGE_TAG
             docker compose -f "$COMPOSE_FILE" pull
             
-            # Stop existing containers
-            echo "Stopping existing containers..."
-            docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
+            # Stop and remove existing containers
+            echo "Stopping and removing existing containers..."
+            docker compose -f "$COMPOSE_FILE" down --timeout 30 --remove-orphans 2>/dev/null || true
+            
+            # Remove any orphaned containers that might cause conflicts
+            echo "Cleaning up orphaned containers..."
+            docker ps -a --filter "name=tamankehati-" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
             
             # Start services
             echo "Starting services..."
-            docker compose -f "$COMPOSE_FILE" up -d
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
             
             # Wait for services to be ready
             echo "Waiting for services to initialize..."
@@ -621,13 +625,17 @@ jobs:
               }
             }
             
-            # Stop existing containers
+            # Stop and remove existing containers
             echo "🛑 Stopping existing containers..."
-            docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
+            docker compose -f "$COMPOSE_FILE" down --timeout 30 --remove-orphans 2>/dev/null || true
+            
+            # Remove any orphaned containers that might cause conflicts
+            echo "Cleaning up orphaned containers..."
+            docker ps -a --filter "name=tamankehati-" --format "{{.ID}}" | xargs -r docker rm -f 2>/dev/null || true
             
             # Start services with previous image
             echo "▶️  Starting services with previous image..."
-            docker compose -f "$COMPOSE_FILE" up -d || {
+            docker compose -f "$COMPOSE_FILE" up -d --remove-orphans || {
               echo "❌ Failed to start services"
               exit 1
             }
