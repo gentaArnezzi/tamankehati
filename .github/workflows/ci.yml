@@ -220,8 +220,8 @@ jobs:
       - name: Build frontend
         working-directory: apps/frontend
         env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16:8080' }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16:8080' }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://tamankehati.tspdigital.id' }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://tamankehati.tspdigital.id' }}
         run: |
           echo "Building frontend..."
           # Build should succeed even with ESLint/TypeScript warnings (handled in next.config.js)
@@ -237,8 +237,8 @@ jobs:
           docker build \
             --target runner \
             --tag frontend-test \
-            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16:8080' }} \
-            --build-arg NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16:8080' }} \
+            --build-arg NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL || 'https://tamankehati.tspdigital.id' }} \
+            --build-arg NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://tamankehati.tspdigital.id' }} \
             -f apps/frontend/Dockerfile \
             apps/frontend || {
               echo "❌ Frontend Docker build failed"

@@ -14,7 +14,7 @@ on:
 env:
   DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
   DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '5617' }}
-  DOCKER_COMPOSE_FILE: docker-compose.pull.yml
+  DOCKER_COMPOSE_FILE: docker-compose.pull.no-nginx.yml
 
 jobs:
   deploy:
@@ -63,9 +63,13 @@ jobs:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           mkdir -p ~/.ssh
-          printf '%s' "$DEPLOY_SSH_KEY" | perl -0pe 's/\r//g; s/\\n/\n/g' > ~/.ssh/id_ed25519
+          if echo "$DEPLOY_SSH_KEY" | grep -qE '^[A-Za-z0-9+/]+=*$'; then
+            echo "$DEPLOY_SSH_KEY" | base64 -d > ~/.ssh/id_ed25519
+          else
+            printf '%s' "$DEPLOY_SSH_KEY" | perl -0pe 's/\r//g; s/\\n/\n/g' > ~/.ssh/id_ed25519
+          fi
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null
+          ssh-keygen -y -f ~/.ssh/id_ed25519 > /dev/null || { echo "SSH key validation failed"; exit 1; }
 
       - name: Add server to known hosts
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
@@ -125,14 +129,42 @@ jobs:
             echo "✅ Deployment completed!"
             DEPLOY_SCRIPT
 
+      - name: Verify frontend bundle URL
+        if: steps.check_prereqs.outputs.deploy_skipped == 'false'
+        run: |
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+            echo "🔎 Verifying frontend bundle URL configuration..."
+
+            FRONTEND_CONTAINER=$(docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} ps -q frontend 2>/dev/null)
+            if [ -z "$FRONTEND_CONTAINER" ]; then
+              FRONTEND_CONTAINER=$(docker ps --filter "name=tamankehati-frontend" -q | head -n 1)
+            fi
+
+            if [ -z "$FRONTEND_CONTAINER" ]; then
+              echo "⚠️  Frontend container not found, skipping bundle verification"
+              exit 0
+            fi
+
+            docker exec "$FRONTEND_CONTAINER" sh -lc '
+              if grep -R -q -E "103\.125\.91\.16:8080|127\.0\.0\.1:8081" /app/.next 2>/dev/null; then
+                echo "❌ Stale frontend endpoint found in built bundle"
+                exit 1
+              fi
+              echo "✅ No stale frontend endpoint found"
+            '
+          EOF
+
       - name: Health check - Backend
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             set -e
             echo "🏥 Checking backend health..."
             
-            BACKEND_URL="http://localhost:8000/health"
+            cd "${{ env.DEPLOY_PATH }}"
+            BACKEND_PORT=$(grep -E '^BACKEND_PORT=' .env 2>/dev/null | tail -n 1 | cut -d '=' -f2-)
+            BACKEND_URL="http://127.0.0.1:${BACKEND_PORT:-8000}/health"
             MAX_RETRIES=10
             RETRY_COUNT=0
             
@@ -154,11 +186,13 @@ jobs:
       - name: Health check - Frontend
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             set -e
             echo "🌐 Checking frontend health..."
             
-            FRONTEND_URL="http://localhost:3000"
+            cd "${{ env.DEPLOY_PATH }}"
+            FRONTEND_PORT=$(grep -E '^FRONTEND_PORT=' .env 2>/dev/null | tail -n 1 | cut -d '=' -f2-)
+            FRONTEND_URL="http://127.0.0.1:${FRONTEND_PORT:-3000}"
             MAX_RETRIES=10
             RETRY_COUNT=0
             
@@ -180,11 +214,16 @@ jobs:
       - name: Health check - Public API
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             set -e
             echo "🔍 Checking public API..."
-            
-            API_URL="http://103.125.91.16:8080/health"
+
+            BASE_URL=$(grep -E '^NEXT_PUBLIC_SITE_URL=' .env 2>/dev/null | tail -n 1 | cut -d '=' -f2-)
+            if [ -z "$BASE_URL" ]; then
+              BASE_URL="https://tamankehati.tspdigital.id"
+            fi
+            BASE_URL="${BASE_URL%/}"
+            API_URL="${BASE_URL}/health"
             MAX_RETRIES=5
             RETRY_COUNT=0
             
@@ -206,26 +245,31 @@ jobs:
       - name: Verify deployment
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+          ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo "📊 Deployment Verification"
             echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
             echo ""
             echo "🐳 Docker containers status:"
-            docker compose -f docker-compose.pull.yml ps
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} ps
             echo ""
             echo "📋 Recent logs:"
-            docker compose -f docker-compose.pull.yml logs --tail=10
+            docker compose -f ${{ env.DOCKER_COMPOSE_FILE }} logs --tail=10
           EOF
 
       - name: Deployment summary
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
+          BASE_URL="https://tamankehati.tspdigital.id"
+          if [ -f .env ]; then
+            BASE_URL=$(grep -E '^NEXT_PUBLIC_SITE_URL=' .env | tail -n 1 | cut -d '=' -f2-)
+          fi
+          BASE_URL=${BASE_URL%/}
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo "✅ Deployment Completed Successfully!"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
           echo ""
-          echo "🌐 Application URL: http://103.125.91.16:8080"
-          echo "🏥 Health Check: http://103.125.91.16:8080/health"
+          echo "🌐 Application URL: ${BASE_URL}"
+          echo "🏥 Health Check: ${BASE_URL}/health"
           echo ""
           echo "All services should be running and healthy."

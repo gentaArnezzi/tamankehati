@@ -9,7 +9,7 @@ on:
   workflow_dispatch: # Allow manual trigger
 
 env:
-  API_URL: "http://103.125.91.16:8080"
+  API_URL: "https://tamankehati.tspdigital.id"
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
   TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
