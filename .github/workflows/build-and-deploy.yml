@@ -416,44 +416,44 @@ jobs:
             "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' DEPLOY_USER='${{ secrets.DEPLOY_USER }}' IMAGE_TAG='${{ env.IMAGE_TAG }}' NEXT_PUBLIC_API_URL='${{ steps.public_urls.outputs.api_url }}' NEXT_PUBLIC_SITE_URL='${{ steps.public_urls.outputs.site_url }}' bash" << 'DEPLOY_SCRIPT'
             set -e
             
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-            echo "🚀 Starting Deployment"
-            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "=========================================="
+            echo "Starting Deployment"
+            echo "=========================================="
             echo ""
             
             # Create deployment directory if not exists
-            echo "📁 Creating deployment directory..."
+            echo "Creating deployment directory..."
             if [ ! -d "$DEPLOY_PATH" ]; then
               sudo mkdir -p "$DEPLOY_PATH"
               sudo chown -R $(whoami):$(whoami) "$DEPLOY_PATH"
-              echo "✅ Created directory: $DEPLOY_PATH"
+              echo "Created directory: $DEPLOY_PATH"
             else
-              echo "✅ Directory already exists: $DEPLOY_PATH"
+              echo "Directory already exists: $DEPLOY_PATH"
             fi
             
             cd "$DEPLOY_PATH"
             
             # Copy docker-compose file if not exists
             if [ ! -f "$COMPOSE_FILE" ]; then
-              echo "📦 Copying docker-compose file..."
+              echo "Copying docker-compose file..."
               if [ -f "/home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml" ]; then
                 cp /home/$DEPLOY_USER/docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
               elif [ -f "docker-compose.pull.no-nginx.yml" ]; then
                 cp docker-compose.pull.no-nginx.yml "$COMPOSE_FILE"
               else
-                echo "❌ docker-compose.pull.no-nginx.yml not found!"
+                echo "docker-compose.pull.no-nginx.yml not found!"
                 exit 1
               fi
             fi
             
             # Login to GHCR (required for private packages)
-            echo "🔑 Logging into GitHub Container Registry..."
+            echo "Logging into GitHub Container Registry..."
             if [ -n "$GHCR_TOKEN" ]; then
               echo "$GHCR_TOKEN" | docker login "$DOCKER_REGISTRY" -u "$GHCR_USER" --password-stdin 2>&1
             fi
             
             # Create .env file if not exists
-            echo "⚙️  Setting up environment variables..."
+            echo "Setting up environment variables..."
             if [ ! -f .env ]; then
               cat > .env << ENVEOF
 # Docker Registry Configuration
@@ -489,9 +489,9 @@ DEBUG=false
 # Ollama
 OLLAMA_MODEL=qwen2:1.5b
 ENVEOF
-              echo "✅ Created .env file"
+              echo "Created .env file"
             else
-              echo "✅ .env file already exists"
+              echo ".env file already exists"
               # Update IMAGE_TAG in existing .env
               if grep -q "^IMAGE_TAG=" .env; then
                 sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=$IMAGE_TAG|" .env
@@ -501,32 +501,32 @@ ENVEOF
             fi
             
             # Pull latest images
-            echo "🐳 Pulling Docker images..."
+            echo "Pulling Docker images..."
             export IMAGE_TAG=$IMAGE_TAG
             docker compose -f "$COMPOSE_FILE" pull
             
             # Stop existing containers
-            echo "🛑 Stopping existing containers..."
+            echo "Stopping existing containers..."
             docker compose -f "$COMPOSE_FILE" down --timeout 30 || true
             
             # Start services
-            echo "▶️  Starting services..."
+            echo "Starting services..."
             docker compose -f "$COMPOSE_FILE" up -d
             
             # Wait for services to be ready
-            echo "⏳ Waiting for services to initialize..."
+            echo "Waiting for services to initialize..."
             sleep 15
             
             echo ""
-            echo "✅ Deployment completed successfully!"
-            echo "📦 Deployed images with tag: $IMAGE_TAG"
+            echo "Deployment completed successfully!"
+            echo "Deployed images with tag: $IMAGE_TAG"
           DEPLOY_SCRIPT
 
       - name: Verify deployment
         if: steps.check_prereqs.outputs.deploy_skipped == 'false'
         run: |
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
-            echo "🔍 Verifying deployment..."
+            echo "Verifying deployment..."
             
             BACKEND_URL="http://localhost:8000/health"
             MAX_RETRIES=10
@@ -534,16 +534,16 @@ ENVEOF
             
             while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
               if curl -f -s $BACKEND_URL > /dev/null 2>&1; then
-                echo "✅ Backend health check passed"
+                echo "Backend health check passed"
                 exit 0
               fi
               
               RETRY_COUNT=$((RETRY_COUNT + 1))
-              echo "⏳ Service not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
+              echo "Service not ready yet, retrying... ($RETRY_COUNT/$MAX_RETRIES)"
               sleep 5
             done
             
-            echo "⚠️ Backend health check failed"
+            echo "Backend health check failed"
             exit 1
           EOF
 
