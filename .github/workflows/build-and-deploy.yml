@@ -27,10 +27,10 @@ env:
   IMAGE_TAG: ${{ github.event.inputs.image_tag || github.sha }}
   DEPLOY_PATH: ${{ secrets.DEPLOY_PATH || '/opt/tamankehati' }}
   DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '5617' }}
-  DOCKER_COMPOSE_FILE: docker-compose.pull.yml
-  APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'http://103.125.91.16' }}
-  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'http://103.125.91.16' }}
-  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'http://103.125.91.16' }}
+  DOCKER_COMPOSE_FILE: docker-compose.pull.no-nginx.yml
+  APP_BASE_URL: ${{ secrets.APP_BASE_URL || 'https://tamankehati.tspdigital.id' }}
+  NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL || 'https://tamankehati.tspdigital.id' }}
+  NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL || 'https://tamankehati.tspdigital.id' }}
   PYTHON_VERSION: "3.11"
   NODE_VERSION: "22.x"
   TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -82,6 +82,21 @@ jobs:
           cache: "npm"
           cache-dependency-path: apps/frontend/package-lock.json
 
+      - name: Normalize public URLs
+        id: public_urls
+        run: |
+          API_URL="${NEXT_PUBLIC_API_URL%/}"
+          API_URL="${API_URL%/api/v1}"
+          API_URL="${API_URL%/api}"
+          SITE_URL="${NEXT_PUBLIC_SITE_URL%/}"
+          SITE_URL="${SITE_URL%/api/v1}"
+          SITE_URL="${SITE_URL%/api}"
+          echo "NEXT_PUBLIC_API_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "APP_BASE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "site_url=$SITE_URL" >> "$GITHUB_OUTPUT"
+
       - name: Install frontend dependencies
         working-directory: apps/frontend
         run: |
@@ -94,8 +109,8 @@ jobs:
       - name: Build frontend (verification)
         working-directory: apps/frontend
         env:
-          NEXT_PUBLIC_API_URL: ${{ env.NEXT_PUBLIC_API_URL }}
-          NEXT_PUBLIC_SITE_URL: ${{ env.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_API_URL: ${{ steps.public_urls.outputs.api_url }}
+          NEXT_PUBLIC_SITE_URL: ${{ steps.public_urls.outputs.site_url }}
         run: |
           echo "Building frontend for verification..."
           npm run build || {
@@ -155,6 +170,21 @@ jobs:
     
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Normalize public URLs
+        id: public_urls
+        run: |
+          API_URL="${NEXT_PUBLIC_API_URL%/}"
+          API_URL="${API_URL%/api/v1}"
+          API_URL="${API_URL%/api}"
+          SITE_URL="${NEXT_PUBLIC_SITE_URL%/}"
+          SITE_URL="${SITE_URL%/api/v1}"
+          SITE_URL="${SITE_URL%/api}"
+          echo "NEXT_PUBLIC_API_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "APP_BASE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "site_url=$SITE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Normalize registry namespace
         env:
@@ -216,8 +246,8 @@ jobs:
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
           build-args: |
-            NEXT_PUBLIC_API_URL=${{ env.NEXT_PUBLIC_API_URL }}
-            NEXT_PUBLIC_SITE_URL=${{ env.NEXT_PUBLIC_SITE_URL }}
+            NEXT_PUBLIC_API_URL=${{ steps.public_urls.outputs.api_url }}
+            NEXT_PUBLIC_SITE_URL=${{ steps.public_urls.outputs.site_url }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
@@ -299,6 +329,21 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Normalize public URLs
+        id: public_urls
+        run: |
+          API_URL="${NEXT_PUBLIC_API_URL%/}"
+          API_URL="${API_URL%/api/v1}"
+          API_URL="${API_URL%/api}"
+          SITE_URL="${NEXT_PUBLIC_SITE_URL%/}"
+          SITE_URL="${SITE_URL%/api/v1}"
+          SITE_URL="${SITE_URL%/api}"
+          echo "NEXT_PUBLIC_API_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "APP_BASE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "site_url=$SITE_URL" >> "$GITHUB_OUTPUT"
 
       - name: Check deployment prerequisites
         id: check_prereqs
@@ -389,7 +434,7 @@ jobs:
           GHCR_LOGIN_USER: ${{ secrets.GHCR_USERNAME || github.actor }}
         run: |
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' IMAGE_TAG='${{ env.IMAGE_TAG }}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' bash" << 'DEPLOY_SCRIPT'
+            "GHCR_TOKEN='${GHCR_LOGIN_TOKEN}' GHCR_USER='${GHCR_LOGIN_USER}' IMAGE_TAG='${{ env.IMAGE_TAG }}' DOCKER_USERNAME='${{ env.DOCKER_USERNAME }}' DOCKER_REGISTRY='${{ env.DOCKER_REGISTRY }}' COMPOSE_FILE='${{ env.DOCKER_COMPOSE_FILE }}' DEPLOY_PATH='${{ env.DEPLOY_PATH }}' NEXT_PUBLIC_API_URL='${{ steps.public_urls.outputs.api_url }}' NEXT_PUBLIC_SITE_URL='${{ steps.public_urls.outputs.site_url }}' APP_BASE_URL='${{ steps.public_urls.outputs.site_url }}' bash" << 'DEPLOY_SCRIPT'
             set +e  # Don't exit on error, we'll handle errors manually
             cd "$DEPLOY_PATH"
             DEPLOY_SUCCESS=0
@@ -410,6 +455,20 @@ jobs:
                 echo "IMAGE_TAG=$IMAGE_TAG" >> .env
               fi
               echo "✅ Updated IMAGE_TAG=$IMAGE_TAG"
+              for pair in \
+                "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
+                "NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL" \
+                "APP_BASE_URL=$APP_BASE_URL" \
+                "CORS_ORIGINS=$APP_BASE_URL"; do
+                key="${pair%%=*}"
+                value="${pair#*=}"
+                if grep -q "^${key}=" .env; then
+                  sed -i "s|^${key}=.*|${key}=${value}|" .env
+                else
+                  echo "${key}=${value}" >> .env
+                fi
+              done
+              echo "✅ Updated public URL env values"
             fi
             
             # Pull latest code (optional, for config updates)
@@ -464,30 +523,19 @@ jobs:
             echo "🗄️  Running database migrations..."
             docker compose -f "$COMPOSE_FILE" exec -T backend alembic upgrade head || echo "⚠️  Migration failed, but continuing..."
             
-            # Patch frontend JS bundles to use port 80 instead of 8080
-            echo "🔧 Patching frontend JS bundles (replacing :8080 → port 80)..."
-            FRONTEND_CONTAINER=$(docker compose -f "$COMPOSE_FILE" ps -q frontend 2>/dev/null || docker ps --filter 'name=kehati-frontend' -q)
+            # Verify the built frontend no longer contains stale public endpoints.
+            echo "🔎 Verifying frontend bundle URL configuration..."
+            FRONTEND_CONTAINER=$(docker compose -f "$COMPOSE_FILE" ps -q frontend 2>/dev/null || docker ps --filter 'name=tamankehati-frontend' -q)
             if [ -n "$FRONTEND_CONTAINER" ]; then
-              docker exec "$FRONTEND_CONTAINER" sh -c "
-                FILES=\$(find /app/.next -type f \( -name '*.js' -o -name '*.html' -o -name '*.rsc' \) 2>/dev/null | xargs grep -l '103.125.91.16:8080' 2>/dev/null)
-                if [ -n \"\$FILES\" ]; then
-                  echo \"\$FILES\" | while read f; do
-                    sed -i 's|http://103.125.91.16:8080|http://103.125.91.16|g' \"\$f\"
-                  done
-                  echo 'Patched JS bundles successfully'
-                else
-                  echo 'No files to patch (already clean)'
+              docker exec "$FRONTEND_CONTAINER" sh -lc '
+                if grep -R -q -E "103\.125\.91\.16:8080|127\.0\.0\.1:8081" /app/.next 2>/dev/null; then
+                  echo "❌ Stale frontend endpoint found in built bundle"
+                  exit 1
                 fi
-                # Also patch fetch-cache
-                find /app/.next/cache -type f 2>/dev/null | xargs grep -l '103.125.91.16:8080' 2>/dev/null | while read f; do
-                  sed -i 's|http://103.125.91.16:8080|http://103.125.91.16|g' \"\$f\"
-                done
-                # Update timestamps to bust browser cache
-                find /app/.next/static -name '*.js' -exec touch {} \; 2>/dev/null || true
-              " 2>&1 || echo "⚠️ Frontend patch failed (non-critical)"
-              echo "✅ Frontend JS bundles patched"
+                echo "✅ No stale frontend endpoint found"
+              ' || DEPLOY_SUCCESS=1
             else
-              echo "⚠️ Frontend container not found, skipping patch"
+              echo "⚠️ Frontend container not found, skipping bundle verification"
             fi
             
             echo ""
@@ -505,7 +553,9 @@ jobs:
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🏥 Checking backend health..."
             
-            BACKEND_URL="http://localhost:8000/health"
+            cd "${{ env.DEPLOY_PATH }}"
+            BACKEND_PORT=$(grep -E '^BACKEND_PORT=' .env 2>/dev/null | tail -n 1 | cut -d '=' -f2-)
+            BACKEND_URL="http://127.0.0.1:${BACKEND_PORT:-8000}/health"
             MAX_RETRIES=10
             RETRY_COUNT=0
             HEALTH_CHECK_PASSED=0
@@ -536,7 +586,9 @@ jobs:
           ssh -p ${{ env.DEPLOY_PORT }} -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
             echo "🌐 Checking frontend health..."
             
-            FRONTEND_URL="http://localhost:3000"
+            cd "${{ env.DEPLOY_PATH }}"
+            FRONTEND_PORT=$(grep -E '^FRONTEND_PORT=' .env 2>/dev/null | tail -n 1 | cut -d '=' -f2-)
+            FRONTEND_URL="http://127.0.0.1:${FRONTEND_PORT:-3000}"
             MAX_RETRIES=5
             RETRY_COUNT=0
             HEALTH_CHECK_PASSED=0
@@ -571,8 +623,8 @@ jobs:
           echo "🐳 Backend: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-backend:${{ env.IMAGE_TAG }}"
           echo "🌐 Frontend: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_USERNAME }}/tamankehati-frontend:${{ env.IMAGE_TAG }}"
           echo ""
-          echo "🌐 Application URL: ${{ env.APP_BASE_URL }}"
-          echo "🏥 Health Check: ${{ env.APP_BASE_URL }}/health"
+          echo "🌐 Application URL: ${{ steps.public_urls.outputs.site_url }}"
+          echo "🏥 Health Check: ${{ steps.public_urls.outputs.site_url }}/health"
           echo ""
           echo "All services should be running and healthy."
 
@@ -650,6 +702,21 @@ jobs:
     if: github.ref == 'refs/heads/main'
     
     steps:
+      - name: Normalize public URLs
+        id: public_urls
+        run: |
+          API_URL="${NEXT_PUBLIC_API_URL%/}"
+          API_URL="${API_URL%/api/v1}"
+          API_URL="${API_URL%/api}"
+          SITE_URL="${NEXT_PUBLIC_SITE_URL%/}"
+          SITE_URL="${SITE_URL%/api/v1}"
+          SITE_URL="${SITE_URL%/api}"
+          echo "NEXT_PUBLIC_API_URL=$API_URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SITE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "APP_BASE_URL=$SITE_URL" >> "$GITHUB_ENV"
+          echo "api_url=$API_URL" >> "$GITHUB_OUTPUT"
+          echo "site_url=$SITE_URL" >> "$GITHUB_OUTPUT"
+
       - name: Check deployment prerequisites
         id: check_prereqs
         run: |
@@ -666,7 +733,7 @@ jobs:
         run: |
           echo "🏥 Verifying backend health from external URL..."
           
-          BACKEND_URL="${{ env.APP_BASE_URL }}/health"
+          BACKEND_URL="${{ steps.public_urls.outputs.site_url }}/health"
           MAX_RETRIES=15
           RETRY_COUNT=0
           HEALTH_CHECK_PASSED=0
@@ -695,7 +762,7 @@ jobs:
         run: |
           echo "🔍 Verifying public API endpoints..."
           
-          BASE_URL="${{ env.APP_BASE_URL }}"
+          BASE_URL="${{ steps.public_urls.outputs.site_url }}"
           ENDPOINTS=(
             "/api/public/parks/"
             "/api/public/stats/"
@@ -727,7 +794,7 @@ jobs:
         run: |
           echo "🌐 Verifying frontend from external URL..."
           
-          FRONTEND_URL="${{ env.APP_BASE_URL }}"
+          FRONTEND_URL="${{ steps.public_urls.outputs.site_url }}"
           MAX_RETRIES=10
           RETRY_COUNT=0
           FRONTEND_CHECK_PASSED=0
@@ -763,7 +830,7 @@ jobs:
           echo "✅ Frontend: CHECKED"
           echo ""
           echo "🌐 Application is live and accessible:"
-          echo "   ${{ env.APP_BASE_URL }}"
+          echo "   ${{ steps.public_urls.outputs.site_url }}"
 
   rollback-deployment:
     name: Rollback Deployment
